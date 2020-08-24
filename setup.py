@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-version = '0.0.1-7'
+version = '0.0.1-8'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
@@ -11,6 +11,8 @@ setup(
         f'{name}/api',
         f'{name}/api/src',
         f'{name}/api/src/annotation',
+        f'{name}/api/src/model',
+        f'{name}/api/src/domain',
         f'{name}/api/src/helper',
         f'{name}/api/src/service',
         f'{name}/api/src/service/openapi',
