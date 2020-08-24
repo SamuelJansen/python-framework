@@ -4,8 +4,8 @@ from flask_jwt_extended.exceptions import NoAuthorizationError, RevokedTokenErro
 from jwt import ExpiredSignatureError
 from python_helper import Constant, log
 from python_framework.api.src.annotation.MethodWrapper import Method
-import python_framework.api.src.helper.Serializer
-import python_framework.api.src.domain.HttpStatus
+from python_framework.api.src.helper import Serializer
+from python_framework.api.src.domain import HttpStatus
 from python_framework.api.src.model import ErrorLog
 
 DEFAULT_MESSAGE = 'Something bad happened. Please, try again later'

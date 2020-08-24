@@ -1,9 +1,8 @@
-
 from python_framework.api.resource.swaggerui import *
 
-from python_framework.api.src.annotation import MethodWrapper
-
 from python_framework.api.src.domain import HttpStatus
+
+from python_framework.api.src.annotation import MethodWrapper
 
 from python_framework.api.src.model import ErrorLog
 

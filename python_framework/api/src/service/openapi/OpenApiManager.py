@@ -5,7 +5,7 @@ from python_helper import log, StringHelper
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.openapi.OpenApiKey import Key as k
 from python_framework.api.src.service.openapi.OpenApiValue import Value as v
-from python_framework.api.src.service.openapi.OpenApiDocumentationFile
+from python_framework.api.src.service.openapi import OpenApiDocumentationFile
 
 KW_OPEN_API = 'swagger'
 KW_UI = 'ui'

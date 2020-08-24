@@ -10,8 +10,6 @@ MAX_VERB_SIZE = 8
 MAX_RESOURCE_NAME_SIZE = 128
 MAX_RESOURCE_METHOD_NAME_SIZE = 128
 
-def getNewErrorLogModel(baseModel)
-
 class ErrorLog(MODEL):
     __tablename__ = ERROR_LOG
 
