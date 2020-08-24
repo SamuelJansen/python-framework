@@ -17,5 +17,3 @@ from python_framework.api.src.service.openapi import OpenApiManager
 
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service.flask import ResourceManager
-
-ResourceManager = ResourceManager
