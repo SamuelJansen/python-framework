@@ -221,14 +221,14 @@ def initialize(defaultUrl=None) :
     if defaultUrl :
         url = f'{url}{defaultUrl}'
     def inBetweenFunction(function,*argument,**keywordArgument) :
-        noException = None
         log.debug(initialize,f'''{function.__name__} method''')
         # webbrowser.open_new(url)
         def innerFunction(*args,**kwargs) :
             try :
-                return function(*args,**kwargs)
+                functionReturn = function(*args,**kwargs)
             except Exception as exception :
                 raise Exception(f'Failed to initialize. Cause: {str(exception)}')
+            return functionReturn
         return innerFunction
     return inBetweenFunction
 
@@ -243,7 +243,6 @@ def Controller(
     controllerDescription = description
     def Wrapper(OuterClass,*args,**kwargs):
         apiInstance = getApi()
-        noException = None
         log.debug(Controller,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass,flask_restful.Resource):
             url = controllerUrl

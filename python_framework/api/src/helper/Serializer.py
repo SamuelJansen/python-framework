@@ -67,10 +67,12 @@ def importResource(resourceName, resourceModuleName=None) :
         try :
             module = __import__(resourceModuleName)
         except :
+            log(importResource, f'Not possible to import {resourceName} resource. Going for a second attempt')
             try :
                 module = importlib.import_module(resourceModuleName)
             except :
                 module = None
+                log(importResource, f'Not possible to import {resourceName} resource in the second attempt either')
         if module :
             try :
                 resource = getattr(module, resourceName)
