@@ -1,4 +1,4 @@
-from python_framework.api.src.service.framework.SqlAlchemyProxy import *
+from python_framework.api.src.service.SqlAlchemyProxy import *
 
 ERROR_LOG = 'ErrorLog'
 MODEL = getNewModel()

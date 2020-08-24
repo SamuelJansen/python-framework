@@ -3,10 +3,10 @@ from flask_restful import Api
 from python_helper import Constant as c
 from python_framework.api.src.annotation.MethodWrapper import Function
 from python_framework.api.src.helper import Serializer
-from python_framework.api.src.service.framework.flask import FlaskManager
-from python_framework.api.src.service.framework import SqlAlchemyProxy
-from python_framework.api.src.service.framework import Security
-from python_framework.api.src.service.framework.openapi import OpenApiManager
+from python_framework.api.src.service.flask import FlaskManager
+from python_framework.api.src.service import SqlAlchemyProxy
+from python_framework.api.src.service import Security
+from python_framework.api.src.service.openapi import OpenApiManager
 
 DOT_PY = '.py'
 

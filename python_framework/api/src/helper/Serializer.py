@@ -2,7 +2,7 @@ import json, importlib
 from python_helper import Constant as c
 from python_helper import log
 from python_framework.api.src.annotation.MethodWrapper import Function
-from python_framework.api.src.service.framework.SqlAlchemyProxy import DeclarativeMeta, InstrumentedList
+from python_framework.api.src.service.SqlAlchemyProxy import DeclarativeMeta, InstrumentedList
 
 IGNORE_REOURCE_LIST = [
     'FlaskManager',

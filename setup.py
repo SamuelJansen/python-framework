@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-version = '0.0.1'
+version = '0.0.1-3'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
@@ -15,9 +15,8 @@ setup(
         f'{name}/api/src/annotation',
         f'{name}/api/src/helper',
         f'{name}/api/src/service',
-        f'{name}/api/src/service/framework',
-        f'{name}/api/src/service/framework/openpia',
-        f'{name}/api/src/service/framework/flask'
+        f'{name}/api/src/service/openapi',
+        f'{name}/api/src/service/flask'
     ],
     version = version,
     license = 'MIT',
