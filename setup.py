@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-version = '0.0.1-5'
+version = '0.0.1-6'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
@@ -9,14 +9,14 @@ setup(
     packages = [
         name,
         f'{name}/api',
-        f'{name}/api/resource',
-        f'{name}/api/resource/swaggerui',
         f'{name}/api/src',
         f'{name}/api/src/annotation',
         f'{name}/api/src/helper',
         f'{name}/api/src/service',
         f'{name}/api/src/service/openapi',
-        f'{name}/api/src/service/flask'
+        f'{name}/api/src/service/flask',
+        f'{name}/api/resource',
+        f'{name}/api/resource/swaggerui'
     ],
     version = version,
     license = 'MIT',
