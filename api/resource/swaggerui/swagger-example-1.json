@@ -1,0 +1,660 @@
+{
+  "swagger": "2.0",
+  "basePath": "/",
+  "paths": {
+    "/authentication/login": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_login_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/authentication/login/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_login_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/authentication/logout": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_logout_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/authentication/logout/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_logout_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/best-fit": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_best_fit_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/best-fit/{amount}": {
+      "parameters": [
+        {
+          "name": "amount",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_best_fit_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/feature-datas": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_feature_data_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_feature_data_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/feature-datas/batch": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_feature_data_batch_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/feature-datas/batch/{featureKey}": {
+      "parameters": [
+        {
+          "name": "featureKey",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_feature_data_batch_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/feature-datas/{featureKey}": {
+      "parameters": [
+        {
+          "name": "featureKey",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_feature_data_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_feature_data_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/feature-datas/{featureKey}/{sampleKey}": {
+      "parameters": [
+        {
+          "name": "featureKey",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "sampleKey",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_feature_data_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_feature_data_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/features": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_feature_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "put_feature_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_feature_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_feature_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/features/batch": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_feature_batch_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/features/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_feature_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "put_feature_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_feature_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_feature_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/health/check": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_health_check_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/samples": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "patch": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "patch_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "put_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_sample_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/samples/batch": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_sample_batch_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/samples/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "patch": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "patch_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "put_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_sample_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/samples/{key}/{value}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "patch": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "patch_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "put_sample_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_sample_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_user_batch_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    },
+    "/users/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_user_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "put_user_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_user_controller",
+        "tags": [
+          "default"
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_user_controller",
+        "tags": [
+          "default"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Feature dataset manager",
+    "version": "1.0",
+    "description": "A feature manager api"
+  },
+  "produces": [
+    "application/json"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "tags": [
+    {
+      "name": "default",
+      "description": "Default namespace"
+    }
+  ],
+  "responses": {
+    "ParseError": {
+      "description": "When a mask can't be parsed"
+    },
+    "MaskError": {
+      "description": "When any error occurs on mask"
+    }
+  }
+}

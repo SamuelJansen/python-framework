@@ -1,0 +1,12 @@
+class Value:
+    SWAGGER_VERSION = '2.0'
+    PATH = 'path'
+    OBJECT = 'object'
+    BODY = 'body'
+    ARRAY = 'array'
+    DEFAULT_RESPONSE = 'successful operation'
+    INTEGER = 'integer'
+    STRING = 'string'
+    HEADER = 'header'
+    BEARER_TOKEN = 'Bearer <token>'
+    AUTHORIZATION = 'Authorization'
