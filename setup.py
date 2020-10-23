@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-version = '0.0.1-48'
+version = '0.0.1-49'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
@@ -51,13 +51,13 @@ setup(
     download_url = f'{url}archive/v{version}.tar.gz',
     keywords = ['flask', 'sqlalchemy', 'open api', 'jwt', 'serializer'],
     install_requires = [
-        "gunicorn",
-        "Flask",
-        "Flask-RESTful",
-        "Flask-JWT-Extended",
-        "Flask-Swagger-Ui",
-        "psycopg2-binary",
-        "SQLAlchemy",
+        "gunicorn>=0",
+        "Flask>=0",
+        "Flask-RESTful>=0",
+        "Flask-JWT-Extended>=0",
+        "Flask-Swagger-Ui>=0",
+        "psycopg2-binary>=0",
+        "SQLAlchemy>=0",
         "globals==0.0.42",
         "python_helper==0.0.14"
     ],
