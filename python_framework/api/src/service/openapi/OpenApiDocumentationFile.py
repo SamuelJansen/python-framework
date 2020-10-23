@@ -2,7 +2,6 @@ import json
 from python_helper import Constant as c
 from python_helper import StringHelper
 
-
 KW_UI = 'ui'
 KW_JSON = 'json'
 KW_API = 'api'
