@@ -215,10 +215,9 @@ def getCompleteResponseByException(exception, resourceInstance, resourceInstance
     return completeResponse
 
 @Function
-def initialize(defaultUrl=None, openInBrowser=False) :
+def initialize(apiInstance, defaultUrl=None, openInBrowser=False) :
     defaultUrl = defaultUrl
     openInBrowser = openInBrowser
-    apiInstance = getApi()
     url = f'{apiInstance.host}{apiInstance.baseUrl}'
     if defaultUrl :
         url = f'{url}{defaultUrl}'
