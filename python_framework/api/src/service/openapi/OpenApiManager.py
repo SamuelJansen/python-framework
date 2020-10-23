@@ -63,7 +63,6 @@ def addSwagger(apiInstance, appInstance):
         DOCUMENTATION_FILE
     )
     swaggerUi._static_folder = f'{OpenApiDocumentationFile.getDocumentationFolderPath(apiInstance)}{globals.OS_SEPARATOR}'
-    # appInstance.documentationFolder = swaggerUi._static_folder
     appInstance.register_blueprint(swaggerUi, url_prefix=documentationUrl)
     OpenApiDocumentationFile.overrideDocumentation(apiInstance)
 
