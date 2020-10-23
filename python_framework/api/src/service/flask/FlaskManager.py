@@ -218,7 +218,8 @@ def getCompleteResponseByException(exception, resourceInstance, resourceInstance
 def initialize(defaultUrl=None, openInBrowser=False) :
     defaultUrl = defaultUrl
     openInBrowser = openInBrowser
-    url = LOCALHOST_URL
+    apiInstance = getApi()
+    url = f'{apiInstance.host}{apiInstance.baseUrl}'
     if defaultUrl :
         url = f'{url}{defaultUrl}'
     def inBetweenFunction(function,*argument,**keywordArgument) :

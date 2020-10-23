@@ -209,6 +209,7 @@ def addFlaskApiResources(
         databaseEnvironmentVariable = None,
         localStorageName = None
     ) :
+    apiInstance.host = apiInstance.globals.getApiSetting('api.host')
     apiInstance.baseUrl = baseUrl
     OpenApiManager.newDocumentation(apiInstance, appInstance)
     addResourceAttibutes(apiInstance)
