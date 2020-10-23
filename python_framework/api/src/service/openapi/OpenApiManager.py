@@ -62,19 +62,9 @@ def addSwagger(apiInstance, appInstance):
         documentationUrl,
         DOCUMENTATION_FILE
     )
-    log.debug(addSwagger, f'''Swagger original static folder at "{swaggerUi._static_folder}"''')
-    ###- a = 'src\service\openapi\OpenApiManager.py'
     selfSrcPath = f"""src{globals.OS_SEPARATOR}service{globals.OS_SEPARATOR}openapi{globals.OS_SEPARATOR}{__name__.split('.')[-1]}.py"""
-    log.debug(addSwagger, f'''selfSrcPath folder at "{selfSrcPath}"''')
-
     apiInstance.documentationFolderPath = f'''{__file__.split(selfSrcPath)[0]}{KW_RESOURCE}{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'''
-    log.debug(addSwagger, f'''apiInstance.documentationFolderPath folder at "{apiInstance.documentationFolderPath}"''')
-
-    swaggerUi._static_folder = apiInstance.documentationFolderPath ###- f'{globals.currentPath}api{globals.OS_SEPARATOR}resource{globals.OS_SEPARATOR}swaggerui{globals.OS_SEPARATOR}'
-    log.debug(addSwagger, f'''Swagger static folder at "{swaggerUi._static_folder}"''')
-    log.debug(addSwagger, f'''Swagger lib name "{__name__}"''')
-    log.debug(addSwagger, f'''Swagger lib folder "{__file__}"''')
-    # swaggerUi._static_folder = f'{OpenApiDocumentationFile.getDocumentationFolderPath(apiInstance)}{globals.OS_SEPARATOR}'
+    swaggerUi._static_folder = apiInstance.documentationFolderPath 
     appInstance.register_blueprint(swaggerUi, url_prefix=documentationUrl)
     OpenApiDocumentationFile.overrideDocumentation(apiInstance)
 

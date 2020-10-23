@@ -10,13 +10,9 @@ KW_OPEN_API = 'swagger'
 DOCUMENTATION_FILE = f'{KW_OPEN_API}{c.DOT}{KW_JSON}'
 
 def getDocumentationFolderPath(apiInstance):
-    # globals = apiInstance.globals
-    # return f'{globals.currentPath}{KW_API}{globals.OS_SEPARATOR}{KW_RESOURCE}{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}'
     return apiInstance.documentationFolderPath
 
 def getDocumentationFilePath(apiInstance):
-    # globals = apiInstance.globals
-    # return f'{getDocumentationFolderPath(apiInstance)}{globals.OS_SEPARATOR}{DOCUMENTATION_FILE}'
     return f'{apiInstance.documentationFolderPath}{DOCUMENTATION_FILE}'
 
 def loadDocumentationAsString(apiInstance):
