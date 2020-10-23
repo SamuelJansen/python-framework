@@ -7,4 +7,3 @@ psycopg2-binary
 SQLAlchemy
 globals==0.0.42
 python_helper==0.0.14
-python_framework==0.0.1-45

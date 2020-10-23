@@ -51,7 +51,15 @@ setup(
     download_url = f'{url}archive/v{version}.tar.gz',
     keywords = ['flask', 'sqlalchemy', 'open api', 'jwt', 'serializer'],
     install_requires = [
-
+        "gunicorn",
+        "Flask",
+        "Flask-RESTful",
+        "Flask-JWT-Extended",
+        "Flask-Swagger-Ui",
+        "psycopg2-binary",
+        "SQLAlchemy",
+        "globals==0.0.42",
+        "python_helper==0.0.14"
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
