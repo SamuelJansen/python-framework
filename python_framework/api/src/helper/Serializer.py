@@ -70,9 +70,9 @@ def importResource(resourceName, resourceModuleName=None) :
             log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module. Going for a second attempt')
             try :
                 module = importlib.import_module(resourceModuleName)
-            except :
+            except Exception as exception:
                 module = None
-                log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module in the second attempt either')
+                log.error(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module in the second attempt either', exception)
         if module :
             try :
                 resource = getattr(module, resourceName)
