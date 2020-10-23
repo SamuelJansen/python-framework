@@ -8,7 +8,7 @@ DOCUMENTATION_FILE = f'{KW_OPEN_API}{c.DOT}{KW_JSON}'
 
 def getDocumentationFilePath(apiInstance):
     # return f'{g.apiPath}api{g.OS_SEPARATOR}resource{g.OS_SEPARATOR}swaggerui{g.OS_SEPARATOR}swagger.json'
-    return f'{apiInstance.documentationFolder}{g.OS_SEPARATOR}swagger.json'
+    return f'{apiInstance.documentationFolder}{g.OS_SEPARATOR}{DOCUMENTATION_FILE}'
 
 def loadDocumentationAsString(apiInstance):
     documentationFilePath = getDocumentationFilePath(apiInstance)
@@ -22,7 +22,7 @@ def loadDocumentation(apiInstance):
 
 def overrideDocumentation(apiInstance):
     globals = apiInstance.globals
-    documentationAsString = StringHelper.stringfyThisDictionary(documentation)
+    documentationAsString = StringHelper.stringfyThisDictionary(apiInstance.documentation)
     documentationFilePath = getDocumentationFilePath(apiInstance)
     with open(documentationFilePath, globals.OVERRIDE, encoding=globals.ENCODING) as documentationFile :
         documentationFile.write(documentationAsString)

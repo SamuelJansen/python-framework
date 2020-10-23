@@ -59,7 +59,7 @@ KW_METHOD = '__METHOD__'
 KW_REQUEST = '__KW_REQUEST__'
 KW_RESPONSE = '__KW_RESPONSE__'
 
-def addSwagger(appInstance, apiInstance):
+def addSwagger(apiInstance, appInstance):
     globals = apiInstance.globals
     documentationUrl = f'{apiInstance.baseUrl}{OPEN_API_URL}'
     swaggerUi = get_swaggerui_blueprint(

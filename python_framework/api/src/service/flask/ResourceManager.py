@@ -220,4 +220,4 @@ def addFlaskApiResources(
     addHelperListTo(apiInstance, helperList)
     addConverterListTo(apiInstance, converterList)
     Security.addJwt(jwtInstance)
-    OpenApiManager.addSwagger(appInstance, apiInstance)
+    OpenApiManager.addSwagger(apiInstance, appInstance)
