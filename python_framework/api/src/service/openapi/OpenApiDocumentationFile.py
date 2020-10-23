@@ -19,6 +19,7 @@ def getDocumentationFilePath(apiInstance):
     return f'{getDocumentationFolderPath(apiInstance)}{globals.OS_SEPARATOR}{DOCUMENTATION_FILE}'
 
 def loadDocumentationAsString(apiInstance):
+    globals = apiInstance.globals
     documentationFilePath = getDocumentationFilePath(apiInstance)
     with open(documentationFilePath, globals.READ, encoding=globals.ENCODING) as documentationFile :
         documentationAsString = c.NOTHING.join(documentationFile.readlines())
