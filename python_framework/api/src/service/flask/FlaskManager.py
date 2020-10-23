@@ -225,6 +225,7 @@ def initialize(defaultUrl=None, openInBrowser=False) :
     def inBetweenFunction(function,*argument,**keywordArgument) :
         log.debug(initialize,f'''{function.__name__} method''')
         if (openInBrowser) :
+            log.debug(initialize,f'''Openning "{url}" url in rowser''')
             webbrowser.open_new(url)
         def innerFunction(*args,**kwargs) :
             try :
