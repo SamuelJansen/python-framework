@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-version = '0.0.1-34'
+version = '0.0.1-35'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
@@ -19,6 +19,16 @@ setup(
         f'{name}/api/src/service/flask',
         f'{name}/api/resource',
         f'{name}/api/resource/swaggerui'
+    ],
+    data_files = [
+        ("png", [
+            f'{name}/api/resource/swaggerui/favicon-16x16.png',
+            f'{name}/api/resource/swaggerui/favicon-32x32.png',
+        ]),
+        ('html', [
+            f'{name}/api/resource/swaggerui/index.template.html',
+            f'{name}/api/resource/swaggerui/oauth2-redirect.html'
+        ])
     ],
     version = version,
     license = 'MIT',
