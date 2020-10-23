@@ -62,6 +62,8 @@ def addSwagger(apiInstance, appInstance):
         documentationUrl,
         DOCUMENTATION_FILE
     )
+    log.debug(addSwagger, f'''Swagger original static folder at "{swaggerUi._static_folder}"''')
+    a = 'src\service\openapi\OpenApiManager.py'
     swaggerUi._static_folder = f'{globals.currentPath}api{globals.OS_SEPARATOR}resource{globals.OS_SEPARATOR}swaggerui{globals.OS_SEPARATOR}'
     log.debug(addSwagger, f'''Swagger static folder at "{swaggerUi._static_folder}"''')
     log.debug(addSwagger, f'''Swagger lib name "{__name__}"''')
