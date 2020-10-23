@@ -6,7 +6,7 @@ from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.openapi.OpenApiKey import Key as k
 from python_framework.api.src.service.openapi.OpenApiValue import Value as v
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile
-from python_framework.api.src.service.openapi.OpenApiDocumentationFile import DOCUMENTATION_FILE, KW_OPEN_API
+from python_framework.api.src.service.openapi.OpenApiDocumentationFile import DOCUMENTATION_FILE, KW_OPEN_API, KW_RESOURCE, KW_UI
 
 COLON_DOUBLE_BAR = '://'
 LOCAL_HOST = 'localhost'
