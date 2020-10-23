@@ -1,8 +1,10 @@
 from distutils.core import setup
 
-version = '0.0.1-38'
+version = '0.0.1-39'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
+
+dataFilePackage = "Lib/site-packages"
 
 swaggerRelativePath = "/api/resource/swaggerui"
 
@@ -23,11 +25,21 @@ setup(
         f'{name}/api/resource/swaggerui'
     ],
     data_files = [
-        (f'{name}{swaggerRelativePath}', [
+        (f'{dataFilePackage}/{name}{swaggerRelativePath}', [
             f'{name}{swaggerRelativePath}/favicon-16x16.png',
             f'{name}{swaggerRelativePath}/favicon-32x32.png',
             f'{name}{swaggerRelativePath}/index.template.html',
-            f'{name}{swaggerRelativePath}/oauth2-redirect.html'
+            f'{name}{swaggerRelativePath}/oauth2-redirect.html',
+            f'{name}{swaggerRelativePath}/swagger-ui-bundle.js',
+            f'{name}{swaggerRelativePath}/swagger-ui-bundle.js.map',
+            f'{name}{swaggerRelativePath}/swagger-ui-standalone-preset.js',
+            f'{name}{swaggerRelativePath}/swagger-ui-standalone-preset.js.map',
+            f'{name}{swaggerRelativePath}/swagger-ui.css',
+            f'{name}{swaggerRelativePath}/swagger-ui.css.map',
+            f'{name}{swaggerRelativePath}/swagger-ui.js',
+            f'{name}{swaggerRelativePath}/swagger-ui.js.map',
+            f'{name}{swaggerRelativePath}/LICENSE',
+            f'{name}{swaggerRelativePath}/VERSION'
         ])
     ],
     version = version,
