@@ -67,7 +67,7 @@ def addSwagger(apiInstance, appInstance):
     selfSrcPath = f"""src{globals.OS_SEPARATOR}service{globals.OS_SEPARATOR}openapi{globals.OS_SEPARATOR}{__name__.split('.')[-1]}.py"""
     log.debug(addSwagger, f'''selfSrcPath folder at "{selfSrcPath}"''')
 
-    apiInstance.documentationFolderPath = f'''{__file__.split(selfSrcPath)}{KW_RESOURCE}{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'''
+    apiInstance.documentationFolderPath = f'''{__file__.split(selfSrcPath)[0]}{KW_RESOURCE}{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'''
     log.debug(addSwagger, f'''apiInstance.documentationFolderPath folder at "{apiInstance.documentationFolderPath}"''')
 
     swaggerUi._static_folder = apiInstance.documentationFolderPath ###- f'{globals.currentPath}api{globals.OS_SEPARATOR}resource{globals.OS_SEPARATOR}swaggerui{globals.OS_SEPARATOR}'
