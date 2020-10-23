@@ -1,10 +1,10 @@
 from distutils.core import setup
 
-version = '0.0.1-37'
+version = '0.0.1-38'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
-swaggerRelativePath = "api/resource/swaggerui"
+swaggerRelativePath = "/api/resource/swaggerui"
 
 setup(
     name = name,
@@ -23,11 +23,11 @@ setup(
         f'{name}/api/resource/swaggerui'
     ],
     data_files = [
-        (f'{name}/api/resource/swaggerui', [
-            f'{swaggerRelativePath}/favicon-16x16.png',
-            f'{swaggerRelativePath}/favicon-32x32.png',
-            f'{swaggerRelativePath}/index.template.html',
-            f'{swaggerRelativePath}/oauth2-redirect.html'
+        (f'{name}{swaggerRelativePath}', [
+            f'{name}{swaggerRelativePath}/favicon-16x16.png',
+            f'{name}{swaggerRelativePath}/favicon-32x32.png',
+            f'{name}{swaggerRelativePath}/index.template.html',
+            f'{name}{swaggerRelativePath}/oauth2-redirect.html'
         ])
     ],
     version = version,
