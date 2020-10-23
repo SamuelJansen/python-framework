@@ -215,14 +215,16 @@ def getCompleteResponseByException(exception, resourceInstance, resourceInstance
     return completeResponse
 
 @Function
-def initialize(defaultUrl=None) :
+def initialize(defaultUrl=None, openInBrowser=False) :
     defaultUrl = defaultUrl
+    openInBrowser = openInBrowser
     url = LOCALHOST_URL
     if defaultUrl :
         url = f'{url}{defaultUrl}'
     def inBetweenFunction(function,*argument,**keywordArgument) :
         log.debug(initialize,f'''{function.__name__} method''')
-        # webbrowser.open_new(url)
+        if (openInBrowser) :
+            webbrowser.open_new(url)
         def innerFunction(*args,**kwargs) :
             try :
                 functionReturn = function(*args,**kwargs)
