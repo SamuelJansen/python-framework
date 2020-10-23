@@ -57,7 +57,7 @@ KW_RESPONSE = '__KW_RESPONSE__'
 
 def addSwagger(apiInstance, appInstance):
     globals = apiInstance.globals
-    documentationUrl = f'{apiInstance.baseUrl}{SLASH}{KW_OPEN_API}'
+    documentationUrl = f'{apiInstance.baseUrl}{c.SLASH}{KW_OPEN_API}'
     swaggerUi = get_swaggerui_blueprint(
         documentationUrl,
         DOCUMENTATION_FILE
