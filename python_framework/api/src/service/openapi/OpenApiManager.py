@@ -92,8 +92,8 @@ def addInfo(apiInstance):
 
 def addHostAndBasePath(apiInstance, appInstance):
     globals = apiInstance.globals
-    apiInstance.documentation[k.SCHEMES] = globals.getApiSetting(f'{KW_API}.{KW_SCHEMES}')
-    apiInstance.documentation[k.HOST] = globals.getApiSetting(f'{KW_API}.{KW_HOST}')
+    apiInstance.documentation[k.HOST] = globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_HOST}')
+    apiInstance.documentation[k.SCHEMES] = globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_SCHEMES}')
     apiInstance.documentation[k.BASE_PATH] = apiInstance.baseUrl
     # completeUrl = appInstance.test_request_context().request.host_url[:-1] ###- request.remote_addr
     # apiInstance.documentation[k.HOST] = completeUrl.split(COLON_DOUBLE_BAR)[1]
