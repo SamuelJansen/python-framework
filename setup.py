@@ -1,10 +1,10 @@
 from distutils.core import setup
 
-version = '0.0.1-61'
+version = '0.0.1-62'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
-dataFilePackage = "Python38/site-packages"
+dataFilePackage = "Lib/site-packages"
 
 swaggerRelativePath = "/api/resource/swaggerui"
 
@@ -58,7 +58,7 @@ setup(
         "Flask-Swagger-Ui>=0",
         "psycopg2-binary>=0",
         "SQLAlchemy>=0",
-        "globals==0.0.43-4",
+        "globals==0.0.43-5",
         "python_helper==0.0.14"
     ],
     classifiers = [

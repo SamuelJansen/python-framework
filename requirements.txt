@@ -5,5 +5,5 @@ Flask-JWT-Extended
 Flask-Swagger-Ui
 psycopg2-binary
 SQLAlchemy
-globals==0.0.43-4
+globals==0.0.43-5
 python_helper==0.0.14
