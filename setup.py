@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-version = '0.0.1-57'
+version = '0.0.1-58'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
@@ -58,7 +58,7 @@ setup(
         "Flask-Swagger-Ui>=0",
         "psycopg2-binary>=0",
         "SQLAlchemy>=0",
-        "globals==0.0.42",
+        "globals==0.0.43-4",
         "python_helper==0.0.14"
     ],
     classifiers = [
