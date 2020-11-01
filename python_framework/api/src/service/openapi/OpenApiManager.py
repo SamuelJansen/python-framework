@@ -71,7 +71,7 @@ def addSwagger(apiInstance, appInstance):
     # swaggerUi._static_folder = apiInstance.documentationFolderPath
     # log.debug(addSwagger, f'swaggerUi._static_folder at "{swaggerUi._static_folder}"')
     import site
-    distPackage = str(site.getsitepackages()).replace('\\\\',self.globals.OS_SEPARATOR).replace('/',self.globals.OS_SEPARATOR).replace('\\',self.globals.OS_SEPARATOR)
+    distPackage = str(site.getsitepackages()).replace('\\\\',globals.OS_SEPARATOR).replace('/',globals.OS_SEPARATOR).replace('\\',globals.OS_SEPARATOR)
 
     swaggerUi._static_folder = f'dist{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
     # swaggerUi._static_folder = f'{swaggerUi._static_folder}{globals.OS_SEPARATOR}'
