@@ -1,14 +1,14 @@
 from distutils.core import setup
 import os
 
-version = '0.0.1-73'
+version = '0.0.1-75'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
 OS_SEPARATOR = os.path.sep
 
-# dataFilePackage = "Python38{OS_SEPARATOR}site-packages"
-distPackage = f'lib{OS_SEPARATOR}site-packages'
+# distPackage = f'lib{OS_SEPARATOR}site-packages'
+distPackage = f'dist'
 
 swaggerRelativePath = f'{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
 
@@ -64,7 +64,7 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals==0.0.43-6',
+        'globals==0.0.43-8',
         'python_helper==0.0.14'
     ],
     classifiers = [
