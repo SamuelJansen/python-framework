@@ -6,7 +6,7 @@ from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.openapi.OpenApiKey import Key as k
 from python_framework.api.src.service.openapi.OpenApiValue import Value as v
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile
-from python_framework.api.src.service.openapi.OpenApiDocumentationFile import DOCUMENTATION_FILE, KW_OPEN_API, KW_RESOURCE, KW_UI
+from python_framework.api.src.service.openapi.OpenApiDocumentationFile import KW_OPEN_API, KW_RESOURCE, KW_UI
 
 COLON_DOUBLE_BAR = '://'
 LOCAL_HOST = 'localhost'
@@ -60,7 +60,7 @@ def addSwagger(apiInstance, appInstance):
     documentationUrl = f'{apiInstance.baseUrl}{c.SLASH}{KW_OPEN_API}'
     swaggerUi = get_swaggerui_blueprint(
         documentationUrl,
-        DOCUMENTATION_FILE
+        OpenApiDocumentationFile.getDocumentationFileName(apiInstance)
     )
     pythonFrameworkStaticFiles = f'{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource'
     swaggerStaticFiles = f'{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
