@@ -1,10 +1,11 @@
 from distutils.core import setup
 
-version = '0.0.1-66'
+version = '0.0.1-67'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
-dataFilePackage = "Python38/site-packages"
+# dataFilePackage = "Python38/site-packages"
+dataFilePackage = "dist"
 
 swaggerRelativePath = "/api/resource/swaggerui"
 
