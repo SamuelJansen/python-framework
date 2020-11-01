@@ -62,20 +62,9 @@ def addSwagger(apiInstance, appInstance):
         documentationUrl,
         DOCUMENTATION_FILE
     )
-    # selfSrcPath = f"""src{globals.OS_SEPARATOR}service{globals.OS_SEPARATOR}openapi{globals.OS_SEPARATOR}{__name__.split('.')[-1]}.py"""
-    # log.debug(addSwagger, f'selfSrcPath at "{selfSrcPath}"')
-    #
-    # apiInstance.documentationFolderPath = f'''{__file__.split(selfSrcPath)[0]}{KW_RESOURCE}{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'''
-    # log.debug(addSwagger, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
-    #
-    # swaggerUi._static_folder = apiInstance.documentationFolderPath
-    # log.debug(addSwagger, f'swaggerUi._static_folder at "{swaggerUi._static_folder}"')
-    import site
-    distPackage = str(site.getsitepackages()[1]).replace('\\\\',globals.OS_SEPARATOR).replace('/',globals.OS_SEPARATOR).replace('\\',globals.OS_SEPARATOR)
-
-    swaggerUi._static_folder = f'{distPackage}{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
-    # swaggerUi._static_folder = f'{swaggerUi._static_folder}{globals.OS_SEPARATOR}'
-    # swaggerUi._static_folder = f'{swaggerUi._static_folder}{globals.OS_SEPARATOR}'
+    pythonFrameworkStaticFiles = f'{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource'
+    swaggerStaticFiles = f'{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
+    swaggerUi._static_folder = f'{globals.distPackage}{pythonFrameworkStaticFiles}{swaggerStaticFiles}'
     apiInstance.documentationFolderPath = swaggerUi._static_folder
     log.debug(addSwagger, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
 
