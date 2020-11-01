@@ -1,6 +1,7 @@
 import json
 from python_helper import Constant as c
 from python_helper import StringHelper
+from python_helper import log
 
 KW_UI = 'ui'
 KW_JSON = 'json'
@@ -30,6 +31,9 @@ def loadDocumentation(apiInstance):
 
 def overrideDocumentation(apiInstance):
     globals = apiInstance.globals
-    documentationAsString = StringHelper.stringfyThisDictionary(apiInstance.documentation)
-    with open(getDocumentationFilePath(apiInstance), globals.OVERRIDE, encoding=globals.ENCODING) as documentationFile :
-        documentationFile.write(documentationAsString)
+    try :
+        documentationAsString = StringHelper.stringfyThisDictionary(apiInstance.documentation)
+        with open(getDocumentationFilePath(apiInstance), globals.OVERRIDE, encoding=globals.ENCODING) as documentationFile :
+            documentationFile.write(documentationAsString)
+    except Exception as exception :
+        log.error(overrideDocumentation,"Error while overriding OpenApi documentation file",exception)
