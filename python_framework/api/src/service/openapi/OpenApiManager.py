@@ -71,6 +71,7 @@ def addSwagger(apiInstance, appInstance):
     # swaggerUi._static_folder = apiInstance.documentationFolderPath
     # log.debug(addSwagger, f'swaggerUi._static_folder at "{swaggerUi._static_folder}"')
 
+    swaggerUi._static_folder = f'{swaggerUi._static_folder}{globals.OS_SEPARATOR}'
     apiInstance.documentationFolderPath = swaggerUi._static_folder
     log.debug(addSwagger, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
 
