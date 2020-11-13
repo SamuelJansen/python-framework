@@ -1,14 +1,14 @@
 from distutils.core import setup
 import os
 
-version = '0.0.1-80'
+version = '0.0.1-81'
 name = 'python_framework'
 url = f'https://github.com/SamuelJansen/{name}/'
 
 OS_SEPARATOR = os.path.sep
 
 # distPackage = f'lib{OS_SEPARATOR}site-packages'
-distPackage = f'dist'
+distPackage = f'statics'
 
 swaggerRelativePath = f'{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
 
