@@ -23,3 +23,4 @@ Globals:
                 web: [globals,python_helper,Popen,Path,numpy,pywin32,sqlalchemy]
         git:
             force-upgrade-command: pip install --upgrade --force python_framework
+        static-package: AppData\Local\Programs\Python\Python38-32\statics
