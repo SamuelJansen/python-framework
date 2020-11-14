@@ -1,3 +1,4 @@
+from globals import getStaticPackagePath
 from flask import send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
 from python_helper import Constant as c
@@ -63,14 +64,25 @@ def addSwagger(apiInstance, appInstance):
         documentationUrl,
         OpenApiDocumentationFile.getDocumentationFileName(apiInstance)
     )
-    pythonFrameworkStaticFiles = f'{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource'
-    swaggerStaticFiles = f'{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
-    swaggerUi._static_folder = f'{globals.distPackage}{pythonFrameworkStaticFiles}{swaggerStaticFiles}'
-    apiInstance.documentationFolderPath = swaggerUi._static_folder
-    log.debug(addSwagger, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
+
+    # pythonFrameworkStaticFiles = f'{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource'
+    # swaggerStaticFiles = f'{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
+    # swaggerUi._static_folder = f'{globals.distPackage}{pythonFrameworkStaticFiles}{swaggerStaticFiles}'
+    # apiInstance.documentationFolderPath = swaggerUi._static_folder
+    # log.debug(addSwagger, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
+
+    swaggerUi._static_folder = getStaticFolder(apiInstance, appInstance)
 
     appInstance.register_blueprint(swaggerUi, url_prefix=documentationUrl)
     OpenApiDocumentationFile.overrideDocumentation(apiInstance)
+
+def getStaticFolder(apiInstance, appInstance):
+    globals = apiInstance.globals
+    pythonFrameworkStaticFiles = f'{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource'
+    swaggerStaticFiles = f'{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
+    apiInstance.documentationFolderPath = f'{globals.staticPackage}{pythonFrameworkStaticFiles}{swaggerStaticFiles}'
+    log.debug(getStaticFolder, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
+    return apiInstance.documentationFolderPath
 
 ################################################################################
 

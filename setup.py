@@ -1,13 +1,19 @@
 from distutils.core import setup
 import os
+from globals import getStaticPackagePath
 
-VERSION = '0.0.1-94'
+VERSION = '0.0.1-95'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
 OS_SEPARATOR = os.path.sep
-SWAGGER_RELATIVE_PATH = f'{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
-STATIC_PACKAGE = 'statics'
+# SWAGGER_RELATIVE_PATH = f'{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
+# STATIC_PACKAGE = 'statics'
+SWAGGER_RELATIVE_PATH = f'{OS_SEPARATOR}{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
+# STATIC_PACKAGE = 'statics'
+
+staticPackagePath = f'{getStaticPackagePath()}{SWAGGER_RELATIVE_PATH}'
+#(f'{STATIC_PACKAGE}{OS_SEPARATOR}{NAME}{SWAGGER_RELATIVE_PATH}', [
 
 setup(
     name = NAME,
@@ -26,7 +32,7 @@ setup(
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
     ],
     data_files = [
-        (f'{STATIC_PACKAGE}{OS_SEPARATOR}{NAME}{SWAGGER_RELATIVE_PATH}', [
+        (staticPackagePath, [
             f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-16x16.png',
             f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-32x32.png',
             f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}index.template.html',
