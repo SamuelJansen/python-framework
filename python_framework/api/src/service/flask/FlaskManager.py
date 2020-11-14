@@ -69,6 +69,7 @@ def getModuleName(instance) :
 def getQualitativeName(instance) :
     return instance.__class__.__qualname__
 
+@Function
 def appendArgs(args, argument, isControllerMethod=False) :
     if isControllerMethod and Serializer.isList(argument) :
         return args + argument
@@ -200,10 +201,12 @@ def bindResource(apiInstance,resourceInstance) :
     validateFlaskApi(apiInstance)
     setResource(getattr(apiInstance.resource, getResourceType(resourceInstance).lower()), resourceInstance)
 
+@Function
 def getGlobalException(exception, resourceInstance, resourceInstanceMethod):
     apiInstance = getNullableApi()
     return GlobalException.handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, apiInstance)
 
+@Function
 def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod) :
     raise getGlobalException(exception, resourceInstance, resourceInstanceMethod)
 
@@ -260,6 +263,7 @@ def Controller(
         return InnerClass
     return Wrapper
 
+@Function
 def getRequestBodyAsJson(contentType) :
     try :
         if OpenApiManager.DEFAULT_CONTENT_TYPE == contentType :
@@ -270,12 +274,14 @@ def getRequestBodyAsJson(contentType) :
         raise GlobalException.GlobalException(message='Not possible to parse the request', logMessage=str(exception), status=HttpStatus.BAD_REQUEST)
     return requestBodyAsJson
 
+@Function
 @Security.jwtRequired
 def securedMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, roleRequired) :
     if not Security.getRole() in roleRequired :
         raise GlobalException.GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDEN)
     return notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass)
 
+@Function
 def notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass) :
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType) ###- request.get_json()
