@@ -241,9 +241,9 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                         k.DESCRIPTION : v.DEFAULT_RESPONSE,
                         k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
                     }
-                if not dtoClass.__name__ in documentation[k.DEFINITIONS] :
+                if not dtoName in documentation[k.DEFINITIONS] :
                     dtoClassDoc = {}
-                    documentation[k.DEFINITIONS][dtoClass.__name__] = dtoClassDoc
+                    documentation[k.DEFINITIONS][dtoName] = dtoClassDoc
                     dtoClassDoc[k.TYPE] = v.OBJECT
                     dtoClassDoc[k.PROPERTIES] = {}
                     dtoClassDoc[k.REQUIRED] = Serializer.getAttributeNameList(dtoClass)
@@ -273,9 +273,9 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                         k.DESCRIPTION : v.DEFAULT_RESPONSE,
                         k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
                     }
-                if not dtoClass.__name__ in documentation[k.DEFINITIONS] :
+                if not dtoName in documentation[k.DEFINITIONS] :
                     dtoClassDoc = {}
-                    documentation[k.DEFINITIONS][dtoClass.__name__] = dtoClassDoc
+                    documentation[k.DEFINITIONS][dtoName] = dtoClassDoc
                     dtoClassDoc[k.TYPE] = v.OBJECT
                     dtoClassDoc[k.PROPERTIES] = {}
                     dtoClassDoc[k.REQUIRED] = []
