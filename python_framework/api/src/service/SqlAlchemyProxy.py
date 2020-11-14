@@ -5,7 +5,6 @@ from sqlalchemy.orm import sessionmaker, scoped_session, relationship
 from sqlalchemy.orm.collections import InstrumentedList
 from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 from sqlalchemy import Table, Column, Integer, String, Float, ForeignKey, UnicodeText, MetaData, Sequence, DateTime
-
 from sqlalchemy import and_, or_
 
 from python_helper import log
