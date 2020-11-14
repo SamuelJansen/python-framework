@@ -89,10 +89,6 @@ def getManyToOne(pet, owner, refferenceModel) :
     owner = relationship(owner, back_populates=attributeIt(f'{pet}{LIST}'))
     return owner, ownerId
 
-# @Function
-# def getOneToOne(owner, pet, refferenceModel) :
-#     return relationship(pet, back_populates=attributeIt(owner))
-
 @Function
 def getOneToOne(woman, man, refferenceModel) :
     manId = Column(Integer(), ForeignKey(f'{man}.{attributeIt(ID)}'))
