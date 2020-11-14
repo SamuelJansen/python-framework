@@ -32,6 +32,7 @@ ABLE_TO_RECIEVE_BODY_LIST = [
 ]
 
 DEFAULT_CONTENT_TYPE = 'application/json'
+JSON_OBJECT_NAME = 'jsonObject'
 
 KW_API = 'api'
 KW_INFO = 'info'
@@ -256,6 +257,29 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                                 k.TYPE : attributeType,
                                 k.EXAMPLE : None
                             }
+            else :
+                dtoName = JSON_OBJECT_NAME
+                if KW_REQUEST == where :
+                    documentation[k.PATHS][url][verb][k.PARAMETERS].append({
+                        k.NAME : v.BODY,
+                        k.TYPE : v.OBJECT,
+                        k.IN : v.BODY,
+                        k.REQUIRED: True,
+                        k.DESCRIPTION : None,
+                        k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
+                    })
+                if KW_RESPONSE == where :
+                    documentation[k.PATHS][url][verb][k.RESPONSES][k.DEFAULT_STATUS_CODE] = {
+                        k.DESCRIPTION : v.DEFAULT_RESPONSE,
+                        k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
+                    }
+                if not dtoClass.__name__ in documentation[k.DEFINITIONS] :
+                    dtoClassDoc = {}
+                    documentation[k.DEFINITIONS][dtoClass.__name__] = dtoClassDoc
+                    dtoClassDoc[k.TYPE] = v.OBJECT
+                    dtoClassDoc[k.PROPERTIES] = {}
+                    dtoClassDoc[k.REQUIRED] = []
+
         elif 1 == len(dtoClass) :
             if dtoClass[0] and not isinstance(dtoClass[0], list) :
                 addDtoToUrlVerb(verb, url, dtoClass[0], documentation, where=where)
