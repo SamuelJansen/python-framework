@@ -290,24 +290,11 @@ def securedMethod(args, kwargs, contentType, resourceInstance, resourceInstanceM
 @Function
 def notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass) :
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
-        requestBodyAsJson = getRequestBodyAsJson(contentType) ###- request.get_json()
+        requestBodyAsJson = getRequestBodyAsJson(contentType)
         if  isPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(serializerReturn, args, isControllerMethod=True)
     return resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 @Function
 def ControllerMethod(
