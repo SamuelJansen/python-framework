@@ -55,8 +55,11 @@ def isList(thing) :
 
 @Function
 def isDictionary(thing) :
-    return type({}) == type(thing)
+    return isDictionaryClass(type(thing))
 
+@Function
+def isDictionaryClass(thing) :
+    return type({}) == thing
 
 @Function
 def importResource(resourceName, resourceModuleName=None) :
@@ -245,6 +248,8 @@ def serializeIt(fromJson, toObjectClass) :
 
 @Function
 def convertFromJsonToObject(fromJson, toObjectClass) :
+    if isDictionaryClass(toObjectClass) :
+        return fromJson
     if isList(toObjectClass) :
         objectArgs = []
         for innerToObjectClass in toObjectClass :
