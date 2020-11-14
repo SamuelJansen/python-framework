@@ -54,6 +54,12 @@ def printClass(Class) :
     print(f'{2 * c.TAB}Class.__qualname__ = {Class.__qualname__}')
 
 @Function
+def isPresent(object) :
+    if object or isinstance(type(object), dict) or {} == object :
+        return True
+    return False
+
+@Function
 def jsonifyResponse(object, contentType, status) :
     return Response(Serializer.jsonifyIt(object),  mimetype = contentType, status = status)
 
@@ -169,7 +175,7 @@ def validateFlaskApi(instance) :
 def validateResponseClass(responseClass, controllerResponse) :
     log.debug(validateResponseClass, controllerResponse)
     if responseClass :
-        if not controllerResponse and not isinstance(type(controllerResponse), dict) and not isinstance(controllerResponse, list):
+        if not isPresent(controllerResponse) and not isinstance(controllerResponse, list):
             raiseBadResponseImplementetion(f'Response not present')
         if isinstance(responseClass, list) :
             if 0 == len(responseClass) :
@@ -285,10 +291,23 @@ def securedMethod(args, kwargs, contentType, resourceInstance, resourceInstanceM
 def notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass) :
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType) ###- request.get_json()
-        if requestBodyAsJson :
+        if  isPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(serializerReturn, args, isControllerMethod=True)
     return resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @Function
 def ControllerMethod(
