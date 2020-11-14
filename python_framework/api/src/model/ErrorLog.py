@@ -1,5 +1,5 @@
 import python_framework.api.src.service.SqlAlchemyProxy as sap
-from python_framework.api.src.model.FrameworkModelAssociation import ERROR_LOG, MODEL
+from python_framework.api.src.model.FrameworkModel import ERROR_LOG, MODEL
 
 MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE = 16384
 MAX_MESSAGE_SIZE = 512
