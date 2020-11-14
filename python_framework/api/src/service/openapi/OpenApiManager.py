@@ -226,7 +226,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
     if dtoClass :
         if not isinstance(dtoClass, list) :
             if not c.TYPE_DICT == dtoClass.__name__ :
-                dtoName = getClassDocumentationName(dtoClass)
+                dtoName = getDtoDocumentationName(dtoClass)
                 if KW_REQUEST == where :
                     documentation[k.PATHS][url][verb][k.PARAMETERS].append({
                         k.NAME : v.BODY,
@@ -258,7 +258,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                                 k.EXAMPLE : None
                             }
             else :
-                dtoName = getClassDocumentationName(dtoClass)
+                dtoName = getDtoDocumentationName(dtoClass)
                 if KW_REQUEST == where :
                     documentation[k.PATHS][url][verb][k.PARAMETERS].append({
                         k.NAME : v.BODY,
@@ -317,7 +317,7 @@ def getDtoDocumentationName(objectClass) :
 
 def getDtoSchema(attributeName, attributeType, dtoClass):
     if dtoClass :
-        dtoName = getClassDocumentationName(dtoClass)
+        dtoName = getDtoDocumentationName(dtoClass)
         if v.ARRAY == attributeType :
             return {
                 k.TYPE : v.ARRAY,
