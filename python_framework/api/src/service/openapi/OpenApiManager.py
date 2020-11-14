@@ -32,7 +32,7 @@ ABLE_TO_RECIEVE_BODY_LIST = [
 ]
 
 DEFAULT_CONTENT_TYPE = 'application/json'
-JSON_OBJECT_NAME = 'jsonObject'
+JSON_OBJECT_NAME = 'json'
 
 KW_API = 'api'
 KW_INFO = 'info'
@@ -226,7 +226,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
     if dtoClass :
         if not isinstance(dtoClass, list) :
             if not c.TYPE_DICT == dtoClass.__name__ :
-                dtoName = dtoClass.__name__
+                dtoName = getClassDocumentationName(dtoClass)
                 if KW_REQUEST == where :
                     documentation[k.PATHS][url][verb][k.PARAMETERS].append({
                         k.NAME : v.BODY,
@@ -258,7 +258,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                                 k.EXAMPLE : None
                             }
             else :
-                dtoName = JSON_OBJECT_NAME
+                dtoName = getClassDocumentationName(dtoClass)
                 if KW_REQUEST == where :
                     documentation[k.PATHS][url][verb][k.PARAMETERS].append({
                         k.NAME : v.BODY,
@@ -309,9 +309,15 @@ def getTypeFromAttributeNameAndChildDtoClass(attributeName):
 def getRefferenceValue(name):
     return f'#/{k.DEFINITIONS}/{name}'
 
+def getDtoDocumentationName(objectClass) :
+    if Serializer.isDictionaryClass(objectClass) :
+        return JSON_OBJECT_NAME
+    else:
+        return objectClass.__name__
+
 def getDtoSchema(attributeName, attributeType, dtoClass):
     if dtoClass :
-        dtoName = dtoClass.__name__
+        dtoName = getClassDocumentationName(dtoClass)
         if v.ARRAY == attributeType :
             return {
                 k.TYPE : v.ARRAY,
