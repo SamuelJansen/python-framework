@@ -56,3 +56,24 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 
 ![Alt text](https://i.pinimg.com/originals/dc/73/61/dc73616f86bfe1d07cf586ce5f97f46d.jpg?raw=true "feature_repository")
 
+### Model examples
+- User model
+
+![Alt text](https://i.pinimg.com/originals/29/75/24/29752451dc74cc2209e94bc0326f9eed.jpg?raw=true "user_model")
+
+- Feature model
+
+![Alt text](https://i.pinimg.com/originals/c2/4b/a9/c24ba93018bdd9229ccb164c7aa523e1.jpg?raw=true "feature_model")
+
+- Model association - its just to make things easier
+
+![Alt text](https://i.pinimg.com/originals/9d/59/ae/9d59ae37c24a5508e5a56d01e33c9378.jpg?raw=true "model_association")
+
+### Mapper examples
+- User mapper
+
+![Alt text](https://i.pinimg.com/originals/2a/aa/81/2aaa811f38bd5ec22f2b5eab3858d9a4.jpg?raw=true "user_mapper")
+
+- Feature mapper
+
+![Alt text](https://i.pinimg.com/originals/d9/dc/77/d9dc771066877d75152b477557f0339a.jpg?raw=true "feature_mapper")
