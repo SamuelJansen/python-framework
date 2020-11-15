@@ -1,7 +1,7 @@
 from distutils.core import setup
 import os, site
 
-VERSION = '0.0.1-104'
+VERSION = '0.0.1-105'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -14,17 +14,15 @@ SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPAR
 SETUP_LOG_LABEL = '[SETUP  ] '
 
 def getStaticPackagePath() :
-    ###- /app/.heroku/python/statics/python_framework/api/resource/swaggerui/
     staticPackageList = site.getsitepackages()
     print(f'{SETUP_LOG_LABEL}Static package list: {staticPackageList}. Picking the first one')
     staticPackage = str(staticPackageList[0])
     staticPackage = staticPackage.replace(f'{BACK_SLASH}{BACK_SLASH}',OS_SEPARATOR)
     staticPackage = staticPackage.replace(SLASH,OS_SEPARATOR)
     staticPackage = staticPackage.replace(BACK_SLASH,OS_SEPARATOR)
-    staticPackage = f'{staticPackage.split(PYTHON_LANGUAGE_NAME)[0]}'
-    if not staticPackage[-1] == str(OS_SEPARATOR) :
-        staticPackage = f'{staticPackage}{OS_SEPARATOR}'
-    staticPackage = f'{staticPackage}{PYTHON_LANGUAGE_NAME}{STATIC_DIRECTORY_PATH}'
+    if staticPackage[-1] == str(OS_SEPARATOR) :
+        staticPackage = staticPackage[:-1]
+    staticPackage = f'{staticPackage}{STATIC_DIRECTORY_PATH}'
     print(f'{SETUP_LOG_LABEL}Static package: "{staticPackage}"')
     return staticPackage
 
@@ -82,7 +80,7 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals==0.1.0-05'
+        'globals==0.1.0-06'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
