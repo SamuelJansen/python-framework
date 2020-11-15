@@ -4,6 +4,8 @@ from python_helper import log
 from python_framework.api.src.annotation.MethodWrapper import Function
 from python_framework.api.src.service.SqlAlchemyProxy import DeclarativeMeta, InstrumentedList
 
+UTF8_ENCODE = 'utf8'
+
 IGNORE_REOURCE_LIST = [
     'FlaskManager',
     'MethodWrapper',
@@ -271,4 +273,4 @@ def convertFromObjectToObject(fromObject, toObjectClass) :
 
 @Function
 def prettify(objectAsDict) :
-    return json.dumps(objectAsDict, indent=2, sort_keys=True)
+    return json.dumps(objectAsDict, indent=2, sort_keys=True, ensure_ascii=False).encode(UTF8_ENCODE)
