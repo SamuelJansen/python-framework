@@ -2,14 +2,14 @@ from distutils.core import setup
 import os
 from globals import getStaticPackagePath
 
-VERSION = '0.0.1-97'
+VERSION = '0.0.1-98'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
 OS_SEPARATOR = os.path.sep
 # SWAGGER_RELATIVE_PATH = f'{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
 # STATIC_PACKAGE = 'statics'
-SWAGGER_RELATIVE_PATH = f'{OS_SEPARATOR}{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
+SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
 # STATIC_PACKAGE = 'statics'
 
 staticPackagePath = f'{getStaticPackagePath()}{SWAGGER_RELATIVE_PATH}'
