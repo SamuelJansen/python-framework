@@ -1,6 +1,6 @@
 import json, importlib
 from python_helper import Constant as c
-from python_helper import log
+from python_helper import StringHelper, log
 from python_framework.api.src.annotation.MethodWrapper import Function
 from python_framework.api.src.service.SqlAlchemyProxy import DeclarativeMeta, InstrumentedList
 
@@ -273,4 +273,4 @@ def convertFromObjectToObject(fromObject, toObjectClass) :
 
 @Function
 def prettify(objectAsDict) :
-    return json.dumps(objectAsDict, indent=2, sort_keys=True).decode(UTF8_ENCODE)
+    return StringHelper.stringfyThisDictionary(objectAsDict)
