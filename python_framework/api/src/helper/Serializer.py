@@ -270,5 +270,5 @@ def convertFromObjectToObject(fromObject, toObjectClass) :
     return convertFromJsonToObject(fromJson,toObjectClass)
 
 @Function
-def prettyPrint(objectAsJson) :
-    print(json.dumps(json.loads(objectAsJson), indent=2, sort_keys=True))
+def prettify(objectAsDict) :
+    return json.dumps(objectAsDict, indent=2, sort_keys=True)

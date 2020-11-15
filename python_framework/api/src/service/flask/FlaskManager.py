@@ -291,7 +291,7 @@ def notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstan
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType)
         if resourceInstanceMethod.logBodyRequest :
-            log.debug(resourceInstanceMethod, f'"bodyRequest" : {Serializer.prettyPrint(requestBodyAsJson)}')
+            log.debug(resourceInstanceMethod, f'"bodyRequest" : {Serializer.prettify(requestBodyAsJson)}')
         if  isPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(serializerReturn, args, isControllerMethod=True)
@@ -347,7 +347,7 @@ def ControllerMethod(
             controllerResponse = completeResponse[0]
             status = completeResponse[1]
             if logBodyResponse :
-                log.debug(innerResourceInstanceMethod, f'"bodyResponse" : {Serializer.prettyPrint(controllerResponse)}')
+                log.debug(innerResourceInstanceMethod, f'"bodyResponse" : {Serializer.prettify(controllerResponse)}')
             return jsonifyResponse(controllerResponse, produces, status)
         overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         innerResourceInstanceMethod.url = controllerMethodUrl
