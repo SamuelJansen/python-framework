@@ -1,4 +1,4 @@
-# python_framework - v0.1.0-05 - FINALY OUT LOL
+# python_framework - v0.1.0-05 - stable for python3.8
 Basically, its a Flask wrapper
 
 It alters Flask behaviours in order to make APIs better organized.
@@ -88,7 +88,7 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 - [FeatureManager API](https://github.com/SamuelJansen/FeatureManager "FeatureManager API")
 - [WebkookBoot API](https://github.com/SamuelJansen/WebkookBoot "WebkookBoot API")
 
-## Notes - v0.1.0-05
+## Notes - v0.1.0-05 - stable for python3.8
 - If you don't follow package pattern, it wont happens
 - I just hate OS environments lose all over the project. That's why I made Globals.py, so we can centralize it in there. Unfortnatelly, `globals` module isn't perfect yet. That's my next goal
 - Repository connections are much alike SqlAlchemy native sintax. So, any specific implementation can be written in SqlAlchemy native sintax. Any issue, contact me, so I can fix it.
