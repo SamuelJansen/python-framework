@@ -1,32 +1,14 @@
 from distutils.core import setup
 import os, site
 
-VERSION = '0.0.1-105'
+VERSION = '0.0.1-106'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
 OS_SEPARATOR = os.path.sep
-BACK_SLASH = '\\'
-SLASH = '/'
-PYTHON_LANGUAGE_NAME = 'python'
-STATIC_DIRECTORY_PATH = f'{OS_SEPARATOR}statics'
 SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
-SETUP_LOG_LABEL = '[SETUP  ] '
-
-def getStaticPackagePath() :
-    staticPackageList = site.getsitepackages()
-    print(f'{SETUP_LOG_LABEL}Static package list: {staticPackageList}. Picking the first one')
-    staticPackage = str(staticPackageList[0])
-    staticPackage = staticPackage.replace(f'{BACK_SLASH}{BACK_SLASH}',OS_SEPARATOR)
-    staticPackage = staticPackage.replace(SLASH,OS_SEPARATOR)
-    staticPackage = staticPackage.replace(BACK_SLASH,OS_SEPARATOR)
-    if staticPackage[-1] == str(OS_SEPARATOR) :
-        staticPackage = staticPackage[:-1]
-    staticPackage = f'{staticPackage}{STATIC_DIRECTORY_PATH}'
-    print(f'{SETUP_LOG_LABEL}Static package: "{staticPackage}"')
-    return staticPackage
-
-staticPackagePath = f'{getStaticPackagePath()}{OS_SEPARATOR}{SWAGGER_RELATIVE_PATH}'
+STATIC_PACKAGE_PATH = f'statics{OS_SEPARATOR}{SWAGGER_RELATIVE_PATH}'
+print(f'[SETUP  ] Static package: "{staticPackagePath}"')
 
 setup(
     name = NAME,
@@ -45,7 +27,7 @@ setup(
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
     ],
     data_files = [
-        (staticPackagePath, [
+        (STATIC_PACKAGE_PATH, [
             f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-16x16.png',
             f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-32x32.png',
             f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}index.template.html',
@@ -80,7 +62,7 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals==0.1.0-06'
+        'globals==0.1.0-07'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
