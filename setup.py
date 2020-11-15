@@ -1,14 +1,14 @@
 from distutils.core import setup
 import os, site
 
-VERSION = '0.0.1-106'
+VERSION = '0.0.1-107'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
 OS_SEPARATOR = os.path.sep
 SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
 STATIC_PACKAGE_PATH = f'statics{OS_SEPARATOR}{SWAGGER_RELATIVE_PATH}'
-print(f'[SETUP  ] Static package: "{staticPackagePath}"')
+print(f'[SETUP  ] Static package: "{STATIC_PACKAGE_PATH}"')
 
 setup(
     name = NAME,
