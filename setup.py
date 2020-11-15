@@ -1,7 +1,7 @@
 from distutils.core import setup
 import os, site
 
-VERSION = '0.0.1-101'
+VERSION = '0.0.1-102'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -14,6 +14,7 @@ SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPAR
 SETUP_LOG_LABEL = '[SETUP  ] '
 
 def getStaticPackagePath() :
+    ###- /app/.heroku/python/statics/python_framework/api/resource/swaggerui/
     staticPackageList = site.getsitepackages()
     print(f'{SETUP_LOG_LABEL}Static package list: {staticPackageList}. Picking the first one')
     staticPackage = str(staticPackageList[0])

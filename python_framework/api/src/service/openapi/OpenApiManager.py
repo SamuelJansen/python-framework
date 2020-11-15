@@ -58,7 +58,6 @@ KW_REQUEST = '__KW_REQUEST__'
 KW_RESPONSE = '__KW_RESPONSE__'
 
 def addSwagger(apiInstance, appInstance):
-    globals = apiInstance.globals
     documentationUrl = f'{apiInstance.baseUrl}{c.SLASH}{KW_OPEN_API}'
     swaggerUi = get_swaggerui_blueprint(
         documentationUrl,
@@ -70,8 +69,9 @@ def addSwagger(apiInstance, appInstance):
     # swaggerUi._static_folder = f'{globals.distPackage}{pythonFrameworkStaticFiles}{swaggerStaticFiles}'
     # apiInstance.documentationFolderPath = swaggerUi._static_folder
     # log.debug(addSwagger, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
-
+    log.debug(addSwagger,f'swaggerUi._static_folder before reassignment: "{swaggerUi._static_folder}"')
     swaggerUi._static_folder = getStaticFolder(apiInstance, appInstance)
+    log.debug(addSwagger,f'swaggerUi._static_folder after reassignment: "{swaggerUi._static_folder}"')
 
     appInstance.register_blueprint(swaggerUi, url_prefix=documentationUrl)
     OpenApiDocumentationFile.overrideDocumentation(apiInstance)
