@@ -281,16 +281,16 @@ def getRequestBodyAsJson(contentType) :
 
 @Function
 @Security.jwtRequired
-def securedMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, roleRequired) :
+def securedMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logBodyRequest) :
     if not Security.getRole() in roleRequired :
         raise GlobalException.GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDEN)
-    return notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass)
+    return notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest)
 
 @Function
-def notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass) :
+def notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest) :
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType)
-        if resourceInstanceMethod.logBodyRequest :
+        if logBodyRequest :
             log.debug(resourceInstanceMethod, f'"bodyRequest" : {Serializer.prettify(requestBodyAsJson)}')
         if  isPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
@@ -323,9 +323,9 @@ def ControllerMethod(
             resourceInstance = args[0]
             try :
                 if roleRequired and (type(list()) == type(roleRequired) and not [] == roleRequired) :
-                    completeResponse = securedMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass, roleRequired)
+                    completeResponse = securedMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logBodyRequest)
                 else :
-                    completeResponse = notSecuredMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass)
+                    completeResponse = notSecuredMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest)
                 validateResponseClass(responseClass, completeResponse[0])
 
             except Exception as exception :
