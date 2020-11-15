@@ -1,19 +1,31 @@
 from distutils.core import setup
-import os
-from globals import getStaticPackagePath
+import os, site
 
-VERSION = '0.0.1-99'
+VERSION = '0.0.1-100'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
 OS_SEPARATOR = os.path.sep
-# SWAGGER_RELATIVE_PATH = f'{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
-# STATIC_PACKAGE = 'statics'
+BACK_SLASH = '\\'
+SLASH = '/'
+STATIC_DIRECTORY_PATH = f'{OS_SEPARATOR}statics'
 SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
-# STATIC_PACKAGE = 'statics'
+SETUP_LOG_LABEL = '[SETUP  ] '
+
+def getStaticPackagePath() :
+    staticPackageList = site.getsitepackages()
+    print(f'{SETUP_LOG_LABEL}Static package list: {staticPackageList}. Picking the first one')
+    staticPackage = str(staticPackageList[0])
+    staticPackage = staticPackage.replace(f'{BACK_SLASH}{BACK_SLASH}',OS_SEPARATOR)
+    staticPackage = staticPackage.replace(SLASH,OS_SEPARATOR)
+    staticPackage = staticPackage.replace(BACK_SLASH,OS_SEPARATOR)
+    if staticPackage[-1] == str(OS_SEPARATOR) or staticPackage[-1] == SLASH :
+        staticPackage = staticPackage[:-1]
+    staticPackage = f'{staticPackage}{STATIC_DIRECTORY_PATH}'
+    print(f'{SETUP_LOG_LABEL}Static package: "{staticPackage}"')
+    return staticPackage
 
 staticPackagePath = f'{getStaticPackagePath()}{OS_SEPARATOR}{SWAGGER_RELATIVE_PATH}'
-#(f'{STATIC_PACKAGE}{OS_SEPARATOR}{NAME}{SWAGGER_RELATIVE_PATH}', [
 
 setup(
     name = NAME,
