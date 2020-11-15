@@ -24,7 +24,7 @@ so_on_so_forth==1.0.2
 ```
 
 ### Package pattern 
-- [This package pattern](https://github.com/SamuelJansen/FeatureManager "package_pattern") automate controller registration, controller-service-repository-etc interconnections and so on
+- [This package pattern](https://github.com/SamuelJansen/FeatureManager "package_pattern") automate controller registration, controller-service-repository-etc interconnections and so on. Follow it and/or make improvements suggestions.
 
 ![Package pattern](https://i.pinimg.com/originals/f6/b0/6a/f6b06aac4c675655a8ad8763f2afcbe4.jpg?raw=true "package_pattern")
 
