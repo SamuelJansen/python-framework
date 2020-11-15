@@ -14,17 +14,19 @@ It alters Flask behaviours in order to make APIs better organized.
 - ```python_framework==0.1.0.post05```
 
 ### Package pattern 
-- this pattern automate controller registration, controller-service-repository-etc interconnections and so on
+- [This package pattern](https://github.com/SamuelJansen/FeatureManager "package_pattern") automate controller registration, controller-service-repository-etc interconnections and so on
 
-![Alt text](https://i.pinimg.com/originals/f6/b0/6a/f6b06aac4c675655a8ad8763f2afcbe4.jpg?raw=true "package_pattern")
+![Package pattern](https://i.pinimg.com/originals/f6/b0/6a/f6b06aac4c675655a8ad8763f2afcbe4.jpg?raw=true "package_pattern")
 
-### Globals.yml file
-- I still need to do some work on globals library in order to make OS variables income here. For while it does not
+### Globals.yml configuration file
+- [Globals.yml](https://github.com/SamuelJansen/FeatureManager/blob/master/api/resource/Globals.yml "Globals.yml") configures the application 
 
-![Alt text](https://i.pinimg.com/originals/47/2f/d5/472fd582fac7483666e327e754be5df1.jpg?raw=true "globals_confituration_file")
+I still need to do some work on globals library in order to make OS variables income here. For while it does not
+
+![Globals.yml example](https://i.pinimg.com/originals/47/2f/d5/472fd582fac7483666e327e754be5df1.jpg?raw=true "globals_confituration_file")
 
 ### app.py and MyApi.py - just copy paste and be happy
-![Alt text](https://i.pinimg.com/originals/e8/99/ff/e899ff77f1ecde64bf22175422691e63.jpg?raw=true "app_and_MyApi")
+![app.py and MyApi.py](https://i.pinimg.com/originals/e8/99/ff/e899ff77f1ecde64bf22175422691e63.jpg?raw=true "app_and_MyApi")
 
 ### Documentation example
 https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to load as heroku sometime sleeps...
@@ -32,11 +34,11 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 ### Controller examples
 - Login controller
 
-![Alt text](https://i.pinimg.com/originals/46/ad/f1/46adf1c4209bf789ae6cbc63828fd003.jpg?raw=true "login_controller")
+![Login controller example](https://i.pinimg.com/originals/46/ad/f1/46adf1c4209bf789ae6cbc63828fd003.jpg?raw=true "login_controller")
 
 - Feature controller
 
-![Alt text](https://i.pinimg.com/originals/87/95/7d/87957d15526998de8ef4b587e8b89373.jpg?raw=true "feature_controller")
+![Feature controller example](https://i.pinimg.com/originals/87/95/7d/87957d15526998de8ef4b587e8b89373.jpg?raw=true "feature_controller")
 
 ### Service examples
 - User service
