@@ -1,13 +1,14 @@
 from distutils.core import setup
 import os, site
 
-VERSION = '0.0.1-100'
+VERSION = '0.0.1-101'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
 OS_SEPARATOR = os.path.sep
 BACK_SLASH = '\\'
 SLASH = '/'
+PYTHON_LANGUAGE_NAME = 'python'
 STATIC_DIRECTORY_PATH = f'{OS_SEPARATOR}statics'
 SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
 SETUP_LOG_LABEL = '[SETUP  ] '
@@ -19,9 +20,10 @@ def getStaticPackagePath() :
     staticPackage = staticPackage.replace(f'{BACK_SLASH}{BACK_SLASH}',OS_SEPARATOR)
     staticPackage = staticPackage.replace(SLASH,OS_SEPARATOR)
     staticPackage = staticPackage.replace(BACK_SLASH,OS_SEPARATOR)
-    if staticPackage[-1] == str(OS_SEPARATOR) or staticPackage[-1] == SLASH :
-        staticPackage = staticPackage[:-1]
-    staticPackage = f'{staticPackage}{STATIC_DIRECTORY_PATH}'
+    staticPackage = f'{staticPackage.split(PYTHON_LANGUAGE_NAME)[0]}'
+    if not staticPackage[-1] == str(OS_SEPARATOR) :
+        staticPackage = f'{staticPackage}{OS_SEPARATOR}'
+    staticPackage = f'{staticPackage}{PYTHON_LANGUAGE_NAME}{STATIC_DIRECTORY_PATH}'
     print(f'{SETUP_LOG_LABEL}Static package: "{staticPackage}"')
     return staticPackage
 
@@ -79,7 +81,7 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals==0.1.0-02'
+        'globals==0.1.0-03'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
