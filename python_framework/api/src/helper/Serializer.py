@@ -273,4 +273,4 @@ def convertFromObjectToObject(fromObject, toObjectClass) :
 
 @Function
 def prettify(objectAsDict) :
-    return json.dumps(objectAsDict, indent=2, sort_keys=True, ensure_ascii=False).encode(UTF8_ENCODE)
+    return json.dumps(objectAsDict, indent=2, sort_keys=True).decode(UTF8_ENCODE)
