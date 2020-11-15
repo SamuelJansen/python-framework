@@ -173,7 +173,6 @@ def validateFlaskApi(instance) :
 
 @Function
 def validateResponseClass(responseClass, controllerResponse) :
-    log.debug(validateResponseClass, controllerResponse)
     if responseClass :
         if not isPresent(controllerResponse) and not isinstance(controllerResponse, list):
             raiseBadResponseImplementetion(f'Response not present')
@@ -291,6 +290,8 @@ def securedMethod(args, kwargs, contentType, resourceInstance, resourceInstanceM
 def notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass) :
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType)
+        if resourceInstanceMethod.logBodyRequest :
+            log.debug(resourceInstanceMethod, f'"bodyRequest" : {Serializer.prettyPrint(requestBodyAsJson)}')
         if  isPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(serializerReturn, args, isControllerMethod=True)
@@ -303,7 +304,9 @@ def ControllerMethod(
     responseClass = None,
     roleRequired = None,
     consumes = OpenApiManager.DEFAULT_CONTENT_TYPE,
-    produces = OpenApiManager.DEFAULT_CONTENT_TYPE
+    produces = OpenApiManager.DEFAULT_CONTENT_TYPE,
+    logBodyRequest = False,
+    logBodyResponse = False
 ):
     controllerMethodUrl = url
     controllerMethodRequestClass = requestClass
@@ -311,6 +314,8 @@ def ControllerMethod(
     controllerMethodRoleRequired = roleRequired
     controllerMethodProduces = produces
     controllerMethodConsumes = consumes
+    controllerMethodLogBodyRequest = logBodyRequest
+    controllerMethodLogBodyResponse = logBodyResponse
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
         noException = None
         log.debug(ControllerMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
@@ -338,8 +343,11 @@ def ControllerMethod(
                 ###- request.full_path:           /alert/dingding/test?x=y
                 ###- request.args:                ImmutableMultiDict([('x', 'y')])
                 ###- request.args.get('x'):       y
+
             controllerResponse = completeResponse[0]
             status = completeResponse[1]
+            if resourceInstanceMethod.logBodyResponse :
+                log.debug(innerResourceInstanceMethod, f'"bodyResponse" : {Serializer.prettyPrint(controllerResponse)}')
             return jsonifyResponse(controllerResponse, produces, status)
         overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         innerResourceInstanceMethod.url = controllerMethodUrl
@@ -348,6 +356,8 @@ def ControllerMethod(
         innerResourceInstanceMethod.roleRequired = controllerMethodRoleRequired
         innerResourceInstanceMethod.produces = controllerMethodProduces
         innerResourceInstanceMethod.consumes = controllerMethodConsumes
+        innerResourceInstanceMethod.logBodyRequest = controllerMethodLogBodyRequest
+        innerResourceInstanceMethod.logBodyResponse = controllerMethodLogBodyResponse
         return innerResourceInstanceMethod
     return innerMethodWrapper
 

@@ -268,3 +268,7 @@ def convertFromJsonToObject(fromJson, toObjectClass) :
 def convertFromObjectToObject(fromObject, toObjectClass) :
     fromJson = json.loads(jsonifyIt(fromObject))
     return convertFromJsonToObject(fromJson,toObjectClass)
+
+@Function
+def prettyPrint(objectAsJson) :
+    print(json.dumps(json.loads(objectAsJson), indent=2, sort_keys=True))

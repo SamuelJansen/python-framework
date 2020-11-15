@@ -62,16 +62,8 @@ def addSwagger(apiInstance, appInstance):
         documentationUrl,
         OpenApiDocumentationFile.getDocumentationFileName(apiInstance)
     )
-
-    # pythonFrameworkStaticFiles = f'{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource'
-    # swaggerStaticFiles = f'{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
-    # swaggerUi._static_folder = f'{globals.distPackage}{pythonFrameworkStaticFiles}{swaggerStaticFiles}'
-    # apiInstance.documentationFolderPath = swaggerUi._static_folder
-    # log.debug(addSwagger, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
     log.debug(addSwagger,f'swaggerUi._static_folder before reassignment: "{swaggerUi._static_folder}"')
     swaggerUi._static_folder = getStaticFolder(apiInstance, appInstance)
-    log.debug(addSwagger,f'swaggerUi._static_folder after reassignment: "{swaggerUi._static_folder}"')
-
     appInstance.register_blueprint(swaggerUi, url_prefix=documentationUrl)
     OpenApiDocumentationFile.overrideDocumentation(apiInstance)
 
