@@ -83,3 +83,15 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 [Feature mapper](https://github.com/SamuelJansen/FeatureManager/blob/master/api/src/mapper/FeatureMapper.py "Feature mapper")
 
 ![Feature mapper](https://i.pinimg.com/originals/d9/dc/77/d9dc771066877d75152b477557f0339a.jpg?raw=true "feature_mapper")
+
+## Usage examples
+- [FeatureManager API](https://github.com/SamuelJansen/FeatureManager "FeatureManager API")
+- [WebkookBoot API](https://github.com/SamuelJansen/WebkookBoot "WebkookBoot API")
+
+## Notes
+- If you don't follow package pattern, it wont happens
+- I just hate OS environments lose all over the project. That's why I made Globals.py, so we can centralize it in there. Unfortnatelly, `globals` module isn't perfect yet. That's my next goal
+- Repository connections are much alike SqlAlchemy native sintax. So, any specific implementation can be written in SqlAlchemy native sintax. Any issue, contact me, so I can fix it.
+- Unit tests requires intance injection in runtime. I'm implementein a module to handle it, so as its Mocks.
+- `python_framework` comes with a LogError table by default (an auditory like stuff for api errors or bad behaviour). Contact me if you don't want it, so I'll release a feature to enable it only when it's actually desired
+- Any issues with deploy, contactme so I can fix it
