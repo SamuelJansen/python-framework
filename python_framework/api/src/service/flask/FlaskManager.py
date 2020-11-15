@@ -346,7 +346,7 @@ def ControllerMethod(
 
             controllerResponse = completeResponse[0]
             status = completeResponse[1]
-            if resourceInstanceMethod.logBodyResponse :
+            if logBodyResponse :
                 log.debug(innerResourceInstanceMethod, f'"bodyResponse" : {Serializer.prettyPrint(controllerResponse)}')
             return jsonifyResponse(controllerResponse, produces, status)
         overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
