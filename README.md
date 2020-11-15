@@ -88,10 +88,12 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 - [FeatureManager API](https://github.com/SamuelJansen/FeatureManager "FeatureManager API")
 - [WebkookBoot API](https://github.com/SamuelJansen/WebkookBoot "WebkookBoot API")
 
-## Notes
+## Notes - v0.1.0-05
 - If you don't follow package pattern, it wont happens
 - I just hate OS environments lose all over the project. That's why I made Globals.py, so we can centralize it in there. Unfortnatelly, `globals` module isn't perfect yet. That's my next goal
 - Repository connections are much alike SqlAlchemy native sintax. So, any specific implementation can be written in SqlAlchemy native sintax. Any issue, contact me, so I can fix it.
-- Unit tests requires intance injection in runtime. I'm implementein a module to handle it, so as its Mocks.
+- The auto-serialization stuff is just magic. But it comes with a price: Models and Dtos must have all its attributes initialyzed with None value. I'll fix it by 2021, february
+- Unit tests requires intance injection in runtime. I'm implementein a module to handle it, so as its Mocks. It will be release by 2021, february
 - `python_framework` comes with a LogError table by default (an auditory like stuff for api errors or bad behaviour). Contact me if you don't want it, so I'll release a feature to enable it only when it's actually desired
 - Any issues with deploy, contactme so I can fix it
+- I may release further versions. Don't use them before a proper release here
