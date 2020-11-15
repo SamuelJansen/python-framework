@@ -11,7 +11,17 @@ It alters Flask behaviours in order to make APIs better organized.
 - SqlAlhemyProxy without the need to "open connection" due to circular import issues
 
 ### Requirements
-- ```python_framework==0.1.0.post05```
+- Add `python_framework==0.1.0.post05` in your `requirements.txt` file
+- It comes with a lot of stuffs. Check on [setup.py](https://github.com/SamuelJansen/python_framework/blob/master/setup.py "setup.py"). If you need a different version of some of them, you can add it bellow `python_framework==0.1.0.post05`
+
+Something like this:
+
+```
+python_framework==0.1.0.post05
+sqlalchemy==9.9.9
+etc==7.0.3
+so_on_so_forth=1.0.2
+```
 
 ### Package pattern 
 - [This package pattern](https://github.com/SamuelJansen/FeatureManager "package_pattern") automate controller registration, controller-service-repository-etc interconnections and so on
