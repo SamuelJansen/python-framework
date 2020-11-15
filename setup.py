@@ -2,7 +2,7 @@ from distutils.core import setup
 import os
 from globals import getStaticPackagePath
 
-VERSION = '0.0.1-96'
+VERSION = '0.0.1-97'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -33,20 +33,20 @@ setup(
     ],
     data_files = [
         (staticPackagePath, [
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-16x16.png',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-32x32.png',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}index.template.html',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}oauth2-redirect.html',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js.map',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js.map',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css.map',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js.map',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}LICENSE',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}VERSION'
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-16x16.png',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-32x32.png',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}index.template.html',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}oauth2-redirect.html',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js.map',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js.map',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css.map',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js.map',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}LICENSE',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}VERSION'
         ])
     ],
     version = VERSION,
