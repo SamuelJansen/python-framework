@@ -1,4 +1,3 @@
-from globals import getStaticPackagePath
 from flask import send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
 from python_helper import Constant as c

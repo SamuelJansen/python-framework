@@ -1,15 +1,13 @@
 from distutils.core import setup
 import os, site
 
-VERSION = '0.0.1-111'
+VERSION = '0.0.1-112'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
 OS_SEPARATOR = os.path.sep
-PYTHON_VERSION = 3.8
 SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
 STATIC_PACKAGE_PATH = f'statics{OS_SEPARATOR}{SWAGGER_RELATIVE_PATH}'
-STATIC_DIRECTORY_PATH = f'{OS_SEPARATOR}lib{OS_SEPARATOR}python{PYTHON_VERSION}{OS_SEPARATOR}site-packages{OS_SEPARATOR}statics'
 print(f'[SETUP  ] Static package: "{STATIC_PACKAGE_PATH}"')
 
 setup(
@@ -64,7 +62,7 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals==0.1.0-11'
+        'globals==0.1.0-17'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
