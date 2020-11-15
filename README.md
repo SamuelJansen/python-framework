@@ -20,7 +20,7 @@ Something like this:
 python_framework==0.1.0.post05
 sqlalchemy==9.9.9
 etc==7.0.3
-so_on_so_forth=1.0.2
+so_on_so_forth==1.0.2
 ```
 
 ### Package pattern 
