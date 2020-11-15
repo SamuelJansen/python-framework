@@ -13,10 +13,12 @@ It alters Flask behaviours in order to make APIs better organized.
 ### Requirements
 - ```python_framework==0.1.0.post05```
 
-### Package pattern
+### Package pattern 
+- this pattern automate controller registration, controller-service-repository-etc interconnections and so on
 ![Alt text](https://i.pinimg.com/originals/f6/b0/6a/f6b06aac4c675655a8ad8763f2afcbe4.jpg?raw=true "package_pattern")
 
 ### Globals.yml file
+- I still need to do some work on globals library in order to make OS variables income here. For while it does not.
 ![Alt text](https://i.pinimg.com/originals/47/2f/d5/472fd582fac7483666e327e754be5df1.jpg?raw=true "globals_confituration_file")
 
 ### app.py and MyApi.py - just copy paste and be happy
