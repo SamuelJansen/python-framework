@@ -8,7 +8,7 @@ It alters Flask behaviours in order to make APIs better organized.
 - OpenApiDocumentation 
 - JwtSecutiry
 - Suport for services, validators, helpers, converters, mappers, and repository
-- SqlAlhemyProxy without the need to "open connection" due to circular import issues
+- SqlAlhemyProxy without the need to "open connection" due to circular import issues. You call them and it works like a horse
 
 ### Requirements
 - Add `python_framework==0.1.0.post05` in your `requirements.txt` file
