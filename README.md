@@ -108,5 +108,5 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 - Yes, api code/file imports are simplifyed. You can move a service from one package to another without impact on API behaviour. Just make shure it's somewhere inside the `service` package.
 - Unit tests requires instance injection in runtime. I'm implementing a module to handle it, so as its Mocks. It will be release by 2021, february
 - `python_framework` comes with a LogError table by default (an auditory like stuff for api errors or bad behaviours). Contact me if you don't want it, so I'll release a feature to enable it only when it's actually desired
-- Any issues with deploy, contactme so I can fix it
+- Any issues with deploy, contact me so I can fix it
 - I may release further versions. Don't use them before a proper release here
