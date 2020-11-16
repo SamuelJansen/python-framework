@@ -3,6 +3,8 @@ Basically, its a Flask wrapper
 
 It alters Flask behaviours in order to make APIs better organized.
 
+I did it because it's cool and makes Flask better :D
+
 ## Features
 - NOT A SINGLE SERIALIZER IS NEEDED!
 - OpenApiDocumentation 
@@ -44,6 +46,8 @@ so_on_so_forth==1.0.2
 
 ### Documentation example
 https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to load as heroku sometime sleeps...
+
+- No configurations needed. Just code you controllers and it will be there at `GET: whathever-your-host-is/basic-deploy-url/swagger` endpoint
 
 ### Controller examples
 [Login controller](https://github.com/SamuelJansen/FeatureManager/blob/master/api/src/controller/authentication/LoginController.py "Login controller")
