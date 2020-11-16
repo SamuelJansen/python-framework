@@ -114,3 +114,4 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 - `python_framework` comes with a LogError table by default (an auditory like stuff for api errors or bad behaviours). Contact me if you don't want it, so I'll release a feature to enable it only when it's actually desired
 - Any issues with deploy, contact me so I can fix it
 - I may release further versions. Don't use them before a proper release here
+- Of course this wrapper may has bugs. Whenever you find one, issue it here. So I can fix it and make it better :D
