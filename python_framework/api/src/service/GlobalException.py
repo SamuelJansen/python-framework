@@ -3,7 +3,7 @@ from flask import request
 from flask_jwt_extended.exceptions import NoAuthorizationError, RevokedTokenError
 from jwt import ExpiredSignatureError
 from python_helper import Constant, log
-from python_framework.api.src.annotation.MethodWrapper import Method
+from python_framework.api.src.annotation.MethodWrapper import Method, FunctionThrough
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.domain import HttpStatus
 from python_framework.api.src.model import ErrorLog
@@ -60,6 +60,7 @@ class GlobalException(Exception):
                 requestBody = {}
         return requestBody
 
+@FunctionThrough
 def validateArgs(self, method, objectRequest, expecteObjectClass):
     try :
         proceedValidation = True
@@ -72,6 +73,7 @@ def validateArgs(self, method, objectRequest, expecteObjectClass):
         log.error(expecteObjectClass.__class__, f'Failed to validate args of {resourceInstanceMethod.__name__} method', exception)
         raise GlobalException(logMessage = f'Failed to validate args of {resourceInstanceMethod.__name__} method{DOT_SPACE_CAUSE}{str(exception)}')
 
+@FunctionThrough
 def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, apiInstance) :
     if not (isinstance(exception.__class__, GlobalException) or GlobalException.__name__ == exception.__class__.__name__) :
         log.error(resourceInstance.__class__, f'Failed to excecute {resourceInstanceMethod.__name__} method due to {exception.__class__.__name__} exception', exception)

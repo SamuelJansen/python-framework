@@ -3,7 +3,7 @@ from python_helper import Constant as c
 from python_helper import log, StringHelper
 from flask import Response, request
 import flask_restful
-from python_framework.api.src.annotation.MethodWrapper import Function, overrideSignatures
+from python_framework.api.src.annotation.MethodWrapper import Function, FunctionThrough, overrideSignatures
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service import GlobalException
 from python_framework.api.src.domain import HttpStatus

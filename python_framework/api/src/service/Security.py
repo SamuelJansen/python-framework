@@ -6,6 +6,7 @@ from flask_jwt_extended import (
 )
 from python_helper import Constant, log
 import datetime
+from python_framework.api.src.annotation.MethodWrapper import FunctionThrough
 
 BLACK_LIST = set()
 
@@ -23,25 +24,31 @@ KW_JWT_BLACKLIST_ENABLED = 'JWT_BLACKLIST_ENABLED'
 
 DOT_SPACE_CAUSE = f'''{Constant.DOT_SPACE}{Constant.LOG_CAUSE}'''
 
+@FunctionThrough
 def getRawJwt(*arg,**kwargs) :
     return get_raw_jwt(*arg,**kwargs)
 
+@FunctionThrough
 def jwtRequired(*arg,**kwargs) :
     return jwt_required(*arg,**kwargs)
 
+@FunctionThrough
 def getJti(*arg,**kwargs) :
     return getRawJwt(*arg,**kwargs)[KW_JTI]
 
+@FunctionThrough
 def getRole(*arg,**kwargs) :
     return getRawJwt(*arg,**kwargs)[KW_USER_CLAIMS]
 
+@FunctionThrough
 def getIdentity(*arg,**kwargs) :
     return getRawJwt(*arg,**kwargs)[KW_IDENTITY]
 
+@FunctionThrough
 def addUserToBlackList() :
     BLACK_LIST.add(getJti())
 
-
+@FunctionThrough
 def getJwtMannager(appInstance, jwtSecret) :
     if not jwtSecret :
         log.warning(JWTManager, f'Not possible to instanciate jwtManager{DOT_SPACE_CAUSE}Missing jwt secret')
@@ -51,6 +58,7 @@ def getJwtMannager(appInstance, jwtSecret) :
         appInstance.config[KW_JWT_BLACKLIST_ENABLED] = True
         return jwtMannager
 
+@FunctionThrough
 def addJwt(jwtInstance) :
     @jwtInstance.token_in_blacklist_loader
     def verifyAuthorizaionAccess(decriptedToken) :
@@ -60,6 +68,7 @@ def addJwt(jwtInstance) :
     def invalidAccess() :
         return {'message': 'Access denied'}, HttpStatus.UNAUTHORIZED
 
+@FunctionThrough
 def createAccessToken(user, deltaMinutes=None) :
     ###- datetime.datetime.utcnow()
     if deltaMinutes :
