@@ -1,13 +1,14 @@
 from distutils.core import setup
-import os
+import os, site
 
-VERSION = '0.0.1-83'
+VERSION = '0.1.0-05'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
 OS_SEPARATOR = os.path.sep
-SWAGGER_RELATIVE_PATH = f'{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
-STATIC_PACKAGE = 'statics'
+SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
+STATIC_PACKAGE_PATH = f'statics{OS_SEPARATOR}{SWAGGER_RELATIVE_PATH}'
+print(f'[SETUP  ] Static package: "{STATIC_PACKAGE_PATH}"')
 
 setup(
     name = NAME,
@@ -26,21 +27,21 @@ setup(
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
     ],
     data_files = [
-        (f'{STATIC_PACKAGE}{OS_SEPARATOR}{NAME}{SWAGGER_RELATIVE_PATH}', [
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-16x16.png',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-32x32.png',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}index.template.html',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}oauth2-redirect.html',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js.map',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js.map',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css.map',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js.map',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}LICENSE',
-            f'{NAME}{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}VERSION'
+        (STATIC_PACKAGE_PATH, [
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-16x16.png',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-32x32.png',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}index.template.html',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}oauth2-redirect.html',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js.map',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js.map',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css.map',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js.map',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}LICENSE',
+            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}VERSION'
         ])
     ],
     version = VERSION,
@@ -61,8 +62,7 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals==0.0.43-25',
-        'python_helper==0.0.14'
+        'globals==0.1.0-18'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',

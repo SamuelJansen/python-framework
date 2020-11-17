@@ -1,7 +1,5 @@
-from python_framework.api.src.service.SqlAlchemyProxy import *
-
-ERROR_LOG = 'ErrorLog'
-MODEL = getNewModel()
+import python_framework.api.src.service.SqlAlchemyProxy as sap
+from python_framework.api.src.model.FrameworkModel import ERROR_LOG, MODEL
 
 MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE = 16384
 MAX_MESSAGE_SIZE = 512
@@ -13,16 +11,16 @@ MAX_RESOURCE_METHOD_NAME_SIZE = 128
 class ErrorLog(MODEL):
     __tablename__ = ERROR_LOG
 
-    id = Column(Integer(), Sequence(f'{__tablename__}{ID}{SEQ}'), primary_key=True)
-    timeStamp = Column(DateTime())
-    status = Column(Integer())
-    verb = Column(String(MAX_VERB_SIZE))
-    url = Column(String(MAX_URL_SIZE))
-    message = Column(String(MAX_MESSAGE_SIZE))
-    logMessage = Column(String(MAX_MESSAGE_SIZE))
-    logPayload = Column(String(MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE))
-    logResource = Column(String(MAX_RESOURCE_NAME_SIZE))
-    logResourceMethod = Column(String(MAX_RESOURCE_METHOD_NAME_SIZE))
+    id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
+    timeStamp = sap.Column(sap.DateTime())
+    status = sap.Column(sap.Integer())
+    verb = sap.Column(sap.String(MAX_VERB_SIZE))
+    url = sap.Column(sap.String(MAX_URL_SIZE))
+    message = sap.Column(sap.String(MAX_MESSAGE_SIZE))
+    logMessage = sap.Column(sap.String(MAX_MESSAGE_SIZE))
+    logPayload = sap.Column(sap.String(MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE))
+    logResource = sap.Column(sap.String(MAX_RESOURCE_NAME_SIZE))
+    logResourceMethod = sap.Column(sap.String(MAX_RESOURCE_METHOD_NAME_SIZE))
 
     def __init__(self,
         id = None,

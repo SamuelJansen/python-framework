@@ -5,7 +5,6 @@ from sqlalchemy.orm import sessionmaker, scoped_session, relationship
 from sqlalchemy.orm.collections import InstrumentedList
 from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 from sqlalchemy import Table, Column, Integer, String, Float, ForeignKey, UnicodeText, MetaData, Sequence, DateTime
-
 from sqlalchemy import and_, or_
 
 from python_helper import log
@@ -88,10 +87,6 @@ def getManyToOne(pet, owner, refferenceModel) :
     ownerId = Column(Integer(), ForeignKey(f'{owner}.{attributeIt(ID)}'))
     owner = relationship(owner, back_populates=attributeIt(f'{pet}{LIST}'))
     return owner, ownerId
-
-# @Function
-# def getOneToOne(owner, pet, refferenceModel) :
-#     return relationship(pet, back_populates=attributeIt(owner))
 
 @Function
 def getOneToOne(woman, man, refferenceModel) :

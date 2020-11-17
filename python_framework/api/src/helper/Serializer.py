@@ -1,8 +1,10 @@
 import json, importlib
 from python_helper import Constant as c
-from python_helper import log
+from python_helper import StringHelper, log
 from python_framework.api.src.annotation.MethodWrapper import Function
 from python_framework.api.src.service.SqlAlchemyProxy import DeclarativeMeta, InstrumentedList
+
+UTF8_ENCODE = 'utf8'
 
 IGNORE_REOURCE_LIST = [
     'FlaskManager',
@@ -55,8 +57,11 @@ def isList(thing) :
 
 @Function
 def isDictionary(thing) :
-    return type({}) == type(thing)
+    return isDictionaryClass(type(thing))
 
+@Function
+def isDictionaryClass(thing) :
+    return type({}) == thing
 
 @Function
 def importResource(resourceName, resourceModuleName=None) :
@@ -245,6 +250,8 @@ def serializeIt(fromJson, toObjectClass) :
 
 @Function
 def convertFromJsonToObject(fromJson, toObjectClass) :
+    if isDictionaryClass(toObjectClass) :
+        return fromJson
     if isList(toObjectClass) :
         objectArgs = []
         for innerToObjectClass in toObjectClass :
@@ -263,3 +270,7 @@ def convertFromJsonToObject(fromJson, toObjectClass) :
 def convertFromObjectToObject(fromObject, toObjectClass) :
     fromJson = json.loads(jsonifyIt(fromObject))
     return convertFromJsonToObject(fromJson,toObjectClass)
+
+@Function
+def prettify(objectAsDict) :
+    return StringHelper.stringfyThisDictionary(objectAsDict)

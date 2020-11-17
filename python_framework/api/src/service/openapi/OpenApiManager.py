@@ -32,6 +32,7 @@ ABLE_TO_RECIEVE_BODY_LIST = [
 ]
 
 DEFAULT_CONTENT_TYPE = 'application/json'
+JSON_OBJECT_NAME = 'json'
 
 KW_API = 'api'
 KW_INFO = 'info'
@@ -56,20 +57,23 @@ KW_REQUEST = '__KW_REQUEST__'
 KW_RESPONSE = '__KW_RESPONSE__'
 
 def addSwagger(apiInstance, appInstance):
-    globals = apiInstance.globals
     documentationUrl = f'{apiInstance.baseUrl}{c.SLASH}{KW_OPEN_API}'
     swaggerUi = get_swaggerui_blueprint(
         documentationUrl,
         OpenApiDocumentationFile.getDocumentationFileName(apiInstance)
     )
-    pythonFrameworkStaticFiles = f'{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource'
-    swaggerStaticFiles = f'{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
-    swaggerUi._static_folder = f'{globals.distPackage}{pythonFrameworkStaticFiles}{swaggerStaticFiles}'
-    apiInstance.documentationFolderPath = swaggerUi._static_folder
-    log.debug(addSwagger, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
-
+    log.debug(addSwagger,f'swaggerUi._static_folder before reassignment: "{swaggerUi._static_folder}"')
+    swaggerUi._static_folder = getStaticFolder(apiInstance, appInstance)
     appInstance.register_blueprint(swaggerUi, url_prefix=documentationUrl)
     OpenApiDocumentationFile.overrideDocumentation(apiInstance)
+
+def getStaticFolder(apiInstance, appInstance):
+    globals = apiInstance.globals
+    pythonFrameworkStaticFiles = f'{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource'
+    swaggerStaticFiles = f'{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
+    apiInstance.documentationFolderPath = f'{globals.staticPackage}{pythonFrameworkStaticFiles}{swaggerStaticFiles}'
+    log.debug(getStaticFolder, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
+    return apiInstance.documentationFolderPath
 
 ################################################################################
 
@@ -225,7 +229,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
     if dtoClass :
         if not isinstance(dtoClass, list) :
             if not c.TYPE_DICT == dtoClass.__name__ :
-                dtoName = dtoClass.__name__
+                dtoName = getDtoDocumentationName(dtoClass)
                 if KW_REQUEST == where :
                     documentation[k.PATHS][url][verb][k.PARAMETERS].append({
                         k.NAME : v.BODY,
@@ -240,9 +244,9 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                         k.DESCRIPTION : v.DEFAULT_RESPONSE,
                         k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
                     }
-                if not dtoClass.__name__ in documentation[k.DEFINITIONS] :
+                if not dtoName in documentation[k.DEFINITIONS] :
                     dtoClassDoc = {}
-                    documentation[k.DEFINITIONS][dtoClass.__name__] = dtoClassDoc
+                    documentation[k.DEFINITIONS][dtoName] = dtoClassDoc
                     dtoClassDoc[k.TYPE] = v.OBJECT
                     dtoClassDoc[k.PROPERTIES] = {}
                     dtoClassDoc[k.REQUIRED] = Serializer.getAttributeNameList(dtoClass)
@@ -256,6 +260,29 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                                 k.TYPE : attributeType,
                                 k.EXAMPLE : None
                             }
+            else :
+                dtoName = getDtoDocumentationName(dtoClass)
+                if KW_REQUEST == where :
+                    documentation[k.PATHS][url][verb][k.PARAMETERS].append({
+                        k.NAME : v.BODY,
+                        k.TYPE : v.OBJECT,
+                        k.IN : v.BODY,
+                        k.REQUIRED: True,
+                        k.DESCRIPTION : None,
+                        k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
+                    })
+                if KW_RESPONSE == where :
+                    documentation[k.PATHS][url][verb][k.RESPONSES][k.DEFAULT_STATUS_CODE] = {
+                        k.DESCRIPTION : v.DEFAULT_RESPONSE,
+                        k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
+                    }
+                if not dtoName in documentation[k.DEFINITIONS] :
+                    dtoClassDoc = {}
+                    documentation[k.DEFINITIONS][dtoName] = dtoClassDoc
+                    dtoClassDoc[k.TYPE] = v.OBJECT
+                    dtoClassDoc[k.PROPERTIES] = {}
+                    dtoClassDoc[k.REQUIRED] = []
+
         elif 1 == len(dtoClass) :
             if dtoClass[0] and not isinstance(dtoClass[0], list) :
                 addDtoToUrlVerb(verb, url, dtoClass[0], documentation, where=where)
@@ -285,9 +312,15 @@ def getTypeFromAttributeNameAndChildDtoClass(attributeName):
 def getRefferenceValue(name):
     return f'#/{k.DEFINITIONS}/{name}'
 
+def getDtoDocumentationName(objectClass) :
+    if Serializer.isDictionaryClass(objectClass) :
+        return JSON_OBJECT_NAME
+    else:
+        return objectClass.__name__
+
 def getDtoSchema(attributeName, attributeType, dtoClass):
     if dtoClass :
-        dtoName = dtoClass.__name__
+        dtoName = getDtoDocumentationName(dtoClass)
         if v.ARRAY == attributeType :
             return {
                 k.TYPE : v.ARRAY,
