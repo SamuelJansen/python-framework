@@ -13,8 +13,8 @@ I did it because it's cool and makes Flask better :D
 - SqlAlhemyProxy without the need to "open connection" due to circular import issues. You call them and it works like a horse
 
 ### Requirements
-- Add `python_framework==0.1.0.post05` in your `requirements.txt` file
-- It comes with a lot of stuffs. Check on [setup.py](https://github.com/SamuelJansen/python_framework/blob/master/setup.py "setup.py"). If you need a different version of some of them, you can add it bellow `python_framework==0.1.0.post05`
+- Add `python_framework==0.1.0.-05` in your `requirements.txt` file (or `python_framework==0.1.0.-post05`. In some environments, life is tuff)
+- It comes with a lot of stuffs. Check on [setup.py](https://github.com/SamuelJansen/python_framework/blob/master/setup.py "setup.py"). If you need a different version of some of them, you can add it bellow `python_framework==0.1.0.-05`
 
 Something like this:
 
