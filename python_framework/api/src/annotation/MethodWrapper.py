@@ -21,6 +21,21 @@ def Function(function,*args,**kwargs) :
     overrideSignatures(wrapedFunction, function)
     return wrapedFunction
 
+def FunctionThrough(function,*args,**kwargs) :
+    def wrapedFunction(*args,**kwargs) :
+        try :
+            functionReturn = function(*args,**kwargs)
+        except Exception as exception :
+            try :
+                functionName = f'{function.__name__}'
+            except :
+                functionName = f'({KW_FUNCTION} {NAME_NOT_PRESENT})'
+            log.wraper(Function,f'''failed to execute "{functionName}" function. Received args: {args}. Received kwargs: {kwargs}''',exception)
+            raise exception
+        return functionReturn
+    overrideSignatures(wrapedFunction, function)
+    return wrapedFunction
+
 def Method(method,*args,**kwargs) :
     def wrapedMethod(*args,**kwargs) :
         try :
