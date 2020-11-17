@@ -152,6 +152,11 @@ def addServiceListTo(apiInstance,serviceList) :
         apiInstance.bindResource(apiInstance,service())
 
 @Function
+def addClientListTo(apiInstance,clientList) :
+    for client in clientList :
+        apiInstance.bindResource(apiInstance,client())
+
+@Function
 def addRepositoryTo(apiInstance, repositoryList, model, databaseEnvironmentVariable=None, localStorageName=None) :
     apiInstance.repository = SqlAlchemyProxy.SqlAlchemyProxy(
         databaseEnvironmentVariable = databaseEnvironmentVariable,
@@ -200,6 +205,7 @@ def addFlaskApiResources(
         jwtInstance,
         controllerList,
         serviceList,
+        clientList,
         repositoryList,
         validatorList,
         mapperList,
@@ -215,6 +221,7 @@ def addFlaskApiResources(
     addResourceAttibutes(apiInstance)
     addRepositoryTo(apiInstance, repositoryList, model, databaseEnvironmentVariable=databaseEnvironmentVariable, localStorageName=localStorageName)
     addServiceListTo(apiInstance, serviceList)
+    addClientListTo(apiInstance, clientList)
     addControllerListTo(apiInstance, controllerList)
     addValidatorListTo(apiInstance, validatorList)
     addMapperListTo(apiInstance, mapperList)
