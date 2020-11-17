@@ -21,6 +21,7 @@ KW_RESOURCE = 'resource'
 
 KW_CONTROLLER_RESOURCE = 'Controller'
 KW_SERVICE_RESOURCE = 'Service'
+KW_CLIENT_RESOURCE = 'Client'
 KW_REPOSITORY_RESOURCE = 'Repository'
 KW_VALIDATOR_RESOURCE = 'Validator'
 KW_MAPPER_RESOURCE = 'Mapper'
@@ -29,6 +30,7 @@ KW_CONVERTER_RESOURCE = 'Converter'
 KW_RESOURCE_LIST = [
     KW_CONTROLLER_RESOURCE,
     KW_SERVICE_RESOURCE,
+    KW_CLIENT_RESOURCE,
     KW_REPOSITORY_RESOURCE,
     KW_VALIDATOR_RESOURCE,
     KW_MAPPER_RESOURCE,
@@ -376,6 +378,7 @@ def Service() :
                 OuterClass.__init__(self,*args,**kwargs)
                 self.globals = apiInstance.globals
                 self.service = apiInstance.resource.service
+                self.client = apiInstance.resource.client
                 self.repository = apiInstance.resource.repository
                 self.validator = apiInstance.resource.validator
                 self.mapper = apiInstance.resource.mapper
@@ -390,6 +393,38 @@ def ServiceMethod(requestClass=None):
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
         noException = None
         log.debug(ServiceMethod,f'''innerMethodWrapper wraped {resourceInstanceMethod.__name__}''')
+        def innerResourceInstanceMethod(*args,**kwargs) :
+            resourceInstance = args[0]
+            try :
+                validateArgs(args,requestClass,innerResourceInstanceMethod)
+                methodReturn = resourceInstanceMethod(*args,**kwargs)
+            except Exception as exception :
+                raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
+            return methodReturn
+        overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        return innerResourceInstanceMethod
+    return innerMethodWrapper
+
+@Function
+def Client() :
+    def Wrapper(OuterClass, *args, **kwargs):
+        apiInstance = getApi()
+        noException = None
+        log.debug(Client,f'''wrapping {OuterClass.__name__}''')
+        class InnerClass(OuterClass):
+            def __init__(self,*args,**kwargs):
+                log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
+                OuterClass.__init__(self,*args,**kwargs)
+                self.globals = apiInstance.globals
+        overrideSignatures(InnerClass, OuterClass)
+        return InnerClass
+    return Wrapper
+
+@Function
+def ClientMethod(requestClass=None):
+    def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
+        noException = None
+        log.debug(ClientMethod,f'''innerMethodWrapper wraped {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
             try :
