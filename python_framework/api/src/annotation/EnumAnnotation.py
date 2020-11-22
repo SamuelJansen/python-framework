@@ -35,7 +35,7 @@ def Enum() :
                 OuterEnum.__init__(self,*args,**kwargs)
                 attributeDataList = FlaskManager.getAttributeDataList(self)
                 for attribute, value in attributeDataList :
-                    if value not in originalClassAttributeValueList :
+                    if not 'map' == value and value not in originalClassAttributeValueList :
                         __raiseBadImplementation__(value)
                     setattr(attribute, VALUE_AS_STRING_KEY, str(value))
 
