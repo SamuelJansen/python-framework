@@ -125,6 +125,14 @@ def getAttributePointerList(object) :
     ]
 
 @Function
+def getAttributeDataList(object) :
+    return [
+        (getattr(object, objectAttributeName), objectAttributeName)
+        for objectAttributeName in dir(object)
+        if (not objectAttributeName.startswith('__') and not objectAttributeName.startswith('_'))
+    ]
+
+@Function
 def setMethod(resourceInstance, newMethod, methodName = None) :
     def buildNewClassMethod(resourceInstance, newMethod) :
         def myInnerMethod(*args, **kwargs) :
@@ -162,18 +170,18 @@ def getNullableApi() :
         api = None
     return api
 
-@Function
+@FunctionThrough
 def raiseBadResponseImplementetion(cause):
     raise Exception(f'Bad response implementation. {cause}')
 
-@Function
+@FunctionThrough
 def validateFlaskApi(instance) :
     apiClassName = flask_restful.Api.__name__
     moduleName = flask_restful.__name__
     if not apiClassName == getClassName(instance) and apiClassName == getQualitativeName(instance) and moduleName == getModuleName(instance) :
         raise Exception(f'Globals can only be added to a "flask_restful.Api" instance. Not to {apiInstance}')
 
-@Function
+@FunctionThrough
 def validateResponseClass(responseClass, controllerResponse) :
     if responseClass :
         if not isPresent(controllerResponse) and not isinstance(controllerResponse, list):

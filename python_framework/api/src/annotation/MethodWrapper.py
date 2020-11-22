@@ -15,7 +15,7 @@ def Function(function,*args,**kwargs) :
                 functionName = f'{function.__name__}'
             except :
                 functionName = f'({KW_FUNCTION} {NAME_NOT_PRESENT})'
-            log.wraper(Function,f'''failed to execute "{functionName}" function. Received args: {args}. Received kwargs: {kwargs}''',exception)
+            log.wraper(Function,f'''failed to execute "{functionName}(args={args}, kwargs={kwargs})"''',exception)
             raise Exception(f'{functionName} function error{c.DOT_SPACE_CAUSE}{str(exception)}')
         return functionReturn
     overrideSignatures(wrapedFunction, function)
@@ -30,7 +30,7 @@ def FunctionThrough(function,*args,**kwargs) :
                 functionName = f'{function.__name__}'
             except :
                 functionName = f'({KW_FUNCTION} {NAME_NOT_PRESENT})'
-            log.wraper(Function,f'''failed to execute "{functionName}" function. Received args: {args}. Received kwargs: {kwargs}''',exception)
+            log.wraper(Function,f'''exception trace passed through "{functionName}(args={args}, kwargs={kwargs})"''',exception)
             raise exception
         return functionReturn
     overrideSignatures(wrapedFunction, function)
