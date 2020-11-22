@@ -1,5 +1,5 @@
 from python_helper import log
-import MethodWrapper
+from python_framework.api.src.service.annotation import MethodWrapper
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.helper import EnumHelper
