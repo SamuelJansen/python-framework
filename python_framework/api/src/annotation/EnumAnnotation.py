@@ -2,7 +2,8 @@ from python_helper import log
 from python_framework.api.src.annotation import MethodWrapper
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.helper import Serializer
-from python_framework.api.src.helper import EnumHelper
+
+VALUE_AS_STRING_KEY = 'value'
 
 class EnumClass(object) :
     ...
@@ -11,6 +12,14 @@ class EnumItem :
     def __init__(self,**kwargs):
         for key,value in kwargs.items() :
             setattr(self, key, value)
+
+def isEnumItem(possibleEnumItem) :
+    itIs = False
+    try :
+        itIs = isinstance(possibleEnumItem, EnumItem)
+    except Exception as exception :
+        log.error(isEnumItem, f'not possible to evaluate. Returning {itIs} by default', exception)
+    return itIs
 
 def Enum() :
     def Wrapper(OuterEnum, *args, **kwargs):
@@ -21,22 +30,19 @@ def Enum() :
         log.debug(Enum,f'''wrapping {OuterEnum.__name__}''')
         class InnerEnum(OuterEnum, EnumClass):
             def __init__(self,*args,**kwargs):
-                log.debug(OuterEnum,f'in {InnerEnum.__name__}.__init__(*{args},**{kwargs})')
                 originalClassAttributeValueList = Serializer.getAttributeNameList(OuterEnum)
                 log.debug(OuterEnum,f'''originalClassAttributeValueList={originalClassAttributeValueList}''')
                 OuterEnum.__init__(self,*args,**kwargs)
                 attributeDataList = FlaskManager.getAttributeDataList(self)
-                log.debug(OuterEnum,f'''attributeDataList: {attributeDataList}''')
                 for attribute, value in attributeDataList :
-                    log.debug(OuterEnum,f'''attribute={attribute}, value={value}''')
                     if value not in originalClassAttributeValueList :
                         __raiseBadImplementation__(value)
-                    setattr(attribute, 'value', str(value))
-                log.debug(OuterEnum,f'in {InnerEnum.__name__}.__init__(*{args},**{kwargs}) completed')
+                    setattr(attribute, VALUE_AS_STRING_KEY, str(value))
 
-            def __get__(self, enumItemOrEnumItemValue) :
+            @staticmethod
+            def map(enumItemOrEnumItemValue) :
                 log.debug(OuterEnum,f'''enumItemOrEnumItemValue={enumItemOrEnumItemValue}''')
-                if EnumHelper.isEnumItem(enumItemOrEnumItemValue) :
+                if isEnumItem(enumItemOrEnumItemValue) :
                     originalClassAttributeValueList = [str(value) for value in Serializer.getAttributeNameList(OuterEnum)]
                     if enumItemOrEnumItemValue.value not in originalClassAttributeValueList :
                         __raiseBadImplementation__(enumItemOrEnumItemValue.value)
@@ -44,7 +50,7 @@ def Enum() :
                 else :
                     attributeList = [
                         attribute
-                        for attribute, value in FlaskManager.getAttributeDataList(self)
+                        for attribute, value in FlaskManager.getAttributeDataList(OuterEnum())
                         if attribute.value == enumItemOrEnumItemValue
                     ]
                     if not 1 == len(attributeList) :
