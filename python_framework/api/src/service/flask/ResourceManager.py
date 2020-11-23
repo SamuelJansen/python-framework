@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restful import Api
-from python_helper import Constant as c
+from python_helper import Constant as c, log
 from python_framework.api.src.annotation.MethodWrapper import Function
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.flask import FlaskManager
@@ -111,8 +111,8 @@ def initialize(
 
         addGlobalsTo(api)
         args = [api, app, baseUrl, jwt]
-        for kwResource in FlaskManager.KW_RESOURCE_LIST :
-            args.append(getResourceList(api,kwResource))
+        for resourceType in FlaskManager.KW_RESOURCE_LIST :
+            args.append(getResourceList(api,resourceType))
         args.append(refferenceModel)
         kwargs = {
             'databaseEnvironmentVariable' : databaseEnvironmentVariable,
@@ -148,11 +148,13 @@ def addControllerListTo(apiInstance, controllerList) :
 
 @Function
 def addServiceListTo(apiInstance,serviceList) :
+    log.debug(addServiceListTo, serviceList)
     for service in serviceList :
         apiInstance.bindResource(apiInstance,service())
 
 @Function
 def addClientListTo(apiInstance,clientList) :
+    log.debug(addClientListTo, clientList)
     for client in clientList :
         apiInstance.bindResource(apiInstance,client())
 

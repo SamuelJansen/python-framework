@@ -103,18 +103,18 @@ def getArgsWithResponseClassInstanceAppended(args, responseClass) :
 def getResourceFinalName(resourceInstance, resourceName=None) :
     if not resourceName :
         resourceName = resourceInstance.__class__.__name__
-    for kwAsset in KW_RESOURCE_LIST :
-        if kwAsset in resourceName :
-            resourceName = resourceName.replace(kwAsset, c.NOTHING)
+    for resourceType in KW_RESOURCE_LIST :
+        if resourceType in resourceName :
+            resourceName = resourceName.replace(resourceType, c.NOTHING)
     return f'{resourceName[0].lower()}{resourceName[1:]}'
 
 @Function
 def getResourceType(resourceInstance, resourceName = None) :
     if not resourceName :
         resourceName = resourceInstance.__class__.__name__
-    for kwAsset in KW_RESOURCE_LIST :
-        if kwAsset in resourceName :
-            return kwAsset
+    for resourceType in KW_RESOURCE_LIST :
+        if resourceName.endswith(resourceType):
+            return resourceType
 
 @Function
 def getAttributePointerList(object) :
@@ -209,6 +209,7 @@ def validateResponseClass(responseClass, controllerResponse) :
 @Function
 def setResource(apiInstance, resourceInstance, resourceName=None) :
     resourceName = getResourceFinalName(resourceInstance, resourceName=resourceName)
+    log.debug(setResource, f'resourceInstance={resourceInstance}, resourceName={resourceName}')
     setattr(apiInstance,resourceName,resourceInstance)
 
 @Function
