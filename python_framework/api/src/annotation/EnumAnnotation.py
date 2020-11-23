@@ -54,10 +54,15 @@ def Enum() :
                         if attribute.value == enumItemOrEnumItemValue
                     ]
                     if not 1 == len(attributeList) :
-                        __raiseBadImplementation__(enumItemOrEnumItemValue.value)
+                        __raiseBadImplementation__(enumItemOrEnumItemValue)
                     return attributeList[0]
-                __raiseBadImplementation__(enumItemOrEnumItemValue.value)
-
+                try :
+                    __raiseBadImplementation__(enumItemOrEnumItemValue.value)
+                except :
+                    try :
+                        __raiseBadImplementation__(enumItemOrEnumItemValue)
+                    except :
+                        __raiseBadImplementation__('NOT_POSSIBLE_TO_EXTRACT_THE_VALUE')
         MethodWrapper.overrideSignatures(InnerEnum, OuterEnum)
         return InnerEnum
     return Wrapper

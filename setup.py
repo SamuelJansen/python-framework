@@ -1,7 +1,7 @@
 from distutils.core import setup
 import os, site
 
-VERSION = '0.1.6'
+VERSION = '0.1.7'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
