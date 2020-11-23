@@ -5,6 +5,11 @@ from python_framework.api.src.helper import Serializer
 
 VALUE_AS_STRING_KEY = 'value'
 
+MAP_METHOD_NAME = 'map'
+ENUM_METHOD_NAME_LIST = [
+    MAP_METHOD_NAME
+]
+
 class EnumClass(object) :
     ...
 
@@ -35,7 +40,7 @@ def Enum() :
                 OuterEnum.__init__(self,*args,**kwargs)
                 attributeDataList = FlaskManager.getAttributeDataList(self)
                 for attribute, value in attributeDataList :
-                    if not 'map' == value and value not in originalClassAttributeValueList :
+                    if value not in ENUM_METHOD_NAME_LIST and value not in originalClassAttributeValueList :
                         __raiseBadImplementation__(value)
                     setattr(attribute, VALUE_AS_STRING_KEY, str(value))
 
@@ -46,16 +51,18 @@ def Enum() :
                     originalClassAttributeValueList = [str(value) for value in Serializer.getAttributeNameList(OuterEnum)]
                     if enumItemOrEnumItemValue.value not in originalClassAttributeValueList :
                         __raiseBadImplementation__(enumItemOrEnumItemValue.value)
-                        return enumItemOrEnumItemValue
+                    return enumItemOrEnumItemValue
                 else :
                     attributeList = [
                         attribute
                         for attribute, value in FlaskManager.getAttributeDataList(OuterEnum())
                         if attribute.value == enumItemOrEnumItemValue
                     ]
-                    if not 1 == len(attributeList) :
-                        __raiseBadImplementation__(enumItemOrEnumItemValue)
-                    return attributeList[0]
+                    if 0 == len(attributeList) :
+                        return None
+                    if 1 == len(attributeList) :
+                        return attributeList[0]
+                    __raiseBadImplementation__(enumItemOrEnumItemValue)
                 try :
                     __raiseBadImplementation__(enumItemOrEnumItemValue.value)
                 except :
