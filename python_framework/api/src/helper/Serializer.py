@@ -143,16 +143,13 @@ def jsonifyIt(object, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
 def instanciateItWithNoArgsConstructor(objectClass) :
     args = []
     objectInstance = None
-    try :
-        objectInstance = objectClass()
-    except :
-        for ammountOfVariables in range(60) :
-            try :
-                objectInstance = objectClass(*args)
-                break
-            except :
-                args.append(None)
-    if not objectInstance :
+    for ammountOfVariables in range(60) :
+        try :
+            objectInstance = objectClass(*args)
+            break
+        except :
+            args.append(None)
+    if not isinstance(objectInstance, objectClass) :
         raise Exception(f'Not possible to instanciate {objectClass} class in instanciateItWithNoArgsConstructor() method with None as args constructor')
     return objectInstance
 
