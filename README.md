@@ -1,4 +1,4 @@
-# python_framework - v0.1.0-05 - stable for python3.8
+# python_framework - current on v0.1.8-2 - stable for python3.8 
 Basically, its a Flask wrapper
 
 It alters Flask behaviours in order to make APIs better organized.
@@ -102,7 +102,9 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 - [FeatureManager API](https://github.com/SamuelJansen/FeatureManager "FeatureManager API")
 - [WebkookBoot API](https://github.com/SamuelJansen/WebkookBoot "WebkookBoot API")
 
-## Notes - v0.1.0-05 - stable for python3.8
+## Notes - stable for python3.8
+### - v0.1.0-05 
+### - v0.1.8-2
 - Of course it's open source
 - If you don't follow package pattern, it wont happens
 - I just hate OS environments lose all over the project. That's why I made Globals.py, so we can centralize it in there. Unfortnatelly, `globals` module isn't perfect yet. That's my next goal
@@ -114,4 +116,4 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 - `python_framework` comes with a LogError table by default (an auditory like stuff for api errors or bad behaviours). Contact me if you don't want it, so I'll release a feature to enable it only when it's actually desired
 - Any issues with deploy, contact me so I can fix it
 - I may release further versions. Don't use them before a proper release here
-- Of course this wrapper may has bugs. Whenever you find one, issue it here. So I can fix it and make it better :D
+- Of course this wrapper may have bugs. Whenever you find one, issue it here. So I can fix it and make it better :D
