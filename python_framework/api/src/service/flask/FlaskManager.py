@@ -146,7 +146,7 @@ def setMethod(resourceInstance, newMethod, methodName = None) :
     setattr(resourceInstance, methodName, newMethod)
     return resourceInstance
 
-@Function
+@FunctionThrough
 def getGlobals() :
     try :
         from app import globals
@@ -154,7 +154,7 @@ def getGlobals() :
         raise Exception('Failed to get "globals" instance from app.py')
     return globals
 
-@Function
+@FunctionThrough
 def getApi() :
     try:
         api = getGlobals().api
@@ -162,7 +162,7 @@ def getApi() :
         raise Exception(f'Failed to return api from "globals" instance. Cause: {str(exception)}')
     return api
 
-@Function
+@FunctionThrough
 def getNullableApi() :
     try :
         api = getApi()
@@ -209,7 +209,6 @@ def validateResponseClass(responseClass, controllerResponse) :
 @Function
 def setResource(apiInstance, resourceInstance, resourceName=None) :
     resourceName = getResourceFinalName(resourceInstance, resourceName=resourceName)
-    log.debug(setResource, f'resourceInstance={resourceInstance}, resourceName={resourceName}')
     setattr(apiInstance,resourceName,resourceInstance)
 
 @Function
@@ -292,13 +291,14 @@ def getRequestBodyAsJson(contentType) :
 
 @FunctionThrough
 @Security.jwtRequired
-def securedMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logBodyRequest) :
+def securedControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logBodyRequest) :
     if not Security.getRole() in roleRequired :
         raise GlobalException.GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDEN)
-    return notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest)
+    return publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest)
+
 
 @FunctionThrough
-def notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest) :
+def publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest) :
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType)
         if logBodyRequest :
@@ -306,7 +306,10 @@ def notSecuredMethod(args, kwargs, contentType, resourceInstance, resourceInstan
         if  isPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(serializerReturn, args, isControllerMethod=True)
-    return resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
+    response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
+    if response and Serializer.isList(response) and 2 == len(response)
+        return response
+    raise GlobalException.GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
 
 @Function
 def ControllerMethod(
@@ -334,9 +337,9 @@ def ControllerMethod(
             resourceInstance = args[0]
             try :
                 if roleRequired and (type(list()) == type(roleRequired) and not [] == roleRequired) :
-                    completeResponse = securedMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logBodyRequest)
+                    completeResponse = securedControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logBodyRequest)
                 else :
-                    completeResponse = notSecuredMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest)
+                    completeResponse = publicControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest)
                 validateResponseClass(responseClass, completeResponse[0])
 
             except Exception as exception :

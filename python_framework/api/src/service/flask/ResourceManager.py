@@ -144,17 +144,16 @@ def addControllerListTo(apiInstance, controllerList) :
                 #             if not newUrl in urlList :
                 #                 urlList.append(newUrl)
                 OpenApiManager.addEndPointDocumentation(controllerUrl, controllerMethod, controller, apiInstance)
+        log.debug(addControllerListTo, f'{controller.url} -> {urlList}')
         apiInstance.add_resource(controller, *urlList)
 
 @Function
 def addServiceListTo(apiInstance,serviceList) :
-    log.debug(addServiceListTo, serviceList)
     for service in serviceList :
         apiInstance.bindResource(apiInstance,service())
 
 @Function
 def addClientListTo(apiInstance,clientList) :
-    log.debug(addClientListTo, clientList)
     for client in clientList :
         apiInstance.bindResource(apiInstance,client())
 

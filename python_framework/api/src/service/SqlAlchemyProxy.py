@@ -70,8 +70,8 @@ def getManyToMany(sister, brother, refferenceModel) :
     # featureList = relationship(FEATURE, secondary=featureToSampleAssociation, back_populates=attributeIt(f'{__tablename__}{LIST}'))
     # sampleList = relationship(SAMPLE, secondary=featureToSampleAssociation, back_populates=attributeIt(f'{__tablename__}{LIST}'))
     manySisterToManyBrother = Table(f'{sister}{MANY_TO_MANY}{brother}', refferenceModel.metadata,
-        Column(f'{attributeIt(sister)}{ID}', Integer, ForeignKey(f'{sister}.{attributeIt(ID)}')),
-        Column(f'{attributeIt(brother)}{ID}', Integer, ForeignKey(f'{brother}.{attributeIt(ID)}')))
+        Column(f'{attributeIt(sister)}{ID}', Integer(), ForeignKey(f'{sister}.{attributeIt(ID)}')),
+        Column(f'{attributeIt(brother)}{ID}', Integer(), ForeignKey(f'{brother}.{attributeIt(ID)}')))
     sisterList = relationship(sister, secondary=manySisterToManyBrother, back_populates=attributeIt(f'{brother}{LIST}'))
     brotherList = relationship(brother, secondary=manySisterToManyBrother, back_populates=attributeIt(f'{sister}{LIST}'))
     ### sister recieves the brotherList
@@ -89,16 +89,15 @@ def getManyToOne(pet, owner, refferenceModel) :
     return owner, ownerId
 
 @Function
-def getOneToOne(woman, man, refferenceModel) :
-    manId = Column(Integer(), ForeignKey(f'{man}.{attributeIt(ID)}'))
-    manList = relationship(man, back_populates=attributeIt(woman), uselist=False)
-    return manId, manList
+def getOneToOneParent(parent, child, refferenceModel) :
+    childAttribute = relationship(child, uselist=False, back_populates=attributeIt(parent))
+    return childAttribute
 
 @Function
-def getOneToOne__forDebug(man, woman, refferenceModel) :
-    womanId = Column(Integer(), ForeignKey(f'{woman}.{attributeIt(ID)}'))
-    womanList = relationship(woman, back_populates=attributeIt(man))
-    return womanId, womanList
+def getOneToOneChild(child, parent, refferenceModel) :
+    parentId = Column(Integer(), ForeignKey(f'{parent}.{attributeIt(ID)}'))
+    parentAttribute = relationship(parent, back_populates=attributeIt(child))
+    return parentAttribute, parentId
 
 class SqlAlchemyProxy:
 

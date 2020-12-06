@@ -1,8 +1,18 @@
 import json, importlib
 from python_helper import Constant as c
 from python_helper import StringHelper, log
-from python_framework.api.src.annotation.MethodWrapper import Function
+from python_framework.api.src.annotation.MethodWrapper import Function, FunctionThrough
 from python_framework.api.src.service.SqlAlchemyProxy import DeclarativeMeta, InstrumentedList
+
+GENERATOR_CLASS_NAME = 'generator'
+UNKNOWN_OBJECT_CLASS_NAME = 'unknown'
+
+METADATA_NAME = 'metadata'
+
+NOT_SERIALIZABLE_CLASS_NAME_LIST = [
+    GENERATOR_CLASS_NAME,
+    UNKNOWN_OBJECT_CLASS_NAME
+]
 
 UTF8_ENCODE = 'utf8'
 
@@ -52,18 +62,6 @@ MESO_SUFIX_LIST = [
 ]
 
 @Function
-def isList(thing) :
-    return type([]) == type(thing) or type(InstrumentedList()) == type(thing)
-
-@Function
-def isDictionary(thing) :
-    return isDictionaryClass(type(thing))
-
-@Function
-def isDictionaryClass(thing) :
-    return type({}) == thing
-
-@Function
 def importResource(resourceName, resourceModuleName=None) :
     if not resourceName in IGNORE_REOURCE_LIST :
         resource = None
@@ -85,25 +83,79 @@ def importResource(resourceName, resourceModuleName=None) :
                 log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module. cause: {str(exception)}')
             return resource
 
-@Function
-def isSerializable(attributeValue) :
-    return (isinstance(attributeValue.__class__, DeclarativeMeta) or
-        (isinstance(attributeValue, list) and len(attributeValue) > 0 and isinstance(attributeValue[0].__class__, DeclarativeMeta)))
+@FunctionThrough
+def isList(thing) :
+    return type([]) == type(thing) or type(InstrumentedList()) == type(thing)
 
-@Function
-def getAttributeSet(object, fieldsToExpand, classTree, verifiedClassList) :
+@FunctionThrough
+def isDictionary(thing) :
+    return isDictionaryClass(type(thing))
+
+@FunctionThrough
+def isDictionaryClass(thingClass) :
+    return type({}) == thingClass
+
+
+@FunctionThrough
+def notNone(object) :
+    return object or isDictionary(object) or isList(object)
+
+@FunctionThrough
+def isNotNativeClassIsntance(object) :
+    return object.__class__ not in [
+        int,
+        str,
+        float,
+        dict,
+        list,
+        tuple,
+        set
+    ] and not isList(object)
+
+@FunctionThrough
+def isNotMethodInstance(object) :
+    return object.__class__.__name__ not in [
+        'method',
+        'builtin_function_or_method'
+    ]
+
+@FunctionThrough
+def getTypeName(thingInstance) :
+    if not type(type) == type(thingInstance) :
+        return type(thingInstance).__name__
+    log.debug(getTypeName, f'Not possible to get object type name')
+    return UNKNOWN_OBJECT_CLASS_NAME
+
+@FunctionThrough
+def isJsonifyable(thing) :
+    return getTypeName(thing) not in NOT_SERIALIZABLE_CLASS_NAME_LIST
+
+@FunctionThrough
+def isModel(thing) :
+    return (
+        isinstance(thing.__class__, DeclarativeMeta) or (
+            isinstance(thing, list) and len(thing) > 0 and isinstance(thing[0].__class__, DeclarativeMeta)
+        )
+    )
+
+@FunctionThrough
+def isModelClass(thingClass) :
+    return isinstance(thingClass, DeclarativeMeta)
+
+@FunctionThrough
+def getAttributeSet(object, fieldsToExpand, classTree) :
     attributeSet = {}
     presentClass = object.__class__.__name__
     if presentClass not in classTree :
         classTree[presentClass] = [object]
     elif classTree[presentClass].count(object) < 2 :
         classTree[presentClass].append(object)
-    for attributeName in [name for name in dir(object) if not name.startswith(c.UNDERSCORE) and not name == 'metadata']:
+    for attributeName in [name for name in dir(object) if not name.startswith(c.UNDERSCORE) and not name == METADATA_NAME]:
         attributeValue = object.__getattribute__(attributeName)
         if classTree[presentClass].count(object) > 1 :
             attributeSet[attributeName] = None
             continue
-        if isSerializable(attributeValue) :
+        if isModel(attributeValue) :
             if attributeName not in fieldsToExpand :
                 if EXPAND_ALL_FIELDS not in fieldsToExpand :
                     attributeSet[attributeName] = None
@@ -111,35 +163,79 @@ def getAttributeSet(object, fieldsToExpand, classTree, verifiedClassList) :
         attributeSet[attributeName] = attributeValue
     return attributeSet
 
-@Function
-def getJsonifier(revisitingItself=False, fieldsToExpand=[EXPAND_ALL_FIELDS], classTree=None, verifiedClassList=None):
-    visitedObjectList = []
-    class SqlAlchemyJsonifier(json.JSONEncoder):
-        def default(self, object):
-            if isinstance(object.__class__, DeclarativeMeta) :
-                if revisitingItself :
-                    if object in visitedObjectList:
-                        return
-                    visitedObjectList.append(object)
-                if object.__class__.__name__ in classTree and classTree[object.__class__.__name__].count(object) > 0 :
-                    return
-                return getAttributeSet(object, fieldsToExpand, classTree, verifiedClassList)
-            try :
-                objectEncoded = json.JSONEncoder.default(self, object)
-            except Exception as exception :
-                try :
-                    objectEncoded = object.__dict__
-                except Exception as otherException :
-                    raise Exception(f'Failed to encode object. Cause {str(exception)} and {str(otherException)}')
-            return objectEncoded
-    return SqlAlchemyJsonifier
+# @FunctionThrough
+# def getJsonifier(revisitingItself=False, fieldsToExpand=[EXPAND_ALL_FIELDS], classTree=None):
+#     class SqlAlchemyJsonifier(json.JSONEncoder):
+#         def default(self, object):
+#             if isinstance(object.__class__, DeclarativeMeta) :
+#                 # if revisitingItself :
+#                 #     if object in verifiedInstanceList:
+#                 #         return
+#                 #     verifiedInstanceList.append(object)
+#                 if object.__class__.__name__ in classTree and classTree[object.__class__.__name__].count(object) > 0 :
+#                     return
+#                 return getAttributeSet(object, fieldsToExpand, classTree)
+#             try :
+#                 objectEncoded = json.JSONEncoder.default(self, object)
+#             except Exception as exception :
+#                 try :
+#                     objectEncoded = object.__dict__
+#                 except Exception as otherException :
+#                     raise Exception(f'Failed to encode object. Cause {str(exception)} and {str(otherException)}')
+#             return objectEncoded
+#     return SqlAlchemyJsonifier
+
+@FunctionThrough
+def getObjectAsDictionary(object, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedInstances=[]) :
+    # print()
+    # print()
+    # print()
+    # print(f'object.__class__.__name__ : {object.__class__.__name__}')
+    if object not in visitedInstances :
+        jsonInstance = {}
+        innerVisitedInstances = visitedInstances.copy()
+        innerVisitedInstances.append(object)
+        # print(f'object.__class__ = {object.__class__}')
+        # print(f'object.__class__.__name__ = {object.__class__.__name__}')
+        # InstrumentedList
+        atributeNameList = getAttributeNameList(object.__class__)
+        # print(f'atributeNameList = {atributeNameList}')
+        # print()
+        # print(f'atributeNameList : {atributeNameList}')
+        for attributeName in atributeNameList :
+            attributeValue = getattr(object, attributeName)
+            # print('     ' + attributeName + ' : ' + str(attributeValue))
+            # print('     ' + f'type({attributeName}) :' + str(type(attributeValue)))
+            # print(f'attributeValue = {attributeValue}')
+            # print(f'attributeValue.__class__ = {attributeValue.__class__}')
+            # print(f'attributeValue.__class__.__name__ = {attributeValue.__class__.__name__}')
+            if isNotNativeClassIsntance(attributeValue) :
+                if isNotMethodInstance(attributeValue) and notNone(attributeValue) :
+                    jsonInstance[attributeName] = getObjectAsDictionary(attributeValue, visitedInstances=innerVisitedInstances)
+                else :
+                    jsonInstance[attributeName] = None
+            elif isList(attributeValue) :
+                attributeValueList = []
+                for innerObject in attributeValue :
+                    innerAttributeValue = getObjectAsDictionary(innerObject, visitedInstances=innerVisitedInstances)
+                    if notNone(innerAttributeValue) :
+                        attributeValueList.append(innerAttributeValue)
+                jsonInstance[attributeName] = attributeValueList
+            else :
+                jsonInstance[attributeName] = attributeValue
+        # print(jsonInstance)
+        return jsonInstance
 
 @Function
 def jsonifyIt(object, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
-    jsonCompleted = json.dumps(object, cls=getJsonifier(classTree={}, verifiedClassList=[]), check_circular = False)
-    return jsonCompleted.replace('}, null]','}]').replace('[null]','[]')
+    if isJsonifyable(object) :
+        # jsonCompleted = json.dumps(object, cls=getJsonifier(classTree={}), check_circular = False)
+        # return jsonCompleted.replace('}, null]','}]').replace('[null]','[]')
+        return json.dumps(getObjectAsDictionary(object), check_circular = False)
+    # log.debug(jsonifyIt, f'Not jsonifiable object. Type: {getTypeName(object)}')
+    return object
 
-@Function
+@FunctionThrough
 def instanciateItWithNoArgsConstructor(objectClass) :
     args = []
     objectInstance = None
@@ -159,10 +255,14 @@ def getAttributeNameList(objectClass) :
     return [
         objectAttributeName
         for objectAttributeName in dir(object)
-        if (not objectAttributeName.startswith(f'{2 * c.UNDERSCORE}') and not objectAttributeName.startswith(c.UNDERSCORE))
+        if objectAttributeName and (
+            not objectAttributeName.startswith(f'{2 * c.UNDERSCORE}') and
+            not objectAttributeName.startswith(c.UNDERSCORE) and
+            not METADATA_NAME == objectAttributeName
+        )
     ]
 
-@Function
+@FunctionThrough
 def getClassRole(objectClass) :
     if DTO_SUFIX == objectClass.__name__[-len(DTO_SUFIX):] :
         sufixList = [str(DTO_CLASS_ROLE)]
@@ -174,17 +274,18 @@ def getClassRole(objectClass) :
         return c.UNDERSCORE.join(sufixList)
     return MODEL_CLASS_ROLE
 
+@FunctionThrough
 def getDtoClassFromFatherClassAndChildMethodName(fatherClass, childAttributeName):
     classRole = getClassRole(fatherClass)
     dtoClassName = getResourceName(childAttributeName, classRole)
     dtoModuleName  = getResourceModuleName(childAttributeName, classRole)
     return importResource(dtoClassName, resourceModuleName=dtoModuleName)
 
-@Function
+@FunctionThrough
 def getListRemovedFromKey(key) :
     return key.replace(LIST_SUFIX, c.NOTHING)
 
-@Function
+@FunctionThrough
 def getResourceName(key, classRole) :
     filteredKey = getListRemovedFromKey(key)
     resourceName = f'{filteredKey[0].upper()}{filteredKey[1:]}'
@@ -195,7 +296,7 @@ def getResourceName(key, classRole) :
                 resourceName += f'{sufix[0].upper()}{sufix[1:]}'
     return resourceName
 
-@Function
+@FunctionThrough
 def getResourceModuleName(key, classRole) :
     filteredKey = getListRemovedFromKey(key)
     resourceModuleName = f'{filteredKey[0].upper()}{filteredKey[1:]}'
@@ -203,7 +304,7 @@ def getResourceModuleName(key, classRole) :
         resourceModuleName += DTO_SUFIX
     return resourceModuleName
 
-@Function
+@FunctionThrough
 def resolveValue(value, key, classRole) :
     if isList(value) :
         if LIST_SUFIX == key[-4:] :
