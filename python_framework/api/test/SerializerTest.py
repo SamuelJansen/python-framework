@@ -17,6 +17,12 @@ class MyAttributeClass :
         self.myClass = myClass
         self.myNeutralClassAttribute = 'someOtherString'
 
+MY_DICTIONARY = {
+    'myString' : 'myValue',
+    'myInteger' : 0,
+    'myFloat' : 0.099
+}
+
 MODEL = sap.getNewModel()
 
 class MyEntityClass(MODEL) :
@@ -58,6 +64,8 @@ def Serializer_isJsonifyable() :
     log.debug(Serializer_isJsonifyable, 'Success')
 
 def Serializer_jsonifyIt() :
+    assert '{"myString": "myValue", "myInteger": 0, "myFloat": 0.099}' == jsonifyIt(MY_DICTIONARY)
+
     myGenerator = generatorFunction()
     assert myGenerator == jsonifyIt(myGenerator)
     assert '{"myAttribute": null, "myNeutralAttribute": "someString"}' == jsonifyIt(MyClass())
@@ -104,28 +112,10 @@ def Serializer_jsonifyIt() :
     assert '{"brother": {"child": null, "father": {"brotherList": [], "childList": [], "id": 4}, "fatherId": 4, "id": 3}, "brotherId": 3, "father": {"brotherList": [{"child": {"brother": null, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}, "father": null, "fatherId": 1, "id": 5}], "childList": [{"brother": {"child": null, "father": null, "fatherId": 1, "id": 5}, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}], "id": 1}, "fatherId": 1, "id": 2}' == jsonifyIt(child)
     assert '{"brotherList": [{"child": {"brother": null, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}, "father": null, "fatherId": 1, "id": 5}], "childList": [{"brother": {"child": null, "father": {"brotherList": [], "childList": [], "id": 4}, "fatherId": 4, "id": 3}, "brotherId": 3, "father": null, "fatherId": 1, "id": 2}, {"brother": {"child": null, "father": null, "fatherId": 1, "id": 5}, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}], "id": 1}' == jsonifyIt(father)
 
-
-    from python_helper import StringHelper
-    import json
-
-class MyClass :
-    def __init__(self, myAttribute=None):
-        self.myAttribute = myAttribute
-        self.myNeutralAttribute = 'someString'
-
-class MyAttributeClass :
-    def __init__(self, myClass=None):
-        self.myClass = myClass
-        self.myNeutralClassAttribute = 'someOtherString'
-
-
-    # print(StringHelper.stringfyThisDictionary(json.loads(jsonifyIt(child))))
-
     myClass = MyClass()
     myAttributeClass =  MyAttributeClass(myClass=myClass)
     myClass.myAttribute = myAttributeClass
     assert '{"myAttribute": {"myClass": null, "myNeutralClassAttribute": "someOtherString"}, "myNeutralAttribute": "someString"}' == jsonifyIt(myClass)
-    # # assert 'someOtherString' == jsonifyIt(myClass.myAttributeClass)
     assert '{"myClass": {"myAttribute": null, "myNeutralAttribute": "someString"}, "myNeutralClassAttribute": "someOtherString"}' == jsonifyIt(myClass.myAttribute)
 
     log.debug(Serializer_jsonifyIt, 'Success')

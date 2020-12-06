@@ -95,28 +95,40 @@ def isDictionary(thing) :
 def isDictionaryClass(thingClass) :
     return type({}) == thingClass
 
+@FunctionThrough
+def isNone(object) :
+    not notNone(object)
 
 @FunctionThrough
 def notNone(object) :
     return object or isDictionary(object) or isList(object)
 
 @FunctionThrough
-def isNotNativeClassIsntance(object) :
-    return object.__class__ not in [
+def isNativeClassIsntance(object) :
+    return object.__class__ in [
         int,
         str,
-        float,
-        dict,
-        list,
-        tuple,
-        set
-    ] and not isList(object)
+        float
+    ]
+
+@FunctionThrough
+def isNotNativeClassIsntance(object) :
+    return not isNativeClassIsntance(object)
 
 @FunctionThrough
 def isNotMethodInstance(object) :
     return object.__class__.__name__ not in [
         'method',
         'builtin_function_or_method'
+    ]
+
+@FunctionThrough
+def isCollection(object) :
+    return object.__class__ in [
+        list,
+        dict,
+        tuple,
+        set
     ]
 
 @FunctionThrough
@@ -142,26 +154,26 @@ def isModel(thing) :
 def isModelClass(thingClass) :
     return isinstance(thingClass, DeclarativeMeta)
 
-@FunctionThrough
-def getAttributeSet(object, fieldsToExpand, classTree) :
-    attributeSet = {}
-    presentClass = object.__class__.__name__
-    if presentClass not in classTree :
-        classTree[presentClass] = [object]
-    elif classTree[presentClass].count(object) < 2 :
-        classTree[presentClass].append(object)
-    for attributeName in [name for name in dir(object) if not name.startswith(c.UNDERSCORE) and not name == METADATA_NAME]:
-        attributeValue = object.__getattribute__(attributeName)
-        if classTree[presentClass].count(object) > 1 :
-            attributeSet[attributeName] = None
-            continue
-        if isModel(attributeValue) :
-            if attributeName not in fieldsToExpand :
-                if EXPAND_ALL_FIELDS not in fieldsToExpand :
-                    attributeSet[attributeName] = None
-                    continue
-        attributeSet[attributeName] = attributeValue
-    return attributeSet
+# @FunctionThrough
+# def getAttributeSet(object, fieldsToExpand, classTree) :
+#     attributeSet = {}
+#     presentClass = object.__class__.__name__
+#     if presentClass not in classTree :
+#         classTree[presentClass] = [object]
+#     elif classTree[presentClass].count(object) < 2 :
+#         classTree[presentClass].append(object)
+#     for attributeName in [name for name in dir(object) if not name.startswith(c.UNDERSCORE) and not name == METADATA_NAME]:
+#         attributeValue = object.__getattribute__(attributeName)
+#         if classTree[presentClass].count(object) > 1 :
+#             attributeSet[attributeName] = None
+#             continue
+#         if isModel(attributeValue) :
+#             if attributeName not in fieldsToExpand :
+#                 if EXPAND_ALL_FIELDS not in fieldsToExpand :
+#                     attributeSet[attributeName] = None
+#                     continue
+#         attributeSet[attributeName] = attributeValue
+#     return attributeSet
 
 # @FunctionThrough
 # def getJsonifier(revisitingItself=False, fieldsToExpand=[EXPAND_ALL_FIELDS], classTree=None):
@@ -187,44 +199,34 @@ def getAttributeSet(object, fieldsToExpand, classTree) :
 
 @FunctionThrough
 def getObjectAsDictionary(object, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedInstances=[]) :
-    # print()
-    # print()
-    # print()
-    # print(f'object.__class__.__name__ : {object.__class__.__name__}')
+    if isNativeClassIsntance(object) or isNone(object) :
+        return object
     if object not in visitedInstances :
-        jsonInstance = {}
         innerVisitedInstances = visitedInstances.copy()
-        innerVisitedInstances.append(object)
-        # print(f'object.__class__ = {object.__class__}')
-        # print(f'object.__class__.__name__ = {object.__class__.__name__}')
-        # InstrumentedList
-        atributeNameList = getAttributeNameList(object.__class__)
-        # print(f'atributeNameList = {atributeNameList}')
-        # print()
-        # print(f'atributeNameList : {atributeNameList}')
-        for attributeName in atributeNameList :
-            attributeValue = getattr(object, attributeName)
-            # print('     ' + attributeName + ' : ' + str(attributeValue))
-            # print('     ' + f'type({attributeName}) :' + str(type(attributeValue)))
-            # print(f'attributeValue = {attributeValue}')
-            # print(f'attributeValue.__class__ = {attributeValue.__class__}')
-            # print(f'attributeValue.__class__.__name__ = {attributeValue.__class__.__name__}')
-            if isNotNativeClassIsntance(attributeValue) :
-                if isNotMethodInstance(attributeValue) and notNone(attributeValue) :
+        if isDictionary(object) :
+            for key,value in object.items() :
+                object[key] = getObjectAsDictionary(value, visitedInstances=innerVisitedInstances)
+            return object
+        elif isList(object) or type(tuple()) == type(object) or type(set()) == type(object) :
+            objectValueList = []
+            for innerObject in object :
+                innerAttributeValue = getObjectAsDictionary(innerObject, visitedInstances=innerVisitedInstances)
+                if notNone(innerAttributeValue) :
+                    objectValueList.append(innerAttributeValue)
+            return objectValueList
+        else :
+            jsonInstance = {}
+            innerVisitedInstances.append(object)
+            InstrumentedList
+            atributeNameList = getAttributeNameList(object.__class__)
+            for attributeName in atributeNameList :
+                attributeValue = getattr(object, attributeName)
+                if isNotMethodInstance(attributeValue):
                     jsonInstance[attributeName] = getObjectAsDictionary(attributeValue, visitedInstances=innerVisitedInstances)
                 else :
                     jsonInstance[attributeName] = None
-            elif isList(attributeValue) :
-                attributeValueList = []
-                for innerObject in attributeValue :
-                    innerAttributeValue = getObjectAsDictionary(innerObject, visitedInstances=innerVisitedInstances)
-                    if notNone(innerAttributeValue) :
-                        attributeValueList.append(innerAttributeValue)
-                jsonInstance[attributeName] = attributeValueList
-            else :
-                jsonInstance[attributeName] = attributeValue
-        # print(jsonInstance)
-        return jsonInstance
+            if jsonInstance :
+                return jsonInstance
 
 @Function
 def jsonifyIt(object, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
