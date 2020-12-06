@@ -307,7 +307,7 @@ def publicControllerMethod(args, kwargs, contentType, resourceInstance, resource
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(serializerReturn, args, isControllerMethod=True)
     response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
-    if response and Serializer.isList(response) and 2 == len(response)
+    if response and Serializer.isList(response) and 2 == len(response) :
         return response
     raise GlobalException.GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
 
