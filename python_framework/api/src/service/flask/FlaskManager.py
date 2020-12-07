@@ -283,6 +283,8 @@ def getRequestBodyAsJson(contentType) :
     try :
         if OpenApiManager.DEFAULT_CONTENT_TYPE == contentType :
             requestBodyAsJson = request.get_json()
+        elif 'multipart/x-mixed-replace' in contentType :
+            requestBodyAsJson = request.get_data()
         else :
             raise Exception(f'Content type "{contentType}" not implemented')
     except Exception as exception :
@@ -291,17 +293,17 @@ def getRequestBodyAsJson(contentType) :
 
 @FunctionThrough
 @Security.jwtRequired
-def securedControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logBodyRequest) :
+def securedControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logRequest) :
     if not Security.getRole() in roleRequired :
         raise GlobalException.GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDEN)
-    return publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest)
+    return publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logRequest)
 
 
 @FunctionThrough
-def publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest) :
+def publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logRequest) :
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType)
-        if logBodyRequest :
+        if logRequest :
             log.debug(resourceInstanceMethod, f'"bodyRequest" : {Serializer.prettify(requestBodyAsJson)}')
         if  isPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
@@ -319,8 +321,8 @@ def ControllerMethod(
     roleRequired = None,
     consumes = OpenApiManager.DEFAULT_CONTENT_TYPE,
     produces = OpenApiManager.DEFAULT_CONTENT_TYPE,
-    logBodyRequest = False,
-    logBodyResponse = False
+    logRequest = False,
+    logResponse = False
 ):
     controllerMethodUrl = url
     controllerMethodRequestClass = requestClass
@@ -328,8 +330,8 @@ def ControllerMethod(
     controllerMethodRoleRequired = roleRequired
     controllerMethodProduces = produces
     controllerMethodConsumes = consumes
-    controllerMethodLogBodyRequest = logBodyRequest
-    controllerMethodLogBodyResponse = logBodyResponse
+    controllerMethodLogRequest = logRequest
+    controllerMethodLogResponse = logResponse
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
         noException = None
         log.debug(ControllerMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
@@ -337,9 +339,9 @@ def ControllerMethod(
             resourceInstance = args[0]
             try :
                 if roleRequired and (type(list()) == type(roleRequired) and not [] == roleRequired) :
-                    completeResponse = securedControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logBodyRequest)
+                    completeResponse = securedControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logRequest)
                 else :
-                    completeResponse = publicControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass, logBodyRequest)
+                    completeResponse = publicControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass, logRequest)
                 validateResponseClass(responseClass, completeResponse[0])
 
             except Exception as exception :
@@ -360,7 +362,7 @@ def ControllerMethod(
 
             controllerResponse = completeResponse[0]
             status = completeResponse[1]
-            if logBodyResponse :
+            if logResponse :
                 log.debug(innerResourceInstanceMethod, f'"bodyResponse" : {Serializer.prettify(controllerResponse)}')
             return jsonifyResponse(controllerResponse, produces, status)
         overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
@@ -370,8 +372,8 @@ def ControllerMethod(
         innerResourceInstanceMethod.roleRequired = controllerMethodRoleRequired
         innerResourceInstanceMethod.produces = controllerMethodProduces
         innerResourceInstanceMethod.consumes = controllerMethodConsumes
-        innerResourceInstanceMethod.logBodyRequest = controllerMethodLogBodyRequest
-        innerResourceInstanceMethod.logBodyResponse = controllerMethodLogBodyResponse
+        innerResourceInstanceMethod.logRequest = controllerMethodLogRequest
+        innerResourceInstanceMethod.logResponse = controllerMethodLogResponse
         return innerResourceInstanceMethod
     return innerMethodWrapper
 

@@ -4,6 +4,11 @@ from python_helper import StringHelper, log
 from python_framework.api.src.annotation.MethodWrapper import Function, FunctionThrough
 from python_framework.api.src.service.SqlAlchemyProxy import DeclarativeMeta, InstrumentedList
 
+def generatorInstance() :
+    while True :
+        yield False
+        break
+
 GENERATOR_CLASS_NAME = 'generator'
 UNKNOWN_OBJECT_CLASS_NAME = 'unknown'
 
@@ -12,6 +17,21 @@ METADATA_NAME = 'metadata'
 NOT_SERIALIZABLE_CLASS_NAME_LIST = [
     GENERATOR_CLASS_NAME,
     UNKNOWN_OBJECT_CLASS_NAME
+]
+
+NATIVE_CLASS_LIST = [
+    int,
+    str,
+    float,
+    bytes,
+    type(generatorInstance())
+]
+
+COLLECTION_CLASS_LIST = [
+    list,
+    dict,
+    tuple,
+    set
 ]
 
 UTF8_ENCODE = 'utf8'
@@ -105,11 +125,7 @@ def notNone(object) :
 
 @FunctionThrough
 def isNativeClassIsntance(object) :
-    return object.__class__ in [
-        int,
-        str,
-        float
-    ]
+    return object.__class__ in NATIVE_CLASS_LIST
 
 @FunctionThrough
 def isNotNativeClassIsntance(object) :
@@ -124,12 +140,7 @@ def isNotMethodInstance(object) :
 
 @FunctionThrough
 def isCollection(object) :
-    return object.__class__ in [
-        list,
-        dict,
-        tuple,
-        set
-    ]
+    return object.__class__ in COLLECTION_CLASS_LIST
 
 @FunctionThrough
 def getTypeName(thingInstance) :
@@ -323,6 +334,8 @@ def resolveValue(value, key, classRole) :
 
 @Function
 def serializeIt(fromJson, toObjectClass) :
+    if isNativeClassIsntance(fromJson) and toObjectClass == fromJson.__class__ :
+        return fromJson
     attributeNameList = getAttributeNameList(toObjectClass)
     classRole = getClassRole(toObjectClass)
     # print(f'        classRole = {classRole}')
@@ -376,4 +389,6 @@ def convertFromObjectToObject(fromObject, toObjectClass) :
 
 @Function
 def prettify(objectAsDict) :
+    if isNativeClassIsntance(objectAsDict) :
+        return objectAsDict
     return StringHelper.stringfyThisDictionary(objectAsDict)
