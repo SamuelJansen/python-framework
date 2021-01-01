@@ -37,7 +37,7 @@ def getControllerNameList(controllerName) :
     controllerNameList = [controllerName]
     controllerNameList.append(f'{controllerName[:-len(FlaskManager.KW_CONTROLLER_RESOURCE)]}{Serializer.KW_BATCH}{FlaskManager.KW_CONTROLLER_RESOURCE}')
     # controllerNameList = [name for name in dir(__import__(controllerName)) if not name.startswith(c.UNDERSCORE)]
-    # return Serializer.getAttributeNameList(__import__(controllerName))
+    # return ReflectionHelper.getAttributeOrMethodNameList(__import__(controllerName))
     return controllerNameList
 
 @Function
@@ -216,7 +216,7 @@ def addFlaskApiResources(
         databaseEnvironmentVariable = None,
         localStorageName = None
     ) :
-    apiInstance.host = apiInstance.globals.getApiSetting('api.host')
+    apiInstance.host = apiInstance.globals.getSetting('api.host')
     apiInstance.baseUrl = baseUrl
     OpenApiManager.newDocumentation(apiInstance, appInstance)
     addResourceAttibutes(apiInstance)

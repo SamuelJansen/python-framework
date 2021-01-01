@@ -138,7 +138,7 @@ class SqlAlchemyProxy:
                 self.databaseUrl = os.environ.get(databaseEnvironmentVariable)
                 self.engine = create_engine(self.databaseUrl, echo=echo)
             except Exception as exception :
-                log.error(SqlAlchemyProxy, 'Not possible to parse database environment variable. proceeding to globals configuration', exception)
+                log.error(SqlAlchemyProxy, 'Not possible to parse database environment variable. Proceeding to globals configuration', exception)
 
         elif not self.databaseUrl :
             self.globalsConfiguration(localName,dialect,user,password,host,port,model,globals,echo,checkSameThread)
@@ -154,32 +154,32 @@ class SqlAlchemyProxy:
 
     def globalsConfiguration(self,localName,dialect,user,password,host,port,model,globals,echo,checkSameThread):
         if not dialect and globals :
-            self.dialect = globals.getApiSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_DIALECT}')
+            self.dialect = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_DIALECT}')
         else :
             self.dialect = dialect
 
         if not dialect and globals :
-            self.user = globals.getApiSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_USER}')
+            self.user = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_USER}')
         else :
             self.user = user
 
         if not dialect and globals :
-            self.password = globals.getApiSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_PASSWORD}')
+            self.password = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_PASSWORD}')
         else :
             self.password = password
 
         if not dialect and globals :
-            self.host = globals.getApiSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_HOST}')
+            self.host = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_HOST}')
         else :
             self.host = host
 
         if not dialect and globals :
-            self.port = globals.getApiSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_PORT}')
+            self.port = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_PORT}')
         else :
             self.port = port
 
         if localName == self.TOKEN_WITHOUT_NAME and globals :
-            databaseName = globals.getApiSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_DATABASE}')
+            databaseName = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_DATABASE}')
             if databaseName and not 'None' == databaseName :
                 self.name = databaseName
             else :

@@ -1,4 +1,4 @@
-from python_helper import log
+from python_helper import log, ReflectionHelper
 from python_framework.api.src.annotation import MethodWrapper
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.helper import Serializer
@@ -35,7 +35,7 @@ def Enum() :
         log.debug(Enum,f'''wrapping {OuterEnum.__name__}''')
         class InnerEnum(OuterEnum, EnumClass):
             def __init__(self,*args,**kwargs):
-                originalClassAttributeValueList = Serializer.getAttributeNameList(OuterEnum)
+                originalClassAttributeValueList = ReflectionHelper.getAttributeNameList(OuterEnum)
                 log.debug(OuterEnum,f'''originalClassAttributeValueList={originalClassAttributeValueList}''')
                 OuterEnum.__init__(self,*args,**kwargs)
                 attributeDataList = FlaskManager.getAttributeDataList(self)
@@ -48,7 +48,7 @@ def Enum() :
             def map(enumItemOrEnumItemValue) :
                 log.debug(OuterEnum,f'''enumItemOrEnumItemValue={enumItemOrEnumItemValue}''')
                 if isEnumItem(enumItemOrEnumItemValue) :
-                    originalClassAttributeValueList = [str(value) for value in Serializer.getAttributeNameList(OuterEnum)]
+                    originalClassAttributeValueList = [str(value) for value in ReflectionHelper.getAttributeNameList(OuterEnum)]
                     if enumItemOrEnumItemValue.value not in originalClassAttributeValueList :
                         __raiseBadImplementation__(enumItemOrEnumItemValue.value)
                     return enumItemOrEnumItemValue

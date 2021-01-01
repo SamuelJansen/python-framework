@@ -1,26 +1,25 @@
-Globals:
-    print-status: True
-    api:
-        name: FeatureManager
-        host: localhost:5000 ###- feature-dataset-manager.herokuapp.com ###-
-        schemes: [http] ###- [https] ###- [http, https] ###- [http] ###-
-        info:
-            title: Feature Manager
-            version: 0.0.1
-            description: This is an api that manage samples and its features. The main goal is to retrieve the best sample match given a set of features
-            terms-of-service: http://swagger.io/terms/
-            contact:
-                name: Samuel Jansen
-                email: samuel.jansenn@gmail.com
-            license:
-                name: Apache 2.0 / MIT License
-                url: http://www.apache.org/licenses/LICENSE-2.0.html
+print-status: True
+api:
+    name: FeatureManager
+    host: localhost:5000 ###- feature-dataset-manager.herokuapp.com ###-
+    schemes: [http] ###- [https] ###- [http, https] ###- [http] ###-
+    info:
+        title: Feature Manager
+        version: 0.0.1
+        description: This is an api that manage samples and its features. The main goal is to retrieve the best sample match given a set of features
+        terms-of-service: http://swagger.io/terms/
+        contact:
+            name: Samuel Jansen
+            email: samuel.jansenn@gmail.com
+        license:
+            name: Apache 2.0 / MIT License
+            url: http://www.apache.org/licenses/LICENSE-2.0.html
 
-        extension: yml
-        dependency:
-            update: False
-            list:
-                web: [globals,python_helper,Popen,Path,numpy,pywin32,sqlalchemy]
-        git:
-            force-upgrade-command: pip install --upgrade --force python_framework
-        static-package: AppData\Local\Programs\Python\Python38-32\statics
+    extension: yml
+    dependency:
+        update: False
+        list:
+            web: [globals,python_helper,Popen,Path,numpy,pywin32,sqlalchemy]
+    git:
+        force-upgrade-command: pip install --upgrade --force python_framework
+    static-package: AppData\Local\Programs\Python\Python38-32\statics

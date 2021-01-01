@@ -1,7 +1,7 @@
 from flask import send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
 from python_helper import Constant as c
-from python_helper import log, StringHelper
+from python_helper import log, StringHelper, ReflectionHelper, ObjectHelper
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.openapi.OpenApiKey import Key as k
 from python_framework.api.src.service.openapi.OpenApiValue import Value as v
@@ -91,18 +91,18 @@ def newDocumentation(apiInstance, appInstance):
 def addInfo(apiInstance):
     globals = apiInstance.globals
     apiInstance.documentation[k.INFO] = {
-        k.TITLE : globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_TITLE}'),
-        k.DESCRIPTION : globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_DESCRIPTION}'),
-        k.VERSION : globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_VERSION}'),
-        k.TERMS_OF_SERVICE : globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_TERMS_OF_SERVICE}')
+        k.TITLE : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_TITLE}'),
+        k.DESCRIPTION : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_DESCRIPTION}'),
+        k.VERSION : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_VERSION}'),
+        k.TERMS_OF_SERVICE : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_TERMS_OF_SERVICE}')
     }
     addContact(globals, apiInstance.documentation)
     addLisence(globals, apiInstance.documentation)
 
 def addHostAndBasePath(apiInstance, appInstance):
     globals = apiInstance.globals
-    apiInstance.documentation[k.HOST] = globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_HOST}')
-    apiInstance.documentation[k.SCHEMES] = globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_SCHEMES}')
+    apiInstance.documentation[k.HOST] = globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_HOST}')
+    apiInstance.documentation[k.SCHEMES] = globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_SCHEMES}')
     apiInstance.documentation[k.BASE_PATH] = apiInstance.baseUrl
     # completeUrl = appInstance.test_request_context().request.host_url[:-1] ###- request.remote_addr
     # apiInstance.documentation[k.HOST] = completeUrl.split(COLON_DOUBLE_BAR)[1]
@@ -144,14 +144,14 @@ def getTagByTagName(tagName, documentation):
 
 def addContact(globals, documentation):
     documentation[k.INFO][k.CONTACT] = {
-        k.NAME : globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_CONTACT}.{KW_NAME}'),
-        k.EMAIL : globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_CONTACT}.{KW_EMAIL}')
+        k.NAME : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_CONTACT}.{KW_NAME}'),
+        k.EMAIL : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_CONTACT}.{KW_EMAIL}')
     }
 
 def addLisence(globals, documentation):
     documentation[k.INFO][k.LICENSE] = {
-        k.NAME : globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_LICENSE}.{KW_NAME}'),
-        k.URL : globals.getApiSetting(f'{KW_API}.{KW_INFO}.{KW_LICENSE}.{KW_URL}')
+        k.NAME : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_LICENSE}.{KW_NAME}'),
+        k.URL : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_LICENSE}.{KW_URL}')
     }
 
 def addUrlIfNeeded(url, documentation):
@@ -249,7 +249,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                     documentation[k.DEFINITIONS][dtoName] = dtoClassDoc
                     dtoClassDoc[k.TYPE] = v.OBJECT
                     dtoClassDoc[k.PROPERTIES] = {}
-                    dtoClassDoc[k.REQUIRED] = Serializer.getAttributeNameList(dtoClass)
+                    dtoClassDoc[k.REQUIRED] = ReflectionHelper.getAttributeNameList(dtoClass)
                     for attributeName in dtoClassDoc[k.REQUIRED] :
                         attributeType = getTypeFromAttributeNameAndChildDtoClass(attributeName)
                         childDtoClass = getNullableChildDtoClass(attributeName, dtoClass,  verb, url, documentation)
@@ -313,7 +313,7 @@ def getRefferenceValue(name):
     return f'#/{k.DEFINITIONS}/{name}'
 
 def getDtoDocumentationName(objectClass) :
-    if Serializer.isDictionaryClass(objectClass) :
+    if ObjectHelper.isDictionaryClass(objectClass) :
         return JSON_OBJECT_NAME
     else:
         return objectClass.__name__

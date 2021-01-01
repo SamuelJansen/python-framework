@@ -32,7 +32,7 @@ def loadDocumentation(apiInstance):
 def overrideDocumentation(apiInstance):
     globals = apiInstance.globals
     try :
-        documentationAsString = StringHelper.stringfyThisDictionary(apiInstance.documentation)
+        documentationAsString = StringHelper.prettyJson(apiInstance.documentation)
         with open(getDocumentationFilePath(apiInstance), globals.OVERRIDE, encoding=globals.ENCODING) as documentationFile :
             documentationFile.write(documentationAsString)
     except Exception as exception :
