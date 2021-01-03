@@ -11,7 +11,8 @@ NOT_SERIALIZABLE_CLASS_NAME_LIST = [
 
 UTF8_ENCODE = 'utf8'
 
-IGNORE_REOURCE_LIST = [
+global IGNORE_REOURCE_LIST
+IGNORE_REOURCE_LIST += [
     'FlaskManager',
     'MethodWrapper',
     'ResourceManager',

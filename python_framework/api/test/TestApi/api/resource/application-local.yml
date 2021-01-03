@@ -1,0 +1,9 @@
+print-status: True
+
+server:
+    scheme: http
+    port: 5001
+
+swagger:
+    host: localhost:${server.port}
+    schemes: [http]

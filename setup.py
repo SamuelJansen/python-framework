@@ -62,13 +62,13 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals==0.1.0-23'
+        'globals==0.2.2'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.8'
+        'Programming Language :: Python :: 3.8, 3.9'
     ]
 )

@@ -8,9 +8,6 @@ from python_framework.api.src.service.openapi.OpenApiValue import Value as v
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile
 from python_framework.api.src.service.openapi.OpenApiDocumentationFile import KW_OPEN_API, KW_RESOURCE, KW_UI
 
-COLON_DOUBLE_BAR = '://'
-LOCAL_HOST = 'localhost'
-
 KW_GET = 'get'
 KW_POST = 'post'
 KW_PUT = 'put'
@@ -105,11 +102,11 @@ def addHostAndBasePath(apiInstance, appInstance):
     apiInstance.documentation[k.SCHEMES] = globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_SCHEMES}')
     apiInstance.documentation[k.BASE_PATH] = apiInstance.baseUrl
     # completeUrl = appInstance.test_request_context().request.host_url[:-1] ###- request.remote_addr
-    # apiInstance.documentation[k.HOST] = completeUrl.split(COLON_DOUBLE_BAR)[1]
-    # if LOCAL_HOST in apiInstance.documentation[k.HOST] :
+    # apiInstance.documentation[k.HOST] = completeUrl.split('://')[1]
+    # if 'localhost' in apiInstance.documentation[k.HOST] :
     #     apiInstance.documentation[k.HOST] = f'{apiInstance.documentation[k.HOST]}:5000'
     # apiInstance.documentation[k.BASE_PATH] = apiInstance.baseUrl
-    # apiInstance.documentation[k.SCHEMES] = [completeUrl.split(COLON_DOUBLE_BAR)[0]]
+    # apiInstance.documentation[k.SCHEMES] = [completeUrl.split('://')[0]]
 
 def addEndPointDocumentation(endPointUrl, controllerMethod, controller, apiInstance):
     url = getUrl(endPointUrl, apiInstance.baseUrl)

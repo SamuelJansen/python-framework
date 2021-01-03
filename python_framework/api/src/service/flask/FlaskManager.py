@@ -528,11 +528,21 @@ def raiseBadResponseImplementetion(cause):
     raise Exception(f'Bad response implementation. {cause}')
 
 def getGlobals() :
+    print()
+    print()
+    print()
+    print('HEEEEEEEEEEEEEEEEEEEEERRRRRRRREEEEEEEEEEEEEEE')
+    print()
+    print()
+    print()
+    globalsInstance = None
     try :
-        from app import globals
+        from globals import importResource
+        globalsInstance = importResource('globals', resourceModuleName='app'
+        # from app import globals as globalsInstance
     except Exception as exception :
         raise Exception('Failed to get "globals" instance from app.py')
-    return globals
+    return globalsInstance
 
 def getApi() :
     try:
