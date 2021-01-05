@@ -1,4 +1,4 @@
-from python_framework.api.src.helper.Serializer import *
+from python_framework import Serializer
 from python_helper import log
 from python_framework.api.src.service import SqlAlchemyProxy as sap
 
@@ -52,24 +52,24 @@ class Child(MODEL) :
     brother, brotherId = sap.getOneToOneChild(__tablename__, BROTHER_NAME, MODEL)
 
 def Serializer_isModelTest() :
-    assert False == isModel(generatorFunction())
-    assert False == isModel(MyClass())
-    assert True == isModel(MyEntityClass())
+    assert False == Serializer.isModel(generatorFunction())
+    assert False == Serializer.isModel(MyClass())
+    assert True == Serializer.isModel(MyEntityClass())
     log.debug(Serializer_isModelTest, 'Success')
 
 def Serializer_isJsonifyable() :
-    assert False == isJsonifyable(generatorFunction())
-    assert True == isJsonifyable(MyClass())
-    assert True == isJsonifyable(MyEntityClass())
+    assert False == Serializer.isJsonifyable(generatorFunction())
+    assert True == Serializer.isJsonifyable(MyClass())
+    assert True == Serializer.isJsonifyable(MyEntityClass())
     log.debug(Serializer_isJsonifyable, 'Success')
 
 def Serializer_jsonifyIt() :
-    assert '{"myString": "myValue", "myInteger": 0, "myFloat": 0.099}' == jsonifyIt(MY_DICTIONARY)
+    assert '{"myString": "myValue", "myInteger": 0, "myFloat": 0.099}' == Serializer.jsonifyIt(MY_DICTIONARY)
 
     myGenerator = generatorFunction()
-    assert myGenerator == jsonifyIt(myGenerator)
-    assert '{"myAttribute": null, "myNeutralAttribute": "someString"}' == jsonifyIt(MyClass())
-    assert '{"id": null}' == jsonifyIt(MyEntityClass())
+    assert myGenerator == Serializer.jsonifyIt(myGenerator)
+    assert '{"myAttribute": null, "myNeutralAttribute": "someString"}' == Serializer.jsonifyIt(MyClass())
+    assert '{"id": null}' == Serializer.jsonifyIt(MyEntityClass())
 
     father = Father()
     child = Child()
@@ -109,13 +109,13 @@ def Serializer_jsonifyIt() :
     otherChild.brother = otherBrother
     otherChild.brotherId = otherBrother.id
 
-    assert '{"brother": {"child": null, "father": {"brotherList": [], "childList": [], "id": 4}, "fatherId": 4, "id": 3}, "brotherId": 3, "father": {"brotherList": [{"child": {"brother": null, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}, "father": null, "fatherId": 1, "id": 5}], "childList": [{"brother": {"child": null, "father": null, "fatherId": 1, "id": 5}, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}], "id": 1}, "fatherId": 1, "id": 2}' == jsonifyIt(child)
-    assert '{"brotherList": [{"child": {"brother": null, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}, "father": null, "fatherId": 1, "id": 5}], "childList": [{"brother": {"child": null, "father": {"brotherList": [], "childList": [], "id": 4}, "fatherId": 4, "id": 3}, "brotherId": 3, "father": null, "fatherId": 1, "id": 2}, {"brother": {"child": null, "father": null, "fatherId": 1, "id": 5}, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}], "id": 1}' == jsonifyIt(father)
+    assert '{"brother": {"child": null, "father": {"brotherList": [], "childList": [], "id": 4}, "fatherId": 4, "id": 3}, "brotherId": 3, "father": {"brotherList": [{"child": {"brother": null, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}, "father": null, "fatherId": 1, "id": 5}], "childList": [{"brother": {"child": null, "father": null, "fatherId": 1, "id": 5}, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}], "id": 1}, "fatherId": 1, "id": 2}' == Serializer.jsonifyIt(child)
+    assert '{"brotherList": [{"child": {"brother": null, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}, "father": null, "fatherId": 1, "id": 5}], "childList": [{"brother": {"child": null, "father": {"brotherList": [], "childList": [], "id": 4}, "fatherId": 4, "id": 3}, "brotherId": 3, "father": null, "fatherId": 1, "id": 2}, {"brother": {"child": null, "father": null, "fatherId": 1, "id": 5}, "brotherId": 5, "father": null, "fatherId": 1, "id": 6}], "id": 1}' == Serializer.jsonifyIt(father)
 
     myClass = MyClass()
     myAttributeClass =  MyAttributeClass(myClass=myClass)
     myClass.myAttribute = myAttributeClass
-    assert '{"myAttribute": {"myClass": null, "myNeutralClassAttribute": "someOtherString"}, "myNeutralAttribute": "someString"}' == jsonifyIt(myClass)
-    assert '{"myClass": {"myAttribute": null, "myNeutralAttribute": "someString"}, "myNeutralClassAttribute": "someOtherString"}' == jsonifyIt(myClass.myAttribute)
+    assert '{"myAttribute": {"myClass": null, "myNeutralClassAttribute": "someOtherString"}, "myNeutralAttribute": "someString"}' == Serializer.jsonifyIt(myClass)
+    assert '{"myClass": {"myAttribute": null, "myNeutralAttribute": "someString"}, "myNeutralClassAttribute": "someOtherString"}' == Serializer.jsonifyIt(myClass.myAttribute)
 
     log.debug(Serializer_jsonifyIt, 'Success')

@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_restful import Api
-from python_helper import Constant as c, log
-from python_framework.api.src.annotation.MethodWrapper import Function
+from python_helper import Constant as c
+from python_helper import log, Function
+import globals
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import SqlAlchemyProxy
@@ -45,7 +46,7 @@ def getControllerList(resourceName):
     controllerNameList = getControllerNameList(resourceName)
     importedControllerList = []
     for controllerName in controllerNameList :
-        resource = Serializer.importResource(controllerName, resourceModuleName=resourceName)
+        resource = globals.importResource(controllerName, resourceModuleName=resourceName)
         if resource :
             importedControllerList.append(resource)
     return importedControllerList
@@ -61,7 +62,7 @@ def getResourceList(apiInstance, resourceType) :
         if FlaskManager.KW_CONTROLLER_RESOURCE == resourceName[-len(FlaskManager.KW_CONTROLLER_RESOURCE):] :
             resourceList += getControllerList(resourceName)
         else :
-            resource = Serializer.importResource(resourceName)
+            resource = globals.importResource(resourceName)
             if resource :
                 resourceList.append(resource)
     return resourceList

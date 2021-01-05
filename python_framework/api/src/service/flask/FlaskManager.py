@@ -1,14 +1,14 @@
 import webbrowser
 from python_helper import Constant as c
-from python_helper import log, StringHelper
+from python_helper import log, StringHelper, Function, FunctionThrough, ReflectionHelper
 from flask import Response, request
 import flask_restful
-from python_framework.api.src.annotation.MethodWrapper import Function, FunctionThrough, overrideSignatures
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service import GlobalException
 from python_framework.api.src.domain import HttpStatus
 from python_framework.api.src.service import Security
 from python_framework.api.src.service.openapi import OpenApiManager
+from python_framework.api.src.service.flask import GlobalsManager
 
 KW_URL = 'url'
 KW_DEFAULT_URL = 'defaultUrl'
@@ -43,7 +43,8 @@ LOCALHOST_URL = 'http://127.0.0.1:5000'
 DOT_SPACE_CAUSE = f'''{c.DOT_SPACE}{c.LOG_CAUSE}'''
 
 @FunctionThrough
-def initialize(apiInstance, defaultUrl=None, openInBrowser=False) :
+def initialize(apiInstance, globalsInstance, defaultUrl=None, openInBrowser=False) :
+    GlobalsManager.GLOBALS = GlobalsManager.updateGlobals(globalsInstance)
     defaultUrl = defaultUrl
     openInBrowser = openInBrowser
     url = f'{apiInstance.host}{apiInstance.baseUrl}'
@@ -152,22 +153,22 @@ def bindResource(apiInstance,resourceInstance) :
 
 @Function
 def validateArgs(args, requestClass, method) :
-if requestClass :
-    resourceInstance = args[0]
-    if Serializer.isSerializerList(requestClass) :
-        for index in range(len(requestClass)) :
-            if Serializer.isSerializerList(args[index + 1]) and len(args[index + 1]) > 0 :
-                expecteObjectClass = requestClass[index][0]
-                for objectInstance in args[index + 1] :
-                    GlobalException.validateArgs(resourceInstance, method, objectInstance, expecteObjectClass)
-            else :
-                objectRequest = args[index + 1]
-                expecteObjectClass = requestClass[index]
-                GlobalException.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
-    else :
-        objectRequest = args[1]
-        expecteObjectClass = requestClass
-        GlobalException.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
+    if requestClass :
+        resourceInstance = args[0]
+        if Serializer.isSerializerList(requestClass) :
+            for index in range(len(requestClass)) :
+                if Serializer.isSerializerList(args[index + 1]) and len(args[index + 1]) > 0 :
+                    expecteObjectClass = requestClass[index][0]
+                    for objectInstance in args[index + 1] :
+                        GlobalException.validateArgs(resourceInstance, method, objectInstance, expecteObjectClass)
+                else :
+                    objectRequest = args[index + 1]
+                    expecteObjectClass = requestClass[index]
+                    GlobalException.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
+        else :
+            objectRequest = args[1]
+            expecteObjectClass = requestClass
+            GlobalException.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
 
 @Function
 def Controller(
@@ -190,7 +191,7 @@ def Controller(
                 OuterClass.__init__(self)
                 flask_restful.Resource.__init__(self,*args,**kwargs)
                 self.service = apiInstance.resource.service
-        overrideSignatures(InnerClass, OuterClass)
+        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
 
@@ -245,7 +246,7 @@ def ControllerMethod(
             if logResponse :
                 log.wraper(innerResourceInstanceMethod, f'"bodyResponse" : {Serializer.prettify(controllerResponse)}', None)
             return jsonifyResponse(controllerResponse, produces, status)
-        overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         innerResourceInstanceMethod.url = controllerMethodUrl
         innerResourceInstanceMethod.requestClass = controllerMethodRequestClass
         innerResourceInstanceMethod.responseClass = controllerMethodResponseClass
@@ -274,7 +275,7 @@ def Service() :
                 self.mapper = apiInstance.resource.mapper
                 self.helper = apiInstance.resource.helper
                 self.converter = apiInstance.resource.converter
-        overrideSignatures(InnerClass, OuterClass)
+        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
 
@@ -290,7 +291,7 @@ def ServiceMethod(requestClass=None):
             except Exception as exception :
                 raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
             return methodReturn
-        overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
 
@@ -304,7 +305,7 @@ def Client() :
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
                 self.globals = apiInstance.globals
-        overrideSignatures(InnerClass, OuterClass)
+        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
 
@@ -320,7 +321,7 @@ def ClientMethod(requestClass=None):
             except Exception as exception :
                 raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
             return methodReturn
-        overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
 
@@ -337,7 +338,7 @@ def Repository(model = None) :
                 OuterClass.__init__(self,*args,**kwargs)
                 self.repository = apiInstance.repository
                 self.globals = apiInstance.globals
-        overrideSignatures(InnerClass, OuterClass)
+        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
 
@@ -354,7 +355,7 @@ def Validator() :
                 self.validator = apiInstance.resource.validator
                 self.helper = apiInstance.resource.helper
                 self.converter = apiInstance.resource.converter
-        overrideSignatures(InnerClass, OuterClass)
+        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
 
@@ -370,7 +371,7 @@ def ValidatorMethod(requestClass=None, message=None, logMessage=None) :
             except Exception as exception :
                 raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
             return methodReturn
-        overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
 
@@ -389,7 +390,7 @@ def Mapper() :
                 self.mapper = apiInstance.resource.mapper
                 self.helper = apiInstance.resource.helper
                 self.converter = apiInstance.resource.converter
-        overrideSignatures(InnerClass, OuterClass)
+        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
 
@@ -406,7 +407,7 @@ def MapperMethod(requestClass=None, responseClass=None) :
             except Exception as exception :
                 raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
             return methodReturn
-        overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
 
@@ -421,7 +422,7 @@ def Helper() :
                 OuterClass.__init__(self,*args,**kwargs)
                 self.helper = apiInstance.resource.helper
                 self.converter = apiInstance.resource.converter
-        overrideSignatures(InnerClass, OuterClass)
+        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
 
@@ -438,7 +439,7 @@ def HelperMethod(requestClass=None, responseClass=None) :
             except Exception as exception :
                 raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
             return methodReturn
-        overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
 
@@ -453,7 +454,7 @@ def Converter() :
                 OuterClass.__init__(self,*args,**kwargs)
                 self.helper = apiInstance.resource.helper
                 self.converter = apiInstance.resource.converter
-        overrideSignatures(InnerClass, OuterClass)
+        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
 
@@ -470,7 +471,7 @@ def ConverterMethod(requestClass=None, responseClass=None) :
             except Exception as exception :
                 raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
             return methodReturn
-        overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
 
@@ -527,21 +528,14 @@ def isNotPythonFrameworkHttpsResponse(controllerResponse) :
 def raiseBadResponseImplementetion(cause):
     raise Exception(f'Bad response implementation. {cause}')
 
+@Function
 def getGlobals() :
-    print()
-    print()
-    print()
-    print('HEEEEEEEEEEEEEEEEEEEEERRRRRRRREEEEEEEEEEEEEEE')
-    print()
-    print()
-    print()
     globalsInstance = None
     try :
-        from globals import importResource
-        globalsInstance = importResource('globals', resourceModuleName='app'
-        # from app import globals as globalsInstance
+        globalsInstance = GlobalsManager.getGlobals()
     except Exception as exception :
-        raise Exception('Failed to get "globals" instance from app.py')
+        log.error(getGlobals, 'Failed to get "globals instance" from GlobalsManager', exception)
+        raise exception
     return globalsInstance
 
 def getApi() :

@@ -1,5 +1,5 @@
-from python_framework.api.test.api.src.helper.SerializerTest import *
+from python_framework.api.test.api.src.helper import SerializerTest
 
-Serializer_isModelTest()
-Serializer_isJsonifyable()
-Serializer_jsonifyIt()
+SerializerTest.Serializer_isModelTest()
+SerializerTest.Serializer_isJsonifyable()
+SerializerTest.Serializer_jsonifyIt()

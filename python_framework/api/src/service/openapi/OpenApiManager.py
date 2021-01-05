@@ -88,18 +88,18 @@ def newDocumentation(apiInstance, appInstance):
 def addInfo(apiInstance):
     globals = apiInstance.globals
     apiInstance.documentation[k.INFO] = {
-        k.TITLE : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_TITLE}'),
-        k.DESCRIPTION : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_DESCRIPTION}'),
-        k.VERSION : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_VERSION}'),
-        k.TERMS_OF_SERVICE : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_TERMS_OF_SERVICE}')
+        k.TITLE : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TITLE}'),
+        k.DESCRIPTION : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_DESCRIPTION}'),
+        k.VERSION : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_VERSION}'),
+        k.TERMS_OF_SERVICE : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TERMS_OF_SERVICE}')
     }
     addContact(globals, apiInstance.documentation)
     addLisence(globals, apiInstance.documentation)
 
 def addHostAndBasePath(apiInstance, appInstance):
     globals = apiInstance.globals
-    apiInstance.documentation[k.HOST] = globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_HOST}')
-    apiInstance.documentation[k.SCHEMES] = globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_SCHEMES}')
+    apiInstance.documentation[k.HOST] = globals.getSetting(f'{KW_OPEN_API}.{KW_HOST}')
+    apiInstance.documentation[k.SCHEMES] = globals.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}')
     apiInstance.documentation[k.BASE_PATH] = apiInstance.baseUrl
     # completeUrl = appInstance.test_request_context().request.host_url[:-1] ###- request.remote_addr
     # apiInstance.documentation[k.HOST] = completeUrl.split('://')[1]
@@ -141,14 +141,14 @@ def getTagByTagName(tagName, documentation):
 
 def addContact(globals, documentation):
     documentation[k.INFO][k.CONTACT] = {
-        k.NAME : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_CONTACT}.{KW_NAME}'),
-        k.EMAIL : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_CONTACT}.{KW_EMAIL}')
+        k.NAME : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_CONTACT}.{KW_NAME}'),
+        k.EMAIL : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_CONTACT}.{KW_EMAIL}')
     }
 
 def addLisence(globals, documentation):
     documentation[k.INFO][k.LICENSE] = {
-        k.NAME : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_LICENSE}.{KW_NAME}'),
-        k.URL : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_LICENSE}.{KW_URL}')
+        k.NAME : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_LICENSE}.{KW_NAME}'),
+        k.URL : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_LICENSE}.{KW_URL}')
     }
 
 def addUrlIfNeeded(url, documentation):

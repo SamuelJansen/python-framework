@@ -19,8 +19,8 @@ api:
     static-package: AppData\Local\Programs\Python\Python38-32\statics
 
 swagger:
-    schemes: [https]
     host: ${server.servlet.context-path}
+    schemes: [https]
     info:
         title: TestApi
         version: 0.0.1

@@ -1,7 +1,7 @@
 import json, importlib
 from python_helper import Constant as c
-from python_helper import StringHelper, ObjectHelper, log
-from python_framework.api.src.annotation.MethodWrapper import Function, FunctionThrough
+from python_helper import StringHelper, ObjectHelper, log, ReflectionHelper
+from python_helper import Function, FunctionThrough
 from python_framework.api.src.service.SqlAlchemyProxy import DeclarativeMeta, InstrumentedList
 
 NOT_SERIALIZABLE_CLASS_NAME_LIST = [
@@ -10,14 +10,6 @@ NOT_SERIALIZABLE_CLASS_NAME_LIST = [
 ]
 
 UTF8_ENCODE = 'utf8'
-
-global IGNORE_REOURCE_LIST
-IGNORE_REOURCE_LIST += [
-    'FlaskManager',
-    'MethodWrapper',
-    'ResourceManager',
-    'SqlAlchemyProxy'
-]
 
 EXPAND_ALL_FIELDS = 'EXPAND_ALL_FIELDS'
 
@@ -64,29 +56,7 @@ def isSerializerCollection(instance) :
     return ObjectHelper.isCollection(instance) or type(instance) == InstrumentedList
 
 def requestBodyIsPresent(requestBody) :
-    return ObjectHelper.isNotNone(requestBody) and (isinstance(requestBody, dict) or isinstance(requestBody, list)) :
-
-# @Function
-# def importResource(resourceName, resourceModuleName=None) :
-#     if not resourceName in IGNORE_REOURCE_LIST :
-#         resource = None
-#         module = None
-#         if not resourceModuleName :
-#             resourceModuleName = resourceName
-#         try :
-#             module = importlib.import_module(resourceModuleName)
-#         except Exception as exception:
-#             log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module. Going for a second attempt')
-#             try :
-#                 module = __import__(resourceModuleName)
-#             except :
-#                 log.error(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module in the second attempt either', exception)
-#         if module :
-#             try :
-#                 resource = getattr(module, resourceName)
-#             except Exception as exception :
-#                 log.warning(importResource, f'Not possible to import "{resourceName}" resource from "{resourceModuleName}" module. cause: {str(exception)}')
-#             return resource
+    return ObjectHelper.isNotNone(requestBody) and (ObjectHelper.isDictionary(requestBody) or ObjectHelper.isList(requestBody))
 
 @Function
 def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
@@ -99,7 +69,7 @@ def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
 
 @Function
 def serializeIt(fromJson, toClass) :
-    if isNativeClassIsntance(fromJson) and toClass == fromJson.__class__ :
+    if ObjectHelper.isNativeClassIsntance(fromJson) and toClass == fromJson.__class__ :
         return fromJson
     attributeNameList = getAttributeNameList(toClass)
     classRole = getClassRole(toClass)
@@ -154,7 +124,7 @@ def convertFromObjectToObject(fromObject, toClass) :
 
 @Function
 def prettify(objectAsDict) :
-    if isNativeClassIsntance(objectAsDict) :
+    if ObjectHelper.isNativeClassIsntance(objectAsDict) :
         return objectAsDict
     return StringHelper.prettyJson(objectAsDict)
 
@@ -182,8 +152,8 @@ def isJsonifyable(thing) :
 
 def isModel(thing) :
     return (
-        isinstance(thing.__class__, DeclarativeMeta) or (
-            isinstance(thing, list) and len(thing) > 0 and isinstance(thing[0].__class__, DeclarativeMeta)
+        isModelClass(thing.__class__) or (
+            isSerializerCollection(thing) and len(thing) > 0 and isModel(thing[0]) if ObjectHelper.isNotDictionary(thing) else isModel(thing.values()[0])
         )
     )
 
@@ -191,7 +161,7 @@ def isModelClass(thingClass) :
     return isinstance(thingClass, DeclarativeMeta)
 
 def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedInstances=[]) :
-    if isNativeClassIsntance(instance) or isNone(instance) :
+    if ObjectHelper.isNativeClassIsntance(instance) or ObjectHelper.isNone(instance) :
         return instance
     if instance not in visitedInstances :
         innerVisitedInstances = visitedInstances.copy()
@@ -203,7 +173,7 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
             objectValueList = []
             for innerObject in instance :
                 innerAttributeValue = getObjectAsDictionary(innerObject, visitedInstances=innerVisitedInstances)
-                if notNone(innerAttributeValue) :
+                if ObjectHelper.isNotNone(innerAttributeValue) :
                     objectValueList.append(innerAttributeValue)
             return objectValueList
         else :
@@ -213,7 +183,7 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
             atributeNameList = getAttributeNameList(instance.__class__)
             for attributeName in atributeNameList :
                 attributeValue = getattr(instance, attributeName)
-                if isNotMethodInstance(attributeValue):
+                if ReflectionHelper.isNotMethodInstance(attributeValue):
                     jsonInstance[attributeName] = getObjectAsDictionary(attributeValue, visitedInstances=innerVisitedInstances)
                 else :
                     jsonInstance[attributeName] = None

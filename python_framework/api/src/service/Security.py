@@ -4,9 +4,9 @@ from flask_jwt_extended import (
     create_access_token, create_refresh_token,
     jwt_refresh_token_required, get_raw_jwt
 )
-from python_helper import Constant, log
+from python_helper import Constant as c
+from python_helper import log, FunctionThrough
 import datetime
-from python_framework.api.src.annotation.MethodWrapper import FunctionThrough
 
 BLACK_LIST = set()
 
@@ -22,7 +22,7 @@ KW_IAT = 'iat'
 KW_JWT_SECRET_KEY = 'JWT_SECRET_KEY'
 KW_JWT_BLACKLIST_ENABLED = 'JWT_BLACKLIST_ENABLED'
 
-DOT_SPACE_CAUSE = f'''{Constant.DOT_SPACE}{Constant.LOG_CAUSE}'''
+DOT_SPACE_CAUSE = f'''{c.DOT_SPACE}{c.LOG_CAUSE}'''
 
 @FunctionThrough
 def getRawJwt(*arg,**kwargs) :

@@ -1,5 +1,5 @@
 from python_helper import log, ReflectionHelper
-from python_framework.api.src.annotation import MethodWrapper
+from python_helper import ReflectionHelper
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.helper import Serializer
 
@@ -70,6 +70,6 @@ def Enum() :
                         __raiseBadImplementation__(enumItemOrEnumItemValue)
                     except :
                         __raiseBadImplementation__('NOT_POSSIBLE_TO_EXTRACT_THE_VALUE')
-        MethodWrapper.overrideSignatures(InnerEnum, OuterEnum)
+        ReflectionHelper.overrideSignatures(InnerEnum, OuterEnum)
         return InnerEnum
     return Wrapper

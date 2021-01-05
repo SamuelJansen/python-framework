@@ -4,9 +4,6 @@ log.debug(log, 'imported')
 from python_framework import HttpStatus
 log.debug(HttpStatus, 'imported')
 
-from python_framework.api.src.annotation import MethodWrapper
-log.debug(MethodWrapper, 'imported')
-
 from python_framework.api.src.model import ErrorLog
 log.debug(ErrorLog, 'imported')
 
@@ -30,3 +27,6 @@ log.debug(FlaskManager, 'imported')
 
 from python_framework.api.src.service.flask import ResourceManager
 log.debug(ResourceManager, 'imported')
+
+from python_framework.api.src.annotation import EnumAnnotation
+log.debug(EnumAnnotation, 'imported')

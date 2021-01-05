@@ -1,5 +1,5 @@
 from python_framework.api.src.service.flask import ResourceManager
-import ModelAssociation
+from python_framework.api.test.api.src.model import ModelAssociation
 
 api, app, jwt = ResourceManager.initialize(
     __name__,
