@@ -1,7 +1,7 @@
 from distutils.core import setup
 import os
 
-VERSION = '0.1.8-17'
+VERSION = '0.1.8-18'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -74,6 +74,6 @@ setup(
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.8, 3.9'
+        'Programming Language :: Python :: 3.9'
     ]
 )
