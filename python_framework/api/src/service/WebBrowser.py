@@ -23,6 +23,9 @@ def openUrlInChrome(url) :
 
 def openUrl(url) :
     webbrowser.open_new(url)
+
+
+    
 # import time
 # import subprocess
 # import os

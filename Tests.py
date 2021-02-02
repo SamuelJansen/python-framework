@@ -1,5 +1,5 @@
 from python_helper import TestHelper
-# TestHelper.run(__file__)
+TestHelper.run(__file__)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
@@ -8,12 +8,12 @@ from python_helper import TestHelper
 #         'EnumAnnotationTest.python_framework_status'
 #     ]
 # )
-TestHelper.run(
-    __file__,
-    runOnly = [
-        'TestApiTest.appRun_withSuccess'
-    ]
-)
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
+#         'TestApiTest.appRun_withSuccess'
+#     ]
+# )
 # SerializerTest.Serializer_isModelTest()
 # SerializerTest.Serializer_isJsonifyable()
 # SerializerTest.Serializer_jsonifyIt()

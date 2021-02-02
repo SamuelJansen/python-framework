@@ -1,4 +1,4 @@
-from python_helper import log
+from python_helper import log, Test
 from python_framework import Serializer
 from python_framework import SqlAlchemyProxy as sap
 
@@ -51,18 +51,19 @@ class Child(MODEL) :
     father, fatherId = sap.getManyToOne(__tablename__, SELF_REFERENCE_FATHER_NAME, MODEL)
     brother, brotherId = sap.getOneToOneChild(__tablename__, BROTHER_NAME, MODEL)
 
+@Test()
 def Serializer_isModelTest() :
     assert False == Serializer.isModel(generatorFunction())
     assert False == Serializer.isModel(MyClass())
     assert True == Serializer.isModel(MyEntityClass())
-    log.debug(Serializer_isModelTest, 'Success')
 
+@Test()
 def Serializer_isJsonifyable() :
     assert False == Serializer.isJsonifyable(generatorFunction())
     assert True == Serializer.isJsonifyable(MyClass())
     assert True == Serializer.isJsonifyable(MyEntityClass())
-    log.debug(Serializer_isJsonifyable, 'Success')
 
+@Test()
 def Serializer_jsonifyIt() :
     assert '{"myString": "myValue", "myInteger": 0, "myFloat": 0.099}' == Serializer.jsonifyIt(MY_DICTIONARY)
 
@@ -117,5 +118,3 @@ def Serializer_jsonifyIt() :
     myClass.myAttribute = myAttributeClass
     assert '{"myAttribute": {"myClass": null, "myNeutralClassAttribute": "someOtherString"}, "myNeutralAttribute": "someString"}' == Serializer.jsonifyIt(myClass)
     assert '{"myClass": {"myAttribute": null, "myNeutralAttribute": "someString"}, "myNeutralClassAttribute": "someOtherString"}' == Serializer.jsonifyIt(myClass.myAttribute)
-
-    log.debug(Serializer_jsonifyIt, 'Success')
