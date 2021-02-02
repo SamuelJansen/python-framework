@@ -1,19 +1,23 @@
-import webbrowser
+from python_framework.api.src.service import WebBrowser
 from python_helper import Constant as c
-from python_helper import log, StringHelper, Function, FunctionThrough, ReflectionHelper
+from python_helper import log, StringHelper, Function, ReflectionHelper, ObjectHelper, SettingHelper
 from flask import Response, request
 import flask_restful
+from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service import GlobalException
-from python_framework.api.src.domain import HttpStatus
 from python_framework.api.src.service import Security
 from python_framework.api.src.service.openapi import OpenApiManager
-from python_framework.api.src.service.flask import GlobalsManager
+import globals
+import json
+
+FRAMEWORK_GLOBALS_INSTANCE = None
 
 KW_URL = 'url'
 KW_DEFAULT_URL = 'defaultUrl'
 KW_MODEL = 'model'
 KW_API = 'api'
+KW_APP = 'app'
 
 KW_METHOD = 'method'
 
@@ -38,23 +42,71 @@ KW_RESOURCE_LIST = [
     KW_CONVERTER_RESOURCE
 ]
 
-LOCALHOST_URL = 'http://127.0.0.1:5000'
+def runGlobals(
+    filePath
+    , successStatus = False
+    , settingStatus = False
+    , debugStatus = False
+    , warningStatus = False
+    , wrapperStatus = False
+    , failureStatus = False
+    , errorStatus = False
+    , testStatus = False
+    , logStatus = False
+) :
+    return globals.newGlobalsInstance(
+        filePath
+        , successStatus = successStatus
+        , settingStatus = settingStatus
+        , debugStatus = debugStatus
+        , warningStatus = warningStatus
+        , wrapperStatus = wrapperStatus
+        , failureStatus = failureStatus
+        , errorStatus = errorStatus
+        , testStatus = testStatus
+        , logStatus = logStatus
+    )
 
-DOT_SPACE_CAUSE = f'''{c.DOT_SPACE}{c.LOG_CAUSE}'''
-
-@FunctionThrough
-def initialize(apiInstance, globalsInstance, defaultUrl=None, openInBrowser=False) :
-    GlobalsManager.GLOBALS = GlobalsManager.updateGlobals(globalsInstance)
-    defaultUrl = defaultUrl
-    openInBrowser = openInBrowser
-    url = f'{apiInstance.host}{apiInstance.baseUrl}'
+@Function
+def initialize(
+    apiInstance
+    , defaultUrl = None
+    , openInBrowser = False
+    , filePath = None
+    , successStatus = False
+    , settingStatus = False
+    , debugStatus = False
+    , warningStatus = False
+    , wrapperStatus = False
+    , failureStatus = False
+    , errorStatus = False
+    , testStatus = False
+    , logStatus = False
+) :
+    if ObjectHelper.isNone(apiInstance) :
+        globalsInstance = globals.newGlobalsInstance(
+            filePath
+            , successStatus = successStatus
+            , settingStatus = settingStatus
+            , debugStatus = debugStatus
+            , warningStatus = warningStatus
+            , wrapperStatus = wrapperStatus
+            , failureStatus = failureStatus
+            , errorStatus = errorStatus
+            , testStatus = testStatus
+            , logStatus = logStatus
+        )
+    defaultUrl
+    openInBrowser
+    url = f'{apiInstance.scheme}://{apiInstance.host}{c.NOTHING if ObjectHelper.isEmpty(apiInstance.port) else f"{c.COLON}{apiInstance.port}"}{apiInstance.baseUrl}'
     if defaultUrl :
         url = f'{url}{defaultUrl}'
     def inBetweenFunction(function,*argument,**keywordArgument) :
         log.debug(initialize,f'''{function.__name__} method''')
         if (openInBrowser) :
             log.debug(initialize,f'''Openning "{url}" url in rowser''')
-            webbrowser.open_new(url)
+            # WebBrowser.openUrlInChrome(url)
+            WebBrowser.openUrl(url)
         def innerFunction(*args,**kwargs) :
             try :
                 functionReturn = function(*args,**kwargs)
@@ -64,12 +116,12 @@ def initialize(apiInstance, globalsInstance, defaultUrl=None, openInBrowser=Fals
         return innerFunction
     return inBetweenFunction
 
-@FunctionThrough
+@Function
 def getRequestBodyAsJson(contentType) :
     try :
         if OpenApiManager.DEFAULT_CONTENT_TYPE == contentType :
             requestBodyAsJson = request.get_json()
-        elif 'multipart/x-mixed-replace' in contentType :
+        elif OpenApiManager.MULTIPART_X_MIXED_REPLACE in contentType :
             requestBodyAsJson = request.get_data()
         else :
             raise Exception(f'Content type "{contentType}" not implemented')
@@ -77,24 +129,30 @@ def getRequestBodyAsJson(contentType) :
         raise GlobalException.GlobalException(message='Not possible to parse the request', logMessage=str(exception), status=HttpStatus.BAD_REQUEST)
     return requestBodyAsJson
 
-@FunctionThrough
+@Function
 @Security.jwtRequired
 def securedControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logRequest) :
     if not Security.getRole() in roleRequired :
         raise GlobalException.GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDEN)
     return publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logRequest)
 
-@FunctionThrough
+@Function
 def publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logRequest) :
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType)
         if logRequest :
-            log.debug(resourceInstanceMethod, f'"bodyRequest" : {Serializer.prettify(requestBodyAsJson)}')
+            print(f'logRequest: {logRequest}')
+            log.printDebug(
+                f'"bodyRequest" : {StringHelper.prettyJson(requestBodyAsJson, withColors=SettingHelper.activeEnvironmentIsLocal())}',
+                condition = logRequest,
+                margin = False,
+                newLine = False
+            )
         if Serializer.requestBodyIsPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(serializerReturn, args, isControllerMethod=True)
     response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
-    if response and Serializer.isCollection(response) and 2 == len(response) :
+    if response and Serializer.isSerializerCollection(response) and 2 == len(response) :
         return response
     raise GlobalException.GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
 
@@ -144,7 +202,7 @@ def getResourceType(resourceInstance, resourceName = None) :
 @Function
 def setResource(apiInstance, resourceInstance, resourceName=None) :
     resourceName = getResourceFinalName(resourceInstance, resourceName=resourceName)
-    setattr(apiInstance,resourceName,resourceInstance)
+    ReflectionHelper.setAttributeOrMethod(apiInstance,resourceName,resourceInstance)
 
 @Function
 def bindResource(apiInstance,resourceInstance) :
@@ -180,7 +238,6 @@ def Controller(
     controllerTag = tag
     controllerDescription = description
     def Wrapper(OuterClass,*args,**kwargs):
-        apiInstance = getApi()
         log.wraper(Controller, f'''wrapping {OuterClass.__name__}''', None)
         class InnerClass(OuterClass,flask_restful.Resource):
             url = controllerUrl
@@ -190,7 +247,7 @@ def Controller(
                 log.wraper(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})', None)
                 OuterClass.__init__(self)
                 flask_restful.Resource.__init__(self,*args,**kwargs)
-                self.service = apiInstance.resource.service
+                self.service = getApi().resource.service
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -206,6 +263,7 @@ def ControllerMethod(
     logRequest = False,
     logResponse = False
 ):
+
     controllerMethodUrl = url
     controllerMethodRequestClass = requestClass
     controllerMethodResponseClass = responseClass
@@ -219,12 +277,11 @@ def ControllerMethod(
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
             try :
-                if roleRequired and (type(list()) == type(roleRequired) and not [] == roleRequired) :
+                if ObjectHelper.isNotEmptyCollection(roleRequired) :
                     completeResponse = securedControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logRequest)
                 else :
                     completeResponse = publicControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass, logRequest)
                 validateResponseClass(responseClass, completeResponse)
-
             except Exception as exception :
                 completeResponse = getCompleteResponseByException(exception, resourceInstance, resourceInstanceMethod)
                 ###- request.method:              GET
@@ -240,11 +297,15 @@ def ControllerMethod(
                 ###- request.full_path:           /alert/dingding/test?x=y
                 ###- request.args:                ImmutableMultiDict([('x', 'y')])
                 ###- request.args.get('x'):       y
-
             controllerResponse = completeResponse[0]
             status = completeResponse[1]
             if logResponse :
-                log.wraper(innerResourceInstanceMethod, f'"bodyResponse" : {Serializer.prettify(controllerResponse)}', None)
+                log.printDebug(
+                    f'"bodyResponse" : {StringHelper.prettyJson(json.loads(Serializer.jsonifyIt(controllerResponse)), withColors=SettingHelper.activeEnvironmentIsLocal())}',
+                    condition = logResponse,
+                    margin = False,
+                    newLine = False
+                )
             return jsonifyResponse(controllerResponse, produces, status)
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         innerResourceInstanceMethod.url = controllerMethodUrl
@@ -261,12 +322,12 @@ def ControllerMethod(
 @Function
 def Service() :
     def Wrapper(OuterClass, *args, **kwargs):
-        apiInstance = getApi()
         log.debug(Service,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
+                apiInstance = getApi()
                 self.globals = apiInstance.globals
                 self.service = apiInstance.resource.service
                 self.client = apiInstance.resource.client
@@ -298,13 +359,12 @@ def ServiceMethod(requestClass=None):
 @Function
 def Client() :
     def Wrapper(OuterClass, *args, **kwargs):
-        apiInstance = getApi()
         log.debug(Client,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
-                self.globals = apiInstance.globals
+                self.globals = getApi().globals
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -329,13 +389,13 @@ def ClientMethod(requestClass=None):
 def Repository(model = None) :
     repositoryModel = model
     def Wrapper(OuterClass, *args, **kwargs):
-        apiInstance = getApi()
         log.debug(Repository,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             model = repositoryModel
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
+                apiInstance = getApi()
                 self.repository = apiInstance.repository
                 self.globals = apiInstance.globals
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
@@ -345,12 +405,12 @@ def Repository(model = None) :
 @Function
 def Validator() :
     def Wrapper(OuterClass, *args, **kwargs):
-        apiInstance = getApi()
         log.debug(Validator,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
+                apiInstance = getApi()
                 self.service = apiInstance.resource.service
                 self.validator = apiInstance.resource.validator
                 self.helper = apiInstance.resource.helper
@@ -379,12 +439,12 @@ def ValidatorMethod(requestClass=None, message=None, logMessage=None) :
 @Function
 def Mapper() :
     def Wrapper(OuterClass, *args, **kwargs):
-        apiInstance = getApi()
         log.debug(Mapper,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
+                apiInstance = getApi()
                 self.service = apiInstance.resource.service
                 self.validator = apiInstance.resource.validator
                 self.mapper = apiInstance.resource.mapper
@@ -414,12 +474,12 @@ def MapperMethod(requestClass=None, responseClass=None) :
 @Function
 def Helper() :
     def Wrapper(OuterClass, *args, **kwargs):
-        apiInstance = getApi()
         log.debug(Helper,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass,flask_restful.Resource):
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
+                apiInstance = getApi()
                 self.helper = apiInstance.resource.helper
                 self.converter = apiInstance.resource.converter
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
@@ -446,12 +506,12 @@ def HelperMethod(requestClass=None, responseClass=None) :
 @Function
 def Converter() :
     def Wrapper(OuterClass, *args, **kwargs):
-        apiInstance = getApi()
         log.debug(Converter,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
+                apiInstance = getApi()
                 self.helper = apiInstance.resource.helper
                 self.converter = apiInstance.resource.converter
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
@@ -490,7 +550,7 @@ def getCompleteResponseByException(exception, resourceInstance, resourceInstance
 
 def validateResponseClass(responseClass, controllerResponse) :
     if isNotPythonFrameworkHttpsResponse(controllerResponse) :
-        raiseBadResponseImplementetion(f'Python Framewok response cannot be null. It should be a list like this: [{responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HTTPS_CODE]')
+        raiseBadResponseImplementetion(f'Python Framework response cannot be null. It should be a list like this: [{"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HTTPS_CODE]')
     if ObjectHelper.isNotNone(responseClass) :
         if Serializer.isSerializerList(responseClass) :
             if 0 == len(responseClass) :
@@ -520,7 +580,7 @@ def getQualitativeName(instance) :
     return instance.__class__.__qualname__
 
 def isPythonFrameworkHttpsResponse(controllerResponse) :
-    return ObjectHelper.isList(controllerResponse) and 2 == len(controllerResponse)
+    return (ObjectHelper.isTuple(controllerResponse) or ObjectHelper.isList(controllerResponse)) and 2 == len(controllerResponse)
 
 def isNotPythonFrameworkHttpsResponse(controllerResponse) :
     return not isPythonFrameworkHttpsResponse(controllerResponse)
@@ -530,15 +590,10 @@ def raiseBadResponseImplementetion(cause):
 
 @Function
 def getGlobals() :
-    globalsInstance = None
-    try :
-        globalsInstance = GlobalsManager.getGlobals()
-    except Exception as exception :
-        log.error(getGlobals, 'Failed to get "globals instance" from GlobalsManager', exception)
-        raise exception
-    return globalsInstance
+    return globals.getGlobalsInstance()
 
 def getApi() :
+    api = None
     try:
         api = getGlobals().api
     except Exception as exception :
@@ -546,10 +601,11 @@ def getApi() :
     return api
 
 def getNullableApi() :
+    api=None
     try :
         api = getApi()
-    except :
-        api = None
+    except Exception as exception :
+        log.warning(getNullableApi, 'Not possible to get api', exception=exception)
     return api
 
 def validateFlaskApi(instance) :

@@ -1,7 +1,7 @@
-import json, importlib
+import json, importlib, globals
 from python_helper import Constant as c
 from python_helper import StringHelper, ObjectHelper, log, ReflectionHelper
-from python_helper import Function, FunctionThrough
+from python_helper import Function
 from python_framework.api.src.service.SqlAlchemyProxy import DeclarativeMeta, InstrumentedList
 
 NOT_SERIALIZABLE_CLASS_NAME_LIST = [
@@ -79,24 +79,29 @@ def serializeIt(fromJson, toClass) :
     for attributeName in attributeNameList :
         # print(f'        fromJson.get({attributeName}) = {fromJson.get(attributeName)}')
         jsonAttributeValue = fromJson.get(attributeName)
-        if jsonAttributeValue or 0 == jsonAttributeValue :
+        if ObjectHelper.isNotNone(jsonAttributeValue) :
+            # print(f'jsonAttributeValue: {jsonAttributeValue}')
             fromJsonToDictionary[attributeName] = resolveValue(jsonAttributeValue, attributeName, classRole)
+            # print(f'resolveValue({jsonAttributeValue}, {attributeName}, {classRole}): {fromJsonToDictionary[attributeName]}')
+        else :
+            fromJsonToDictionary[attributeName] = jsonAttributeValue
         # if jsonAttributeValue :
-        #     setattr(fromObject, attributeName, jsonAttributeValue)
+        #     ReflectionHelper.setAttributeOrMethod(fromObject, attributeName, jsonAttributeValue)
     args = []
     kwargs = fromJsonToDictionary.copy()
     # print(f'fromJsonToDictionary = {fromJsonToDictionary}')
+    objectInstance = None
     for key,value in fromJsonToDictionary.items() :
+        # print(f'*args{args},**kwargs{kwargs}')
         try :
-            toClass(*args,**kwargs)
+            objectInstance = toClass(*args,**kwargs)
+            break
         except :
-            newValue = kwargs.copy()[key]
-            args.append(newValue)
+            args.append(value)
             del kwargs[key]
         # print(f'args = {args}, kwargs = {kwargs}')
-    objectInstance = toClass(*args,**kwargs)
-    if not objectInstance and not 0 == objectInstance :
-        raise Exception(f'Not possible to instanciate {toClass.__name__} class in convertFromJsonToObject() method')
+    if ObjectHelper.isNone(objectInstance) :
+        raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class')
     return objectInstance
 
 @Function
@@ -130,7 +135,7 @@ def prettify(objectAsDict) :
 
 @Function
 def getAttributeNameList(instanceClass) :
-    instance = instanciateItWithNoArgsConstructor(instanceClass)
+    instance = ReflectionHelper.instanciateItWithNoArgsConstructor(instanceClass)
     return [
         objectAttributeName
         for objectAttributeName in dir(instance)
@@ -143,7 +148,7 @@ def getAttributeNameList(instanceClass) :
 
 def getTypeName(thingInstance) :
     if not type(type) == type(thingInstance) :
-        return type(thingInstance).__name__
+        return ReflectionHelper.getName(type(thingInstance))
     log.debug(getTypeName, f'Not possible to get instance type name')
     return ObjectHelper.UNKNOWN_OBJECT_CLASS_NAME
 
@@ -178,37 +183,27 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
             return objectValueList
         else :
             jsonInstance = {}
-            innerVisitedInstances.append(instance)
-            InstrumentedList
-            atributeNameList = getAttributeNameList(instance.__class__)
-            for attributeName in atributeNameList :
-                attributeValue = getattr(instance, attributeName)
-                if ReflectionHelper.isNotMethodInstance(attributeValue):
-                    jsonInstance[attributeName] = getObjectAsDictionary(attributeValue, visitedInstances=innerVisitedInstances)
-                else :
-                    jsonInstance[attributeName] = None
+            try :
+                innerVisitedInstances.append(instance)
+                InstrumentedList
+                atributeNameList = getAttributeNameList(instance.__class__)
+                for attributeName in atributeNameList :
+                    attributeValue = getattr(instance, attributeName)
+                    if ReflectionHelper.isNotMethodInstance(attributeValue):
+                        jsonInstance[attributeName] = getObjectAsDictionary(attributeValue, visitedInstances=innerVisitedInstances)
+                    else :
+                        jsonInstance[attributeName] = None
+            except Exception as exception :
+                log.warning(getObjectAsDictionary, f'Not possible to get attribute name list from {ReflectionHelper.getName(ReflectionHelper.getClass(instance, muteLogs=True), muteLogs=True)}', exception=exception)
             if jsonInstance :
                 return jsonInstance
 
-def instanciateItWithNoArgsConstructor(instanceClass) :
-    args = []
-    objectInstance = None
-    for ammountOfVariables in range(60) :
-        try :
-            objectInstance = instanceClass(*args)
-            break
-        except :
-            args.append(None)
-    if not isinstance(objectInstance, instanceClass) :
-        raise Exception(f'Not possible to instanciate {instanceClass} class in instanciateItWithNoArgsConstructor() method with None as args constructor')
-    return objectInstance
-
 def getClassRole(instanceClass) :
-    if DTO_SUFIX == instanceClass.__name__[-len(DTO_SUFIX):] :
+    if DTO_SUFIX == ReflectionHelper.getName(instanceClass)[-len(DTO_SUFIX):] :
         sufixList = [str(DTO_CLASS_ROLE)]
         concatenatedSufix = str(DTO_SUFIX)
         for mesoSufix in MESO_SUFIX_LIST :
-            if mesoSufix == instanceClass.__name__[-(len(mesoSufix)+len(concatenatedSufix)):-len(concatenatedSufix)] :
+            if mesoSufix == ReflectionHelper.getName(instanceClass)[-(len(mesoSufix)+len(concatenatedSufix)):-len(concatenatedSufix)] :
                 concatenatedSufix += mesoSufix
                 sufixList = [mesoSufix.upper()] + sufixList
         return c.UNDERSCORE.join(sufixList)
@@ -218,7 +213,7 @@ def getDtoClassFromFatherClassAndChildMethodName(fatherClass, childAttributeName
     classRole = getClassRole(fatherClass)
     dtoClassName = getResourceName(childAttributeName, classRole)
     dtoModuleName  = getResourceModuleName(childAttributeName, classRole)
-    return importResource(dtoClassName, resourceModuleName=dtoModuleName)
+    return globals.importResource(dtoClassName, resourceModuleName=dtoModuleName)
 
 def getListRemovedFromKey(key) :
     return key.replace(LIST_SUFIX, c.NOTHING)
@@ -245,7 +240,7 @@ def resolveValue(value, key, classRole) :
         if LIST_SUFIX == key[-4:] :
             resourceName = getResourceName(key, classRole)
             resourceModuleName = getResourceModuleName(key, classRole)
-            keyClass = importResource(resourceName, resourceModuleName=resourceModuleName)
+            keyClass = globals.importResource(resourceName, resourceModuleName=resourceModuleName)
             convertedValue = []
             for jsonItem in value :
                 if jsonItem :

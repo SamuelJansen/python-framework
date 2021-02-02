@@ -1,38 +1,25 @@
-from globals import Globals
-globalsInstance = Globals(__file__,
-    successStatus = True,
-    settingStatus = True,
-    debugStatus = True,
-    warningStatus = True,
-    failureStatus = True,
-    errorStatus = True
-    , logStatus = True
+import globals
+globalsInstance = globals.newGlobalsInstance(__file__
+    , settingStatus = True
+    , successStatus = True
+    , errorStatus = True
+    , debugStatus = False
+    , warningStatus = False
+    , wrapperStatus = False
+    , failureStatus = False
+    , logStatus = False
 )
 
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-print('heeeeeeeeeeeeeeeeeeerrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrreeeeeeeeeeeeeee')
-
-from python_framework.api.src.service.flask import GlobalsManager
-GlobalsManager.GLOBALS = GlobalsManager.updateGlobals(globalsInstance)
-
-from python_framework.api.src.service.flask.FlaskManager import initialize
+from python_framework import initialize
 import TestApi
 app = TestApi.app
 api = TestApi.api
 jwt = TestApi.jwt
 
-@initialize(api, GlobalsManager.GLOBALS, defaultUrl = '/swagger', openInBrowser=False)
+@initialize(api, defaultUrl = '/swagger', openInBrowser=False)
 def runFlaskApplication(app):
-    app.run(debug=True)
+    app.run(debug=True,use_reloader=False)
+    # app.run(debug=True)
 
 if __name__ == '__main__' :
     runFlaskApplication(app)

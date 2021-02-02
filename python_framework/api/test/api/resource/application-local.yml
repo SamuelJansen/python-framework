@@ -1,9 +1,13 @@
-print-status: True
+print-status: False
 
-server:
-    scheme: http
-    port: 5001
+api:
+    server:
+        scheme: http
+        port: 5000
+        host: localhost
+    security:
+        secret: ${SECURITY_KEY:local-secret-key}
+
 
 swagger:
-    host: localhost:${server.port}
-    schemes: [http]
+    host: ${api.server.host}:${api.server.port}

@@ -1,3 +1,3 @@
-from python_framework.api.src.model import FrameworkModel
+from python_framework import FrameworkModel
 
 Model = FrameworkModel.getModel()

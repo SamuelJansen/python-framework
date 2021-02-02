@@ -1,6 +1,6 @@
-from python_framework import Serializer
 from python_helper import log
-from python_framework.api.src.service import SqlAlchemyProxy as sap
+from python_framework import Serializer
+from python_framework import SqlAlchemyProxy as sap
 
 def generatorFunction() :
     while True :

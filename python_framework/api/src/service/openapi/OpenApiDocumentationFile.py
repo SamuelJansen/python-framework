@@ -21,7 +21,8 @@ def getDocumentationFilePath(apiInstance):
 
 def loadDocumentationAsString(apiInstance):
     globals = apiInstance.globals
-    with open(getDocumentationFilePath(apiInstance), globals.READ, encoding=globals.ENCODING) as documentationFile :
+    # with open(getDocumentationFilePath(apiInstance), globals.READ, encoding=globals.ENCODING) as documentationFile :
+    with open(getDocumentationFilePath(apiInstance), c.READ, encoding=c.ENCODING) as documentationFile :
         documentationAsString = c.NOTHING.join(documentationFile.readlines())
     return documentationAsString
 
@@ -33,7 +34,8 @@ def overrideDocumentation(apiInstance):
     globals = apiInstance.globals
     try :
         documentationAsString = StringHelper.prettyJson(apiInstance.documentation)
-        with open(getDocumentationFilePath(apiInstance), globals.OVERRIDE, encoding=globals.ENCODING) as documentationFile :
+        # with open(getDocumentationFilePath(apiInstance), globals.OVERRIDE, encoding=globals.ENCODING) as documentationFile :
+        with open(getDocumentationFilePath(apiInstance), c.OVERRIDE, encoding=c.ENCODING) as documentationFile :
             documentationFile.write(documentationAsString)
     except Exception as exception :
         log.error(overrideDocumentation,"Error while overriding OpenApi documentation file",exception)

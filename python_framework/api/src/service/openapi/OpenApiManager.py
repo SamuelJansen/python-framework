@@ -29,6 +29,7 @@ ABLE_TO_RECIEVE_BODY_LIST = [
 ]
 
 DEFAULT_CONTENT_TYPE = 'application/json'
+MULTIPART_X_MIXED_REPLACE = 'multipart/x-mixed-replace'
 JSON_OBJECT_NAME = 'json'
 
 KW_API = 'api'

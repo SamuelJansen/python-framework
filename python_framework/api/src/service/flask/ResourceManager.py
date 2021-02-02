@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Api
 from python_helper import Constant as c
-from python_helper import log, Function
+from python_helper import log, Function, ReflectionHelper, SettingHelper, ObjectHelper
 import globals
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.flask import FlaskManager
@@ -77,51 +77,46 @@ def addGlobalsTo(apiInstance) :
 
 @Function
 def initialize(
-        rootName,
-        refferenceModel,
-        baseUrl = c.NOTHING,
-        databaseEnvironmentVariable  = None,
-        localStorageName = None,
-        jwtSecret = None
-    ) :
+    rootName,
+    refferenceModel,
+) :
 
-        # # bluePrint = Blueprint('feature-manager', __name__, url_prefix='/api/')
-        # # api = Api(version='1.0', title='Feature dataset manager', description='A feature manager api')
-        # # ns = api.namespace('test', description='Just a test')
-        # # app = Flask(rootName)
-        # # app.register_blueprint(api)
-        #
-        # from werkzeug.contrib.fixers import ProxyFix
-        # app = Flask(rootName)
-        # # app.wsgi_app = ProxyFix(app.wsgi_app)
-        # api = Api(app, version='1.0', title='Feature dataset manager', description='A feature manager api')
-        # # ns = api.namespace('test', description='Just a test')
-        #
-        # # from flask import Blueprint
-        # # from flask_restplus import Namespace
-        # #
-        # # blueprint = Blueprint('api', rootName, url_prefix='/api')
-        # # api = Api(blueprint)
-        # # global_namespace = Namespace('global', path='/global')
-        # # api.add_namespace(global_namespace)
-        # # app = Flask(__name__)
-        # # app.register_blueprint(blueprint, url_prefix='')
-        app = Flask(rootName)
-        api = Api(app)
-        jwt = Security.getJwtMannager(app, jwtSecret)
+    # # bluePrint = Blueprint('feature-manager', __name__, url_prefix='/api/')
+    # # api = Api(version='1.0', title='Feature dataset manager', description='A feature manager api')
+    # # ns = api.namespace('test', description='Just a test')
+    # # app = Flask(rootName)
+    # # app.register_blueprint(api)
+    #
+    # from werkzeug.contrib.fixers import ProxyFix
+    # app = Flask(rootName)
+    # # app.wsgi_app = ProxyFix(app.wsgi_app)
+    # api = Api(app, version='1.0', title='Feature dataset manager', description='A feature manager api')
+    # # ns = api.namespace('test', description='Just a test')
+    #
+    # # from flask import Blueprint
+    # # from flask_restplus import Namespace
+    # #
+    # # blueprint = Blueprint('api', rootName, url_prefix='/api')
+    # # api = Api(blueprint)
+    # # global_namespace = Namespace('global', path='/global')
+    # # api.add_namespace(global_namespace)
+    # # app = Flask(__name__)
+    # # app.register_blueprint(blueprint, url_prefix='')
+    app = Flask(rootName)
+    api = Api(app)
+    addGlobalsTo(api)
+    securityKey = api.globals.getSetting('api.security.secret')
+    if SettingHelper.LOCAL_ENVIRONMENT == SettingHelper.getActiveEnvironment() :
+        log.setting(initialize, f'JWT secret: {securityKey}')
+    jwt = Security.getJwtMannager(app, securityKey)
 
-        addGlobalsTo(api)
-        args = [api, app, baseUrl, jwt]
-        for resourceType in FlaskManager.KW_RESOURCE_LIST :
-            args.append(getResourceList(api,resourceType))
-        args.append(refferenceModel)
-        kwargs = {
-            'databaseEnvironmentVariable' : databaseEnvironmentVariable,
-            'localStorageName' : localStorageName
-        }
-        addFlaskApiResources(*args, **kwargs)
+    args = [api, app, jwt]
+    for resourceType in FlaskManager.KW_RESOURCE_LIST :
+        args.append(getResourceList(api, resourceType))
+    args.append(refferenceModel)
+    addFlaskApiResources(*args)
 
-        return api, app, jwt
+    return api, app, jwt
 
 @Function
 def addControllerListTo(apiInstance, controllerList) :
@@ -129,9 +124,9 @@ def addControllerListTo(apiInstance, controllerList) :
         OpenApiManager.addControllerDocumentation(controller, apiInstance)
         mainUrl = f'{apiInstance.baseUrl}{controller.url}'
         urlList = [mainUrl]
-        controllerMethodList = FlaskManager.getAttributePointerList(controller)
+        controllerMethodList = ReflectionHelper.getAttributePointerList(controller)
         for controllerMethod in controllerMethodList :
-            if hasattr(controllerMethod, FlaskManager.KW_URL) and controllerMethod.url :
+            if hasattr(controllerMethod, FlaskManager.KW_URL) and ObjectHelper.isNotEmpty(controllerMethod.url) :
                 controllerUrl = f'{mainUrl}{controllerMethod.url}'
                 if controllerUrl not in urlList :
                     urlList.append(controllerUrl)
@@ -159,12 +154,10 @@ def addClientListTo(apiInstance,clientList) :
         apiInstance.bindResource(apiInstance,client())
 
 @Function
-def addRepositoryTo(apiInstance, repositoryList, model, databaseEnvironmentVariable=None, localStorageName=None) :
+def addRepositoryTo(apiInstance, repositoryList, model) :
     apiInstance.repository = SqlAlchemyProxy.SqlAlchemyProxy(
-        databaseEnvironmentVariable = databaseEnvironmentVariable,
-        localName = localStorageName,
-        model = model,
-        globals = apiInstance.globals,
+        model,
+        apiInstance.globals,
         echo = False,
         checkSameThread = False
     )
@@ -195,15 +188,14 @@ class FlaskResource:
 
 @Function
 def addResourceAttibutes(apiInstance) :
-    setattr(apiInstance, FlaskManager.KW_RESOURCE, FlaskResource())
+    ReflectionHelper.setAttributeOrMethod(apiInstance, FlaskManager.KW_RESOURCE, FlaskResource())
     for resourceName in FlaskManager.KW_RESOURCE_LIST :
-        setattr(apiInstance.resource, resourceName.lower(), FlaskResource())
+        ReflectionHelper.setAttributeOrMethod(apiInstance.resource, resourceName.lower(), FlaskResource())
 
 @Function
 def addFlaskApiResources(
         apiInstance,
         appInstance,
-        baseUrl,
         jwtInstance,
         controllerList,
         serviceList,
@@ -213,15 +205,15 @@ def addFlaskApiResources(
         mapperList,
         helperList,
         converterList,
-        model,
-        databaseEnvironmentVariable = None,
-        localStorageName = None
+        model
     ) :
-    apiInstance.host = apiInstance.globals.getSetting('api.host')
-    apiInstance.baseUrl = baseUrl
+    apiInstance.scheme = apiInstance.globals.getSetting('api.server.scheme')
+    apiInstance.host = apiInstance.globals.getSetting('api.server.host')
+    apiInstance.port = apiInstance.globals.getSetting('api.server.port')
+    apiInstance.baseUrl = apiInstance.globals.getSetting('api.server.base-url')
     OpenApiManager.newDocumentation(apiInstance, appInstance)
     addResourceAttibutes(apiInstance)
-    addRepositoryTo(apiInstance, repositoryList, model, databaseEnvironmentVariable=databaseEnvironmentVariable, localStorageName=localStorageName)
+    addRepositoryTo(apiInstance, repositoryList, model)
     addServiceListTo(apiInstance, serviceList)
     addClientListTo(apiInstance, clientList)
     addControllerListTo(apiInstance, controllerList)

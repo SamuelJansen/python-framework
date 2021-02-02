@@ -1,11 +1,5 @@
-print-status: True
-flask-specific-port: flask run --host=0.0.0.0 --port=5001
-
-server:
-    scheme: https
-    servlet:
-        context-path: /test-api
-    port: None
+print-status: False
+flask-specific-port: flask run --host=${api.server.host} --port=${api.server.port}
 
 api:
     name: TestApi
@@ -17,10 +11,19 @@ api:
     git:
         force-upgrade-command: pip install --upgrade --force python_framework
     static-package: AppData\Local\Programs\Python\Python38-32\statics
+    list: []
+
+    security:
+        secret: default
+    server:
+        scheme: https
+        host: 127.0.0.1
+        port: 5050
+        base-url: /test-api
 
 swagger:
-    host: ${server.servlet.context-path}
-    schemes: [https]
+    host: ${api.server.host}:${api.server.port}${api.server.base-url}
+    schemes: [${api.server.scheme}]
     info:
         title: TestApi
         version: 0.0.1
@@ -32,3 +35,6 @@ swagger:
         license:
             name: Apache 2.0 / MIT License
             url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+python:
+    version: 3.9
