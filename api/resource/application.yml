@@ -1,0 +1,16 @@
+print-status: False
+api:
+    name: python_framework
+    extension: yml
+    dependency:
+        update: False
+        list:
+            web: [globals]
+            local: []
+    list: [globals, python_helper]
+    language: EN-US
+    git:
+        url: https://github.com/SamuelJansen/
+        extension: git
+python:
+    version: 3.9

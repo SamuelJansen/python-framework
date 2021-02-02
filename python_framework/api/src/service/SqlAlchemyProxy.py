@@ -1,4 +1,6 @@
 import os
+from python_helper import Constant as c
+from python_helper import SettingHelper, EnvironmentHelper, ObjectHelper, StringHelper
 import sqlalchemy
 from sqlalchemy import create_engine, exists, select
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship
@@ -7,9 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 from sqlalchemy import Table, Column, Integer, String, Float, ForeignKey, UnicodeText, MetaData, Sequence, DateTime
 from sqlalchemy import and_, or_
 
-from python_helper import log
-
-from python_framework.api.src.annotation.MethodWrapper import Method, Function
+from python_helper import log, Method, Function
 
 and_ = and_
 or_ = or_
@@ -35,20 +35,6 @@ MetaData = MetaData
 DeclarativeMeta = DeclarativeMeta
 
 InstrumentedList = InstrumentedList
-
-DEFAULT_LOCAL_STORAGE_NAME = 'LocalStorage'
-
-KW_API = 'api'
-KW_NAME = 'name'
-KW_MAIN_URL = 'main-url'
-
-KW_REPOSITORY = 'repository'
-KW_REPOSITORY_DIALECT = 'dialect'
-KW_REPOSITORY_USER = 'user'
-KW_REPOSITORY_PASSWORD = 'password'
-KW_REPOSITORY_HOST = 'host'
-KW_REPOSITORY_PORT = 'port'
-KW_REPOSITORY_DATABASE = 'database'
 
 MANY_TO_MANY = '''And'''
 ID = '''Id'''
@@ -99,117 +85,99 @@ def getOneToOneChild(child, parent, refferenceModel) :
     parentAttribute = relationship(parent, back_populates=attributeIt(child))
     return parentAttribute, parentId
 
+def isNeitherNoneNorBlank(thing) :
+    return ObjectHelper.isNotNone(thing) and StringHelper.isNotBlank(thing)
+
 class SqlAlchemyProxy:
 
-    TOKEN_WITHOUT_NAME = '__TOKEN_WITHOUT_NAME__'
-    DEFAULT_LOCAL_NAME = DEFAULT_LOCAL_STORAGE_NAME
+    KW_API = 'api'
+    KW_MAIN_URL = 'main-url'
 
-    DEFAULT_DATABASE_TYPE = 'sqlite'
-    BAR = '''/'''
-    COLON = ''':'''
-    ARROBA = '''@'''
-    DOUBLE_BAR = 2 * BAR
-    TRIPLE_BAR = 3 * BAR
+    KW_URL = 'url'
+    KW_REPOSITORY = 'repository'
+    KW_REPOSITORY_DIALECT = 'dialect'
+    KW_REPOSITORY_USER = 'user'
+    KW_REPOSITORY_PASSWORD = 'password'
+    KW_REPOSITORY_HOST = 'host'
+    KW_REPOSITORY_PORT = 'port'
+    KW_REPOSITORY_DATABASE = 'database'
 
-    NOTHING = ''
-
+    DATABASE_URL_ENIRONMENT_KEY = 'DATABASE_URL'
+    DEFAULT_LOCAL_STORAGE_NAME = 'LocalStorage'
+    DEFAULT_DIALECT = 'sqlite'
     EXTENSION = 'db'
 
     def __init__(self,
-            databaseEnvironmentVariable = None,
-            localName = TOKEN_WITHOUT_NAME,
-            dialect = None,
-            user = None,
-            password = None,
-            host = None,
-            port = None,
-            model = None,
-            globals = None,
+            model,
+            globals,
             echo = False,
             checkSameThread = False
         ):
 
+        self.globals = globals
         self.sqlalchemy = sqlalchemy
-
-        connectArgs = {}
-        self.databaseUrl = None
-        if databaseEnvironmentVariable :
-            try :
-                self.databaseUrl = os.environ.get(databaseEnvironmentVariable)
-                self.engine = create_engine(self.databaseUrl, echo=echo)
-            except Exception as exception :
-                log.error(SqlAlchemyProxy, 'Not possible to parse database environment variable. Proceeding to globals configuration', exception)
-
-        elif not self.databaseUrl :
-            self.globalsConfiguration(localName,dialect,user,password,host,port,model,globals,echo,checkSameThread)
-            if self.DEFAULT_DATABASE_TYPE == self.dialect :
-                connectArgs['check_same_thread'] = checkSameThread
-
-        self.engine = create_engine(self.databaseUrl, echo=echo, connect_args=connectArgs)
+        dialect = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_DIALECT}')
+        self.engine = self.getNewEngine(dialect, echo, checkSameThread)
         self.session = scoped_session(sessionmaker(self.engine)) ###- sessionmaker(bind=self.engine)()
         self.model = model
         self.model.metadata.bind = self.engine
 
         self.run()
 
-    def globalsConfiguration(self,localName,dialect,user,password,host,port,model,globals,echo,checkSameThread):
-        if not dialect and globals :
-            self.dialect = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_DIALECT}')
+    def getNewEngine(self, dialect, echo, checkSameThread) :
+        url = self.getUrl(dialect)
+        connectArgs = self.getConnectArgs(dialect, checkSameThread)
+        engine = None
+        try :
+            engine = create_engine(url, echo=echo, connect_args=connectArgs)
+        except Exception as exception :
+            log.error(self.getNewEngine, 'Not possible to parse database url environment variable', exception)
+            raise exception
+        return engine
+
+    def getUrl(self, dialect) :
+        url = EnvironmentHelper.get(self.DATABASE_URL_ENIRONMENT_KEY)
+        if isNeitherNoneNorBlank(url) :
+            user = None
+            password = None
+            host = None
+            port = None
+            name = None
         else :
-            self.dialect = dialect
+            url = c.NOTHING
+            user = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_USER}')
+            password = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_PASSWORD}')
+            host = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_HOST}')
+            port = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_PORT}')
+            name = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_DATABASE}')
+            if isNeitherNoneNorBlank(user) and isNeitherNoneNorBlank(password) :
+                url += f'{user}{c.COLON}{password}'
+            if isNeitherNoneNorBlank(host) and isNeitherNoneNorBlank(port) :
+                url += f'{c.ARROBA}{host}{c.COLON}{port}'
+            url += c.SLASH
+            name = f'{name}.{self.EXTENSION}' if isNeitherNoneNorBlank(name) else self.DEFAULT_LOCAL_STORAGE_NAME
+            if not isNeitherNoneNorBlank(dialect) :
+                dialect = self.DEFAULT_DIALECT
+            url = f'{dialect}:{c.DOUBLE_SLASH}{url}{name}'
+        if SettingHelper.activeEnvironmentIsLocal() :
+            log.prettyPython(self.getUrl, 'Database coniguations', {
+                'dialect' : dialect,
+                'user' : user,
+                'password' : password,
+                'host' : host,
+                'port' : port,
+                'name' : name,
+                'url' : url
+            }, logLevel=log.SETTING)
+        return url
 
-        if not dialect and globals :
-            self.user = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_USER}')
+    def getConnectArgs(self, url, checkSameThread) :
+        if isNeitherNoneNorBlank(url) and url.startswith(self.DEFAULT_DIALECT) :
+            return {
+                'check_same_thread' : checkSameThread
+            }
         else :
-            self.user = user
-
-        if not dialect and globals :
-            self.password = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_PASSWORD}')
-        else :
-            self.password = password
-
-        if not dialect and globals :
-            self.host = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_HOST}')
-        else :
-            self.host = host
-
-        if not dialect and globals :
-            self.port = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_PORT}')
-        else :
-            self.port = port
-
-        if localName == self.TOKEN_WITHOUT_NAME and globals :
-            databaseName = globals.getSetting(f'{KW_API}.{KW_REPOSITORY}.{KW_REPOSITORY_DATABASE}')
-            if databaseName and not 'None' == databaseName :
-                self.name = databaseName
-            else :
-                self.name = 'DefaultLocalName'
-        else :
-            self.name = localName
-
-        if globals :
-            globals.debug(f'Repository configuration:')
-            globals.debug(f'{globals.TAB_UNITS * globals.SPACE}dialect = {self.dialect}')
-            globals.debug(f'{globals.TAB_UNITS * globals.SPACE}user = wops!')
-            globals.debug(f'{globals.TAB_UNITS * globals.SPACE}password = wops!')
-            globals.debug(f'{globals.TAB_UNITS * globals.SPACE}host = {self.host}')
-            globals.debug(f'{globals.TAB_UNITS * globals.SPACE}port = {self.port}')
-            globals.debug(f'{globals.TAB_UNITS * globals.SPACE}name = {self.name}')
-
-        user_password_host = self.NOTHING
-        if self.user and self.password :
-            user_password_host += f'{self.user}{self.COLON}{self.password}'
-        if self.host :
-            user_password_host += f'{self.ARROBA}{self.host}{self.COLON}{self.port}'
-        user_password_host += self.BAR
-
-        if user_password_host == self.BAR :
-            self.name = f'{self.name}.{self.EXTENSION}'
-
-        if not self.dialect :
-            self.dialect = self.DEFAULT_DATABASE_TYPE
-
-        self.databaseUrl = f'{self.dialect}:{self.DOUBLE_BAR}{user_password_host}{self.name}'
+            return {}
 
     @Method
     def run(self):
@@ -220,25 +188,44 @@ class SqlAlchemyProxy:
         self.session.commit()
 
     @Method
+    def save(self,instance):
+        self.session.add(instance)
+
+    @Method
+    def saveNew(self,*args):
+        model = args[-1]
+        return self.save(model(*args[:-1]))
+
+    @Method
+    def saveAndCommit(self,instance):
+        self.save(instance)
+        self.session.commit()
+        return instance
+
+    @Method
     def saveNewAndCommit(self,*args):
         model = args[-1]
         return self.saveAndCommit(model(*args[:-1]))
 
     @Method
-    def saveAndCommit(self,instance):
-        self.session.add(instance)
-        self.session.commit()
-        return instance
+    def saveAll(self,instanceList):
+        self.session.add_all(instanceList)
+        return instanceList
 
     @Method
     def saveAllAndCommit(self,instanceList):
-        self.session.add_all(instanceList)
+        self.saveAll(instanceList)
         self.session.commit()
         return instanceList
 
     @Method
-    def findAllAndCommit(self,model):
+    def findAll(self,model):
         objectList = self.session.query(model).all()
+        return objectList
+
+    @Method
+    def findAllAndCommit(self,model):
+        objectList = self.findAll(model)
         self.session.commit()
         return objectList
 

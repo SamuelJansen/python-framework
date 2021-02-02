@@ -1,0 +1,13 @@
+print-status: False
+
+api:
+    server:
+        scheme: http
+        port: 5000
+        host: localhost
+    security:
+        secret: ${SECURITY_KEY:local-secret-key}
+
+
+swagger:
+    host: ${api.server.host}:${api.server.port}

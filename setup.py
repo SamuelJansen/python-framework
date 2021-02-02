@@ -1,7 +1,7 @@
 from distutils.core import setup
-import os, site
+import os
 
-VERSION = '0.1.8-11'
+VERSION = '0.1.8-13'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -62,13 +62,13 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals==0.1.0-22'
+        'globals==0.2.23'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.8'
+        'Programming Language :: Python :: 3.8, 3.9'
     ]
 )

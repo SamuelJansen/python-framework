@@ -8,9 +8,6 @@ from python_framework.api.src.service.openapi.OpenApiValue import Value as v
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile
 from python_framework.api.src.service.openapi.OpenApiDocumentationFile import KW_OPEN_API, KW_RESOURCE, KW_UI
 
-COLON_DOUBLE_BAR = '://'
-LOCAL_HOST = 'localhost'
-
 KW_GET = 'get'
 KW_POST = 'post'
 KW_PUT = 'put'
@@ -32,6 +29,7 @@ ABLE_TO_RECIEVE_BODY_LIST = [
 ]
 
 DEFAULT_CONTENT_TYPE = 'application/json'
+MULTIPART_X_MIXED_REPLACE = 'multipart/x-mixed-replace'
 JSON_OBJECT_NAME = 'json'
 
 KW_API = 'api'
@@ -91,25 +89,25 @@ def newDocumentation(apiInstance, appInstance):
 def addInfo(apiInstance):
     globals = apiInstance.globals
     apiInstance.documentation[k.INFO] = {
-        k.TITLE : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_TITLE}'),
-        k.DESCRIPTION : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_DESCRIPTION}'),
-        k.VERSION : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_VERSION}'),
-        k.TERMS_OF_SERVICE : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_TERMS_OF_SERVICE}')
+        k.TITLE : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TITLE}'),
+        k.DESCRIPTION : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_DESCRIPTION}'),
+        k.VERSION : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_VERSION}'),
+        k.TERMS_OF_SERVICE : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TERMS_OF_SERVICE}')
     }
     addContact(globals, apiInstance.documentation)
     addLisence(globals, apiInstance.documentation)
 
 def addHostAndBasePath(apiInstance, appInstance):
     globals = apiInstance.globals
-    apiInstance.documentation[k.HOST] = globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_HOST}')
-    apiInstance.documentation[k.SCHEMES] = globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_SCHEMES}')
+    apiInstance.documentation[k.HOST] = globals.getSetting(f'{KW_OPEN_API}.{KW_HOST}')
+    apiInstance.documentation[k.SCHEMES] = globals.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}')
     apiInstance.documentation[k.BASE_PATH] = apiInstance.baseUrl
     # completeUrl = appInstance.test_request_context().request.host_url[:-1] ###- request.remote_addr
-    # apiInstance.documentation[k.HOST] = completeUrl.split(COLON_DOUBLE_BAR)[1]
-    # if LOCAL_HOST in apiInstance.documentation[k.HOST] :
+    # apiInstance.documentation[k.HOST] = completeUrl.split('://')[1]
+    # if 'localhost' in apiInstance.documentation[k.HOST] :
     #     apiInstance.documentation[k.HOST] = f'{apiInstance.documentation[k.HOST]}:5000'
     # apiInstance.documentation[k.BASE_PATH] = apiInstance.baseUrl
-    # apiInstance.documentation[k.SCHEMES] = [completeUrl.split(COLON_DOUBLE_BAR)[0]]
+    # apiInstance.documentation[k.SCHEMES] = [completeUrl.split('://')[0]]
 
 def addEndPointDocumentation(endPointUrl, controllerMethod, controller, apiInstance):
     url = getUrl(endPointUrl, apiInstance.baseUrl)
@@ -144,14 +142,14 @@ def getTagByTagName(tagName, documentation):
 
 def addContact(globals, documentation):
     documentation[k.INFO][k.CONTACT] = {
-        k.NAME : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_CONTACT}.{KW_NAME}'),
-        k.EMAIL : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_CONTACT}.{KW_EMAIL}')
+        k.NAME : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_CONTACT}.{KW_NAME}'),
+        k.EMAIL : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_CONTACT}.{KW_EMAIL}')
     }
 
 def addLisence(globals, documentation):
     documentation[k.INFO][k.LICENSE] = {
-        k.NAME : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_LICENSE}.{KW_NAME}'),
-        k.URL : globals.getSetting(f'{KW_API}.{KW_INFO}.{KW_LICENSE}.{KW_URL}')
+        k.NAME : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_LICENSE}.{KW_NAME}'),
+        k.URL : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_LICENSE}.{KW_URL}')
     }
 
 def addUrlIfNeeded(url, documentation):

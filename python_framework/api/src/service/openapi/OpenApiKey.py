@@ -1,4 +1,4 @@
-from python_framework.api.src.domain import HttpStatus
+from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 
 class Key:
     NAME = 'name'

@@ -1,0 +1,17 @@
+print-status: False
+database:
+    dialect: ${DATABASE_DIALECT:postgres}
+    username: ${DATABASE_USERNAME:urkmpryplscxaq}
+    password: ${DATABASE_PASSWORD:ee78f401df2016f74f7f537775169bfedee1423187150ba42ce9313b4a1b3cc3}
+    host: ${DATABASE_HOST:ec2-54-82-208-124.compute-1.amazonaws.com}
+    port: ${DATABASE_PORT:5432}
+    schema: ${DATABASE_SCHEMA:d16t4h30kmho90}
+
+
+environment:
+    database:
+        key: DATABASE_URL
+        value: ${database.dialect}://${database.username}:${database.password}@${database.host}:${database.port}/${database.schema}
+    active-environment:
+        key: ACTIVE_ENVIRONMENT
+        value: local
