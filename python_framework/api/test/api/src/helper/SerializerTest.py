@@ -1,6 +1,10 @@
-from python_helper import log, Test
+import json
+from python_helper import log, Test, RandomHelper, ReflectionHelper, ObjectHelper
 from python_framework import Serializer
 from python_framework import SqlAlchemyProxy as sap
+from MyDto import MyDto
+from MyOtherDto import MyOtherDto
+from MyThirdDto import MyThirdDto
 
 def generatorFunction() :
     while True :
@@ -52,19 +56,66 @@ class Child(MODEL) :
     brother, brotherId = sap.getOneToOneChild(__tablename__, BROTHER_NAME, MODEL)
 
 @Test()
-def Serializer_isModelTest() :
+def isModelTest() :
     assert False == Serializer.isModel(generatorFunction())
     assert False == Serializer.isModel(MyClass())
     assert True == Serializer.isModel(MyEntityClass())
 
 @Test()
-def Serializer_isJsonifyable() :
+def isJsonifyable() :
     assert False == Serializer.isJsonifyable(generatorFunction())
     assert True == Serializer.isJsonifyable(MyClass())
     assert True == Serializer.isJsonifyable(MyEntityClass())
 
 @Test()
-def Serializer_jsonifyIt() :
+def convertFromObjectToObject_whenTargetClassIsList() :
+    # arrange
+    a = RandomHelper.string()
+    b = RandomHelper.string()
+    c = RandomHelper.string()
+    otherA = MyOtherDto(RandomHelper.string())
+    otherB = MyOtherDto(RandomHelper.string())
+    otherC = MyOtherDto(RandomHelper.string())
+    myFirst = MyDto(RandomHelper.string(), otherA, [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), None), RandomHelper.integer())]), RandomHelper.integer())]), RandomHelper.integer())]), RandomHelper.integer())])
+    mySecond = MyDto(RandomHelper.string(), otherB, [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), None), RandomHelper.integer())]), RandomHelper.integer())]), RandomHelper.integer())]), RandomHelper.integer())])
+    myThird = MyDto(RandomHelper.string(), otherC, [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), [MyThirdDto(MyDto(RandomHelper.string(), MyOtherDto(RandomHelper.string()), None), RandomHelper.integer())]), RandomHelper.integer())]), RandomHelper.integer())]), RandomHelper.integer())])
+    thirdOne = RandomHelper.integer()
+    thirdTwo = RandomHelper.integer()
+    thirdThree = RandomHelper.integer()
+    myThirdOne = [MyThirdDto(myFirst, thirdOne)]
+    myThirdTwo = [MyThirdDto(mySecond, thirdTwo)]
+    myThirdThree = [MyThirdDto(myThird, thirdThree)]
+    expected = [MyDto(a, otherA, myThirdOne), MyDto(b, otherB, myThirdTwo), MyDto(c, otherC, myThirdThree)]
+    null = 'null'
+    inspectEquals = False
+
+    # act
+    toAssert = Serializer.convertFromObjectToObject(expected, [[MyDto]])
+    another = Serializer.convertFromObjectToObject([MyDto(a, otherA, [MyThirdDto(myFirst, thirdOne)]), MyDto(b, otherB, myThirdTwo), MyDto(c, otherC, myThirdThree)], [[MyDto]])
+    another[0].myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my = MyDto(
+        MyDto(RandomHelper.string(), None, None),
+        expected[0].myThirdList[0].my.myOther,
+        expected[0].myThirdList[0].my.myThirdList
+    )
+
+    # assert
+    assert expected == toAssert, f'{expected} == {toAssert}: {expected == toAssert}'
+    assert ObjectHelper.equals(expected, toAssert)
+    assert ObjectHelper.isNotNone(expected[0].myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my)
+    assert expected[0].myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my == toAssert[0].myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my
+    assert ObjectHelper.equals(expected[0].myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my, toAssert[0].myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my)
+    assert ObjectHelper.isNone(expected[0].myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList)
+    assert ObjectHelper.equals(expected[0].myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList, toAssert[0].myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList[0].my.myThirdList)
+    assert ObjectHelper.equals(json.loads(Serializer.jsonifyIt(expected)), json.loads(Serializer.jsonifyIt(toAssert))), f'ObjectHelper.equals({json.loads(Serializer.jsonifyIt(expected))},\n\n{json.loads(Serializer.jsonifyIt(toAssert))})'
+    assert False == (expected == another), f'False == ({expected} == {another}): False == {(expected == another)}'
+    assert False == ObjectHelper.equals(expected, another, muteLogs=not inspectEquals)
+    assert False == ObjectHelper.equals(another, expected, muteLogs=not inspectEquals)
+    assert False == ObjectHelper.equals(another, toAssert, muteLogs=not inspectEquals)
+    assert False == ObjectHelper.equals(toAssert, another, muteLogs=not inspectEquals)
+    assert str(expected) == str(toAssert), f'str({str(expected)}) == str({str(toAssert)}): {str(expected) == str(toAssert)}'
+
+@Test()
+def jsonifyIt() :
     assert '{"myString": "myValue", "myInteger": 0, "myFloat": 0.099}' == Serializer.jsonifyIt(MY_DICTIONARY)
 
     myGenerator = generatorFunction()

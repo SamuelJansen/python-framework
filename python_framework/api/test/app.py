@@ -3,11 +3,11 @@ globalsInstance = globals.newGlobalsInstance(__file__
     , settingStatus = True
     , successStatus = True
     , errorStatus = True
-    , debugStatus = False
-    , warningStatus = False
-    , wrapperStatus = False
-    , failureStatus = False
-    , logStatus = False
+    , debugStatus = True
+    , warningStatus = True
+    , wrapperStatus = True
+    , failureStatus = True
+    , logStatus = True
 )
 
 from python_framework import initialize

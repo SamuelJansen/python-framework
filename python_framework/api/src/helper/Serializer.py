@@ -1,4 +1,4 @@
-import json, importlib, globals
+import json, globals
 from python_helper import Constant as c
 from python_helper import StringHelper, ObjectHelper, log, ReflectionHelper
 from python_helper import Function
@@ -63,12 +63,25 @@ def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
     if isJsonifyable(instance) :
         # jsonCompleted = json.dumps(instance, cls=getJsonifier(classTree={}), check_circular = False)
         # return jsonCompleted.replace('}, null]','}]').replace('[null]','[]')
+        # print(f'getObjectAsDictionary(instance): {getObjectAsDictionary(instance)}')
         return json.dumps(getObjectAsDictionary(instance), check_circular = False)
     # log.debug(jsonifyIt, f'Not jsonifiable instance. Type: {getTypeName(instance)}')
     return instance
 
 @Function
-def serializeIt(fromJson, toClass) :
+def serializeIt(fromJson, toClass, fatherClass=None) :
+    # print(f'toClass: {toClass}')
+    if ObjectHelper.isDictionary(toClass) :
+        objectInstance = {}
+        for key, value in fromJson.items() :
+            innerToClass = getTargetClassFromFatherClassAndChildMethodName(fatherClass, childAttributeName)
+            objectInstance[key] = serializeIt(fromJson, innerToClass, fatherClass=fatherClass)
+        return objectInstance
+    # print()
+    # print()
+    # print(fromJson)
+    # print(f'fromJson: {fromJson}')
+    # print(f'toClass: {toClass}')
     if ObjectHelper.isNativeClassIsntance(fromJson) and toClass == fromJson.__class__ :
         return fromJson
     attributeNameList = getAttributeNameList(toClass)
@@ -81,8 +94,15 @@ def serializeIt(fromJson, toClass) :
         jsonAttributeValue = fromJson.get(attributeName)
         if ObjectHelper.isNotNone(jsonAttributeValue) :
             # print(f'jsonAttributeValue: {jsonAttributeValue}')
-            fromJsonToDictionary[attributeName] = resolveValue(jsonAttributeValue, attributeName, classRole)
-            # print(f'resolveValue({jsonAttributeValue}, {attributeName}, {classRole}): {fromJsonToDictionary[attributeName]}')
+            fromJsonToDictionary[attributeName] = resolveValue(jsonAttributeValue, attributeName, classRole, fatherClass=fatherClass)
+            # logList = [
+            #     f'jsonAttributeValue: {jsonAttributeValue}',
+            #     f'attributeName: {attributeName}',
+            #     f'classRole: {classRole}',
+            #     f'fromJsonToDictionary: {fromJsonToDictionary}',
+            #     f'toClass: {toClass}'
+            # ]
+            # log.prettyPython(serializeIt, 'logList', logList, logLevel=log.DEBUG)
         else :
             fromJsonToDictionary[attributeName] = jsonAttributeValue
         # if jsonAttributeValue :
@@ -102,29 +122,39 @@ def serializeIt(fromJson, toClass) :
         # print(f'args = {args}, kwargs = {kwargs}')
     if ObjectHelper.isNone(objectInstance) :
         raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class')
+    # print(objectInstance)
+    # print()
+    # print()
+    # if objectInstance is [] :
+    #     print(fromJson, toClass, fatherClass)
     return objectInstance
 
 @Function
-def convertFromJsonToObject(fromJson, toClass) :
-    if ObjectHelper.isDictionaryClass(toClass) and ObjectHelper.isDictionary(fromJson):
-        return fromJson
+def convertFromJsonToObject(fromJson, toClass, fatherClass=None) :
+    if ObjectHelper.isNone(fatherClass) :
+        fatherClass = toClass
+    if ObjectHelper.isDictionary(toClass):
+        objectInstance = {}
+        for key, value in fromJson.items() :
+            innerToClass = getTargetClassFromFatherClassAndChildMethodName(fatherClass, childAttributeName)
+            objectInstance[key] = convertFromJsonToObject(fromJson, innerToClass, fatherClass=fatherClass)
+        return objectInstance
     if isSerializerList(toClass) :
-        objectArgs = []
         for innerToObjectClass in toClass :
             if isSerializerList(innerToObjectClass) :
                 objectList = []
                 for fromJsonElement in fromJson :
-                    objectList.append(convertFromJsonToObject(fromJsonElement, innerToObjectClass[0]))
-                objectArgs.append(objectList)
+                    objectList.append(convertFromJsonToObject(fromJsonElement, innerToObjectClass[0], fatherClass=fatherClass))
+                return objectList
             else :
-                objectArgs.append(convertFromJsonToObject(fromJson, innerToObjectClass))
-        return objectArgs
+                return convertFromJsonToObject(fromJson, innerToObjectClass, fatherClass=fatherClass)
     else :
-        return serializeIt(fromJson, toClass)
+        return serializeIt(fromJson, toClass, fatherClass=fatherClass)
 
 @Function
 def convertFromObjectToObject(fromObject, toClass) :
     fromJson = json.loads(jsonifyIt(fromObject))
+    # log.prettyPython(convertFromObjectToObject, 'convertFromObjectToObject', fromJson, logLevel=log.DEBUG)
     return convertFromJsonToObject(fromJson, toClass)
 
 @Function
@@ -165,38 +195,42 @@ def isModel(thing) :
 def isModelClass(thingClass) :
     return isinstance(thingClass, DeclarativeMeta)
 
-def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedInstances=[]) :
+def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedIdInstances=None) :
+    # print(instance)
+    if ObjectHelper.isNone(visitedIdInstances) :
+        visitedIdInstances = []
     if ObjectHelper.isNativeClassIsntance(instance) or ObjectHelper.isNone(instance) :
         return instance
-    if instance not in visitedInstances :
-        innerVisitedInstances = visitedInstances.copy()
-        if ObjectHelper.isDictionary(instance) :
-            for key,value in instance.items() :
-                instance[key] = getObjectAsDictionary(value, visitedInstances=innerVisitedInstances)
-            return instance
-        elif isSerializerCollection(instance) :
-            objectValueList = []
-            for innerObject in instance :
-                innerAttributeValue = getObjectAsDictionary(innerObject, visitedInstances=innerVisitedInstances)
-                if ObjectHelper.isNotNone(innerAttributeValue) :
-                    objectValueList.append(innerAttributeValue)
-            return objectValueList
-        else :
-            jsonInstance = {}
-            try :
-                innerVisitedInstances.append(instance)
-                InstrumentedList
-                atributeNameList = getAttributeNameList(instance.__class__)
-                for attributeName in atributeNameList :
-                    attributeValue = getattr(instance, attributeName)
-                    if ReflectionHelper.isNotMethodInstance(attributeValue):
-                        jsonInstance[attributeName] = getObjectAsDictionary(attributeValue, visitedInstances=innerVisitedInstances)
-                    else :
-                        jsonInstance[attributeName] = None
-            except Exception as exception :
-                log.warning(getObjectAsDictionary, f'Not possible to get attribute name list from {ReflectionHelper.getName(ReflectionHelper.getClass(instance, muteLogs=True), muteLogs=True)}', exception=exception)
-            if jsonInstance :
-                return jsonInstance
+    # print(f'{instance} not in {visitedIdInstances}: {instance not in visitedIdInstances}')
+    isVisitedInstance = id(instance) in visitedIdInstances
+    innerVisitedIdInstances = [*visitedIdInstances.copy()]
+    if ObjectHelper.isDictionary(instance) and not isVisitedInstance :
+        for key,value in instance.items() :
+            instance[key] = getObjectAsDictionary(value, visitedIdInstances=innerVisitedIdInstances)
+        return instance
+    elif isSerializerCollection(instance) :
+        objectValueList = []
+        for innerObject in instance :
+            innerAttributeValue = getObjectAsDictionary(innerObject, visitedIdInstances=innerVisitedIdInstances)
+            if ObjectHelper.isNotNone(innerAttributeValue) :
+                objectValueList.append(innerAttributeValue)
+        return objectValueList
+    elif not isVisitedInstance :
+        jsonInstance = {}
+        try :
+            # print(id(instance))
+            innerVisitedIdInstances.append(id(instance))
+            atributeNameList = getAttributeNameList(instance.__class__)
+            for attributeName in atributeNameList :
+                attributeValue = getattr(instance, attributeName)
+                if ReflectionHelper.isNotMethodInstance(attributeValue):
+                    jsonInstance[attributeName] = getObjectAsDictionary(attributeValue, visitedIdInstances=innerVisitedIdInstances)
+                else :
+                    jsonInstance[attributeName] = None
+        except Exception as exception :
+            log.warning(getObjectAsDictionary, f'Not possible to get attribute name list from {ReflectionHelper.getName(ReflectionHelper.getClass(instance, muteLogs=True), muteLogs=True)}', exception=exception)
+        if jsonInstance :
+            return jsonInstance
 
 def getClassRole(instanceClass) :
     if DTO_SUFIX == ReflectionHelper.getName(instanceClass)[-len(DTO_SUFIX):] :
@@ -209,7 +243,7 @@ def getClassRole(instanceClass) :
         return c.UNDERSCORE.join(sufixList)
     return MODEL_CLASS_ROLE
 
-def getDtoClassFromFatherClassAndChildMethodName(fatherClass, childAttributeName):
+def getTargetClassFromFatherClassAndChildMethodName(fatherClass, childAttributeName):
     classRole = getClassRole(fatherClass)
     dtoClassName = getResourceName(childAttributeName, classRole)
     dtoModuleName  = getResourceModuleName(childAttributeName, classRole)
@@ -235,7 +269,9 @@ def getResourceModuleName(key, classRole) :
         resourceModuleName += DTO_SUFIX
     return resourceModuleName
 
-def resolveValue(value, key, classRole) :
+def resolveValue(value, key, classRole, fatherClass=None) :
+    if ObjectHelper.isNativeClassIsntance(value) :
+        return value
     if ObjectHelper.isList(value) :
         if LIST_SUFIX == key[-4:] :
             resourceName = getResourceName(key, classRole)
@@ -244,7 +280,13 @@ def resolveValue(value, key, classRole) :
             convertedValue = []
             for jsonItem in value :
                 if jsonItem :
-                    convertedItem = convertFromJsonToObject(jsonItem,keyClass)
+                    convertedItem = convertFromJsonToObject(jsonItem, keyClass, fatherClass=fatherClass)
                     convertedValue.append(convertedItem)
             return convertedValue
-    return value
+    resourceName = getResourceName(key, classRole)
+    resourceModuleName = getResourceModuleName(key, classRole)
+    keyClass = globals.importResource(resourceName, resourceModuleName=resourceModuleName)
+    if ObjectHelper.isNone(keyClass) :
+        return value
+    else :
+        return convertFromJsonToObject(value, keyClass, fatherClass=fatherClass)

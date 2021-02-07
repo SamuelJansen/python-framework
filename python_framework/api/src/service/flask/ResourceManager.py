@@ -190,7 +190,7 @@ class FlaskResource:
 def addResourceAttibutes(apiInstance) :
     ReflectionHelper.setAttributeOrMethod(apiInstance, FlaskManager.KW_RESOURCE, FlaskResource())
     for resourceName in FlaskManager.KW_RESOURCE_LIST :
-        ReflectionHelper.setAttributeOrMethod(apiInstance.resource, resourceName.lower(), FlaskResource())
+        ReflectionHelper.setAttributeOrMethod(apiInstance.resource, f'{resourceName[0].lower()}{resourceName[1:]}', FlaskResource())
 
 @Function
 def addFlaskApiResources(

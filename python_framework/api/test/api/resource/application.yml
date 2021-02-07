@@ -25,7 +25,7 @@ swagger:
     host: ${api.server.host}:${api.server.port}${api.server.base-url}
     schemes: [${api.server.scheme}]
     info:
-        title: TestApi
+        title: {api.name}
         version: 0.0.1
         description: description
         terms-of-service: http://swagger.io/terms/

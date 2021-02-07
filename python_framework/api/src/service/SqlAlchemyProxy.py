@@ -56,8 +56,8 @@ def getManyToMany(sister, brother, refferenceModel) :
     # featureList = relationship(FEATURE, secondary=featureToSampleAssociation, back_populates=attributeIt(f'{__tablename__}{LIST}'))
     # sampleList = relationship(SAMPLE, secondary=featureToSampleAssociation, back_populates=attributeIt(f'{__tablename__}{LIST}'))
     manySisterToManyBrother = Table(f'{sister}{MANY_TO_MANY}{brother}', refferenceModel.metadata,
-        Column(f'{attributeIt(sister)}{ID}', Integer(), ForeignKey(f'{sister}.{attributeIt(ID)}')),
-        Column(f'{attributeIt(brother)}{ID}', Integer(), ForeignKey(f'{brother}.{attributeIt(ID)}')))
+        Column(f'{attributeIt(sister)}{ID}', Integer(), ForeignKey(f'{sister}{c.DOT}{attributeIt(ID)}')),
+        Column(f'{attributeIt(brother)}{ID}', Integer(), ForeignKey(f'{brother}{c.DOT}{attributeIt(ID)}')))
     sisterList = relationship(sister, secondary=manySisterToManyBrother, back_populates=attributeIt(f'{brother}{LIST}'))
     brotherList = relationship(brother, secondary=manySisterToManyBrother, back_populates=attributeIt(f'{sister}{LIST}'))
     ### sister recieves the brotherList
@@ -70,7 +70,7 @@ def getOneToMany(owner, pet, refferenceModel) :
 
 @Function
 def getManyToOne(pet, owner, refferenceModel) :
-    ownerId = Column(Integer(), ForeignKey(f'{owner}.{attributeIt(ID)}'))
+    ownerId = Column(Integer(), ForeignKey(f'{owner}{c.DOT}{attributeIt(ID)}'))
     owner = relationship(owner, back_populates=attributeIt(f'{pet}{LIST}'))
     return owner, ownerId
 
@@ -81,7 +81,7 @@ def getOneToOneParent(parent, child, refferenceModel) :
 
 @Function
 def getOneToOneChild(child, parent, refferenceModel) :
-    parentId = Column(Integer(), ForeignKey(f'{parent}.{attributeIt(ID)}'))
+    parentId = Column(Integer(), ForeignKey(f'{parent}{c.DOT}{attributeIt(ID)}'))
     parentAttribute = relationship(parent, back_populates=attributeIt(child))
     return parentAttribute, parentId
 
@@ -116,7 +116,7 @@ class SqlAlchemyProxy:
 
         self.globals = globals
         self.sqlalchemy = sqlalchemy
-        dialect = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_DIALECT}')
+        dialect = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_REPOSITORY}{c.DOT}{self.KW_REPOSITORY_DIALECT}')
         self.engine = self.getNewEngine(dialect, echo, checkSameThread)
         self.session = scoped_session(sessionmaker(self.engine)) ###- sessionmaker(bind=self.engine)()
         self.model = model
@@ -145,20 +145,20 @@ class SqlAlchemyProxy:
             name = None
         else :
             url = c.NOTHING
-            user = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_USER}')
-            password = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_PASSWORD}')
-            host = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_HOST}')
-            port = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_PORT}')
-            name = self.globals.getSetting(f'{self.KW_API}.{self.KW_REPOSITORY}.{self.KW_REPOSITORY_DATABASE}')
+            user = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_REPOSITORY}{c.DOT}{self.KW_REPOSITORY_USER}')
+            password = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_REPOSITORY}{c.DOT}{self.KW_REPOSITORY_PASSWORD}')
+            host = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_REPOSITORY}{c.DOT}{self.KW_REPOSITORY_HOST}')
+            port = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_REPOSITORY}{c.DOT}{self.KW_REPOSITORY_PORT}')
+            name = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_REPOSITORY}{c.DOT}{self.KW_REPOSITORY_DATABASE}')
             if isNeitherNoneNorBlank(user) and isNeitherNoneNorBlank(password) :
                 url += f'{user}{c.COLON}{password}'
             if isNeitherNoneNorBlank(host) and isNeitherNoneNorBlank(port) :
                 url += f'{c.ARROBA}{host}{c.COLON}{port}'
             url += c.SLASH
-            name = f'{name}.{self.EXTENSION}' if isNeitherNoneNorBlank(name) else self.DEFAULT_LOCAL_STORAGE_NAME
+            name = f'{name}{c.DOT}{self.EXTENSION}' if isNeitherNoneNorBlank(name) else f'{self.DEFAULT_LOCAL_STORAGE_NAME if ObjectHelper.isNone(self.globals.apiName) else self.globals.apiName}{c.DOT}{self.EXTENSION}'
             if not isNeitherNoneNorBlank(dialect) :
                 dialect = self.DEFAULT_DIALECT
-            url = f'{dialect}:{c.DOUBLE_SLASH}{url}{name}'
+            url = f'{dialect}{c.COLON}{c.DOUBLE_SLASH}{url}{name}'
         if SettingHelper.activeEnvironmentIsLocal() :
             log.prettyPython(self.getUrl, 'Database coniguations', {
                 'dialect' : dialect,
@@ -168,7 +168,7 @@ class SqlAlchemyProxy:
                 'port' : port,
                 'name' : name,
                 'url' : url
-            }, logLevel=log.SETTING)
+            }, logLevel = log.SETTING)
         return url
 
     def getConnectArgs(self, url, checkSameThread) :

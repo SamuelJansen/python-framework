@@ -345,7 +345,7 @@ def addSecurity(verb, url, roleRequired, documentation):
 
 
 def getNullableChildDtoClass(attributeName, dtoClass, verb, url, documentation):
-    childDtoClass = Serializer.getDtoClassFromFatherClassAndChildMethodName(dtoClass, attributeName)
+    childDtoClass = Serializer.getTargetClassFromFatherClassAndChildMethodName(dtoClass, attributeName)
     if childDtoClass :
         addDtoToUrlVerb(verb, url, childDtoClass, documentation)
     return childDtoClass
