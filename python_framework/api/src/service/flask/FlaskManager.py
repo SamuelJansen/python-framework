@@ -141,16 +141,16 @@ def publicControllerMethod(args, kwargs, contentType, resourceInstance, resource
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType)
         if logRequest :
-            print(f'logRequest: {logRequest}')
-            log.printDebug(
-                f'"bodyRequest" : {StringHelper.prettyJson(requestBodyAsJson, withColors=SettingHelper.activeEnvironmentIsLocal())}',
+            log.prettyJson(
+                log.prettyJson,
+                'bodyRequest',
+                requestBodyAsJson,
                 condition = logRequest,
-                margin = False,
-                newLine = False
+                logLevel = log.DEBUG
             )
         if Serializer.requestBodyIsPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
-            args = getArgsWithSerializerReturnAppended(serializerReturn, args, isControllerMethod=True)
+            args = getArgsWithSerializerReturnAppended(serializerReturn, args)
     response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
     if response and Serializer.isSerializerCollection(response) and 2 == len(response) :
         return response
@@ -161,16 +161,9 @@ def jsonifyResponse(response, contentType, status) :
     return Response(Serializer.jsonifyIt(response),  mimetype=contentType, status=status)
 
 @Function
-def appendArgs(args, argument, isControllerMethod=False) :
-    if isControllerMethod and Serializer.isSerializerList(argument) :
-        return args + argument
-    args.append(argument)
-    return args
-
-@Function
-def getArgsWithSerializerReturnAppended(argument, args, isControllerMethod=False) :
+def getArgsWithSerializerReturnAppended(argument, args) :
     args = [arg for arg in args]
-    args = appendArgs(args, argument, isControllerMethod=isControllerMethod)
+    args.append(argument)
     return tuple(arg for arg in args)
 
 @Function
@@ -263,7 +256,6 @@ def ControllerMethod(
     logRequest = False,
     logResponse = False
 ):
-
     controllerMethodUrl = url
     controllerMethodRequestClass = requestClass
     controllerMethodResponseClass = responseClass
@@ -300,11 +292,12 @@ def ControllerMethod(
             controllerResponse = completeResponse[0]
             status = completeResponse[1]
             if logResponse :
-                log.printDebug(
-                    f'"bodyResponse" : {StringHelper.prettyJson(json.loads(Serializer.jsonifyIt(controllerResponse)), withColors=SettingHelper.activeEnvironmentIsLocal())}',
+                log.prettyJson(
+                    log.prettyJson,
+                    'bodyResponse',
+                    json.loads(Serializer.jsonifyIt(controllerResponse)),
                     condition = logResponse,
-                    margin = False,
-                    newLine = False
+                    logLevel = log.DEBUG
                 )
             return jsonifyResponse(controllerResponse, produces, status)
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)

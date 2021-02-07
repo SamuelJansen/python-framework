@@ -71,12 +71,13 @@ def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
 @Function
 def serializeIt(fromJson, toClass, fatherClass=None) :
     # print(f'toClass: {toClass}')
-    if ObjectHelper.isDictionary(toClass) :
-        objectInstance = {}
-        for key, value in fromJson.items() :
-            innerToClass = getTargetClassFromFatherClassAndChildMethodName(fatherClass, childAttributeName)
-            objectInstance[key] = serializeIt(fromJson, innerToClass, fatherClass=fatherClass)
-        return objectInstance
+    if ObjectHelper.isDictionary(fromJson) and ObjectHelper.isDictionaryClass(toClass) :
+        # objectInstance = {}
+        # for key, value in fromJson.items() :
+        #     innerToClass = getTargetClassFromFatherClassAndChildMethodName(fatherClass, key)
+        #     objectInstance[key] = serializeIt(fromJson, innerToClass, fatherClass=fatherClass)
+        # return objectInstance
+        return fromJson
     # print()
     # print()
     # print(fromJson)
@@ -133,18 +134,13 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
 def convertFromJsonToObject(fromJson, toClass, fatherClass=None) :
     if ObjectHelper.isNone(fatherClass) :
         fatherClass = toClass
-    if ObjectHelper.isDictionary(toClass):
-        objectInstance = {}
-        for key, value in fromJson.items() :
-            innerToClass = getTargetClassFromFatherClassAndChildMethodName(fatherClass, childAttributeName)
-            objectInstance[key] = convertFromJsonToObject(fromJson, innerToClass, fatherClass=fatherClass)
-        return objectInstance
     if isSerializerList(toClass) :
         for innerToObjectClass in toClass :
             if isSerializerList(innerToObjectClass) :
                 objectList = []
                 for fromJsonElement in fromJson :
                     objectList.append(convertFromJsonToObject(fromJsonElement, innerToObjectClass[0], fatherClass=fatherClass))
+                # print(f'convertFromJsonToObject: {objectList}')
                 return objectList
             else :
                 return convertFromJsonToObject(fromJson, innerToObjectClass, fatherClass=fatherClass)
