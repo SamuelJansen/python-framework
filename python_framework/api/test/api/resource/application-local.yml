@@ -7,6 +7,11 @@ api:
         host: localhost
     security:
         secret: ${SECURITY_KEY:local-secret-key}
+    database:
+        dialect: ${:sqlite}
+        # settings: {'check_same_thread':False}
+        url: ${DATABASE_URL:}
+
 
 
 swagger:

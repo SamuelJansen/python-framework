@@ -110,28 +110,34 @@ def addHostAndBasePath(apiInstance, appInstance):
     # apiInstance.documentation[k.SCHEMES] = [completeUrl.split('://')[0]]
 
 def addEndPointDocumentation(endPointUrl, controllerMethod, controller, apiInstance):
-    url = getUrl(endPointUrl, apiInstance.baseUrl)
-    addUrlIfNeeded(url, apiInstance.documentation)
-    verb = controllerMethod.__name__
-    if verb in [KW_GET, KW_POST, KW_PUT, KW_DELETE, KW_PATCH] :
-        addVerb(verb, url, apiInstance.documentation)
-        addTagToUrlVerb(verb, url, controller.tag, apiInstance.documentation)
-        addConsumesAndProducesToUrlVerb(verb, url, controllerMethod.consumes, controllerMethod.produces, apiInstance.documentation)
-        addSecurity(verb, url, controllerMethod.roleRequired, apiInstance.documentation)
-        addUrlParamListToUrlVerb(verb, url, endPointUrl, apiInstance.documentation)
-        addRequestToUrlVerb(verb, url, controllerMethod.requestClass, apiInstance.documentation)
-        addResponseToUrlVerb(verb, url, controllerMethod.responseClass, apiInstance.documentation)
+    try :
+        url = getUrl(endPointUrl, apiInstance.baseUrl)
+        addUrlIfNeeded(url, apiInstance.documentation)
+        verb = ReflectionHelper.getName(controllerMethod, muteLogs=True)
+        if verb in [KW_GET, KW_POST, KW_PUT, KW_DELETE, KW_PATCH] :
+            addVerb(verb, url, apiInstance.documentation)
+            addTagToUrlVerb(verb, url, controller.tag, apiInstance.documentation)
+            addConsumesAndProducesToUrlVerb(verb, url, controllerMethod.consumes, controllerMethod.produces, apiInstance.documentation)
+            addSecurity(verb, url, controllerMethod.roleRequired, apiInstance.documentation)
+            addUrlParamListToUrlVerb(verb, url, endPointUrl, apiInstance.documentation)
+            addRequestToUrlVerb(verb, url, controllerMethod.requestClass, apiInstance.documentation)
+            addResponseToUrlVerb(verb, url, controllerMethod.responseClass, apiInstance.documentation)
+    except Exception as exception :
+        log.failure(addEndPointDocumentation, 'Not possible to add end point documentation', exception)
 
 def addControllerDocumentation(controller, apiInstance) :
-    tag = getTagByTagName(controller.tag, apiInstance.documentation)
-    if not tag :
-        apiInstance.documentation[k.TAGS].append({
-            k.NAME : controller.tag,
-            k.DESCRIPTION : controller.description,
-            k.EXTERNAL_DOCS : None
-        })
-    else :
-        tag[k.DESCRIPTION] += f'. {controller.description}'
+    try :
+        tag = getTagByTagName(controller.tag, apiInstance.documentation)
+        if not tag :
+            apiInstance.documentation[k.TAGS].append({
+                k.NAME : controller.tag,
+                k.DESCRIPTION : controller.description,
+                k.EXTERNAL_DOCS : None
+            })
+        else :
+            tag[k.DESCRIPTION] += f'. {controller.description}'
+    except Exception as exception :
+        log.failure(addControllerDocumentation, 'Not possible to add controller documentation', exception)
 
 ################################################################################
 
@@ -226,7 +232,7 @@ def getUrl(endPointUrl, baseUrl):
 def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=None):
     if dtoClass :
         if not isinstance(dtoClass, list) :
-            if not c.TYPE_DICT == dtoClass.__name__ :
+            if not c.TYPE_DICT == ReflectionHelper.getName(dtoClass, muteLogs=True) :
                 dtoName = getDtoDocumentationName(dtoClass)
                 if KW_REQUEST == where :
                     documentation[k.PATHS][url][verb][k.PARAMETERS].append({
@@ -314,7 +320,7 @@ def getDtoDocumentationName(objectClass) :
     if ObjectHelper.isDictionaryClass(objectClass) :
         return JSON_OBJECT_NAME
     else:
-        return objectClass.__name__
+        return ReflectionHelper.getName(objectClass, muteLogs=True)
 
 def getDtoSchema(attributeName, attributeType, dtoClass):
     if dtoClass :
@@ -347,5 +353,8 @@ def addSecurity(verb, url, roleRequired, documentation):
 def getNullableChildDtoClass(attributeName, dtoClass, verb, url, documentation):
     childDtoClass = Serializer.getTargetClassFromFatherClassAndChildMethodName(dtoClass, attributeName)
     if childDtoClass :
-        addDtoToUrlVerb(verb, url, childDtoClass, documentation)
+        if ReflectionHelper.getName(type(type)) == ReflectionHelper.getName(type(childDtoClass)) :
+            addDtoToUrlVerb(verb, url, childDtoClass, documentation)
+        else :
+            addDtoToUrlVerb(verb, url, type(childDtoClass), documentation)
     return childDtoClass

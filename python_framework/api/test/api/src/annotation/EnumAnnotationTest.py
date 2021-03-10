@@ -1,5 +1,5 @@
 import time
-from python_helper import log, Test, SettingHelper, RandomHelper
+from python_helper import log, Test, SettingHelper, RandomHelper, ObjectHelper
 from python_framework import Enum, EnumItem
 from python_framework import HttpStatus, ActuatorHealthStatus
 
@@ -228,7 +228,8 @@ def enum_withSuccess() :
     }
 )
 def otherEnum_withSuccess() :
-    @Enum(associateReturnsTo='value', instanceLog=True)
+    # arrange
+    @Enum(associateReturnsTo='value', instanceLog=False)
     class MyOtherEnumTest :
         ONE = EnumItem(value=1)
         TWO = EnumItem(value=2)
@@ -263,3 +264,104 @@ def python_framework_status() :
     # assert
     assert 200 == HttpStatus.OK
     assert 'UP' == ActuatorHealthStatus.UP
+
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **LOG_HELPER_SETTINGS
+    }
+)
+def enumName() :
+    # arrange
+    @Enum(associateReturnsTo='value', instanceLog=False)
+    class MyOtherEnumTest :
+        ONE = EnumItem(value=1, otherValue='1')
+        TWO = EnumItem(value=2, otherValue='1')
+        THREE = EnumItem(value=3, otherValue='1')
+    @Enum(associateReturnsTo='value', instanceLog=False)
+    class MyThirdEnumTest :
+        ONE = EnumItem(value=4, otherValue='1')
+        TWO = EnumItem(value=5, otherValue='1')
+        THREE = EnumItem(value=6, otherValue='1')
+    ITS_NAME = RandomHelper.string(minimum=5, maximum=10)
+    A_NAME = RandomHelper.string(minimum=5, maximum=10)
+    TEST_NAME = RandomHelper.string(minimum=5, maximum=10)
+    ITS_LABEL = RandomHelper.string(minimum=5, maximum=10)
+    A_LABEL = RandomHelper.string(minimum=5, maximum=10)
+    TEST_LABEL = RandomHelper.string(minimum=5, maximum=10)
+    ITS_NUMERIC = RandomHelper.integer(minimum=5, maximum=1000)
+    A_NUMERIC = RandomHelper.integer(minimum=5, maximum=1000)
+    TEST_NUMERIC = RandomHelper.integer(minimum=5, maximum=1000)
+    ITS_VALUE = 'ITS'
+    A_VALUE = 'A'
+    TEST_VALUE = 'TEST'
+    @Enum()
+    class MyEnumTest :
+        ITS = EnumItem(name=ITS_NAME, label=ITS_LABEL, numeric=ITS_NUMERIC)
+        A = EnumItem(name=A_NAME, label=A_LABEL, numeric=A_NUMERIC)
+        TEST = EnumItem(name=TEST_NAME, label=TEST_LABEL, numeric=TEST_NUMERIC)
+    MY_ENUM_TEST = MyEnumTest()
+
+    # act
+    enumType = MY_ENUM_TEST
+
+    # assert
+    assert 'OK' == HttpStatus.OK.enumName
+    assert 'ONE' == MyOtherEnumTest().ONE.enumName
+    assert 'ONE' == MyOtherEnumTest.ONE.enumName
+    assert 1 == MyOtherEnumTest.ONE
+    assert MyEnumTest.map(MY_ENUM_TEST.ITS.enumValue) == MY_ENUM_TEST.ITS
+    assert MyEnumTest.map(MY_ENUM_TEST.ITS) == MY_ENUM_TEST.ITS
+    assert MyOtherEnumTest.map(MyOtherEnumTest.ONE.enumValue) == MyOtherEnumTest.ONE
+    assert MyOtherEnumTest.map(MyOtherEnumTest.ONE) == MyOtherEnumTest.ONE
+    assert MyOtherEnumTest.map('ONE') == MyOtherEnumTest.ONE.enumValue
+    assert MyOtherEnumTest.map('ONE') == MyOtherEnumTest.ONE
+    assert MY_ENUM_TEST.map('TEST') == MyEnumTest.TEST.enumValue
+    assert MY_ENUM_TEST.map('TEST') == MyEnumTest.TEST
+    assert MyEnumTest == type(enumType)
+
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **LOG_HELPER_SETTINGS
+    }
+)
+def enumName_badImplementation() :
+    # arrange
+    @Enum(associateReturnsTo='value', instanceLog=False)
+    class MyOtherEnumTest :
+        ONE = EnumItem(value='ONE', otherValue=1)
+        TWO = EnumItem(value='TWO', otherValue=2)
+    MY_OTHER_ENUM_TEST = MyOtherEnumTest()
+    firstTestExteption = None
+    secondTestExteption = None
+    thirdTestExteption = None
+    @Enum(associateReturnsTo='value', instanceLog=False)
+    class MyThirdEnumTest :
+        ONE = EnumItem(value='ONE', otherValue=1)
+
+    # act
+    try :
+        @Enum(associateReturnsTo='value', instanceLog=False)
+        class MyEnumTest :
+            ONE = EnumItem(value='ONE', otherValue=1)
+            TWO = EnumItem(value='ONE', otherValue=2)
+        MyEnumTest()
+    except Exception as e :
+        firstTestExteption = e
+    try:
+        MY_OTHER_ENUM_TEST.map('another')
+    except Exception as e :
+        secondTestExteption = e
+    try :
+        '1' == MyThirdEnumTest.ONE
+    except Exception as e :
+        thirdTestExteption = e
+
+    # assert
+    assert '''Not possible to implement "ONE" enum value in MyEnumTest: [
+    ONE(value:ONE)
+] enum''' == str(firstTestExteption)
+    assert '''Not possible to retrieve "another" enum value from MyOtherEnumTest: [
+    ONE(value:ONE),
+    TWO(value:TWO)
+] enum''' == str(secondTestExteption)
+    assert "'EnumItem' object has no attribute 'enumValue'" == str(thirdTestExteption)

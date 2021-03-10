@@ -13,3 +13,11 @@ class MyController:
     )
     def post(self, requestBodyList):
         return requestBodyList[0], HttpStatus.OK
+
+    @ControllerMethod(
+        url = '/other-url',
+        logRequest = True,
+        logResponse = True
+    )
+    def get(self):
+        return None, HttpStatus.OK

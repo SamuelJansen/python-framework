@@ -84,7 +84,7 @@ def initialize(
     , logStatus = False
 ) :
     if ObjectHelper.isNone(apiInstance) :
-        globalsInstance = globals.newGlobalsInstance(
+        globalsInstance = runGlobals(
             filePath
             , successStatus = successStatus
             , settingStatus = settingStatus
@@ -204,7 +204,7 @@ def bindResource(apiInstance,resourceInstance) :
 
 @Function
 def validateArgs(args, requestClass, method) :
-    if requestClass :
+    if ObjectHelper.isNotNone(requestClass) :
         resourceInstance = args[0]
         if Serializer.isSerializerList(requestClass) :
             for index in range(len(requestClass)) :
@@ -231,13 +231,13 @@ def Controller(
     controllerTag = tag
     controllerDescription = description
     def Wrapper(OuterClass,*args,**kwargs):
-        log.wraper(Controller, f'''wrapping {OuterClass.__name__}''', None)
+        log.debug(Controller, f'''wrapping {OuterClass.__name__}''', None)
         class InnerClass(OuterClass,flask_restful.Resource):
             url = controllerUrl
             tag = controllerTag
             description = controllerDescription
             def __init__(self,*args,**kwargs):
-                log.wraper(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})', None)
+                log.debug(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})', None)
                 OuterClass.__init__(self)
                 flask_restful.Resource.__init__(self,*args,**kwargs)
                 self.service = getApi().resource.service
@@ -265,7 +265,7 @@ def ControllerMethod(
     controllerMethodLogRequest = logRequest
     controllerMethodLogResponse = logResponse
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
-        log.wraper(ControllerMethod, f'''wrapping {resourceInstanceMethod.__name__}''', None)
+        log.debug(ControllerMethod, f'''wrapping {resourceInstanceMethod.__name__}''', None)
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
             try :
@@ -289,7 +289,7 @@ def ControllerMethod(
                 ###- request.full_path:           /alert/dingding/test?x=y
                 ###- request.args:                ImmutableMultiDict([('x', 'y')])
                 ###- request.args.get('x'):       y
-            controllerResponse = completeResponse[0]
+            controllerResponse = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : completeResponse[1].enumName}
             status = completeResponse[1]
             if logResponse :
                 log.prettyJson(
@@ -336,7 +336,7 @@ def Service() :
 @Function
 def ServiceMethod(requestClass=None):
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
-        log.debug(ServiceMethod,f'''innerMethodWrapper wraped {resourceInstanceMethod.__name__}''')
+        log.debug(ServiceMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
             try :
@@ -365,7 +365,7 @@ def Client() :
 @Function
 def ClientMethod(requestClass=None):
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
-        log.debug(ClientMethod,f'''innerMethodWrapper wraped {resourceInstanceMethod.__name__}''')
+        log.debug(ClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
             try :

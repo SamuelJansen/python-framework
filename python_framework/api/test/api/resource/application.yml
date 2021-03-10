@@ -20,6 +20,8 @@ api:
         host: 127.0.0.1
         port: 5050
         base-url: /test-api
+    database:
+        url: ${DATABASE_URL:}
 
 swagger:
     host: ${api.server.host}:${api.server.port}${api.server.base-url}

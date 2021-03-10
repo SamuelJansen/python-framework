@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Api
 from python_helper import Constant as c
-from python_helper import log, Function, ReflectionHelper, SettingHelper, ObjectHelper
+from python_helper import log, Function, ReflectionHelper, SettingHelper, ObjectHelper, StringHelper
 import globals
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.flask import FlaskManager
@@ -10,6 +10,30 @@ from python_framework.api.src.service import Security
 from python_framework.api.src.service.openapi import OpenApiManager
 
 DOT_PY = '.py'
+PYTHON_FRAMEWORK_MODULE_NAME = 'python_framework'
+PYTHON_FRAMEWORK_RESOURCE_NAME_LIST = {
+    'controller' : [
+        'ActuatorHealthController'
+    ],
+    'service' : [
+        'ActuatorHealthService'
+    ],
+    'repository' : [
+        'ActuatorHealthRepository'
+    ],
+    'converter' : [
+        'ActuatorHealthConverter'
+    ]
+}
+
+def isFromPythonFramework(apiInstance, resourceType, resourceName) :
+    return not (resourceName in PYTHON_FRAMEWORK_RESOURCE_NAME_LIST.get(resourceType, []) and not PYTHON_FRAMEWORK_MODULE_NAME == apiInstance.apiName)
+
+def getResourceModuleName(apiInstance, resourceType, resourceName) :
+    return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else f'{PYTHON_FRAMEWORK_MODULE_NAME}{c.DOT}{resourceName}'
+
+def isControllerResourceName(resourceName) :
+    return FlaskManager.KW_CONTROLLER_RESOURCE == resourceName[-len(FlaskManager.KW_CONTROLLER_RESOURCE):]
 
 @Function
 def getResourceName(resourceFileName) :
@@ -42,11 +66,11 @@ def getControllerNameList(controllerName) :
     return controllerNameList
 
 @Function
-def getControllerList(resourceName):
+def getControllerList(resourceName, resourceModuleName) :
     controllerNameList = getControllerNameList(resourceName)
     importedControllerList = []
     for controllerName in controllerNameList :
-        resource = globals.importResource(controllerName, resourceModuleName=resourceName)
+        resource = globals.importResource(controllerName, resourceModuleName=resourceModuleName)
         if resource :
             importedControllerList.append(resource)
     return importedControllerList
@@ -59,14 +83,13 @@ def getResourceList(apiInstance, resourceType) :
     )
     resourceList = []
     for resourceName in resourceNameList :
-        if FlaskManager.KW_CONTROLLER_RESOURCE == resourceName[-len(FlaskManager.KW_CONTROLLER_RESOURCE):] :
-            resourceList += getControllerList(resourceName)
+        if isControllerResourceName(resourceName) :
+            resourceList += getControllerList(resourceName, resourceModuleName=getResourceModuleName(apiInstance, resourceType, resourceName))
         else :
-            resource = globals.importResource(resourceName)
+            resource = globals.importResource(resourceName, resourceModuleName=getResourceModuleName(apiInstance, resourceType, resourceName))
             if resource :
                 resourceList.append(resource)
     return resourceList
-
 
 @Function
 def addGlobalsTo(apiInstance) :
@@ -81,27 +104,6 @@ def initialize(
     refferenceModel,
 ) :
 
-    # # bluePrint = Blueprint('feature-manager', __name__, url_prefix='/api/')
-    # # api = Api(version='1.0', title='Feature dataset manager', description='A feature manager api')
-    # # ns = api.namespace('test', description='Just a test')
-    # # app = Flask(rootName)
-    # # app.register_blueprint(api)
-    #
-    # from werkzeug.contrib.fixers import ProxyFix
-    # app = Flask(rootName)
-    # # app.wsgi_app = ProxyFix(app.wsgi_app)
-    # api = Api(app, version='1.0', title='Feature dataset manager', description='A feature manager api')
-    # # ns = api.namespace('test', description='Just a test')
-    #
-    # # from flask import Blueprint
-    # # from flask_restplus import Namespace
-    # #
-    # # blueprint = Blueprint('api', rootName, url_prefix='/api')
-    # # api = Api(blueprint)
-    # # global_namespace = Namespace('global', path='/global')
-    # # api.add_namespace(global_namespace)
-    # # app = Flask(__name__)
-    # # app.register_blueprint(blueprint, url_prefix='')
     app = Flask(rootName)
     api = Api(app)
     addGlobalsTo(api)
@@ -124,12 +126,14 @@ def addControllerListTo(apiInstance, controllerList) :
         OpenApiManager.addControllerDocumentation(controller, apiInstance)
         mainUrl = f'{apiInstance.baseUrl}{controller.url}'
         urlList = [mainUrl]
+        infoList = [f'Controller: {mainUrl}']
         controllerMethodList = ReflectionHelper.getAttributePointerList(controller)
         for controllerMethod in controllerMethodList :
-            if hasattr(controllerMethod, FlaskManager.KW_URL) and ObjectHelper.isNotEmpty(controllerMethod.url) :
+            if ReflectionHelper.hasAttributeOrMethod(controllerMethod, FlaskManager.KW_URL) and ObjectHelper.isNotEmpty(controllerMethod.url) :
                 controllerUrl = f'{mainUrl}{controllerMethod.url}'
                 if controllerUrl not in urlList :
                     urlList.append(controllerUrl)
+                    infoList.append(f'{c.TAB}{ReflectionHelper.getName(controllerMethod)}: {controllerUrl}')
                 # subUrlList = controllerMethod.url.split(c.SLASH)
                 # concatenatedSubUrl = c.NOTHING
                 # for subUrl in subUrlList :
@@ -140,7 +144,7 @@ def addControllerListTo(apiInstance, controllerList) :
                 #             if not newUrl in urlList :
                 #                 urlList.append(newUrl)
                 OpenApiManager.addEndPointDocumentation(controllerUrl, controllerMethod, controller, apiInstance)
-        log.debug(addControllerListTo, f'{controller.url} -> {urlList}')
+        log.debug(addControllerListTo, f'{controller.url} -> {StringHelper.prettyPython(infoList)}')
         apiInstance.add_resource(controller, *urlList)
 
 @Function
@@ -158,8 +162,7 @@ def addRepositoryTo(apiInstance, repositoryList, model) :
     apiInstance.repository = SqlAlchemyProxy.SqlAlchemyProxy(
         model,
         apiInstance.globals,
-        echo = False,
-        checkSameThread = False
+        echo = False
     )
     for repository in repositoryList :
         apiInstance.bindResource(apiInstance,repository())

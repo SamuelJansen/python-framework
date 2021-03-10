@@ -5,7 +5,8 @@ TestHelper.run(__file__)
 #     runOnly = [
 #         'EnumAnnotationTest.enum_withSuccess',
 #         'EnumAnnotationTest.otherEnum_withSuccess',
-#         'EnumAnnotationTest.python_framework_status'
+#         'EnumAnnotationTest.python_framework_status',
+#         'EnumAnnotationTest.enumName'
 #     ]
 # )
 # TestHelper.run(
