@@ -30,14 +30,20 @@ PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
     ]
 }
 
+def getPythonFrameworkResourceByType(resourceType) :
+    return PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.get(resourceType, [])
+
 def isNotPythonFrameworkApiInstance(apiInstance) :
     return apiInstance.globals.apiName not in PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST
 
 def isFromPythonFramework(apiInstance, resourceType, resourceName) :
-    return not (resourceName in PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.get(resourceType, []) and isNotPythonFrameworkApiInstance(apiInstance))
+    return not (resourceName in getPythonFrameworkResourceByType(resourceType) and isNotPythonFrameworkApiInstance(apiInstance))
 
 def getResourceModuleName(apiInstance, resourceType, resourceName) :
-    return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else f'{PYTHON_FRAMEWORK_MODULE_NAME}{c.DOT}{resourceName}'
+    return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else PYTHON_FRAMEWORK_MODULE_NAME
+
+def getResourceName(apiInstance, resourceType, resourceName) :
+    return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else f'{resourceName}{c.DOT}{resourceName}'
 
 def isControllerResourceName(resourceName) :
     return FlaskManager.KW_CONTROLLER_RESOURCE == resourceName[-len(FlaskManager.KW_CONTROLLER_RESOURCE):]
@@ -89,14 +95,13 @@ def getResourceList(apiInstance, resourceType) :
         resourceType
     )
     if isNotPythonFrameworkApiInstance(apiInstance) :
-        for pythonFrameworkResourceNameList in PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.values() :
-            resourceNameList += pythonFrameworkResourceNameList
+        resourceNameList += getPythonFrameworkResourceByType(resourceType)
     resourceList = []
     for resourceName in resourceNameList :
         if isControllerResourceName(resourceName) :
-            resourceList += getControllerList(resourceName, resourceModuleName=getResourceModuleName(apiInstance, resourceType, resourceName))
+            resourceList += getControllerList(getResourceName(apiInstance, resourceType, resourceName), getResourceModuleName(apiInstance, resourceType, resourceName))
         else :
-            resource = globals.importResource(resourceName, resourceModuleName=getResourceModuleName(apiInstance, resourceType, resourceName))
+            resource = globals.importResource(getResourceName(apiInstance, resourceType, resourceName), resourceModuleName=getResourceModuleName(apiInstance, resourceType, resourceName))
             if resource :
                 resourceList.append(resource)
     return resourceList

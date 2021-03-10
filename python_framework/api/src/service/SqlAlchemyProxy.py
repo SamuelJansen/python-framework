@@ -152,7 +152,7 @@ class SqlAlchemyProxy:
             host = None
             port = None
             schema = None
-            log.log(self.getUrl, f'Prioritisig repository url in {self.DATABASE_URL_ENIRONMENT_KEY} environment variable')
+            log.log(self.getUrl, f'Prioritising repository url in {self.DATABASE_URL_ENIRONMENT_KEY} environment variable')
         else :
             url = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_URL}')
             if isNeitherNoneNorBlank(url) :
@@ -162,7 +162,7 @@ class SqlAlchemyProxy:
                 host = None
                 port = None
                 schema = None
-                log.log(self.getUrl, f'Prioritisig repository url in yamel configuration')
+                log.log(self.getUrl, f'Prioritising repository url in yamel configuration')
             else :
                 url = c.NOTHING
                 username = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_USERNAME}')
@@ -179,7 +179,7 @@ class SqlAlchemyProxy:
                 if not isNeitherNoneNorBlank(dialect) :
                     dialect = self.DEFAULT_DIALECT
                 url = f'{dialect}{c.COLON}{c.DOUBLE_SLASH}{url}{schema}'
-                log.log(self.getUrl, 'Prioritisig repository yamel configuration')
+                log.log(self.getUrl, 'Prioritising repository yamel configuration')
         if SettingHelper.activeEnvironmentIsLocal() :
             log.prettyPython(self.getUrl, 'Repository configuations', {**self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}'), **{
                 'dialect' : dialect,
