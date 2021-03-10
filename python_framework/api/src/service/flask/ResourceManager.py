@@ -11,7 +11,11 @@ from python_framework.api.src.service.openapi import OpenApiManager
 
 DOT_PY = '.py'
 PYTHON_FRAMEWORK_MODULE_NAME = 'python_framework'
-PYTHON_FRAMEWORK_RESOURCE_NAME_LIST = {
+PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST = [
+    'python_framework',
+    'TestApi'
+]
+PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
     'controller' : [
         'ActuatorHealthController'
     ],
@@ -26,8 +30,11 @@ PYTHON_FRAMEWORK_RESOURCE_NAME_LIST = {
     ]
 }
 
+def isNotPythonFrameworkApiInstance(apiInstance) :
+    return apiInstance.globals.apiName not in PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST
+
 def isFromPythonFramework(apiInstance, resourceType, resourceName) :
-    return not (resourceName in PYTHON_FRAMEWORK_RESOURCE_NAME_LIST.get(resourceType, []) and not PYTHON_FRAMEWORK_MODULE_NAME == apiInstance.apiName)
+    return not (resourceName in PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.get(resourceType, []) and isNotPythonFrameworkApiInstance(apiInstance))
 
 def getResourceModuleName(apiInstance, resourceType, resourceName) :
     return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else f'{PYTHON_FRAMEWORK_MODULE_NAME}{c.DOT}{resourceName}'
@@ -81,6 +88,9 @@ def getResourceList(apiInstance, resourceType) :
         apiInstance.globals.apiTree[apiInstance.globals.apiPackage],
         resourceType
     )
+    if isNotPythonFrameworkApiInstance(apiInstance) :
+        for pythonFrameworkResourceNameList in PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.values() :
+            resourceNameList += pythonFrameworkResourceNameList
     resourceList = []
     for resourceName in resourceNameList :
         if isControllerResourceName(resourceName) :
