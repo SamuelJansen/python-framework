@@ -90,6 +90,9 @@ def getOneToOneChild(child, parent, refferenceModel) :
 def isNeitherNoneNorBlank(thing) :
     return ObjectHelper.isNotNone(thing) and StringHelper.isNotBlank(thing)
 
+def isNoneOrBlank(thing) :
+    return ObjectHelper.isNone(thing) or StringHelper.isBlank(thing)
+
 class SqlAlchemyProxy:
 
     KW_API = 'api'
@@ -98,7 +101,7 @@ class SqlAlchemyProxy:
     KW_URL = 'url'
     KW_DATABASE = 'database'
     KW_REPOSITORY_DIALECT = 'dialect'
-    KW_REPOSITORY_USER = 'user'
+    KW_REPOSITORY_USERNAME = 'username'
     KW_REPOSITORY_PASSWORD = 'password'
     KW_REPOSITORY_HOST = 'host'
     KW_REPOSITORY_PORT = 'port'
@@ -141,44 +144,52 @@ class SqlAlchemyProxy:
 
     def getUrl(self, dialect) :
         log.log(self.getUrl, 'Loading repository configuration')
-        url = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_URL}')
+        url = EnvironmentHelper.get(self.DATABASE_URL_ENIRONMENT_KEY)
         if isNeitherNoneNorBlank(url) :
-            log.log(self.getUrl, f'Prioritisig repository url in "{self.DATABASE_URL_ENIRONMENT_KEY}" environment variable')
-            user = None
+            dialect = None
+            username = None
             password = None
             host = None
             port = None
             schema = None
+            log.log(self.getUrl, f'Prioritisig repository url in {self.DATABASE_URL_ENIRONMENT_KEY} environment variable')
         else :
-            log.log(self.getUrl, 'Prioritisig repository yamel configuration')
-            url = c.NOTHING
-            user = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_USER}')
-            password = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_PASSWORD}')
-            host = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_HOST}')
-            port = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_PORT}')
-            schema = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_SCHEMA}')
-            if isNeitherNoneNorBlank(user) and isNeitherNoneNorBlank(password) :
-                url += f'{user}{c.COLON}{password}'
-            if isNeitherNoneNorBlank(host) and isNeitherNoneNorBlank(port) :
-                url += f'{c.ARROBA}{host}{c.COLON}{port}'
-            url += c.SLASH
-            schema = f'{schema}{c.DOT}{self.EXTENSION}' if isNeitherNoneNorBlank(schema) else f'{self.DEFAULT_LOCAL_STORAGE_NAME if ObjectHelper.isNone(self.globals.apiName) else self.globals.apiName}{c.DOT}{self.EXTENSION}'
-            if not isNeitherNoneNorBlank(dialect) :
-                dialect = self.DEFAULT_DIALECT
-            url = f'{dialect}{c.COLON}{c.DOUBLE_SLASH}{url}{schema}'
+            url = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_URL}')
+            if isNeitherNoneNorBlank(url) :
+                dialect = None
+                username = None
+                password = None
+                host = None
+                port = None
+                schema = None
+                log.log(self.getUrl, f'Prioritisig repository url in yamel configuration')
+            else :
+                url = c.NOTHING
+                username = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_USERNAME}')
+                password = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_PASSWORD}')
+                host = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_HOST}')
+                port = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_PORT}')
+                schema = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_SCHEMA}')
+                if isNeitherNoneNorBlank(username) and isNeitherNoneNorBlank(password) :
+                    url += f'{username}{c.COLON}{password}'
+                if isNeitherNoneNorBlank(host) and isNeitherNoneNorBlank(port) :
+                    url += f'{c.ARROBA}{host}{c.COLON}{port}'
+                url += c.SLASH
+                schema = f'{schema}{c.DOT}{self.EXTENSION}' if isNeitherNoneNorBlank(schema) else f'{self.DEFAULT_LOCAL_STORAGE_NAME if ObjectHelper.isNone(self.globals.apiName) else self.globals.apiName}{c.DOT}{self.EXTENSION}'
+                if not isNeitherNoneNorBlank(dialect) :
+                    dialect = self.DEFAULT_DIALECT
+                url = f'{dialect}{c.COLON}{c.DOUBLE_SLASH}{url}{schema}'
+                log.log(self.getUrl, 'Prioritisig repository yamel configuration')
         if SettingHelper.activeEnvironmentIsLocal() :
             log.prettyPython(self.getUrl, 'Repository configuations', {**self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}'), **{
                 'dialect' : dialect,
-                'user' : user,
+                'username' : username,
                 'password' : password,
                 'host' : host,
                 'port' : port,
                 'schema' : schema,
                 'url' : url
             }}, logLevel = log.SETTING)
-        return url
-        if SettingHelper.activeEnvironmentIsLocal() :
-            log.prettyPython(self.getUrl, 'Database coniguations', self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}'), logLevel = log.SETTING)
         return url
 
     def getConnectArgs(self, connectArgs) :
