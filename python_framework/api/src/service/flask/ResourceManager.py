@@ -39,10 +39,10 @@ def isNotPythonFrameworkApiInstance(apiInstance) :
 def isFromPythonFramework(apiInstance, resourceType, resourceName) :
     return not (resourceName in getPythonFrameworkResourceByType(resourceType) and isNotPythonFrameworkApiInstance(apiInstance))
 
-def getResourceModuleName(apiInstance, resourceType, resourceName) :
+def getResourceModuleNameAjusted(apiInstance, resourceType, resourceName) :
     return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else PYTHON_FRAMEWORK_MODULE_NAME
 
-def getResourceName(apiInstance, resourceType, resourceName) :
+def getResourceNameAjusted(apiInstance, resourceType, resourceName) :
     return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else f'{resourceName}{c.DOT}{resourceName}'
 
 def isControllerResourceName(resourceName) :
@@ -98,10 +98,12 @@ def getResourceList(apiInstance, resourceType) :
         resourceNameList += getPythonFrameworkResourceByType(resourceType)
     resourceList = []
     for resourceName in resourceNameList :
+        ajustedResourceName = getResourceNameAjusted(apiInstance, resourceType, resourceName)
+        ajustedResourceModuleName = getResourceModuleNameAjusted(apiInstance, resourceType, resourceName)
         if isControllerResourceName(resourceName) :
-            resourceList += getControllerList(getResourceName(apiInstance, resourceType, resourceName), getResourceModuleName(apiInstance, resourceType, resourceName))
+            resourceList += getControllerList(ajustedResourceName, ajustedResourceModuleName)
         else :
-            resource = globals.importResource(getResourceName(apiInstance, resourceType, resourceName), resourceModuleName=getResourceModuleName(apiInstance, resourceType, resourceName))
+            resource = globals.importResource(ajustedResourceName, resourceModuleName=ajustedResourceModuleName)
             if resource :
                 resourceList.append(resource)
     return resourceList
