@@ -96,10 +96,12 @@ def getResourceList(apiInstance, resourceType) :
     )
     if isNotPythonFrameworkApiInstance(apiInstance) :
         resourceNameList += getPythonFrameworkResourceByType(resourceType)
+    print(f'resourceType: {resourceType}, resourceNameList: {resourceNameList}')
     resourceList = []
     for resourceName in resourceNameList :
         ajustedResourceName = getResourceNameAjusted(apiInstance, resourceType, resourceName)
         ajustedResourceModuleName = getResourceModuleNameAjusted(apiInstance, resourceType, resourceName)
+        print(f'    ajustedResourceName: {ajustedResourceName}, ajustedResourceModuleName: {ajustedResourceModuleName}')
         if isControllerResourceName(resourceName) :
             resourceList += getControllerList(ajustedResourceName, ajustedResourceModuleName)
         else :
