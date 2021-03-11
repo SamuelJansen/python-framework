@@ -10,37 +10,18 @@ from python_framework.api.src.service import Security
 from python_framework.api.src.service.openapi import OpenApiManager
 
 DOT_PY = '.py'
-PYTHON_FRAMEWORK_MODULE_NAME = 'python_framework'
-PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST = [
-    'python_framework',
-    'TestApi'
-]
-PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
-    'controller' : [
-        'ActuatorHealthController'
-    ],
-    'service' : [
-        'ActuatorHealthService'
-    ],
-    'repository' : [
-        'ActuatorHealthRepository'
-    ],
-    'converter' : [
-        'ActuatorHealthConverter'
-    ]
-}
 
 def getPythonFrameworkResourceByType(resourceType) :
-    return PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.get(resourceType, [])
+    return FlaskManager.PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.get(resourceType, [])
 
 def isNotPythonFrameworkApiInstance(apiInstance) :
-    return apiInstance.globals.apiName not in PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST
+    return apiInstance.globals.apiName not in FlaskManager.PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST
 
 def isFromPythonFramework(apiInstance, resourceType, resourceName) :
     return not (resourceName in getPythonFrameworkResourceByType(resourceType) and isNotPythonFrameworkApiInstance(apiInstance))
 
 def getResourceModuleNameAjusted(apiInstance, resourceType, resourceName) :
-    return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else PYTHON_FRAMEWORK_MODULE_NAME
+    return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else FlaskManager.PYTHON_FRAMEWORK_MODULE_NAME
 
 def getResourceNameAjusted(apiInstance, resourceType, resourceName) :
     return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else f'{resourceName}{c.DOT}{resourceName}'
@@ -96,12 +77,10 @@ def getResourceList(apiInstance, resourceType) :
     )
     if isNotPythonFrameworkApiInstance(apiInstance) :
         resourceNameList += getPythonFrameworkResourceByType(resourceType)
-    print(f'resourceType: {resourceType}, resourceNameList: {resourceNameList}')
     resourceList = []
     for resourceName in resourceNameList :
         ajustedResourceName = getResourceNameAjusted(apiInstance, resourceType, resourceName)
         ajustedResourceModuleName = getResourceModuleNameAjusted(apiInstance, resourceType, resourceName)
-        print(f'    ajustedResourceName: {ajustedResourceName}, ajustedResourceModuleName: {ajustedResourceModuleName}')
         if isControllerResourceName(resourceName) :
             resourceList += getControllerList(ajustedResourceName, ajustedResourceModuleName)
         else :
