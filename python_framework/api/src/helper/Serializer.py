@@ -227,7 +227,7 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
             log.warning(getObjectAsDictionary, f'Not possible to get attribute name list from {ReflectionHelper.getName(ReflectionHelper.getClass(instance, muteLogs=True), muteLogs=True)}', exception=exception)
         if ObjectHelper.isNotEmpty(jsonInstance) :
             return jsonInstance
-        return instance
+        return str(instance)
 
 def getClassRole(instanceClass) :
     if DTO_SUFIX == ReflectionHelper.getName(instanceClass)[-len(DTO_SUFIX):] :
