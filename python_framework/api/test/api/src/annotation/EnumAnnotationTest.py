@@ -365,3 +365,39 @@ def enumName_badImplementation() :
     TWO(value:TWO)
 ] enum''' == str(secondTestExteption)
     assert "'EnumItem' object has no attribute 'enumValue'" == str(thirdTestExteption)
+
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **LOG_HELPER_SETTINGS
+    }
+)
+def map_whenArgIsNone() :
+    # arrange
+    @Enum(associateReturnsTo='value', instanceLog=False)
+    class MyOtherEnumTest :
+        ONE = EnumItem(value='one', otherValue=1)
+        TWO = EnumItem(value='two', otherValue=2)
+    MY_OTHER_ENUM_TEST = MyOtherEnumTest()
+    @Enum(associateReturnsTo='otherValue', instanceLog=False)
+    class MyThirdEnumTest :
+        ONE = EnumItem(value='one', otherValue=1)
+    MY_THIRD_ENUM_TEST = MyThirdEnumTest()
+    @Enum(instanceLog=False)
+    class SimpleEnumTest :
+        ONE = EnumItem(value='one', otherValue=1)
+        TWO = EnumItem(value='two', otherValue=1)
+        THREE = EnumItem(value='three', otherValue=1)
+    SIMPLE_ENUM_TEST = SimpleEnumTest()
+
+    # act
+    shouldBe_two_asString = MY_OTHER_ENUM_TEST.map('two')
+    shouldBe_one_asInteger = MY_THIRD_ENUM_TEST.map(1)
+    shouldBe_THREE_asString = SIMPLE_ENUM_TEST.map('THREE')
+
+    # assert
+    assert 'two' == shouldBe_two_asString
+    assert 1 == shouldBe_one_asInteger
+    assert 'THREE' == shouldBe_THREE_asString
+    assert MY_OTHER_ENUM_TEST.map(None) is None
+    assert MY_THIRD_ENUM_TEST.map(None) is None
+    assert SIMPLE_ENUM_TEST.map(None) is None

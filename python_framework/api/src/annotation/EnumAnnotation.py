@@ -159,8 +159,11 @@ def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
             def map(enumItemOrEnumItemValue) :
                 if instanceLog :
                     log.log(OuterEnum,f'''enumItemOrEnumItemValue: {enumItemOrEnumItemValue}''')
-                mappedEnum = OuterEnum.__enumMap__.get(str(enumItemOrEnumItemValue))
-                return mappedEnum if ObjectHelper.isNotNone(mappedEnum) else __raiseEnumValueNotImplemented__(enumItemOrEnumItemValue, enumClass=OuterEnum, enumEqList=OuterEnum().__enumEqList__)
+                if ObjectHelper.isNone(enumItemOrEnumItemValue) :
+                    return enumItemOrEnumItemValue
+                else :
+                    mappedEnum = OuterEnum.__enumMap__.get(str(enumItemOrEnumItemValue))
+                    return mappedEnum if ObjectHelper.isNotNone(mappedEnum) else __raiseEnumValueNotImplemented__(enumItemOrEnumItemValue, enumClass=OuterEnum, enumEqList=OuterEnum().__enumEqList__)
         ReflectionHelper.overrideSignatures(InnerEnum, OuterEnum)
         return InnerEnum
     return Wrapper

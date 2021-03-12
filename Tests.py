@@ -40,3 +40,9 @@ TestHelper.run(__file__)
 #         'SerializerTest.fromDtoToModel'
 #     ]
 # )
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
+#         'EnumAnnotationTest.map_whenArgIsNone'
+#     ]
+# )

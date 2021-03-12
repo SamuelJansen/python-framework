@@ -164,7 +164,7 @@ def publicControllerMethod(args, kwargs, contentType, resourceInstance, resource
             )
         if Serializer.requestBodyIsPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
-            args = getArgsWithSerializerReturnAppended(serializerReturn, args)
+            args = getArgsWithSerializerReturnAppended(args, serializerReturn)
     response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
     if response and Serializer.isSerializerCollection(response) and 2 == len(response) :
         return response
@@ -175,7 +175,7 @@ def jsonifyResponse(response, contentType, status) :
     return Response(Serializer.jsonifyIt(response),  mimetype=contentType, status=status)
 
 @Function
-def getArgsWithSerializerReturnAppended(argument, args) :
+def getArgsWithSerializerReturnAppended(args, argument) :
     args = [arg for arg in args]
     args.append(argument)
     return tuple(arg for arg in args)
@@ -186,7 +186,7 @@ def getArgsWithResponseClassInstanceAppended(args, responseClass) :
         resourceInstance = args[0]
         objectRequest = args[1]
         serializerReturn = Serializer.convertFromObjectToObject(objectRequest, responseClass)
-        args = getArgsWithSerializerReturnAppended(serializerReturn, args)
+        args = getArgsWithSerializerReturnAppended(args, serializerReturn)
     return args
 
 @Function
