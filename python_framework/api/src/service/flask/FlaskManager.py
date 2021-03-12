@@ -131,7 +131,7 @@ def initialize(
     return inBetweenFunction
 
 @Function
-def getRequestBodyAsJson(contentType) :
+def getRequestBodyAsJson(contentType, requestClass) :
     try :
         if OpenApiManager.DEFAULT_CONTENT_TYPE == contentType :
             requestBodyAsJson = request.get_json()
@@ -141,7 +141,16 @@ def getRequestBodyAsJson(contentType) :
             raise Exception(f'Content type "{contentType}" not implemented')
     except Exception as exception :
         raise GlobalException.GlobalException(message='Not possible to parse the request', logMessage=str(exception), status=HttpStatus.BAD_REQUEST)
+    validateBodyAsJson(requestBodyAsJson, requestClass)
     return requestBodyAsJson
+
+@Function
+def validateBodyAsJson(requestBodyAsJson, requestClass) :
+    if ObjectHelper.isNotNone(requestClass) :
+        requestBodyAsJsonIsList = ObjectHelper.isList(requestBodyAsJson)
+        requestClassIsList = ObjectHelper.isList(requestClass) and ObjectHelper.isList(requestClass[0])
+        if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)) :
+            raise GlobalException.GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
 
 @Function
 @Security.jwtRequired
@@ -153,7 +162,7 @@ def securedControllerMethod(args, kwargs, contentType, resourceInstance, resourc
 @Function
 def publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logRequest) :
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
-        requestBodyAsJson = getRequestBodyAsJson(contentType)
+        requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
         if logRequest :
             log.prettyJson(
                 log.prettyJson,

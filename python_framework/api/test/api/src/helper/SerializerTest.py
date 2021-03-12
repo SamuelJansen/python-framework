@@ -5,6 +5,8 @@ from python_framework import SqlAlchemyProxy as sap
 from MyDto import MyDto
 from MyOtherDto import MyOtherDto
 from MyThirdDto import MyThirdDto
+from TestCallDto import TestCallRequestDto
+import CallServiceName, CallType, CallStatus
 
 def generatorFunction() :
     while True :
@@ -481,3 +483,202 @@ def jsonifyIt() :
     myClass.myAttribute = myAttributeClass
     assert '{"myAttribute": {"myClass": null, "myNeutralClassAttribute": "someOtherString"}, "myNeutralAttribute": "someString"}' == Serializer.jsonifyIt(myClass)
     assert '{"myClass": {"myAttribute": null, "myNeutralAttribute": "someString"}, "myNeutralClassAttribute": "someOtherString"}' == Serializer.jsonifyIt(myClass.myAttribute)
+
+@Test()
+def convertFromJsonToObject_whenThereAreEnums() :
+    # arrange
+    jsonToConvert = [
+      {
+        "beginAtDate": "2021-03-11",
+        "beginAtTime": "08:00:00",
+        "endAtDate": "2021-03-11",
+        "endAtTime": "09:00:00",
+        "hoster": "Tati",
+        "service": "teams",
+        "url": "https://teams.microsoft.com/dl/launcher/launcher.html?url=%2F_%23%2Fl%2Fmeetup-join%2F19%3Ameeting_Y2Q1MWI1MWMtOWE0YS00OWJkLTkxNGMtYWMxNDczNTgxYTlj%40thread.v2%2F0%3Fcontext%3D%257b%2522Tid%2522%253a%2522b8329613-0680-4673-a03f-9a18a0b0e93b%2522%252c%2522Oid%2522%253a%2522fcb6e799-c1f0-4556-be74-3302ea89c13d%2522%257d%26anon%3Dtrue&type=meetup-join&deeplinkId=98d55d14-abc6-4abf-a4a8-5af45024d137&directDl=true&msLaunch=true&enableMobilePage=true&suppressPrompt=true"
+      },
+      {
+        "beginAtDate": "2021-03-11",
+        "beginAtTime": "14:00:00",
+        "endAtDate": "2021-03-11",
+        "endAtTime": "15:00:00",
+        "hoster": "Cristiano / Tati",
+        "note": "Alinhamento Desmarcação",
+        "service": "teams",
+        "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_YzQ3YTY1ZWUtYzg4Ny00NDg1LTkwNGEtYTBhYmNhM2RjOWZi%40thread.v2/0?context=%7b%22Tid%22%3a%22647631af-8bf8-4048-a98f-b1fbee134a6d%22%2c%22Oid%22%3a%22be78d394-2f08-4059-bee9-97b849e03cdb%22%7d"
+      },
+      {
+        "beginAtDate": "2021-03-16",
+        "beginAtTime": "10:00:00",
+        "endAtDate": "2021-03-16",
+        "endAtTime": "11:00:00",
+        "hoster": "Riachuelo",
+        "note": "Daily Riachuelo - Terça",
+        "type": "DAILY",
+        "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MmQ5ZjliYmQtZDZhYi00MjkwLWE2NGMtOWIxMmUzYzZhYjFh%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+      },
+      {
+        "beginAtDate": "2021-03-10",
+        "beginAtTime": "10:00:00",
+        "endAtDate": "2021-03-10",
+        "endAtTime": "11:00:00",
+        "hoster": "Riachuelo",
+        "note": "Daily Riachuelo - Quarda",
+        "type": "DAILY",
+        "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MmQ5ZjliYmQtZDZhYi00MjkwLWE2NGMtOWIxMmUzYzZhYjFh%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+      },
+      {
+        "beginAtDate": "2021-03-12",
+        "beginAtTime": "10:00:00",
+        "endAtDate": "2021-03-12",
+        "endAtTime": "11:00:00",
+        "hoster": "Riachuelo",
+        "note": "Daily Riachuelo - Sexta",
+        "type": "DAILY",
+        "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MmQ5ZjliYmQtZDZhYi00MjkwLWE2NGMtOWIxMmUzYzZhYjFh%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+      },
+      {
+        "beginAtDate": "2021-03-15",
+        "beginAtTime": "15:00:00",
+        "endAtDate": "2021-03-15",
+        "endAtTime": "16:00:00",
+        "hoster": "Riachuelo",
+        "note": "Daily Riachuelo - Segunda",
+        "type": "DAILY",
+        "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZDZmMGUzY2UtZWQzZS00NDQ3LWEwZDMtMzc0MzQwYjYxNWQ1%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+      },
+      {
+        "beginAtDate": "2021-03-11",
+        "beginAtTime": "17:30:00",
+        "endAtDate": "2021-03-11",
+        "endAtTime": "18:30:00",
+        "hoster": "Riachuelo",
+        "note": "Daily Riachuelo - Quinta",
+        "type": "DAILY",
+        "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_Y2Q1MWI1MWMtOWE0YS00OWJkLTkxNGMtYWMxNDczNTgxYTlj%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+      },
+      {
+        "beginAtDate": "2021-03-18",
+        "beginAtTime": "11:00:00",
+        "endAtDate": "2021-03-18",
+        "endAtTime": "12:00:00",
+        "hoster": "Hoffmann",
+        "note": "CWI - Trimestral",
+        "service": "meet",
+        "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_Y2Q1MWI1MWMtOWE0YS00OWJkLTkxNGMtYWMxNDczNTgxYTlj%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+      }
+    ]
+
+    # act
+    toAssert = Serializer.convertFromJsonToObject(jsonToConvert, [[TestCallRequestDto]])
+
+    # assert
+    # print(Serializer.prettify(Serializer.getObjectAsDictionary(toAssert)))
+    assert 'meet' == CallServiceName.CallServiceName.map('meet')
+    assert 'zoom' == CallServiceName.CallServiceName.map('zoom')
+    assert 'teams' == CallServiceName.CallServiceName.map('teams')
+    assert 'UNIQUE' == CallType.CallType.map('UNIQUE')
+    assert 'DAILY' == CallType.CallType.map('DAILY')
+    assert 'INCOMMING' == CallStatus.CallStatus.map('INCOMMING')
+    assert 'WASTED' == CallStatus.CallStatus.map('WASTED')
+    assert ObjectHelper.equals(
+        [
+            {
+                "beginAtDate": "2021-03-11",
+                "beginAtTime": "08:00:00",
+                "endAtDate": "2021-03-11",
+                "endAtTime": "09:00:00",
+                "hoster": "Tati",
+                "note": None,
+                "service": "teams",
+                "status": None,
+                "type": None,
+                "url": "https://teams.microsoft.com/dl/launcher/launcher.html?url=%2F_%23%2Fl%2Fmeetup-join%2F19%3Ameeting_Y2Q1MWI1MWMtOWE0YS00OWJkLTkxNGMtYWMxNDczNTgxYTlj%40thread.v2%2F0%3Fcontext%3D%257b%2522Tid%2522%253a%2522b8329613-0680-4673-a03f-9a18a0b0e93b%2522%252c%2522Oid%2522%253a%2522fcb6e799-c1f0-4556-be74-3302ea89c13d%2522%257d%26anon%3Dtrue&type=meetup-join&deeplinkId=98d55d14-abc6-4abf-a4a8-5af45024d137&directDl=true&msLaunch=true&enableMobilePage=true&suppressPrompt=true"
+            },
+            {
+                "beginAtDate": "2021-03-11",
+                "beginAtTime": "14:00:00",
+                "endAtDate": "2021-03-11",
+                "endAtTime": "15:00:00",
+                "hoster": "Cristiano / Tati",
+                "note": "Alinhamento Desmarcação",
+                "service": "teams",
+                "status": None,
+                "type": None,
+                "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_YzQ3YTY1ZWUtYzg4Ny00NDg1LTkwNGEtYTBhYmNhM2RjOWZi%40thread.v2/0?context=%7b%22Tid%22%3a%22647631af-8bf8-4048-a98f-b1fbee134a6d%22%2c%22Oid%22%3a%22be78d394-2f08-4059-bee9-97b849e03cdb%22%7d"
+            },
+            {
+                "beginAtDate": "2021-03-16",
+                "beginAtTime": "10:00:00",
+                "endAtDate": "2021-03-16",
+                "endAtTime": "11:00:00",
+                "hoster": "Riachuelo",
+                "note": "Daily Riachuelo - Terça",
+                "service": None,
+                "status": None,
+                "type": "DAILY",
+                "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MmQ5ZjliYmQtZDZhYi00MjkwLWE2NGMtOWIxMmUzYzZhYjFh%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+            },
+            {
+                "beginAtDate": "2021-03-10",
+                "beginAtTime": "10:00:00",
+                "endAtDate": "2021-03-10",
+                "endAtTime": "11:00:00",
+                "hoster": "Riachuelo",
+                "note": "Daily Riachuelo - Quarda",
+                "service": None,
+                "status": None,
+                "type": "DAILY",
+                "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MmQ5ZjliYmQtZDZhYi00MjkwLWE2NGMtOWIxMmUzYzZhYjFh%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+            },
+            {
+                "beginAtDate": "2021-03-12",
+                "beginAtTime": "10:00:00",
+                "endAtDate": "2021-03-12",
+                "endAtTime": "11:00:00",
+                "hoster": "Riachuelo",
+                "note": "Daily Riachuelo - Sexta",
+                "service": None,
+                "status": None,
+                "type": "DAILY",
+                "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MmQ5ZjliYmQtZDZhYi00MjkwLWE2NGMtOWIxMmUzYzZhYjFh%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+            },
+            {
+                "beginAtDate": "2021-03-15",
+                "beginAtTime": "15:00:00",
+                "endAtDate": "2021-03-15",
+                "endAtTime": "16:00:00",
+                "hoster": "Riachuelo",
+                "note": "Daily Riachuelo - Segunda",
+                "service": None,
+                "status": None,
+                "type": "DAILY",
+                "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZDZmMGUzY2UtZWQzZS00NDQ3LWEwZDMtMzc0MzQwYjYxNWQ1%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+            },
+            {
+                "beginAtDate": "2021-03-11",
+                "beginAtTime": "17:30:00",
+                "endAtDate": "2021-03-11",
+                "endAtTime": "18:30:00",
+                "hoster": "Riachuelo",
+                "note": "Daily Riachuelo - Quinta",
+                "service": None,
+                "status": None,
+                "type": "DAILY",
+                "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_Y2Q1MWI1MWMtOWE0YS00OWJkLTkxNGMtYWMxNDczNTgxYTlj%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+            },
+            {
+                "beginAtDate": "2021-03-18",
+                "beginAtTime": "11:00:00",
+                "endAtDate": "2021-03-18",
+                "endAtTime": "12:00:00",
+                "hoster": "Hoffmann",
+                "note": "CWI - Trimestral",
+                "service": "meet",
+                "status": None,
+                "type": None,
+                "url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_Y2Q1MWI1MWMtOWE0YS00OWJkLTkxNGMtYWMxNDczNTgxYTlj%40thread.v2/0?context=%7b%22Tid%22%3a%22b8329613-0680-4673-a03f-9a18a0b0e93b%22%2c%22Oid%22%3a%22fcb6e799-c1f0-4556-be74-3302ea89c13d%22%7d"
+            }
+        ],
+        Serializer.getObjectAsDictionary(toAssert)
+    )

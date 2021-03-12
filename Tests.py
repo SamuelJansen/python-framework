@@ -43,6 +43,6 @@ TestHelper.run(__file__)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
-#         'EnumAnnotationTest.map_whenArgIsNone'
+#         'SerializerTest.convertFromJsonToObject_whenThereAreEnums'
 #     ]
 # )

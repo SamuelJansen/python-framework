@@ -3,6 +3,7 @@ from python_helper import Constant as c
 from python_helper import StringHelper, ObjectHelper, log, ReflectionHelper
 from python_helper import Function
 from python_framework.api.src.service.SqlAlchemyProxy import DeclarativeMeta, InstrumentedList
+from python_framework.api.src.annotation import EnumAnnotation
 
 NOT_SERIALIZABLE_CLASS_NAME_LIST = [
     ObjectHelper.GENERATOR_CLASS_NAME,
@@ -80,6 +81,7 @@ def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
 
 @Function
 def serializeIt(fromJson, toClass, fatherClass=None) :
+    # print(fromJson)
     # print(f'toClass: {toClass}')
     if ObjectHelper.isDictionary(fromJson) and ObjectHelper.isDictionaryClass(toClass) :
         # objectInstance = {}
@@ -194,6 +196,8 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
         visitedIdInstances = []
     if ObjectHelper.isNativeClassIsntance(instance) or ObjectHelper.isNone(instance) :
         return instance
+    if EnumAnnotation.isEnumItem(instance) :
+        return instance.enumValue
     if isDatetimeRelated(instance) :
         return str(instance)
     # print(f'{instance} not in {visitedIdInstances}: {instance not in visitedIdInstances}')

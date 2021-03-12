@@ -72,6 +72,14 @@ ENUM_ITEM_CLASS_DICTIONARY = {
     EnumItemList : EnumItemList
 }
 
+def isEnum(possibleEnum) :
+    itIs = False
+    try :
+        itIs = isinstance(possibleEnum, EnumItem)
+    except Exception as exception :
+        log.error(isEnum, f'Not possible to evaluate. Returning {itIs} by default', exception)
+    return itIs
+
 def isEnumItem(possibleEnumItem) :
     itIs = False
     try :
