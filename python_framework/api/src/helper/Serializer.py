@@ -49,6 +49,13 @@ MESO_SUFIX_LIST = [
     KW_DELETE_ACTION
 ]
 
+DATE_TIME_RELATED = [
+    'datetime',
+    'date',
+    'time',
+    'timedelta'
+]
+
 def isSerializerList(instance) :
     return ObjectHelper.isList(instance) or type(instance) == InstrumentedList
 
@@ -57,6 +64,9 @@ def isSerializerCollection(instance) :
 
 def requestBodyIsPresent(requestBody) :
     return ObjectHelper.isNotNone(requestBody) and (ObjectHelper.isDictionary(requestBody) or ObjectHelper.isList(requestBody))
+
+def isDatetimeRelated(thing) :
+    return ReflectionHelper.getName(type(thing)) in DATE_TIME_RELATED
 
 @Function
 def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
@@ -85,7 +95,7 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
     # print(f'toClass: {toClass}')
     if ObjectHelper.isNativeClassIsntance(fromJson) and toClass == fromJson.__class__ :
         return fromJson
-    attributeNameList = getAttributeNameList(toClass)
+    attributeNameList = ReflectionHelper.getAttributeNameList(toClass)
     classRole = getClassRole(toClass)
     # print(f'        classRole = {classRole}')
     # print(f'        attributeNameList = {attributeNameList}')
@@ -159,19 +169,6 @@ def prettify(objectAsDict) :
         return objectAsDict
     return StringHelper.prettyJson(objectAsDict)
 
-@Function
-def getAttributeNameList(instanceClass) :
-    instance = ReflectionHelper.instanciateItWithNoArgsConstructor(instanceClass)
-    return [
-        objectAttributeName
-        for objectAttributeName in dir(instance)
-        if objectAttributeName and (
-            not objectAttributeName.startswith(f'{2 * c.UNDERSCORE}') and
-            not objectAttributeName.startswith(c.UNDERSCORE) and
-            not ObjectHelper.METADATA_NAME == objectAttributeName
-        )
-    ]
-
 def getTypeName(thingInstance) :
     if not type(type) == type(thingInstance) :
         return ReflectionHelper.getName(type(thingInstance))
@@ -197,6 +194,8 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
         visitedIdInstances = []
     if ObjectHelper.isNativeClassIsntance(instance) or ObjectHelper.isNone(instance) :
         return instance
+    if isDatetimeRelated(instance) :
+        return str(instance)
     # print(f'{instance} not in {visitedIdInstances}: {instance not in visitedIdInstances}')
     isVisitedInstance = id(instance) in visitedIdInstances
     innerVisitedIdInstances = [*visitedIdInstances.copy()]
@@ -216,7 +215,7 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
         try :
             # print(id(instance))
             innerVisitedIdInstances.append(id(instance))
-            atributeNameList = getAttributeNameList(instance.__class__)
+            atributeNameList = ReflectionHelper.getAttributeNameList(instance.__class__)
             for attributeName in atributeNameList :
                 attributeValue = getattr(instance, attributeName)
                 if ReflectionHelper.isNotMethodInstance(attributeValue):

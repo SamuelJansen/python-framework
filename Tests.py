@@ -33,3 +33,10 @@ TestHelper.run(__file__)
 #         'SerializerTest.jsonifyIt'
 #     ]
 # )
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
+#         'SerializerTest.fromModelToDto',
+#         'SerializerTest.fromDtoToModel'
+#     ]
+# )

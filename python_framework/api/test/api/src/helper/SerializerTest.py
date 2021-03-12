@@ -36,6 +36,7 @@ class MyEntityClass(MODEL) :
 SELF_REFERENCE_FATHER_NAME = 'Father'
 SELF_REFERENCE_CHILD_NAME = 'Child'
 BROTHER_NAME = 'Brother'
+DATE_TIME_TEST = 'DateTimeTest'
 
 class Father(MODEL) :
     __tablename__ = SELF_REFERENCE_FATHER_NAME
@@ -54,6 +55,317 @@ class Child(MODEL) :
     id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
     father, fatherId = sap.getManyToOne(__tablename__, SELF_REFERENCE_FATHER_NAME, MODEL)
     brother, brotherId = sap.getOneToOneChild(__tablename__, BROTHER_NAME, MODEL)
+
+import datetime
+from python_helper import Constant as c
+from python_helper import ObjectHelper
+
+DEFAULT_DATETIME_PATTERN = '%Y-%m-%d %H:%M:%S'
+DEFAULT_DATE_PATTERN = '%Y-%m-%d'
+DEFAULT_TIME_PATTERN = '%H:%M:%S'
+
+DATETIME_FULL_PATTERN = '%Y-%m-%d %H:%M:%S.%f'
+TIME_FULL_PATTERN = '%H:%M:%S.%f'
+
+PATTERN_LIST = [
+    DEFAULT_DATETIME_PATTERN,
+    DEFAULT_DATE_PATTERN,
+    DEFAULT_TIME_PATTERN,
+    DATETIME_FULL_PATTERN,
+    TIME_FULL_PATTERN
+]
+
+DATETIME_PATTERN_LIST = [
+    DEFAULT_DATETIME_PATTERN,
+    DATETIME_FULL_PATTERN
+]
+
+DATE_PATTERN_LIST = [
+    DEFAULT_DATE_PATTERN
+]
+
+TIME_PATTERN_LIST = [
+    DEFAULT_TIME_PATTERN,
+    TIME_FULL_PATTERN
+]
+
+DEFAULT_TIME_BEGIN = '00:00:01'
+DEFAULT_TIME_END = '23:59:59'
+
+def toString(givenDatetime, pattern=DEFAULT_DATETIME_PATTERN) :
+    return givenDatetime if ObjectHelper.isNone(givenDatetime) or isinstance(givenDatetime, str) else parseToString(givenDatetime, pattern=pattern)
+
+def parseToString(given, pattern=DEFAULT_DATETIME_PATTERN) :
+    return str(given)
+
+def parseToDatetimeOrDateOrTimePattern(given, pattern=DEFAULT_DATETIME_PATTERN, timedelta=False) :
+    parsed = datetime.datetime.strptime(given, pattern)
+    if timedelta and pattern in TIME_PATTERN_LIST :
+        # try :
+        #     a = datetime.timedelta(hours=parsed.hour, minutes=parsed.minute, seconds=parsed.second, milliseconds=0, microseconds=0)
+        #     print(type(a))
+        # except Exception as exception :
+        #     print(exception)
+        #     pass
+        return datetime.timedelta(hours=parsed.hour, minutes=parsed.minute, seconds=parsed.second, milliseconds=0, microseconds=0)
+    if pattern in DATETIME_PATTERN_LIST :
+        return parsed
+    elif pattern in DATE_PATTERN_LIST :
+        return parsed.date()
+    elif pattern in TIME_PATTERN_LIST :
+        return parsed.time()
+
+def forcedlyParse(given, pattern=DEFAULT_DATETIME_PATTERN, timedelta=False) :
+    parsed = None
+    for pattern in [pattern] + PATTERN_LIST :
+        try :
+            parsed = parseToDatetimeOrDateOrTimePattern(given, pattern=pattern, timedelta=timedelta)
+        except Exception as exception :
+            pass
+    return parsed
+
+def getDatetime(givenDatetime, pattern=DEFAULT_DATETIME_PATTERN) :
+    return givenDatetime if ObjectHelper.isNone(givenDatetime) or not isinstance(givenDatetime, str) else parseToDatetimeOrDateOrTimePattern(givenDatetime, pattern=pattern)
+
+def forcedlyGetDatetime(givenDatetime, pattern=DEFAULT_DATETIME_PATTERN) :
+    return givenDatetime if ObjectHelper.isNone(givenDatetime) or not isinstance(givenDatetime, str) else forcedlyParse(givenDatetime, pattern=pattern)
+
+def forcedlyGetDate(givenDate, pattern=DEFAULT_DATE_PATTERN) :
+    return givenDate if ObjectHelper.isNone(givenDate) or not isinstance(givenDate, str) else forcedlyParse(givenDate, pattern=pattern)
+
+def forcedlyGetTime(givenTime, pattern=DEFAULT_TIME_PATTERN) :
+    return givenTime if ObjectHelper.isNone(givenTime) or not isinstance(givenTime, str) else forcedlyParse(givenTime, pattern=pattern)
+
+def forcedlyGetInterval(givenTime, pattern=DEFAULT_DATETIME_PATTERN) :
+    return givenTime if ObjectHelper.isNone(givenTime) or not isinstance(givenTime, str) else forcedlyParse(givenTime, pattern=pattern, timedelta=True)
+
+class DateTimeTest(MODEL) :
+    __tablename__ = DATE_TIME_TEST
+    id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
+    beginAtDatetime = sap.Column(sap.DateTime)
+    endAtDatetime = sap.Column(sap.DateTime)
+    beginAtDate = sap.Column(sap.Date)
+    endAtDate = sap.Column(sap.Date)
+    beginAtTime = sap.Column(sap.Time)
+    endAtTime = sap.Column(sap.Time)
+    intervalTime = sap.Column(sap.Interval)
+
+    def __init__(self,
+        id = None,
+        beginAtDatetime = None,
+        endAtDatetime = None,
+        beginAtDate = None,
+        endAtDate = None,
+        beginAtTime = None,
+        endAtTime = None,
+        intervalTime = None,
+        timedelta = None
+    ):
+        self.id = id
+        self.beginAtDatetime = forcedlyGetDatetime(beginAtDatetime)
+        self.endAtDatetime = forcedlyGetDatetime(endAtDatetime)
+        self.beginAtDate = forcedlyGetDate(beginAtDate)
+        self.endAtDate = forcedlyGetDate(endAtDate)
+        self.beginAtTime = forcedlyGetTime(beginAtTime)
+        self.endAtTime = forcedlyGetTime(endAtTime)
+        self.intervalTime = forcedlyGetInterval(intervalTime)
+        self.timedelta = forcedlyGetInterval(timedelta)
+
+class DateTimeTestResponseDto :
+    def __init__(self,
+        id = None,
+        beginAtDatetime = None,
+        endAtDatetime = None,
+        beginAtDate = None,
+        endAtDate = None,
+        beginAtTime = None,
+        endAtTime = None,
+        intervalTime = None,
+        timedelta = None
+    ) :
+        self.id = id
+        self.beginAtDatetime = toString(beginAtDatetime, pattern=DEFAULT_DATETIME_PATTERN)
+        self.endAtDatetime = toString(endAtDatetime, pattern=DEFAULT_DATETIME_PATTERN)
+        self.beginAtDate = toString(beginAtDate, pattern=DEFAULT_DATE_PATTERN)
+        self.endAtDate = toString(endAtDate, pattern=DEFAULT_DATE_PATTERN)
+        self.beginAtTime = toString(beginAtTime, pattern=DEFAULT_TIME_PATTERN)
+        self.endAtTime = toString(endAtTime, pattern=DEFAULT_TIME_PATTERN)
+        self.intervalTime = toString(intervalTime, pattern=DEFAULT_DATETIME_PATTERN)
+        self.timedelta = toString(timedelta, pattern=DEFAULT_TIME_PATTERN)
+
+@Test()
+def fromModelToDto() :
+    # arrange
+    mockedDatetimeAsString = '2021-03-11 08:30:00'
+    mockedDateAsString = mockedDatetimeAsString.split()[0]
+    mockedTimeAsString = mockedDatetimeAsString.split()[1]
+    instance = DateTimeTest(
+        beginAtDatetime = forcedlyGetDatetime(mockedDatetimeAsString),
+        endAtDatetime = forcedlyGetDatetime(mockedDatetimeAsString),
+        beginAtDate = forcedlyGetDate(mockedDateAsString),
+        endAtDate = forcedlyGetDate(mockedDateAsString),
+        beginAtTime = forcedlyGetTime(mockedTimeAsString),
+        endAtTime = forcedlyGetTime(mockedTimeAsString),
+        intervalTime = forcedlyGetInterval(mockedDatetimeAsString),
+        timedelta = forcedlyGetInterval(mockedTimeAsString)
+    )
+    # log.prettyPython(fromModelToDto, 'instance', Serializer.getObjectAsDictionary(instance), logLevel=log.DEBUG)
+    instanceList = [
+        instance,
+        instance
+    ]
+
+    # act
+    toAssert = Serializer.convertFromObjectToObject(instance, DateTimeTestResponseDto)
+    listToAssert = Serializer.convertFromObjectToObject(instanceList, [[DateTimeTestResponseDto]])
+    # log.prettyPython(fromModelToDto, 'toAssert', Serializer.getObjectAsDictionary(toAssert), logLevel=log.DEBUG)
+    # log.prettyPython(fromModelToDto, 'listToAssert', Serializer.getObjectAsDictionary(listToAssert), logLevel=log.DEBUG)
+
+    # assert
+    assert ObjectHelper.isNotEmpty(toAssert)
+    assert str == type(toAssert.beginAtDatetime)
+    assert str == type(toAssert.endAtDatetime)
+    assert str == type(toAssert.beginAtDate)
+    assert str == type(toAssert.endAtDate)
+    assert str == type(toAssert.beginAtTime)
+    assert str == type(toAssert.endAtTime)
+    assert str == type(toAssert.intervalTime)
+    assert str == type(toAssert.timedelta)
+    assert ObjectHelper.equals(
+        {
+            'beginAtDate': '2021-03-11',
+            'beginAtDatetime': '2021-03-11 08:30:00',
+            'beginAtTime': '08:30:00',
+            'endAtDate': '2021-03-11',
+            'endAtDatetime': '2021-03-11 08:30:00',
+            'endAtTime': '08:30:00',
+            'id': None,
+            'intervalTime': '2021-03-11 08:30:00',
+            'timedelta': '08:30:00'
+        },
+        Serializer.getObjectAsDictionary(toAssert),
+        ignoreKeyList = [
+            'timedelta'
+        ]
+    )
+    assert ObjectHelper.isNotEmpty(listToAssert)
+    assert ObjectHelper.equals(
+        [
+            {
+                'beginAtDate': '2021-03-11',
+                'beginAtDatetime': '2021-03-11 08:30:00',
+                'beginAtTime': '08:30:00',
+                'endAtDate': '2021-03-11',
+                'endAtDatetime': '2021-03-11 08:30:00',
+                'endAtTime': '08:30:00',
+                'id': None,
+                'intervalTime': '2021-03-11 08:30:00',
+                'timedelta': '08:30:00'
+            },
+            {
+                'beginAtDate': '2021-03-11',
+                'beginAtDatetime': '2021-03-11 08:30:00',
+                'beginAtTime': '08:30:00',
+                'endAtDate': '2021-03-11',
+                'endAtDatetime': '2021-03-11 08:30:00',
+                'endAtTime': '08:30:00',
+                'id': None,
+                'intervalTime': '2021-03-11 08:30:00',
+                'timedelta': '08:30:00'
+            }
+        ],
+        Serializer.getObjectAsDictionary(listToAssert),
+        ignoreKeyList = [
+            'timedelta'
+        ]
+    )
+
+@Test()
+def fromDtoToModel() :
+    # arrange
+    mockedDatetimeAsString = '2021-03-11 08:30:00'
+    mockedDateAsString = mockedDatetimeAsString.split()[0]
+    mockedTimeAsString = mockedDatetimeAsString.split()[1]
+    instance = DateTimeTestResponseDto(
+        beginAtDatetime = mockedDatetimeAsString,
+        endAtDatetime = mockedDatetimeAsString,
+        beginAtDate = mockedDateAsString,
+        endAtDate = mockedDateAsString,
+        beginAtTime = mockedTimeAsString,
+        endAtTime = mockedTimeAsString,
+        intervalTime = mockedDatetimeAsString,
+        timedelta = mockedTimeAsString
+    )
+    # log.prettyPython(fromModelToDto, 'instance', Serializer.getObjectAsDictionary(instance), logLevel=log.DEBUG)
+    instanceList = [
+        instance,
+        instance
+    ]
+
+    # act
+    toAssert = Serializer.convertFromObjectToObject(instance, DateTimeTest)
+    listToAssert = Serializer.convertFromObjectToObject(instanceList, [[DateTimeTest]])
+    # log.prettyPython(fromDtoToModel, 'toAssert', Serializer.getObjectAsDictionary(toAssert), logLevel=log.DEBUG)
+    # log.prettyPython(fromModelToDto, 'listToAssert', Serializer.getObjectAsDictionary(listToAssert), logLevel=log.DEBUG)
+
+    # assert
+    assert ObjectHelper.isNotEmpty(toAssert)
+    assert datetime.datetime == type(toAssert.beginAtDatetime)
+    assert datetime.datetime == type(toAssert.endAtDatetime)
+    assert datetime.date == type(toAssert.beginAtDate)
+    assert datetime.date == type(toAssert.endAtDate)
+    assert datetime.time == type(toAssert.beginAtTime)
+    assert datetime.time == type(toAssert.endAtTime)
+    assert datetime.datetime == type(toAssert.intervalTime)
+    assert datetime.timedelta == type(toAssert.timedelta)
+    assert ObjectHelper.equals(
+        {
+            'beginAtDate': '2021-03-11',
+            'beginAtDatetime': '2021-03-11 08:30:00',
+            'beginAtTime': '08:30:00',
+            'endAtDate': '2021-03-11',
+            'endAtDatetime': '2021-03-11 08:30:00',
+            'endAtTime': '08:30:00',
+            'id': None,
+            'intervalTime': '2021-03-11 08:30:00',
+            'timedelta': '08:30:00'
+        },
+        Serializer.getObjectAsDictionary(toAssert),
+        ignoreKeyList = [
+            'timedelta'
+        ]
+    )
+    assert ObjectHelper.isNotEmpty(listToAssert)
+    assert ObjectHelper.equals(
+        [
+            {
+                'beginAtDate': '2021-03-11',
+                'beginAtDatetime': '2021-03-11 08:30:00',
+                'beginAtTime': '08:30:00',
+                'endAtDate': '2021-03-11',
+                'endAtDatetime': '2021-03-11 08:30:00',
+                'endAtTime': '08:30:00',
+                'id': None,
+                'intervalTime': '2021-03-11 08:30:00',
+                'timedelta': '08:30:00'
+            },
+            {
+                'beginAtDate': '2021-03-11',
+                'beginAtDatetime': '2021-03-11 08:30:00',
+                'beginAtTime': '08:30:00',
+                'endAtDate': '2021-03-11',
+                'endAtDatetime': '2021-03-11 08:30:00',
+                'endAtTime': '08:30:00',
+                'id': None,
+                'intervalTime': '2021-03-11 08:30:00',
+                'timedelta': '08:30:00'
+            }
+        ],
+        Serializer.getObjectAsDictionary(listToAssert),
+        ignoreKeyList = [
+            'timedelta'
+        ]
+    )
 
 @Test()
 def isModelTest() :
