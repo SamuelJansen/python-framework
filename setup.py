@@ -1,7 +1,9 @@
 from distutils.core import setup
 import os
 
-VERSION = '0.1.8-35'
+print('On linux, run:\nsudo apt install libpq-dev python3-dev\npip3.9 install --no-cache-dir python-framework --force --upgrade')
+
+VERSION = '0.1.8-36'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -66,7 +68,7 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals==0.2.27'
+        'globals==0.2.28'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
