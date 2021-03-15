@@ -204,10 +204,11 @@ class SqlAlchemyProxy:
                 if isNeitherNoneNorBlank(host) and isNeitherNoneNorBlank(port) :
                     url += f'{c.ARROBA}{host}{c.COLON}{port}'
                 url += c.SLASH
-                database = f'{database}{c.DOT}{self.EXTENSION}' if isNeitherNoneNorBlank(database) else f'{self.DEFAULT_LOCAL_STORAGE_NAME if ObjectHelper.isNone(self.globals.apiName) else self.globals.apiName}{c.DOT}{self.EXTENSION}'
+                database = f'{database}' if isNeitherNoneNorBlank(database) else f'{self.DEFAULT_LOCAL_STORAGE_NAME if ObjectHelper.isNone(self.globals.apiName) else self.globals.apiName}{c.DOT}{self.EXTENSION}'
                 if not isNeitherNoneNorBlank(dialect) :
                     dialect = self.DEFAULT_DIALECT
-                dialectAndDriver = f'''{dialect}{f'{c.PLUS}{driver}' if isNeitherNoneNorBlank(driver) else c.NOTHING}'''
+                plusDriverOrNothing = f'{c.PLUS}{driver}' if isNeitherNoneNorBlank(driver) else c.NOTHING
+                dialectAndDriver = f'''{dialect}{plusDriverOrNothing}'''
                 url = f'{dialectAndDriver}{c.COLON}{c.DOUBLE_SLASH}{url}{database}'
                 log.log(self.getUrl, 'Prioritising repository yamel configuration')
         if SettingHelper.activeEnvironmentIsLocal() :
