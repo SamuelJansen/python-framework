@@ -9,10 +9,10 @@ api:
         secret: ${SECURITY_KEY:local-secret-key}
     database:
         dialect: ${:sqlite}
-        # settings: {'check_same_thread':False}
+        settings:
+            local:
+                options: -csearch_path=${api.database.schema}
         url: ${DATABASE_URL:}
-
-
 
 swagger:
     host: ${api.server.host}:${api.server.port}

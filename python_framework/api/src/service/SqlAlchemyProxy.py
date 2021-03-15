@@ -98,11 +98,15 @@ def isNoneOrBlank(thing) :
 
 class SqlAlchemyProxy:
 
+    DEFAULT_DRIVER = 'psycopg2'
+
     KW_API = 'api'
     KW_MAIN_URL = 'main-url'
 
     KW_URL = 'url'
     KW_DATABASE = 'database'
+
+    KW_REPOSITORY_DATABASE = 'database'
     KW_REPOSITORY_DIALECT = 'dialect'
     KW_REPOSITORY_USERNAME = 'username'
     KW_REPOSITORY_PASSWORD = 'password'
@@ -112,7 +116,16 @@ class SqlAlchemyProxy:
     KW_REPOSITORY_URL = 'url'
     KW_REPOSITORY_SETTINGS = 'settings'
 
-    DATABASE_URL_ENIRONMENT_KEY = 'DATABASE_URL'
+    ENV_DATABASE_NAME = 'DATABASE_NAME'
+    KW_REPOSITORY_DRIVER = 'DATABASE_DRIVER'
+    ENV_DATABASE_DIALECT = 'DATABASE_DIALECT'
+    ENV_DATABASE_USERNAME = 'DATABASE_USERNAME'
+    ENV_DATABASE_PASSWORD = 'DATABASE_PASSWORD'
+    ENV_DATABASE_HOST = 'DATABASE_HOST'
+    ENV_DATABASE_PORT = 'DATABASE_PORT'
+    ENV_DATABASE_SCHEMA = 'DATABASE_SCHEMA'
+    ENV_DATABASE_URL = 'DATABASE_URL'
+
     DEFAULT_LOCAL_STORAGE_NAME = 'LocalStorage'
     DEFAULT_DIALECT = 'sqlite'
     EXTENSION = 'db'
@@ -135,6 +148,13 @@ class SqlAlchemyProxy:
         self.run()
 
     def getNewEngine(self, dialect, echo, connectArgs) :
+        # MODEL = MODEL = sap.getNewModel()
+        # schemaFromEnvironment = EnvironmentHelper.get(sap.SqlAlchemyProxy.ENV_DATABASE_SCHEMA)
+        # schemaProperty = globalsInstance.getSetting(f'{sap.SqlAlchemyProxy.KW_API}{c.DOT}{sap.SqlAlchemyProxy.KW_DATABASE}{c.DOT}{sap.SqlAlchemyProxy.KW_REPOSITORY_SCHEMA}')
+        # if ObjectHelper.isNotNone(schemaFromEnvironment) :
+        #     MODEL.metadata.schema = schemaFromEnvironment
+        # elif ObjectHelper.isNotNone(schemaProperty) :
+        #     MODEL.metadata.schema = schemaProperty
         url = self.getUrl(dialect)
         connectArgs = self.getConnectArgs(connectArgs)
         engine = None
@@ -147,19 +167,23 @@ class SqlAlchemyProxy:
 
     def getUrl(self, dialect) :
         log.log(self.getUrl, 'Loading repository configuration')
-        url = EnvironmentHelper.get(self.DATABASE_URL_ENIRONMENT_KEY)
+        url = EnvironmentHelper.get(self.ENV_DATABASE_URL)
         if isNeitherNoneNorBlank(url) :
             dialect = None
+            driver = None
+            database = None
             username = None
             password = None
             host = None
             port = None
             schema = None
-            log.log(self.getUrl, f'Prioritising repository url in {self.DATABASE_URL_ENIRONMENT_KEY} environment variable')
+            log.log(self.getUrl, f'Prioritising repository url in {self.ENV_DATABASE_URL} environment variable')
         else :
             url = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_URL}')
             if isNeitherNoneNorBlank(url) :
                 dialect = None
+                driver = None
+                database = None
                 username = None
                 password = None
                 host = None
@@ -168,6 +192,8 @@ class SqlAlchemyProxy:
                 log.log(self.getUrl, f'Prioritising repository url in yamel configuration')
             else :
                 url = c.NOTHING
+                driver = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_DRIVER}')
+                database = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_DATABASE}')
                 username = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_USERNAME}')
                 password = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_PASSWORD}')
                 host = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_HOST}')
@@ -178,14 +204,17 @@ class SqlAlchemyProxy:
                 if isNeitherNoneNorBlank(host) and isNeitherNoneNorBlank(port) :
                     url += f'{c.ARROBA}{host}{c.COLON}{port}'
                 url += c.SLASH
-                schema = f'{schema}{c.DOT}{self.EXTENSION}' if isNeitherNoneNorBlank(schema) else f'{self.DEFAULT_LOCAL_STORAGE_NAME if ObjectHelper.isNone(self.globals.apiName) else self.globals.apiName}{c.DOT}{self.EXTENSION}'
+                database = f'{database}{c.DOT}{self.EXTENSION}' if isNeitherNoneNorBlank(database) else f'{self.DEFAULT_LOCAL_STORAGE_NAME if ObjectHelper.isNone(self.globals.apiName) else self.globals.apiName}{c.DOT}{self.EXTENSION}'
                 if not isNeitherNoneNorBlank(dialect) :
                     dialect = self.DEFAULT_DIALECT
-                url = f'{dialect}{c.COLON}{c.DOUBLE_SLASH}{url}{schema}'
+                dialectAndDriver = f'''{dialect}{f'{c.PLUS}{driver}' if isNeitherNoneNorBlank(driver) else c.NOTHING}'''
+                url = f'{dialectAndDriver}{c.COLON}{c.DOUBLE_SLASH}{url}{database}'
                 log.log(self.getUrl, 'Prioritising repository yamel configuration')
         if SettingHelper.activeEnvironmentIsLocal() :
             log.prettyPython(self.getUrl, 'Repository configuations', {**self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}'), **{
                 'dialect' : dialect,
+                'driver' : driver,
+                'database' : database,
                 'username' : username,
                 'password' : password,
                 'host' : host,
@@ -200,8 +229,7 @@ class SqlAlchemyProxy:
             connectArgs = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_SETTINGS}')
             finalConnectArgs = {}
             if ObjectHelper.isDictionary(connectArgs) :
-                for key, value in connectArgs.items() :
-                    finalConnectArgs[key] = value
+                finalConnectArgs = connectArgs.get(SettingHelper.getActiveEnvironment())
             return finalConnectArgs
         else :
             return connectArgs

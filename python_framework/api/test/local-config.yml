@@ -1,20 +1,23 @@
 print-status: False
 database:
     dialect: ${DATABASE_DIALECT:postgres}
-    username: ${DATABASE_USERNAME:urkmpryplscxaq}
-    password: ${DATABASE_PASSWORD:ee78f401df2016f74f7f537775169bfedee1423187150ba42ce9313b4a1b3cc3}
-    host: ${DATABASE_HOST:ec2-54-82-208-124.compute-1.amazonaws.com}
+    username: ${DATABASE_USERNAME:jbqafgvnjszmoh}
+    password: ${DATABASE_PASSWORD:9a4b08000c04c22cd6f533c5ac76098102aecdb646e9bc2fb3d9a74089fcebc9}
+    host: ${DATABASE_HOST:ec2-35-173-94-156.compute-1.amazonaws.com}
     port: ${DATABASE_PORT:5432}
-    schema: ${DATABASE_SCHEMA:d16t4h30kmho90}
-
+    schema: ${DATABASE_SCHEMA:python_framework_test_schema}
+    database: ${DATABASE_NAME:d5h5kfi694bmst}
 
 environment:
-    database:
-        key: DATABASE_URL
-        value: ${database.dialect}://${database.username}:${database.password}@${database.host}:${database.port}/${database.schema}
+    shema:
+        key: DATABASE_SCHEMA
+        value: ${database.schema}
+    # database:
+    #     key: DATABASE_URL
+    #     value: ${database.dialect}://${database.username}:${database.password}@${database.host}:${database.port}/${database.database}
     active-environment:
         key: ACTIVE_ENVIRONMENT
-        value: local
+        value: prod
     security:
         key: SECURITY_KEY
         value: not-secured-at-all

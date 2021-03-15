@@ -21,6 +21,7 @@ api:
         port: 5050
         base-url: /test-api
     database:
+        schema: ${DATABASE_SCHEMA:}
         url: ${DATABASE_URL:}
 
 swagger:

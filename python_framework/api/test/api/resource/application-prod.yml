@@ -1,0 +1,6 @@
+print-status: False
+api:
+    database:
+        settings:
+            prod:
+                check_same_thread: False

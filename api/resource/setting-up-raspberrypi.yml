@@ -1,0 +1,84 @@
+first-boot: '''
+    https://www.raspberrypi.org/software/ -> download and build Rasbian OS image
+    boot raspberrypi
+    '''
+getting-ip: '''
+    #!/usr/bin/python3
+
+    from urllib.request import urlopen
+    ip = urlopen('http://ipaddr.me/').read()
+    ip = ip.decode('utf-8')
+    print (ip)
+
+    import socket
+    name, alias, addresslist = socket.gethostbyaddr(ip)
+    print (name)'''
+check-if-a-service-is-running-on-port: sudo netstat -tlnp | grep port
+check-all-services-running: sudo netstat -plnt
+show-ip-address: ip address show
+env-configs: '''
+    export FLASK_APP = hello.py
+    export FLASK_ENV = development
+    flask run
+    '''
+port-fowarding: '''
+    Verify that port 7575 is unused on server
+    netstat -l -n
+
+    Ports over 1024 can be used by non-root users. Try first without "-N -f".
+    On pi
+    ssh -R 7575:localhost:7575 usbuser@100.111.111.111 (localhost is on pi)
+    On PC
+    ssh -L 7575:localhost:7575 usbuser@100.111.111.111 (localhost is on server)
+
+    springyulei wrote:
+    or PC: ssh -L -N -f 7575:100.111.111.111:7575 root@100.111.111.111 (or I should do this??)
+    "-N -f" can not be between "-L" and "7575...."
+    '''
+delete-iptables: '''
+    sudo iptables -L
+    sudo iptables -L --line-numbers
+    sudo iptables -D OUTPUT 1
+    '''
+server-configurations: '''
+    ###- https://www.digitalocean.com/community/tutorials/iptables-essentials-common-firewall-rules-and-commands
+    ###- Setup to save
+    try:
+        sudo iptables-save
+    except:
+        sudo apt-get install iptables-persistent
+        sudo netfilter-persistent save
+        sudo service iptables save
+
+    ###- Configs:
+
+    ###- Allow Loopback Connections
+    sudo iptables -A INPUT -i lo -j ACCEPT
+    sudo iptables -A OUTPUT -o lo -j ACCEPT
+
+    ###- Allow Established and Related Incoming Connections
+    sudo iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+    ###- Allow Established Outgoing Connections
+    sudo iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+    ###- Internal to External
+    sudo iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
+
+    ###- Allow All Incoming HTTP
+    sudo iptables -A INPUT -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    sudo iptables -A OUTPUT -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+    ###- Allow All Incoming HTTPS
+    sudo iptables -A INPUT -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    sudo iptables -A OUTPUT -p tcp --sport 443 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+    ###- Allow All Incoming HTTP and HTTPS
+    sudo iptables -A INPUT -p tcp -m multiport --dports 80,9999 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    sudo iptables -A OUTPUT -p tcp -m multiport --dports 80,9999 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+    ###- Configuring inbound
+    sudo iptables -I INPUT -i eth0 -p tcp --dport 59 -m comment --comment "# Server-001 #" -j ACCEPT
+    sudo iptables -I INPUT -i eth0 -p tcp --dport 5933 -m comment --comment "# Server-001 #" -j ACCEPT
+    sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 59 -m comment --comment "# Server-001 #" -j REDIRECT --to-port 5933
+    '''
