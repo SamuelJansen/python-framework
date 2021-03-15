@@ -16,9 +16,9 @@ environment:
     shema:
         key: DATABASE_SCHEMA
         value: ${database.schema}
-    database:
-        key: DATABASE_URL
-        value: ${database.dialect}+${database.driver}://${database.username}:${database.password}@${database.host}:${database.port}/${database.database}
+    # database:
+    #     key: DATABASE_URL
+    #     value: ${database.dialect}+${database.driver}://${database.username}:${database.password}@${database.host}:${database.port}/${database.database}
     active-environment:
         key: ACTIVE_ENVIRONMENT
         value: local
