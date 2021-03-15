@@ -163,12 +163,12 @@ class SqlAlchemyProxy:
             engine = create_engine(url, echo=echo, connect_args=connectArgs)
         except Exception as exception :
             log.error(self.getNewEngine, 'Not possible to parse database url environment variable', exception)
-            log.prettyPython(self.getNewEngine, 'settingsFileName', globalsInstance.settingsFileName, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'settingFilePath', globalsInstance.settingFilePath, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'settingTree', globalsInstance.settingTree, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'defaultSettingFileName', globalsInstance.defaultSettingFileName, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'defaultSettingFilePath', globalsInstance.defaultSettingFilePath, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'defaultSettingTree', globalsInstance.defaultSettingTree, logLevel=log.LOG)
+            log.prettyPython(self.getNewEngine, 'settingsFileName', self.globals.settingsFileName, logLevel=log.LOG)
+            log.prettyPython(self.getNewEngine, 'settingFilePath', self.globals.settingFilePath, logLevel=log.LOG)
+            log.prettyPython(self.getNewEngine, 'settingTree', self.globals.settingTree, logLevel=log.LOG)
+            log.prettyPython(self.getNewEngine, 'defaultSettingFileName', self.globals.defaultSettingFileName, logLevel=log.LOG)
+            log.prettyPython(self.getNewEngine, 'defaultSettingFilePath', self.globals.defaultSettingFilePath, logLevel=log.LOG)
+            log.prettyPython(self.getNewEngine, 'defaultSettingTree', self.globals.defaultSettingTree, logLevel=log.LOG)
             log.prettyPython(self.getNewEngine, 'url', url, logLevel=log.LOG)
             log.prettyPython(self.getNewEngine, 'connectArgs', connectArgs, logLevel=log.LOG)
             raise exception
