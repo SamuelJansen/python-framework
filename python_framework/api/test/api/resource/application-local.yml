@@ -10,8 +10,7 @@ api:
     database:
         dialect: ${:sqlite}
         settings:
-            local:
-                options: -csearch_path=${api.database.schema}
+            options: -csearch_path=${api.database.schema}
         url: ${DATABASE_URL:}
         # dialect: ${DATABASE_DIALECT:postgres}
         # driver: ${DATABASE_DRIVER:psycopg2}

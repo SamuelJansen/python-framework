@@ -229,10 +229,7 @@ class SqlAlchemyProxy:
     def getConnectArgs(self, connectArgs) :
         if ObjectHelper.isNone(connectArgs) :
             connectArgs = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_SETTINGS}')
-            finalConnectArgs = None
-            if ObjectHelper.isDictionary(connectArgs) :
-                finalConnectArgs = connectArgs.get(SettingHelper.getActiveEnvironment(), None)
-            return finalConnectArgs
+            return None if ObjectHelper.isNotDictionary(connectArgs) else connectArgs
         else :
             return connectArgs
 

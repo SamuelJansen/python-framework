@@ -3,7 +3,7 @@ import os
 
 print('On linux, run:\nsudo apt install libpq-dev python3-dev\npip3.9 install --no-cache-dir python-framework --force --upgrade')
 
-VERSION = '0.1.8-42'
+VERSION = '0.1.8-43'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
