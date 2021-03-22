@@ -11,3 +11,4 @@ procfil: [
     web: bundle exec puma -p $PORT -C ./config/puma.rb
 
 ]
+flask-specific-port: flask run --host=${api.server.host} --port=${api.server.port}

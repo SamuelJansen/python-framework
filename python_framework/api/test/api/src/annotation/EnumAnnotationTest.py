@@ -205,10 +205,10 @@ def enum_withSuccess() :
         assert MyEnumTest() == MyEnumTest()
         equalTestTime += (time.time() - equalTestTimeStart)
 
-    log.debug(enum_withSuccess, f'discount time: {discount}')
-    log.debug(enum_withSuccess, f'3 * equal evaluation time : {equalTestTime}')
-    log.debug(enum_withSuccess, f'instanciation time : {instanciationTime}')
-    log.debug(enum_withSuccess, f'test duration: {time.time() - start - equalTestTime - discount}')
+    # log.debug(enum_withSuccess, f'discount time: {discount}')
+    # log.debug(enum_withSuccess, f'3 * equal evaluation time : {equalTestTime}')
+    # log.debug(enum_withSuccess, f'instanciation time : {instanciationTime}')
+    # log.debug(enum_withSuccess, f'test duration: {time.time() - start - equalTestTime - discount}')
 
 
 # LOG_HELPER_SETTINGS = {

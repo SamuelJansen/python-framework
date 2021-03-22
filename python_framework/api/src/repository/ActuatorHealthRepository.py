@@ -8,4 +8,4 @@ class ActuatorHealthRepository:
         return self.repository.saveAndCommit(model)
 
     def findAll(self) :
-        return self.repository.findAll(self.model)
+        return self.repository.findAllAndCommit(self.model)

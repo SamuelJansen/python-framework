@@ -1,0 +1,18 @@
+print-status: False
+
+api:
+    name: LocalTestApi
+    server:
+        base-url: /local-test-api
+        scheme: http
+        port: 5001
+        host: localhost
+    security:
+        secret: ${SECURITY_KEY:local-secret-key}
+    database:
+        dialect: sqlite
+        settings:
+            check_same_thread: False
+
+swagger:
+    host: ${api.server.host}:${api.server.port}

@@ -1,5 +1,5 @@
 from python_helper import Test
-from python_framework import FlaskManager
+from python_framework.api.src.service.flask import FlaskManager
 
 @Test()
 def KW_RESOURCE_LIST_isInCorrectOrder() :

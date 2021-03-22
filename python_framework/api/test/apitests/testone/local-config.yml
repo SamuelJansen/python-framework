@@ -9,15 +9,15 @@ database:
     database: ${DATABASE_NAME:d5h5kfi694bmst}
 
 environment:
-    shema:
-        key: DATABASE_SCHEMA
-        value: ${database.schema}
+    # shema:
+    #     key: DATABASE_SCHEMA
+    #     value: ${database.schema}
     # database:
     #     key: DATABASE_URL
     #     value: ${database.dialect}://${database.username}:${database.password}@${database.host}:${database.port}/${database.database}
     active-environment:
         key: ACTIVE_ENVIRONMENT
-        value: prod
+        value: local
     security:
         key: SECURITY_KEY
         value: not-secured-at-all

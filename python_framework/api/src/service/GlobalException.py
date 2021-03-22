@@ -39,15 +39,15 @@ class GlobalException(Exception):
         self.timeStamp = datetime.datetime.now()
         self.message = message if message else DEFAULT_MESSAGE
         self.status = status if status else DEFAULT_STATUS
-        self.verb = request.method
-        self.url = request.url
+        self.verb = safellyGetVerb()
+        self.url = safellyGetUrl()
         self.logMessage = logMessage if logMessage else DEFAULT_LOG_MESSAGE
         self.logResource = logResource if logResource else DEFAULT_LOG_RESOURCE
         self.logResourceMethod = logResourceMethod if logResourceMethod else DEFAULT_LOG_RESOURCE_METHOD
         self.logPayload = self.getRequestBody()
 
     def __str__(self):
-        return f'''{GlobalException.__name__} thrown at {self.timeStamp}. Status: {self.status}, message: {self.message}, url: {self.url}{', logMessage: ' if self.logMessage else c.NOTHING}{self.logMessage}'''
+        return f'''{GlobalException.__name__} thrown at {self.timeStamp}. Status: {self.status}, message: {self.message}, verb: {self.verb}, url: {self.url}{', logMessage: ' if self.logMessage else c.NOTHING}{self.logMessage}'''
 
     def getRequestBody(self) :
         try :
@@ -97,3 +97,19 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
     except Exception as errorLogException :
         log.error(resourceInstance.__class__, f'Failed to persist {ErrorLog.ErrorLog.__name__}', errorLogException)
     return exception
+
+def safellyGetUrl() :
+    url = None
+    try :
+        url = request.url
+    except Exception as exception :
+        ...
+    return url
+
+def safellyGetVerb() :
+    verb = None
+    try :
+        verb = request.method
+    except Exception as exception :
+        ...
+    return verb

@@ -1,7 +1,7 @@
 import json
 from python_helper import log, Test, RandomHelper, ReflectionHelper, ObjectHelper
-from python_framework import Serializer
-from python_framework import SqlAlchemyProxy as sap
+from python_framework.api.src.helper import Serializer
+from python_framework.api.src.service import SqlAlchemyProxy as sap
 from MyDto import MyDto
 from MyOtherDto import MyOtherDto
 from MyThirdDto import MyThirdDto

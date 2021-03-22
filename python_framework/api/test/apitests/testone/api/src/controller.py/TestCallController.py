@@ -12,7 +12,7 @@ class TestCallController:
     def post(self, dto):
         return dto, HttpStatus.OK
 
-@Controller(url = '/calls', tag='Call', description='Call controller')
+@Controller(url = '/call/batch', tag='Call', description='Call controller')
 class TestCallBatchController:
 
     @ControllerMethod(

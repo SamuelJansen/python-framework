@@ -163,14 +163,14 @@ class SqlAlchemyProxy:
             engine = create_engine(url, echo=echo, connect_args=connectArgs)
         except Exception as exception :
             log.error(self.getNewEngine, 'Not possible to parse database url environment variable', exception)
-            log.prettyPython(self.getNewEngine, 'settingsFileName', self.globals.settingsFileName, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'settingFilePath', self.globals.settingFilePath, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'settingTree', self.globals.settingTree, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'defaultSettingFileName', self.globals.defaultSettingFileName, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'defaultSettingFilePath', self.globals.defaultSettingFilePath, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'defaultSettingTree', self.globals.defaultSettingTree, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'url', url, logLevel=log.LOG)
-            log.prettyPython(self.getNewEngine, 'connectArgs', connectArgs, logLevel=log.LOG)
+            # log.prettyPython(self.getNewEngine, 'settingsFileName', self.globals.settingsFileName, logLevel=log.LOG)
+            # log.prettyPython(self.getNewEngine, 'settingFilePath', self.globals.settingFilePath, logLevel=log.LOG)
+            # log.prettyPython(self.getNewEngine, 'settingTree', self.globals.settingTree, logLevel=log.LOG)
+            # log.prettyPython(self.getNewEngine, 'defaultSettingFileName', self.globals.defaultSettingFileName, logLevel=log.LOG)
+            # log.prettyPython(self.getNewEngine, 'defaultSettingFilePath', self.globals.defaultSettingFilePath, logLevel=log.LOG)
+            # log.prettyPython(self.getNewEngine, 'defaultSettingTree', self.globals.defaultSettingTree, logLevel=log.LOG)
+            # log.prettyPython(self.getNewEngine, 'url', url, logLevel=log.LOG)
+            # log.prettyPython(self.getNewEngine, 'connectArgs', connectArgs, logLevel=log.LOG)
             raise exception
         return engine
 
@@ -232,14 +232,14 @@ class SqlAlchemyProxy:
                 'schema' : schema,
                 'url' : url
             }}, logLevel = log.SETTING)
-        log.prettyPython(self.getUrl, 'url', url, logLevel=log.LOG)
+        # log.prettyPython(self.getUrl, 'url', url, logLevel=log.LOG)
         return url
 
     def getConnectArgs(self, connectArgs) :
         if ObjectHelper.isNone(connectArgs) :
             connectArgs = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_SETTINGS}')
             connectArgs = {} if ObjectHelper.isNotDictionary(connectArgs) else connectArgs
-        log.prettyPython(self.getConnectArgs, 'connectArgs', connectArgs, logLevel=log.LOG)
+        # log.prettyPython(self.getConnectArgs, 'connectArgs', connectArgs, logLevel=log.LOG)
         return connectArgs
 
     @Method
@@ -247,17 +247,17 @@ class SqlAlchemyProxy:
         try :
             self.model.metadata.create_all(self.engine)
         except Exception as exception :
-            log.error(self.run, 'Not possible to parse database url environment variable', exception)
-            log.prettyPython(self.run, 'settingsFileName', self.globals.settingsFileName, logLevel=log.LOG)
-            log.prettyPython(self.run, 'settingFilePath', self.globals.settingFilePath, logLevel=log.LOG)
-            log.prettyPython(self.run, 'settingTree', self.globals.settingTree, logLevel=log.LOG)
-            log.prettyPython(self.run, 'defaultSettingFileName', self.globals.defaultSettingFileName, logLevel=log.LOG)
-            log.prettyPython(self.run, 'defaultSettingFilePath', self.globals.defaultSettingFilePath, logLevel=log.LOG)
-            log.prettyPython(self.run, 'defaultSettingTree', self.globals.defaultSettingTree, logLevel=log.LOG)
-            url = self.getUrl(self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_DIALECT}'))
-            connectArgs = self.getConnectArgs(None)
-            log.prettyPython(self.run, 'url', url, logLevel=log.LOG)
-            log.prettyPython(self.run, 'connectArgs', connectArgs, logLevel=log.LOG)
+            log.error(self.run, 'Not possible to run', exception)
+            # log.prettyPython(self.run, 'settingsFileName', self.globals.settingsFileName, logLevel=log.LOG)
+            # log.prettyPython(self.run, 'settingFilePath', self.globals.settingFilePath, logLevel=log.LOG)
+            # log.prettyPython(self.run, 'settingTree', self.globals.settingTree, logLevel=log.LOG)
+            # log.prettyPython(self.run, 'defaultSettingFileName', self.globals.defaultSettingFileName, logLevel=log.LOG)
+            # log.prettyPython(self.run, 'defaultSettingFilePath', self.globals.defaultSettingFilePath, logLevel=log.LOG)
+            # log.prettyPython(self.run, 'defaultSettingTree', self.globals.defaultSettingTree, logLevel=log.LOG)
+            # url = self.getUrl(self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_DIALECT}'))
+            # connectArgs = self.getConnectArgs(None)
+            # log.prettyPython(self.run, 'url', url, logLevel=log.LOG)
+            # log.prettyPython(self.run, 'connectArgs', connectArgs, logLevel=log.LOG)
 
     @Method
     def commit(self):

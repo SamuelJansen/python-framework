@@ -3,7 +3,7 @@ import os
 
 print('On linux, run:\nsudo apt install libpq-dev python3-dev\npip3.9 install --no-cache-dir python-framework --force --upgrade')
 
-VERSION = '0.1.8-49'
+VERSION = '0.1.8-50'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -63,12 +63,15 @@ setup(
         'Flask==1.1.2',
         'Flask-RESTful==0.3.8',
         'Flask-JWT-Extended==3.24.1',
+        'PyJWT==1.7.1' ###- PyJWT 2.0.0 issue ...
         'flask-restful-swagger-2==0.35',
         'safrs==2.10.4',
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals==0.2.32'
+        'globals==0.2.55',
+        'Flask-APScheduler==1.12.1',
+        'psutil==5.8.0'
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',

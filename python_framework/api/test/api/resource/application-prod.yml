@@ -1,5 +1,1 @@
 print-status: False
-api:
-    database:
-        settings:
-            check_same_thread: False

@@ -1,4 +1,4 @@
-from python_framework import Enum, EnumItem
+from python_framework.api.src.annotation.EnumAnnotation import Enum, EnumItem
 
 @Enum(associateReturnsTo='name')
 class CallServiceNameEnumeration :

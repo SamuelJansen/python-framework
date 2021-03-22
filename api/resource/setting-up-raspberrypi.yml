@@ -1,6 +1,15 @@
 first-boot: '''
     https://www.raspberrypi.org/software/ -> download and build Rasbian OS image
     boot raspberrypi
+
+    ###- configs
+    sudo raspi-config
+
+    ###- installing .deb files, but often it doesn't works on rasbian
+    sudo dpkg -i /path/to/deb/file
+    sudo apt-get install -f
+    ###- or
+    sudo apt install ./name.deb
     '''
 getting-ip: '''
     #!/usr/bin/python3
@@ -82,3 +91,22 @@ server-configurations: '''
     sudo iptables -I INPUT -i eth0 -p tcp --dport 5933 -m comment --comment "# Server-001 #" -j ACCEPT
     sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 59 -m comment --comment "# Server-001 #" -j REDIRECT --to-port 5933
     '''
+host-name: '''
+    ###- see hostname
+    sudo hostname
+
+    ###- change hostname
+    sudo nano /etc/hostname
+    newname - like raspberrypi4-environment-lead
+    ###- hit crtl + x
+    ###- hit y
+    ###- hit enter
+
+    ###- persist operation
+    sudo nano /etc/hosts
+    '''
+telnet: '''
+    on windows. hit WIN + R
+    optionalfeatures
+    telnet client
+    reboot

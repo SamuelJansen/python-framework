@@ -2,6 +2,8 @@ from python_framework.api.src.annotation.EnumAnnotation import Enum, EnumItem
 
 @Enum(associateReturnsTo='value')
 class HttpStatusEnumeration() :
+    ###- HttpStatus.enumName returns the enum name
+
     ###- 1×× Informational
     CONTINUE = EnumItem(value = 100)
     SWITCHING_PROTOCOLS = EnumItem(value = 101)
@@ -64,10 +66,9 @@ class HttpStatusEnumeration() :
     ###- 5×× Server Error
     INTERNAL_SERVER_ERROR = EnumItem(value = 500)
     NOT_IMPLEMENTED = EnumItem(value = 501)
-
     BAD_GATWAY = EnumItem(value = 502)
     SERVICE_UNAVAILABLE = EnumItem(value = 503)
-    GATEWAy_TIMEOUT = EnumItem(value = 504)
+    GATEWAY_TIMEOUT = EnumItem(value = 504)
     HTTP_VERSION_NOT_SUPORTED = EnumItem(value = 505)
     VARIANT_ALSO_NEGOTIATES = EnumItem(value = 506)
     INSUFICIENT_STORAGE = EnumItem(value = 507)

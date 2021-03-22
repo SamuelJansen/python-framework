@@ -26,7 +26,9 @@ KW_RESOURCE = 'resource'
 PYTHON_FRAMEWORK_MODULE_NAME = 'python_framework'
 PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST = [
     'python_framework',
-    'TestApi'
+    'TestApi',
+    'DevTestApi',
+    'LocalTestApi'
 ]
 KW_CONTROLLER_RESOURCE = 'Controller'
 KW_SERVICE_RESOURCE = 'Service'
@@ -165,7 +167,7 @@ def publicControllerMethod(args, kwargs, contentType, resourceInstance, resource
         requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
         if logRequest :
             log.prettyJson(
-                log.prettyJson,
+                resourceInstanceMethod,
                 'bodyRequest',
                 requestBodyAsJson,
                 condition = logRequest,
@@ -187,7 +189,11 @@ def jsonifyResponse(response, contentType, status) :
 def getArgsWithSerializerReturnAppended(args, argument) :
     args = [arg for arg in args]
     args.append(argument)
-    return tuple(arg for arg in args)
+    return [arg for arg in args]
+
+@Function
+def getArgumentInFrontOfArgs(args, argument) :
+    return [argument, *args]
 
 @Function
 def getArgsWithResponseClassInstanceAppended(args, responseClass) :
@@ -291,13 +297,16 @@ def ControllerMethod(
         log.debug(ControllerMethod, f'''wrapping {resourceInstanceMethod.__name__}''', None)
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
+            completeResponse = None
             try :
                 if ObjectHelper.isNotEmptyCollection(roleRequired) :
                     completeResponse = securedControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logRequest)
                 else :
                     completeResponse = publicControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass, logRequest)
+                print(f'completeResponse: {completeResponse}')
                 validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
+                print(exception)
                 completeResponse = getCompleteResponseByException(exception, resourceInstance, resourceInstanceMethod)
                 ###- request.method:              GET
                 ###- request.url:                 http://127.0.0.1:5000/alert/dingding/test?x=y
@@ -316,7 +325,7 @@ def ControllerMethod(
             status = completeResponse[1]
             if logResponse :
                 log.prettyJson(
-                    log.prettyJson,
+                    resourceInstanceMethod,
                     'bodyResponse',
                     json.loads(Serializer.jsonifyIt(controllerResponse)),
                     condition = logResponse,
