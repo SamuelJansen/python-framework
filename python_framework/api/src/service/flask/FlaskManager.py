@@ -303,10 +303,10 @@ def ControllerMethod(
                     completeResponse = securedControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logRequest)
                 else :
                     completeResponse = publicControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass, logRequest)
-                print(f'completeResponse: {completeResponse}')
+                # print(f'completeResponse: {completeResponse}')
                 validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
-                print(exception)
+                # print(exception)
                 completeResponse = getCompleteResponseByException(exception, resourceInstance, resourceInstanceMethod)
                 ###- request.method:              GET
                 ###- request.url:                 http://127.0.0.1:5000/alert/dingding/test?x=y
@@ -626,7 +626,7 @@ def getApi() :
     return api
 
 def getNullableApi() :
-    api=None
+    api = None
     try :
         api = getApi()
     except Exception as exception :

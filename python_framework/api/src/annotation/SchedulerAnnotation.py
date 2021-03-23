@@ -37,6 +37,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
                 methodReturn = resourceInstanceMethod(*args,**kwargs)
             except Exception as exception :
                 FlaskManager.raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
+                log.log(innerResourceInstanceMethod, f'Not possible to run {shedulerId} properly', exception=exception)
             return methodReturn
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
