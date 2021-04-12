@@ -126,10 +126,10 @@ def forcedlyParse(given, pattern=DEFAULT_DATETIME_PATTERN, timedelta=False) :
             pass
     return parsed
 
-def getDatetime(givenDatetime, pattern=DEFAULT_DATETIME_PATTERN) :
+def parseToDateTime(givenDatetime, pattern=DEFAULT_DATETIME_PATTERN) :
     return givenDatetime if ObjectHelper.isNone(givenDatetime) or not isinstance(givenDatetime, str) else parseToDatetimeOrDateOrTimePattern(givenDatetime, pattern=pattern)
 
-def forcedlyGetDatetime(givenDatetime, pattern=DEFAULT_DATETIME_PATTERN) :
+def forcedlyGetDateTime(givenDatetime, pattern=DEFAULT_DATETIME_PATTERN) :
     return givenDatetime if ObjectHelper.isNone(givenDatetime) or not isinstance(givenDatetime, str) else forcedlyParse(givenDatetime, pattern=pattern)
 
 def forcedlyGetDate(givenDate, pattern=DEFAULT_DATE_PATTERN) :
@@ -164,8 +164,8 @@ class DateTimeTest(MODEL) :
         timedelta = None
     ):
         self.id = id
-        self.beginAtDatetime = forcedlyGetDatetime(beginAtDatetime)
-        self.endAtDatetime = forcedlyGetDatetime(endAtDatetime)
+        self.beginAtDatetime = forcedlyGetDateTime(beginAtDatetime)
+        self.endAtDatetime = forcedlyGetDateTime(endAtDatetime)
         self.beginAtDate = forcedlyGetDate(beginAtDate)
         self.endAtDate = forcedlyGetDate(endAtDate)
         self.beginAtTime = forcedlyGetTime(beginAtTime)
@@ -202,8 +202,8 @@ def fromModelToDto() :
     mockedDateAsString = mockedDatetimeAsString.split()[0]
     mockedTimeAsString = mockedDatetimeAsString.split()[1]
     instance = DateTimeTest(
-        beginAtDatetime = forcedlyGetDatetime(mockedDatetimeAsString),
-        endAtDatetime = forcedlyGetDatetime(mockedDatetimeAsString),
+        beginAtDatetime = forcedlyGetDateTime(mockedDatetimeAsString),
+        endAtDatetime = forcedlyGetDateTime(mockedDatetimeAsString),
         beginAtDate = forcedlyGetDate(mockedDateAsString),
         endAtDate = forcedlyGetDate(mockedDateAsString),
         beginAtTime = forcedlyGetTime(mockedTimeAsString),

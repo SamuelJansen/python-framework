@@ -401,3 +401,51 @@ def map_whenArgIsNone() :
     assert MY_OTHER_ENUM_TEST.map(None) is None
     assert MY_THIRD_ENUM_TEST.map(None) is None
     assert SIMPLE_ENUM_TEST.map(None) is None
+
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **LOG_HELPER_SETTINGS
+    }
+)
+def Enum_whenHaveMoreThanOneInnerValue() :
+    # arrange
+    @Enum(instanceLog=False)
+    class MyEnumTest :
+        ONE = EnumItem(value='one', otherValue=1)
+        TWO = EnumItem(value='two', otherValue=2)
+    @Enum(instanceLog=False)
+    class MyOtherEnumTest :
+        ONE = EnumItem(value=1, otherValue='one')
+        TWO = EnumItem(value=2, otherValue='two')
+    MY_ENUM_TEST = MyEnumTest()
+    MY_OTHER_ENUM_TEST = MyOtherEnumTest()
+    @Enum()
+    class WeekDayEnumeration :
+        MONDAY = EnumItem(index=0, short='mon')
+        TUESDAY = EnumItem(index=1, short='tue')
+        WEDNESDAY = EnumItem(index=2, short='wed')
+        THURSDAY = EnumItem(index=3, short='thu')
+        FRIDAY = EnumItem(index=4, short='fri')
+        SATURDAY = EnumItem(index=5, short='sat')
+        SUNDAY = EnumItem(index=6, short='sun')
+    WeekDay = WeekDayEnumeration()
+
+    # act
+    value = MY_ENUM_TEST.ONE.value
+    otherValue = MY_ENUM_TEST.TWO.otherValue
+    other_value = MY_OTHER_ENUM_TEST.ONE.value
+    other_otherValue = MY_OTHER_ENUM_TEST.TWO.otherValue
+    fridayIndex = WeekDay.FRIDAY.index
+    fridayShort = WeekDay.FRIDAY.short
+    # from python_helper import ReflectionHelper
+    # ReflectionHelper.getItNaked(MY_ENUM_TEST)
+    # ReflectionHelper.getItNaked(MY_OTHER_ENUM_TEST)
+    # ReflectionHelper.getItNaked(WeekDay)
+
+    # assert
+    assert 'one' == value
+    assert 2 == otherValue
+    assert 1 == other_value
+    assert 'two' == other_otherValue
+    assert 4 == fridayIndex
+    assert 'fri' == fridayShort

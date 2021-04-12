@@ -1,9 +1,11 @@
 from distutils.core import setup
 import os
 
-print('On linux, run:\nsudo apt install libpq-dev python3-dev\npip3.9 install --no-cache-dir python-framework --force --upgrade')
+print('''On linux, run:
+sudo apt install libpq-dev python3-dev
+pip3.9 install --no-cache-dir python-framework --force --upgrade''')
 
-VERSION = '0.1.8-52'
+VERSION = '0.1.9'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -65,7 +67,7 @@ setup(
         'Flask-JWT-Extended==3.24.1',
         # 'PyJWT==2.0.0' ###- 'PyJWT==1.7.1' for PyJWT 2.0.0 issue ...
         'flask-restful-swagger-2==0.35',
-        'safrs==2.10.4',
+        # 'safrs==2.10.4',
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',

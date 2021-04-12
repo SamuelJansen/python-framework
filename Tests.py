@@ -37,3 +37,9 @@ TestHelper.run(__file__)
 #         'SerializerTest.convertFromJsonToObject_whenThereAreEnums'
 #     ]
 # )
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
+#         'EnumAnnotationTest.Enum_whenHaveMoreThanOneInnerValue'
+#     ]
+# )

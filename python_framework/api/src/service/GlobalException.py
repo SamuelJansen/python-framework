@@ -37,8 +37,8 @@ class GlobalException(Exception):
         logResourceMethod = None
     ):
         self.timeStamp = datetime.datetime.now()
-        self.message = message if message else DEFAULT_MESSAGE
-        self.status = status if status else DEFAULT_STATUS
+        self.status = status if ObjectHelper.isNotNone(status) else DEFAULT_STATUS
+        self.message = message if ObjectHelper.isNotEmpty(message) else DEFAULT_MESSAGE if 500 <= self.status else self.status.enumName
         self.verb = safellyGetVerb()
         self.url = safellyGetUrl()
         self.logMessage = logMessage if logMessage else DEFAULT_LOG_MESSAGE
@@ -78,6 +78,7 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
         log.error(handleLogErrorException, f'Failed to excecute {resourceInstanceMethod.__name__} method due to {exception.__class__.__name__} exception', exception)
         message = None
         status = None
+        logMessage = None
         if (isinstance(exception.__class__, NoAuthorizationError) or NoAuthorizationError.__name__ == exception.__class__.__name__ or
             isinstance(exception.__class__, RevokedTokenError) or RevokedTokenError.__name__ == exception.__class__.__name__ or
             isinstance(exception.__class__, ExpiredSignatureError) or ExpiredSignatureError.__name__ == exception.__class__.__name__):
@@ -85,7 +86,9 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
                 message = c.NOTHING
             message += str(exception)
             status = HttpStatus.UNAUTHORIZED
-        exception = GlobalException(message=message, logMessage=str(exception), logResource=resourceInstance, logResourceMethod=resourceInstanceMethod, status=status)
+            if ObjectHelper.isNotEmpty(str(exception)) :
+                logMessage = str(exception)
+        exception = GlobalException(message=message, logMessage=logMessage, logResource=resourceInstance, logResourceMethod=resourceInstanceMethod, status=status)
     try :
         if not exception.logResource or c.NOTHING == exception.logResource or not resourceInstance == exception.logResource :
             exception.logResource = resourceInstance

@@ -29,7 +29,7 @@ class EnumItem :
         return c.NOTHING.join(StringHelper.prettyPython(self.__enumItemEqMap__, tabCount=2, quote=c.NOTHING))
 
     def __repr__(self) :
-        return __str__()
+        return self.__str__()
 
     def __eq__(self, other) :
         if isinstance(other, EnumItem) :
@@ -161,7 +161,7 @@ def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
                 return c.NOTHING.join([ReflectionHelper.getName(OuterEnum), c.COLON_SPACE, StringHelper.prettyPython(self.__enumEqList__, quote=c.NOTHING)])
 
             def __repr__(self) :
-                return __str__()
+                return self.__str__()
 
             @staticmethod
             def map(enumItemOrEnumItemValue) :
