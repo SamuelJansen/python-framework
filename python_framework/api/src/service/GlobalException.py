@@ -75,7 +75,7 @@ def validateArgs(self, method, objectRequest, expecteObjectClass):
 @Function
 def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, apiInstance) :
     if not (isinstance(exception.__class__, GlobalException) or GlobalException.__name__ == exception.__class__.__name__) :
-        log.error(handleLogErrorException, f'Failed to excecute {resourceInstanceMethod.__name__} method due to {exception.__class__.__name__} exception', exception)
+        log.warning(handleLogErrorException, f'Failed to excecute {resourceInstanceMethod.__name__} method due to {exception.__class__.__name__} exception', exception=exception)
         message = None
         status = None
         logMessage = None
@@ -98,7 +98,7 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
         httpErrorLog.override(exception)
         apiInstance.repository.saveAndCommit(httpErrorLog)
     except Exception as errorLogException :
-        log.error(resourceInstance.__class__, f'Failed to persist {ErrorLog.ErrorLog.__name__}', errorLogException)
+        log.warning(resourceInstance.__class__, f'Failed to persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
     return exception
 
 def safellyGetUrl() :

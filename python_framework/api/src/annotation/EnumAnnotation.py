@@ -10,37 +10,6 @@ ENUM_STATIC_METHOD_NAME_LIST = [
     MAP_METHOD_NAME
 ]
 
-class EnumClass(object) :
-    ...
-
-class EnumItem :
-    def __init__(self, *args, **kwargs) :
-        self.__enumItemMap__ = {}
-        self.__enumItemEqMap__ = {}
-        for key, value in kwargs.items() :
-            self.__enumItemMap__[key] = value
-            self.__enumItemEqMap__[key] = value
-            ReflectionHelper.setAttributeOrMethod(self, key, ENUM_ITEM_CLASS_DICTIONARY.get(type(value))(value))
-
-    def __get__(self, obj, objtype=None) :
-        return self if not ReflectionHelper.hasAttributeOrMethod(self, ENUM_VALUE_AS_STRING_KEY) else self.enumValue
-
-    def __str__(self) :
-        return c.NOTHING.join(StringHelper.prettyPython(self.__enumItemEqMap__, tabCount=2, quote=c.NOTHING))
-
-    def __repr__(self) :
-        return self.__str__()
-
-    def __eq__(self, other) :
-        if isinstance(other, EnumItem) :
-            return str(other.__enumItemEqMap__) == str(self.__enumItemEqMap__)
-        return self.enumValue == other
-
-    def __ne__(self, other) :
-        if isinstance(other, EnumItem) :
-            return str(other.__enumItemEqMap__) != str(self.__enumItemEqMap__)
-        return self.enumValue != other
-
 class EnumItemStr(str) :
     ...
 class EnumItemInt(int) :
@@ -55,6 +24,41 @@ class EnumItemTuple(tuple) :
     ...
 class EnumItemList(list) :
     ...
+
+class EnumClass(object) :
+    ...
+
+def updateEnumItem(enumItem, key, value) :
+    enumItem.__enumItemMap__[key] = value
+    enumItem.__enumItemEqMap__[key] = str(value)
+    ReflectionHelper.setAttributeOrMethod(enumItem, key, ENUM_ITEM_CLASS_DICTIONARY.get(type(value))(value))
+
+class EnumItem :
+    def __init__(self, *args, **kwargs) :
+        self.__enumItemMap__ = {}
+        self.__enumItemEqMap__ = {}
+        for key, value in kwargs.items() :
+            updateEnumItem(self, key, value)
+
+    def __get__(self, obj, objtype=None) :
+        return self if not ReflectionHelper.hasAttributeOrMethod(self, ENUM_VALUE_AS_STRING_KEY) else self.enumValue
+
+    def __str__(self) :
+        return str(self.__enumItemEqMap__)
+
+    def __repr__(self) :
+        return self.__str__()
+
+    def __eq__(self, other) :
+        if isinstance(other, EnumItem) :
+            return str(other.__enumItemEqMap__) == str(self.__enumItemEqMap__)
+        return self.enumValue == other
+
+    def __ne__(self, other) :
+        if isinstance(other, EnumItem) :
+            return str(other.__enumItemEqMap__) != str(self.__enumItemEqMap__)
+        return self.enumValue != other
+
 ENUM_ITEM_CLASS_DICTIONARY = {
     str : EnumItemStr,
     EnumItemStr : EnumItemStr,
@@ -69,7 +73,8 @@ ENUM_ITEM_CLASS_DICTIONARY = {
     tuple : EnumItemTuple,
     EnumItemTuple : EnumItemTuple,
     list : EnumItemList,
-    EnumItemList : EnumItemList
+    EnumItemList : EnumItemList,
+    EnumItem : EnumItem
 }
 
 def isEnum(possibleEnum) :
@@ -91,9 +96,9 @@ def isEnumItem(possibleEnumItem) :
 def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
     def Wrapper(OuterEnum, *args, **kwargs):
         def __raiseBadImplementation__(enumValue, enum=None) :
-            raise Exception(f'Not possible to implement "{enumValue}" enum value in {StringHelper.prettyPython(enum, quote=c.NOTHING)} enum')
-        def __raiseEnumValueNotImplemented__(enumValue, enumClass=None, enumEqList=None) :
-            raise Exception(f'Not possible to retrieve "{enumValue}" enum value from {ReflectionHelper.getName(enumClass)}: {StringHelper.prettyPython(enumEqList, quote=c.NOTHING)} enum')
+            raise Exception(f'Not possible to implement "{enumValue}" enum value in {enum} enum')
+        def __raiseEnumValueNotImplemented__(enumValue, enumClass=None, enumEqList=None, enumMap=None) :
+            raise Exception(f'Not possible to retrieve "{enumValue}" enum value from {ReflectionHelper.getName(enumClass)}: {enumEqList} enum. Enum.__enumMap__ = {enumMap}')
         if instanceLog :
             log.log(Enum,f'''wrapping {OuterEnum.__name__}''')
         class InnerEnum(OuterEnum, EnumClass):
@@ -115,6 +120,7 @@ def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
                     attributeAttributeDataList = ReflectionHelper.getAttributeDataList(attribute)
                     if instanceLog :
                         log.prettyPython(OuterEnum, 'attributeAttributeDataList', attributeAttributeDataList)
+                        # print(f'type({attribute}): {type(attribute)}')
                     association = ReflectionHelper.getAttributeOrMethod(attribute, self.__associateReturnsTo__, muteLogs=True)
                     if type(association) is type(None) :
                         ReflectionHelper.setAttributeOrMethod(attribute, ENUM_VALUE_AS_STRING_KEY, ENUM_ITEM_CLASS_DICTIONARY.get(type(enumValue))(enumValue))
@@ -123,6 +129,9 @@ def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
                         ReflectionHelper.setAttributeOrMethod(attribute, ENUM_VALUE_AS_STRING_KEY, ENUM_ITEM_CLASS_DICTIONARY.get(type(association))(association))
                         nativeClassDataList = ReflectionHelper.getAttributeDataList(type(association)())
                     ReflectionHelper.setAttributeOrMethod(attribute, ENUM_NAME_AS_STRING_KEY, enumValue)
+                    if isinstance(attribute, EnumItem) :
+                        # print(attribute, attribute.enumName, attribute)
+                        updateEnumItem(attribute, attribute.enumName, attribute) ###- so that __eq__ does not crash
                     if not c.TYPE_FUNCTION == ReflectionHelper.getClassName(attribute) :
                         attribute.enumValue.__enumItemMap__ = attribute.__enumItemMap__
                         attribute.enumValue.__enumItemEqMap__ = attribute.__enumItemEqMap__
@@ -158,7 +167,7 @@ def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
                 return str(self) != str(other)
 
             def __str__(self) :
-                return c.NOTHING.join([ReflectionHelper.getName(OuterEnum), c.COLON_SPACE, StringHelper.prettyPython(self.__enumEqList__, quote=c.NOTHING)])
+                return StringHelper.join([ReflectionHelper.getName(OuterEnum), c.COLON_SPACE, str(self.__enumEqList__)])
 
             def __repr__(self) :
                 return self.__str__()
@@ -170,8 +179,8 @@ def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
                 if ObjectHelper.isNone(enumItemOrEnumItemValue) :
                     return enumItemOrEnumItemValue
                 else :
-                    mappedEnum = OuterEnum.__enumMap__.get(str(enumItemOrEnumItemValue))
-                    return mappedEnum if ObjectHelper.isNotNone(mappedEnum) else __raiseEnumValueNotImplemented__(enumItemOrEnumItemValue, enumClass=OuterEnum, enumEqList=OuterEnum().__enumEqList__)
+                    mappedEnum = OuterEnum.__enumMap__.get(str(enumItemOrEnumItemValue) if not ReflectionHelper.hasAttributeOrMethod(enumItemOrEnumItemValue, 'enumName') else enumItemOrEnumItemValue.enumName)
+                    return mappedEnum if ObjectHelper.isNotNone(mappedEnum) else __raiseEnumValueNotImplemented__(enumItemOrEnumItemValue, enumClass=OuterEnum, enumEqList=OuterEnum().__enumEqList__, enumMap=OuterEnum().__enumMap__)
         ReflectionHelper.overrideSignatures(InnerEnum, OuterEnum)
         return InnerEnum
     return Wrapper

@@ -95,7 +95,7 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
     # print(fromJson)
     # print(f'fromJson: {fromJson}')
     # print(f'toClass: {toClass}')
-    if ObjectHelper.isNativeClassIsntance(fromJson) and toClass == fromJson.__class__ :
+    if ObjectHelper.isNativeClassInstance(fromJson) and toClass == fromJson.__class__ :
         return fromJson
     attributeNameList = ReflectionHelper.getAttributeNameList(toClass)
     classRole = getClassRole(toClass)
@@ -167,7 +167,7 @@ def convertFromObjectToObject(fromObject, toClass) :
 
 @Function
 def prettify(objectAsDict) :
-    if ObjectHelper.isNativeClassIsntance(objectAsDict) :
+    if ObjectHelper.isNativeClassInstance(objectAsDict) :
         return objectAsDict
     return StringHelper.prettyJson(objectAsDict)
 
@@ -194,7 +194,7 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
     # print(instance)
     if ObjectHelper.isNone(visitedIdInstances) :
         visitedIdInstances = []
-    if ObjectHelper.isNativeClassIsntance(instance) or ObjectHelper.isNone(instance) :
+    if ObjectHelper.isNativeClassInstance(instance) or ObjectHelper.isNone(instance) :
         return instance
     if EnumAnnotation.isEnumItem(instance) :
         return instance.enumValue
@@ -270,7 +270,7 @@ def getResourceModuleName(key, classRole) :
     return resourceModuleName
 
 def resolveValue(value, key, classRole, fatherClass=None) :
-    if ObjectHelper.isNativeClassIsntance(value) :
+    if ObjectHelper.isNativeClassInstance(value) :
         return value
     if ObjectHelper.isList(value) :
         if LIST_SUFIX == key[-4:] :

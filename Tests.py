@@ -6,7 +6,11 @@ TestHelper.run(__file__)
 #         'EnumAnnotationTest.enum_withSuccess',
 #         'EnumAnnotationTest.otherEnum_withSuccess',
 #         'EnumAnnotationTest.python_framework_status',
-#         'EnumAnnotationTest.enumName'
+#         'EnumAnnotationTest.enumName',
+#         'EnumAnnotationTest.enumName_badImplementation',
+#         'EnumAnnotationTest.map_whenArgIsNone',
+#         'EnumAnnotationTest.Enum_whenHaveMoreThanOneInnerValue',
+#         'EnumAnnotationTest.Enum_dot_map'
 #     ]
 # )
 # TestHelper.run(

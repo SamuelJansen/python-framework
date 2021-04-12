@@ -570,12 +570,12 @@ def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod) :
 def getCompleteResponseByException(exception, resourceInstance, resourceInstanceMethod) :
     exception = getGlobalException(exception, resourceInstance, resourceInstanceMethod)
     completeResponse = [{'message':exception.message, 'timestamp':str(exception.timeStamp)},exception.status]
-    log.error(resourceInstance.__class__, f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request', exception)
+    log.warning(resourceInstance.__class__, f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request', exception=exception)
     return completeResponse
 
 def validateResponseClass(responseClass, controllerResponse) :
     if isNotPythonFrameworkHttpsResponse(controllerResponse) :
-        raiseBadResponseImplementetion(f'Python Framework response cannot be null. It should be a list like this: [{"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HTTPS_CODE]')
+        raiseBadResponseImplementation(f'Python Framework response cannot be null. It should be a list like this: [{"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HTTPS_CODE]')
     if ObjectHelper.isNotNone(responseClass) :
         if Serializer.isSerializerList(responseClass) :
             if 0 == len(responseClass) :
@@ -583,15 +583,15 @@ def validateResponseClass(responseClass, controllerResponse) :
             elif 1 == len(responseClass) :
                 if ObjectHelper.isNotList(responseClass[0])  :
                     if not isinstance(controllerResponse[0], responseClass[0]) :
-                        raiseBadResponseImplementetion(f'Response class does not match expected class. Expected "{responseClass[0].__name__}", response "{controllerResponse[0].__class__.__name__}"')
+                        raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass[0].__name__}", response "{controllerResponse[0].__class__.__name__}"')
                 elif ObjectHelper.isNotList(responseClass[0][0]) :
                     if ObjectHelper.isNotList(controllerResponse[0]) :
-                        raiseBadResponseImplementetion(f'Response is not a list. Expected "{responseClass[0].__class__.__name__}", but found "{controllerResponse[0].__class__.__name__}"')
+                        raiseBadResponseImplementation(f'Response is not a list. Expected "{responseClass[0].__class__.__name__}", but found "{controllerResponse[0].__class__.__name__}"')
                     elif Serializer.isSerializerList(controllerResponse[0]) and 0 < len(controllerResponse[0]) and not isinstance(controllerResponse[0][0], responseClass[0][0]) :
-                        raiseBadResponseImplementetion(f'Response element class does not match expected element class. Expected "{responseClass[0][0].__name__}", response "{controllerResponse[0][0].__class__.__name__}"')
+                        raiseBadResponseImplementation(f'Response element class does not match expected element class. Expected "{responseClass[0][0].__name__}", response "{controllerResponse[0][0].__class__.__name__}"')
         else :
             if not isinstance(controllerResponse[0], responseClass) :
-                raiseBadResponseImplementetion(f'Response class does not match expected class. Expected "{responseClass.__name__}", response "{controllerResponse[0].__class__.__name__}"')
+                raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass.__name__}", response "{controllerResponse[0].__class__.__name__}"')
     else :
         log.warning(validateResponseClass,f'"responseClass" was not defined')
 
@@ -610,7 +610,7 @@ def isPythonFrameworkHttpsResponse(controllerResponse) :
 def isNotPythonFrameworkHttpsResponse(controllerResponse) :
     return not isPythonFrameworkHttpsResponse(controllerResponse)
 
-def raiseBadResponseImplementetion(cause):
+def raiseBadResponseImplementation(cause):
     raise Exception(f'Bad response implementation. {cause}')
 
 @Function

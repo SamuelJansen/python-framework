@@ -110,13 +110,13 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
     responsePostSendPayloadBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload)
     responsePostSendPayloadListBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList)
 
-    print(f'responseGetNone: {responseGetNone.json()}')
-    print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
-
-    print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
-    print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
-    print(f'responsePostSendPayloadBatch: {responsePostSendPayloadBatch.json()}')
-    print(f'responsePostSendPayloadListBatch: {responsePostSendPayloadListBatch.json()}')
+    # print(f'responseGetNone: {responseGetNone.json()}')
+    # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
+    #
+    # print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
+    # print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
+    # print(f'responsePostSendPayloadBatch: {responsePostSendPayloadBatch.json()}')
+    # print(f'responsePostSendPayloadListBatch: {responsePostSendPayloadListBatch.json()}')
 
     # assert
     assert ObjectHelper.equals(
@@ -131,38 +131,39 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
     {'me': 'and you'}
     {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'}
     {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'}
-    print(f'responseGetNone: {responseGetNone.json()}')
+    # print(f'responseGetNone: {responseGetNone.json()}')
     assert ObjectHelper.equals(
         {'message': 'OK'},
         responseGetNone.json()
     )
     assert 200 == responseGetNone.status_code
-    print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
+    # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
     assert ObjectHelper.equals(
         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.299735'},
         responseGetNoneBatch.json(),
         ignoreKeyList=['timestamp']
     )
     assert 500 == responseGetNoneBatch.status_code
-    print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
+    # print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
     assert ObjectHelper.equals(
         {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'},
         responsePostSendPayload.json(),
         ignoreKeyList=['timestamp']
     )
     assert 400 == responsePostSendPayload.status_code
-    print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
+    # print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
     assert ObjectHelper.equals(
         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-19 08:36:20.925177'},
-        responsePostSendPayloadList.json()
+        responsePostSendPayloadList.json(),
+        ignoreKeyList=['timestamp']
     )
-    assert 200 == responsePostSendPayloadList.status_code
+    assert 500 == responsePostSendPayloadList.status_code
     assert ObjectHelper.equals(
         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'},
         responsePostSendPayloadBatch.json(),
         ignoreKeyList=['timestamp']
     )
-    assert 400 == responsePostSendPayloadBatch.status_code
+    assert 500 == responsePostSendPayloadBatch.status_code
     assert ObjectHelper.equals(
         {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'},
         responsePostSendPayloadListBatch.json(),
