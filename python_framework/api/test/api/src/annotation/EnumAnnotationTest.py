@@ -369,10 +369,10 @@ def enumName_badImplementation() :
         thirdTestExteption = e
 
     # assert
-    # print(str(firstTestExteption))
-    # print(str(secondTestExteption))
+    print(str(firstTestExteption))
+    print(str(secondTestExteption))
     assert '''Not possible to implement "ONE" enum value in MyEnumTest: ['ONE(value:ONE)'] enum''' == str(firstTestExteption)
-    assert '''Not possible to retrieve "another" enum value from MyOtherEnumTest: ['ONE(value:ONE)', 'TWO(value:TWO)'] enum. Enum.__enumMap__ = {'ONE': {'value': 'ONE', 'otherValue': '1', 'ONE': "{'value': 'ONE', 'otherValue': '1'}"}, 'TWO': {'value': 'TWO', 'otherValue': '2', 'TWO': "{'value': 'TWO', 'otherValue': '2'}"}}''' == str(secondTestExteption)
+    assert '''Not possible to retrieve "another" enum value from MyOtherEnumTest: ['ONE(value:ONE)', 'TWO(value:TWO)'] enum. Enum.__enumMap__ = {'ONE': ONE, 'TWO': TWO}''' == str(secondTestExteption)
     assert "'EnumItem' object has no attribute 'enumValue'" == str(thirdTestExteption)
 
 @Test(environmentVariables={
@@ -466,24 +466,16 @@ def Enum_whenHaveMoreThanOneInnerValue() :
 )
 def Enum_dot_map() :
     # arrange
-    # @Enum(instanceLog=False)
-    # class MyOtherEnumTest :
-    #     ONE = EnumItem(value=1, otherValue='one')
-    #     TWO = EnumItem(value=2, otherValue='two')
-    # MY_OTHER_ENUM_TEST = MyOtherEnumTest()
-    # @Enum(instanceLog=True)
     @Enum(instanceLog=False)
     class SimpleEnum :
         ABC = EnumItem()
         DEF = EnumItem()
     SIMPLE_ENUM = SimpleEnum()
-    # @Enum(instanceLog=True)
     @Enum(instanceLog=False)
     class MyEnumTest :
         ONE = EnumItem(value='one', otherValue=1)
         TWO = EnumItem(value='two', otherValue=2)
     MY_ENUM_TEST = MyEnumTest()
-    # @Enum(associateReturnsTo='otherValue', instanceLog=True)
     @Enum(associateReturnsTo='otherValue', instanceLog=False)
     class MyThirdEnumTest :
         THREE = EnumItem(value='three', otherValue=3)
@@ -518,3 +510,59 @@ def Enum_dot_map() :
     assert not MY_THIRD_ENUM_TEST.map('FOUR') == MY_THIRD_ENUM_TEST.THREE
     assert MY_THIRD_ENUM_TEST.map('FOUR') is not {}
     assert ObjectHelper.isNotEmpty(MY_THIRD_ENUM_TEST.map('THREE'))
+
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **FULL_LOG_HELPER_SETTINGS
+    }
+)
+def Enum_str() :
+    # arrange
+    @Enum(instanceLog=False)
+    class SimpleEnum :
+        ABC = EnumItem()
+        DEF = EnumItem()
+    SIMPLE_ENUM = SimpleEnum()
+    @Enum(instanceLog=False)
+    class MyEnumTest :
+        ONE = EnumItem(value='one', otherValue=1)
+        TWO = EnumItem(value='two', otherValue=2)
+    MY_ENUM_TEST = MyEnumTest()
+    @Enum(associateReturnsTo='otherValue', instanceLog=False)
+    class MyThirdEnumTest :
+        THREE = EnumItem(value='three', otherValue=3)
+        FOUR = EnumItem(value='four', otherValue=4)
+    MY_THIRD_ENUM_TEST = MyThirdEnumTest()
+
+    # act
+    shouldBe_DEF = SIMPLE_ENUM.map('DEF')
+    shouldBe_DEF_asWell = SIMPLE_ENUM.map(SIMPLE_ENUM.map('DEF'))
+    shouldBe_None = SIMPLE_ENUM.map(None)
+
+    # act and assert
+    assert 'DEF' == str(SIMPLE_ENUM.map('DEF'))
+    assert 'DEF' == str(SIMPLE_ENUM.DEF)
+    assert 'ABC' == str(SIMPLE_ENUM.map(SIMPLE_ENUM.map('ABC')))
+    assert 'ABC' == str(SIMPLE_ENUM.map(SIMPLE_ENUM.ABC))
+    assert 'None' == str(SIMPLE_ENUM.map(SIMPLE_ENUM.map(None)))
+
+    assert 'ONE' == str(MY_ENUM_TEST.ONE)
+    assert 'TWO' == str(MY_ENUM_TEST.TWO)
+
+    assert 3 == MY_THIRD_ENUM_TEST.THREE
+    assert 4 == MY_THIRD_ENUM_TEST.FOUR
+    assert 3 == MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.THREE)
+    assert 4 == MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.FOUR))
+    assert 3 == MY_THIRD_ENUM_TEST.map(3)
+    assert 4 == MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.map(4))
+    assert 3 == MY_THIRD_ENUM_TEST.map('THREE')
+    assert 4 == MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.map('FOUR'))
+
+    assert str(3) == str(MY_THIRD_ENUM_TEST.THREE)
+    assert str(4) == str(MY_THIRD_ENUM_TEST.FOUR)
+    assert str(3) == str(MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.THREE))
+    assert str(4) == str(MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.FOUR)))
+    assert str(3) == str(MY_THIRD_ENUM_TEST.map(3))
+    assert str(4) == str(MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.map(4)))
+    assert str(3) == str(MY_THIRD_ENUM_TEST.map('THREE'))
+    assert str(4) == str(MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.map('FOUR')))

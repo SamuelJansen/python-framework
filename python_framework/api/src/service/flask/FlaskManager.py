@@ -570,7 +570,15 @@ def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod) :
 def getCompleteResponseByException(exception, resourceInstance, resourceInstanceMethod) :
     exception = getGlobalException(exception, resourceInstance, resourceInstanceMethod)
     completeResponse = [{'message':exception.message, 'timestamp':str(exception.timeStamp)},exception.status]
-    log.warning(resourceInstance.__class__, f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request', exception=exception)
+    try :
+        logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request'
+        if HttpStatus.INTERNAL_SERVER_ERROR <= exception.status :
+            log.error(resourceInstance.__class__, logErrorMessage, exception)
+        else :
+            log.warning(resourceInstance.__class__, logErrorMessage, exception=exception)
+    except Exception as logErrorMessageException :
+        log.log(getCompleteResponseByException, 'Error logging exception at controller', exception=logErrorMessageException)
+        log.error(log.error, 'Error processing request', exception)
     return completeResponse
 
 def validateResponseClass(responseClass, controllerResponse) :

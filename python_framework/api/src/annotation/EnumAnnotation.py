@@ -44,7 +44,7 @@ class EnumItem :
         return self if not ReflectionHelper.hasAttributeOrMethod(self, ENUM_VALUE_AS_STRING_KEY) else self.enumValue
 
     def __str__(self) :
-        return str(self.__enumItemEqMap__)
+        return str(ReflectionHelper.getAttributeOrMethod(self, ENUM_VALUE_AS_STRING_KEY, muteLogs=True))
 
     def __repr__(self) :
         return self.__str__()
