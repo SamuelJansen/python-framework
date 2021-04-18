@@ -1,23 +1,25 @@
 from python_helper import TestHelper
-# TestHelper.run(__file__)
-TestHelper.run(
-    __file__,
-    runOnly = [
-        # 'EnumAnnotationTest.enum_withSuccess',
-        # 'EnumAnnotationTest.otherEnum_withSuccess',
-        # 'EnumAnnotationTest.python_framework_status',
-        # 'EnumAnnotationTest.enumName',
-        # 'EnumAnnotationTest.enumName_badImplementation',
-        # 'EnumAnnotationTest.map_whenArgIsNone',
-        # 'EnumAnnotationTest.Enum_whenHaveMoreThanOneInnerValue',
-        # 'EnumAnnotationTest.Enum_dot_map',
-        'EnumAnnotationTest.Enum_str'
-    ]
-)
+TestHelper.run(__file__)
+
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
-#         'TestApiTest.appRun_withSuccess'
+#         'TestApiTest.appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_1'
+#     ]
+# )
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
+#         'EnumAnnotationTest.enum_withSuccess',
+#         'EnumAnnotationTest.otherEnum_withSuccess',
+#         'EnumAnnotationTest.python_framework_status',
+#         'EnumAnnotationTest.enumName',
+#         'EnumAnnotationTest.enumName_badImplementation',
+#         'EnumAnnotationTest.map_whenArgIsNone',
+#         'EnumAnnotationTest.Enum_whenHaveMoreThanOneInnerValue',
+#         'EnumAnnotationTest.Enum_dot_map',
+#         'EnumAnnotationTest.Enum_str',
+#         'EnumAnnotationTest.Enum_strInOutput'
 #     ]
 # )
 # TestHelper.run(

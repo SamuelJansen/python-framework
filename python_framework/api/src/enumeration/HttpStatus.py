@@ -35,7 +35,7 @@ class HttpStatusEnumeration() :
     BAD_REQUEST = EnumItem(value = 400)
     UNAUTHORIZED = EnumItem(value = 401)
     REQUIRED = EnumItem(value = 402)
-    FORBIDEN = EnumItem(value = 403)
+    FORBIDDEN = EnumItem(value = 403)
     NOT_FOUND = EnumItem(value = 404)
     METHOD_NOT_ALLOWED = EnumItem(value = 405)
     NOT_ACCEPTABLE = EnumItem(value = 406)

@@ -93,12 +93,12 @@ def isEnumItem(possibleEnumItem) :
         log.error(isEnumItem, f'Not possible to evaluate. Returning {itIs} by default', exception)
     return itIs
 
-def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
+def Enum(instanceLog=False, associateReturnsTo=ENUM_VALUE_AS_STRING_KEY) :
     def Wrapper(OuterEnum, *args, **kwargs):
         def __raiseBadImplementation__(enumValue, enum=None) :
             raise Exception(f'Not possible to implement "{enumValue}" enum value in {enum} enum')
         def __raiseEnumValueNotImplemented__(enumValue, enumClass=None, enumEqList=None, enumMap=None) :
-            raise Exception(f'Not possible to retrieve "{enumValue}" enum value from {ReflectionHelper.getName(enumClass)}: {enumEqList} enum. Enum.__enumMap__ = {enumMap}')
+            raise Exception(f'Not possible to retrieve "{enumValue}" of type: {type(enumValue)} enum value from {ReflectionHelper.getName(enumClass)}: {enumEqList} enum. Enum.__enumMap__ = {enumMap}')
         if instanceLog :
             log.log(Enum,f'''wrapping {OuterEnum.__name__}''')
         class InnerEnum(OuterEnum, EnumClass):
@@ -123,11 +123,17 @@ def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
                         # print(f'type({attribute}): {type(attribute)}')
                     association = ReflectionHelper.getAttributeOrMethod(attribute, self.__associateReturnsTo__, muteLogs=True)
                     if type(association) is type(None) :
+                        # print('type(association) is type(None)')
                         ReflectionHelper.setAttributeOrMethod(attribute, ENUM_VALUE_AS_STRING_KEY, ENUM_ITEM_CLASS_DICTIONARY.get(type(enumValue))(enumValue))
                         nativeClassDataList = ReflectionHelper.getAttributeDataList(type(enumValue)())
+                        # print(f'type({enumValue}): {type(enumValue)}, type({type(enumValue)}()): {type(type(enumValue)())}')
                     else :
+                        # print('not type(association) is type(None)')
                         ReflectionHelper.setAttributeOrMethod(attribute, ENUM_VALUE_AS_STRING_KEY, ENUM_ITEM_CLASS_DICTIONARY.get(type(association))(association))
                         nativeClassDataList = ReflectionHelper.getAttributeDataList(type(association)())
+                        # print(f'type({association}): {type(association)}, type({type(association)}()): {type(type(association)())}')
+                    # print()
+                    attribute.enumValue.enumName = enumValue
                     ReflectionHelper.setAttributeOrMethod(attribute, ENUM_NAME_AS_STRING_KEY, enumValue)
                     if isinstance(attribute, EnumItem) :
                         # print(attribute, attribute.enumName, attribute)
@@ -148,10 +154,12 @@ def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
                     ReflectionHelper.setAttributeOrMethod(attribute.enumValue, ENUM_AS_STRING_KEY, self)
                 if ObjectHelper.isEmpty(OuterEnum.__enumEqList__) :
                     for attribute, value in attributeDataList :
-                        if str(attribute.enumValue) not in ENUM_STATIC_METHOD_NAME_LIST :
-                            valueAsString = str(attribute.enumValue)
+                        # print(f'type({value}): {type(value)}')
+                        # print(f'type({attribute}): {type(attribute)}')
+                        valueAsString = str(attribute.enumValue)
+                        if valueAsString not in ENUM_STATIC_METHOD_NAME_LIST :
                             if valueAsString not in self.__enumMap__ :
-                                self.__enumMap__[valueAsString] = attribute
+                                self.__enumMap__[valueAsString] = attribute.enumValue ###- ReflectionHelper.getAttributeOrMethod(attribute, valueAsString, muteLogs=True) ###- attribute
                             else :
                                 __raiseBadImplementation__(valueAsString, enum=self)
                             if value not in self.__enumMap__ :
@@ -179,8 +187,12 @@ def Enum(instanceLog=False, associateReturnsTo = ENUM_VALUE_AS_STRING_KEY) :
                 if ObjectHelper.isNone(enumItemOrEnumItemValue) :
                     return enumItemOrEnumItemValue
                 else :
+                    # try :
+                    #     print(f'''not ReflectionHelper.hasAttributeOrMethod({enumItemOrEnumItemValue}, 'enumName') --> {str(enumItemOrEnumItemValue)}''')
+                    # except :
+                    #     print(f'''ReflectionHelper.hasAttributeOrMethod({enumItemOrEnumItemValue}, 'enumName') --> {enumItemOrEnumItemValue.enumName}''')
                     mappedEnum = OuterEnum.__enumMap__.get(str(enumItemOrEnumItemValue) if not ReflectionHelper.hasAttributeOrMethod(enumItemOrEnumItemValue, 'enumName') else enumItemOrEnumItemValue.enumName)
-                    return mappedEnum if ObjectHelper.isNotNone(mappedEnum) else __raiseEnumValueNotImplemented__(enumItemOrEnumItemValue, enumClass=OuterEnum, enumEqList=OuterEnum().__enumEqList__, enumMap=OuterEnum().__enumMap__)
+                    return mappedEnum if ObjectHelper.isNotNone(mappedEnum) else __raiseEnumValueNotImplemented__(enumItemOrEnumItemValue, enumClass=OuterEnum, enumEqList=OuterEnum.__enumEqList__, enumMap=OuterEnum.__enumMap__)
         ReflectionHelper.overrideSignatures(InnerEnum, OuterEnum)
         return InnerEnum
     return Wrapper

@@ -369,10 +369,10 @@ def enumName_badImplementation() :
         thirdTestExteption = e
 
     # assert
-    print(str(firstTestExteption))
-    print(str(secondTestExteption))
+    # print(str(firstTestExteption))
+    # print(str(secondTestExteption))
     assert '''Not possible to implement "ONE" enum value in MyEnumTest: ['ONE(value:ONE)'] enum''' == str(firstTestExteption)
-    assert '''Not possible to retrieve "another" enum value from MyOtherEnumTest: ['ONE(value:ONE)', 'TWO(value:TWO)'] enum. Enum.__enumMap__ = {'ONE': ONE, 'TWO': TWO}''' == str(secondTestExteption)
+    assert '''Not possible to retrieve "another" of type: <class 'str'> enum value from MyOtherEnumTest: ['ONE(value:ONE)', 'TWO(value:TWO)'] enum. Enum.__enumMap__ = {'ONE': 'ONE', 'TWO': 'TWO'}''' == str(secondTestExteption)
     assert "'EnumItem' object has no attribute 'enumValue'" == str(thirdTestExteption)
 
 @Test(environmentVariables={
@@ -545,6 +545,9 @@ def Enum_str() :
     assert 'ABC' == str(SIMPLE_ENUM.map(SIMPLE_ENUM.map('ABC')))
     assert 'ABC' == str(SIMPLE_ENUM.map(SIMPLE_ENUM.ABC))
     assert 'None' == str(SIMPLE_ENUM.map(SIMPLE_ENUM.map(None)))
+    assert shouldBe_DEF == shouldBe_DEF_asWell
+    assert not shouldBe_DEF == shouldBe_None
+    assert not shouldBe_None == shouldBe_DEF_asWell
 
     assert 'ONE' == str(MY_ENUM_TEST.ONE)
     assert 'TWO' == str(MY_ENUM_TEST.TWO)
@@ -566,3 +569,41 @@ def Enum_str() :
     assert str(4) == str(MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.map(4)))
     assert str(3) == str(MY_THIRD_ENUM_TEST.map('THREE'))
     assert str(4) == str(MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.map('FOUR')))
+
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **FULL_LOG_HELPER_SETTINGS
+    }
+)
+def Enum_strInOutput() :
+    # arrange
+    @Enum(instanceLog=False)
+    class SimpleEnum :
+        ABC = EnumItem()
+        DEF = EnumItem()
+    SIMPLE_ENUM = SimpleEnum()
+    @Enum(instanceLog=False)
+    class MyEnumTest :
+        ONE = EnumItem(value='one', otherValue=1)
+        TWO = EnumItem(value='two', otherValue=2)
+    MY_ENUM_TEST = MyEnumTest()
+    @Enum(associateReturnsTo='otherValue', instanceLog=False)
+    class MyThirdEnumTest :
+        THREE = EnumItem(value='three', otherValue=3)
+        FOUR = EnumItem(value='four', otherValue=4)
+    MY_THIRD_ENUM_TEST = MyThirdEnumTest()
+
+    # act and assert
+    assert f'''{[SIMPLE_ENUM.map('DEF')]}''' == "['DEF']"
+    assert str(type(SIMPLE_ENUM.map('DEF'))) == '''<class 'python_framework.api.src.annotation.EnumAnnotation.EnumItemStr'>'''
+    assert f'''{[SIMPLE_ENUM.map(SIMPLE_ENUM.DEF)]}''' == "['DEF']"
+    assert str(type(SIMPLE_ENUM.map(SIMPLE_ENUM.DEF))) == '''<class 'python_framework.api.src.annotation.EnumAnnotation.EnumItemStr'>'''
+    a = [SIMPLE_ENUM.map('DEF')]
+    b = [SIMPLE_ENUM.map(SIMPLE_ENUM.DEF)]
+    assert f'''{a}''' == "['DEF']"
+    assert str(type(a[0])) == '''<class 'python_framework.api.src.annotation.EnumAnnotation.EnumItemStr'>'''
+    assert f'''{b}''' == "['DEF']"
+    assert str(type(b[0])) == '''<class 'python_framework.api.src.annotation.EnumAnnotation.EnumItemStr'>'''
+
+    print(MY_THIRD_ENUM_TEST)
+    print(type(MY_THIRD_ENUM_TEST))

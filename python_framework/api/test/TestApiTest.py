@@ -7,7 +7,7 @@ from python_helper import Test, ObjectHelper, SettingHelper, EnvironmentHelper, 
 import subprocess, psutil
 
 CURRENT_PATH = str(Path(__file__).parent.absolute())
-ESTIMATED_BUILD_TIME_IN_SECONDS = 5
+ESTIMATED_BUILD_TIME_IN_SECONDS = 4
 
 def killProcesses(givenProcess) :
     try :
@@ -79,13 +79,15 @@ GET_ACTUATOR_HEALTH_CONTROLLER = f'/actuator/health'
 TEST_CONTROLLER = '/test-controller'
 TEST_BATCH_CONTROLLER = f'{TEST_CONTROLLER}/batch'
 
+GET_ACTUATOR_HEALTH_CONTROLLER_TEST = '/test/actuator/health'
+
 GET_NONE_ONE = f'{TEST_CONTROLLER}/all-fine-if-its-none'
 POST_PAYLOAD_ONE = f'{TEST_CONTROLLER}/payload-validation-test'
 GET_NONE_ONE_BATCH = f'{TEST_BATCH_CONTROLLER}/all-fine-if-its-none'
 POST_PAYLOAD_ONE_BATCH = f'{TEST_BATCH_CONTROLLER}/payload-validation-test'
 
 @Test()
-def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
+def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
     # arrange
     muteLogs = False
     serverPort = 5001
@@ -171,53 +173,36 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
     )
     assert 400 == responsePostSendPayloadListBatch.status_code
 
+    killProcesses(process)
+
+@Test()
+def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_1() :
+    # arrange
+    muteLogs = False
+    serverPort = 5002
+    process = getProcess(
+        f'flask run --host=localhost --port={serverPort}',
+        f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
+        muteLogs = muteLogs
+    )
+    BASE_URL = f'http://localhost:{serverPort}/local-test-api'
+    time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
+
+    # act
+    responseGetHealth = requests.post(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER_TEST, json={'status': 'UP'})
+
+    # assert
+    assert ObjectHelper.equals(
+        [{'status':'UP'}],
+        responseGetHealth.json()
+    )
+    assert 200 == responseGetHealth.status_code
 
     killProcesses(process)
 
-# @Test(
-#     environmentVariables={
-#         SettingHelper.ACTIVE_ENVIRONMENT: 'dev'
-#     }
-# )
-# def appRun_whenEnvironmentIsDev_withSuccess() :
-#     # arrange
-#     muteLogs = False
-#     serverPort = 5002
-#     process = getProcess(
-#         f'flask run --host=localhost --port={serverPort}',
-#         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
-#         muteLogs = muteLogs
-#     )
-#     BASE_URL = f'http://localhost:{serverPort}/dev-test-api'
-#     payload = {'me':'and you'}
-#     payloadList = [payload]
-#     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
-#
-#     # act
-#     responseGetHealth = requests.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER)
-#
-#     responseGetNone = requests.get(BASE_URL + GET_NONE_ONE)
-#     responseGetNoneBatch = requests.post(BASE_URL + GET_NONE_ONE_BATCH, json=payload)
-#
-#     responsePostSendPayload = requests.post(BASE_URL + POST_PAYLOAD_ONE, json=payload)
-#     responsePostSendPayloadList = requests.post(BASE_URL + POST_PAYLOAD_ONE, json=payloadList)
-#     responsePostSendPayloadBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload)
-#     responsePostSendPayloadListBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList)
-#
-#     # assert
-#     assert ObjectHelper.equals(
-#         {'status':'UP'},
-#         responseGetHealth.json()
-#     )
-#     assert 200 == responseGetHealth.status_code
-#     killProcesses(process)
-#
-# @Test(
-#     environmentVariables={
-#         SettingHelper.ACTIVE_ENVIRONMENT: 'prod'
-#     }
-# )
-# def appRun_whenEnvironmentIsProd_withSuccess() :
+
+# @Test()
+# def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_2() :
 #     # arrange
 #     muteLogs = False
 #     serverPort = 5003
@@ -226,7 +211,7 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
 #         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
 #         muteLogs = muteLogs
 #     )
-#     BASE_URL = f'http://localhost:{serverPort}/test-api'
+#     BASE_URL = f'http://localhost:{serverPort}/local-test-api'
 #     payload = {'me':'and you'}
 #     payloadList = [payload]
 #     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
@@ -248,4 +233,47 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
 #         responseGetHealth.json()
 #     )
 #     assert 200 == responseGetHealth.status_code
+#
+#     {'message': 'OK'}
+#     {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.299735'}
+#     {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'}
+#     {'me': 'and you'}
+#     {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'}
+#     {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'}
+#     assert ObjectHelper.equals(
+#         {'message': 'OK'},
+#         responseGetNone.json()
+#     )
+#     assert 200 == responseGetNone.status_code
+#     assert ObjectHelper.equals(
+#         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.299735'},
+#         responseGetNoneBatch.json(),
+#         ignoreKeyList=['timestamp']
+#     )
+#     assert 500 == responseGetNoneBatch.status_code
+#     assert ObjectHelper.equals(
+#         {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'},
+#         responsePostSendPayload.json(),
+#         ignoreKeyList=['timestamp']
+#     )
+#     assert 400 == responsePostSendPayload.status_code
+#     assert ObjectHelper.equals(
+#         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-19 08:36:20.925177'},
+#         responsePostSendPayloadList.json(),
+#         ignoreKeyList=['timestamp']
+#     )
+#     assert 500 == responsePostSendPayloadList.status_code
+#     assert ObjectHelper.equals(
+#         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'},
+#         responsePostSendPayloadBatch.json(),
+#         ignoreKeyList=['timestamp']
+#     )
+#     assert 500 == responsePostSendPayloadBatch.status_code
+#     assert ObjectHelper.equals(
+#         {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'},
+#         responsePostSendPayloadListBatch.json(),
+#         ignoreKeyList=['timestamp']
+#     )
+#     assert 400 == responsePostSendPayloadListBatch.status_code
+#
 #     killProcesses(process)
