@@ -86,8 +86,19 @@ POST_PAYLOAD_ONE = f'{TEST_CONTROLLER}/payload-validation-test'
 GET_NONE_ONE_BATCH = f'{TEST_BATCH_CONTROLLER}/all-fine-if-its-none'
 POST_PAYLOAD_ONE_BATCH = f'{TEST_BATCH_CONTROLLER}/payload-validation-test'
 
+def debugRequests() :
+    import requests
+    import logging
+    import http.client
+    http.client.HTTPConnection.debuglevel = 1
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True
+
 @Test(environmentVariables={
-    SettingHelper.ACTIVE_ENVIRONMENT : 'dev'
+    SettingHelper.ACTIVE_ENVIRONMENT : 'local'
 })
 def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
     # arrange
@@ -98,21 +109,12 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
         muteLogs = muteLogs
     )
-    BASE_URL = f'http://localhost:{serverPort}/dev-test-api'
+    BASE_URL = f'http://localhost:{serverPort}/local-test-api'
     payload = {'me':'and you'}
     payloadList = [payload]
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
 
     # act
-    import requests
-    import logging
-    import http.client
-    http.client.HTTPConnection.debuglevel = 1
-    logging.basicConfig()
-    logging.getLogger().setLevel(logging.DEBUG)
-    requests_log = logging.getLogger("requests.packages.urllib3")
-    requests_log.setLevel(logging.DEBUG)
-    requests_log.propagate = True
     headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36"}
 
     session = requests.Session()
@@ -127,8 +129,8 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
     responsePostSendPayloadBatch = session.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload, headers=headers)
     responsePostSendPayloadListBatch = session.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList, headers=headers)
 
-    print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
-    print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
+    # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
+    # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
 
     # print(f'responseGetNone: {responseGetNone.json()}')
     # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
@@ -193,7 +195,9 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
 
     killProcesses(process)
 
-@Test()
+@Test(environmentVariables={
+    SettingHelper.ACTIVE_ENVIRONMENT : 'dev'
+})
 def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_1() :
     # arrange
     muteLogs = False
@@ -203,7 +207,7 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_1() :
         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
         muteLogs = muteLogs
     )
-    BASE_URL = f'http://localhost:{serverPort}/local-test-api'
+    BASE_URL = f'http://localhost:{serverPort}/dev-test-api'
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
 
     # act

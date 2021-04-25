@@ -213,7 +213,7 @@ def getResourceFinalName(resourceInstance, resourceName=None) :
     for resourceType in KW_RESOURCE_LIST :
         if resourceName.endswith(resourceType) :
             resourceName = resourceName.replace(resourceType, c.NOTHING)
-    print(f'{resourceName[0].lower()}{resourceName[1:]}')
+            break
     return f'{resourceName[0].lower()}{resourceName[1:]}'
 
 @Function
