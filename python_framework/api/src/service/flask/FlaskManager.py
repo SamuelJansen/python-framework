@@ -31,6 +31,7 @@ PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST = [
     'LocalTestApi'
 ]
 KW_CONTROLLER_RESOURCE = 'Controller'
+KW_SCHEDULER_RESOURCE = 'Scheduler'
 KW_SERVICE_RESOURCE = 'Service'
 KW_CLIENT_RESOURCE = 'Client'
 KW_REPOSITORY_RESOURCE = 'Repository'
@@ -42,6 +43,7 @@ PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
     KW_CONTROLLER_RESOURCE : [
         'ActuatorHealthController'
     ],
+    KW_SCHEDULER_RESOURCE : [],
     KW_SERVICE_RESOURCE : [
         'ActuatorHealthService'
     ],
@@ -209,8 +211,9 @@ def getResourceFinalName(resourceInstance, resourceName=None) :
     if not resourceName :
         resourceName = resourceInstance.__class__.__name__
     for resourceType in KW_RESOURCE_LIST :
-        if resourceType in resourceName :
+        if resourceName.endswith(resourceType) :
             resourceName = resourceName.replace(resourceType, c.NOTHING)
+    print(f'{resourceName[0].lower()}{resourceName[1:]}')
     return f'{resourceName[0].lower()}{resourceName[1:]}'
 
 @Function
@@ -229,7 +232,8 @@ def setResource(apiInstance, resourceInstance, resourceName=None) :
 @Function
 def bindResource(apiInstance,resourceInstance) :
     validateFlaskApi(apiInstance)
-    setResource(getattr(apiInstance.resource, getResourceType(resourceInstance).lower()), resourceInstance)
+    validateResourceInstance(resourceInstance)
+    setResource(ReflectionHelper.getAttributeOrMethod(apiInstance.resource, getResourceType(resourceInstance).lower()), resourceInstance)
 
 @Function
 def validateArgs(args, requestClass, method) :
@@ -341,43 +345,6 @@ def ControllerMethod(
         innerResourceInstanceMethod.consumes = controllerMethodConsumes
         innerResourceInstanceMethod.logRequest = controllerMethodLogRequest
         innerResourceInstanceMethod.logResponse = controllerMethodLogResponse
-        return innerResourceInstanceMethod
-    return innerMethodWrapper
-
-@Function
-def Service() :
-    def Wrapper(OuterClass, *args, **kwargs):
-        log.debug(Service,f'''wrapping {OuterClass.__name__}''')
-        class InnerClass(OuterClass):
-            def __init__(self,*args,**kwargs):
-                log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
-                OuterClass.__init__(self,*args,**kwargs)
-                apiInstance = getApi()
-                self.globals = apiInstance.globals
-                self.service = apiInstance.resource.service
-                self.client = apiInstance.resource.client
-                self.repository = apiInstance.resource.repository
-                self.validator = apiInstance.resource.validator
-                self.mapper = apiInstance.resource.mapper
-                self.helper = apiInstance.resource.helper
-                self.converter = apiInstance.resource.converter
-        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
-        return InnerClass
-    return Wrapper
-
-@Function
-def ServiceMethod(requestClass=None):
-    def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
-        log.debug(ServiceMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
-        def innerResourceInstanceMethod(*args,**kwargs) :
-            resourceInstance = args[0]
-            try :
-                validateArgs(args,requestClass,innerResourceInstanceMethod)
-                methodReturn = resourceInstanceMethod(*args,**kwargs)
-            except Exception as exception :
-                raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
-            return methodReturn
-        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
 
@@ -645,4 +612,8 @@ def validateFlaskApi(instance) :
     apiClassName = flask_restful.Api.__name__
     moduleName = flask_restful.__name__
     if not apiClassName == getClassName(instance) and apiClassName == getQualitativeName(instance) and moduleName == getModuleName(instance) :
-        raise Exception(f'Globals can only be added to a "flask_restful.Api" instance. Not to {apiInstance}')
+        raise Exception(f'Invalid "flask_restful.Api" instance. {apiInstance} is not an Api instance')
+
+def validateResourceInstance(resourceInstance) :
+    if ObjectHelper.isNone(resourceInstance) :
+        raise Exception(f'Resource cannot be None')

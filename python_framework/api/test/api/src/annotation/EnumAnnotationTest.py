@@ -604,6 +604,5 @@ def Enum_strInOutput() :
     assert str(type(a[0])) == '''<class 'python_framework.api.src.annotation.EnumAnnotation.EnumItemStr'>'''
     assert f'''{b}''' == "['DEF']"
     assert str(type(b[0])) == '''<class 'python_framework.api.src.annotation.EnumAnnotation.EnumItemStr'>'''
-
-    print(MY_THIRD_ENUM_TEST)
-    print(type(MY_THIRD_ENUM_TEST))
+    # print(MY_THIRD_ENUM_TEST)
+    # print(type(MY_THIRD_ENUM_TEST))

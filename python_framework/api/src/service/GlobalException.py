@@ -69,7 +69,7 @@ def validateArgs(self, method, objectRequest, expecteObjectClass):
         if proceedValidation and (objectRequest and not type(expecteObjectClass) == type(objectRequest.__class__) and expecteObjectClass.__name__ == objectRequest.__class__.__name__) :
             raise GlobalException(logMessage = f'Invalid args. {self.__class__}.{method} call got an unnexpected object request: {objectRequest.__class__}. It should be {expecteObjectClass}')
     except Exception as exception :
-        log.error(expecteObjectClass.__class__, f'Failed to validate args of {method.__name__} method', exception)
+        log.failure(expecteObjectClass.__class__, f'Failed to validate args of {method.__name__} method', exception)
         raise GlobalException(logMessage = f'Failed to validate args of {method.__name__} method{DOT_SPACE_CAUSE}{str(exception)}')
 
 @Function

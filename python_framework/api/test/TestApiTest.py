@@ -102,15 +102,31 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
 
     # act
-    responseGetHealth = requests.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER)
+    import requests
+    import logging
+    import http.client
+    http.client.HTTPConnection.debuglevel = 1
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True
+    headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36"}
 
-    responseGetNone = requests.get(BASE_URL + GET_NONE_ONE)
-    responseGetNoneBatch = requests.post(BASE_URL + GET_NONE_ONE_BATCH, json=payload)
+    session = requests.Session()
 
-    responsePostSendPayload = requests.post(BASE_URL + POST_PAYLOAD_ONE, json=payload)
-    responsePostSendPayloadList = requests.post(BASE_URL + POST_PAYLOAD_ONE, json=payloadList)
-    responsePostSendPayloadBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload)
-    responsePostSendPayloadListBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList)
+    responseGetHealth = session.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER, headers=headers)
+
+    responseGetNone = session.get(BASE_URL + GET_NONE_ONE)
+    responseGetNoneBatch = session.post(BASE_URL + GET_NONE_ONE_BATCH, json=payload, headers=headers)
+
+    responsePostSendPayload = session.post(BASE_URL + POST_PAYLOAD_ONE, json=payload, headers=headers)
+    responsePostSendPayloadList = session.post(BASE_URL + POST_PAYLOAD_ONE, json=payloadList, headers=headers)
+    responsePostSendPayloadBatch = session.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload, headers=headers)
+    responsePostSendPayloadListBatch = session.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList, headers=headers)
+
+    print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
+    print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
 
     # print(f'responseGetNone: {responseGetNone.json()}')
     # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')

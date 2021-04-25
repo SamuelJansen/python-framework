@@ -6,6 +6,7 @@ def KW_RESOURCE_LIST_isInCorrectOrder() :
     # arrange
     resourceNameCorrectOrder = [
         FlaskManager.KW_CONTROLLER_RESOURCE,
+        FlaskManager.KW_SCHEDULER_RESOURCE,
         FlaskManager.KW_SERVICE_RESOURCE,
         FlaskManager.KW_CLIENT_RESOURCE,
         FlaskManager.KW_REPOSITORY_RESOURCE,
@@ -16,6 +17,8 @@ def KW_RESOURCE_LIST_isInCorrectOrder() :
     ]
 
     # act
+    print(resourceNameCorrectOrder)
+    print(FlaskManager.KW_RESOURCE_LIST)
 
     # assert
     assert len(resourceNameCorrectOrder) == len(FlaskManager.KW_RESOURCE_LIST)

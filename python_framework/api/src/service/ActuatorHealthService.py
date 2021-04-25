@@ -2,7 +2,7 @@ import datetime
 from python_helper import ObjectHelper, log
 from python_framework.api.src.enumeration.ActuatorHealthStatus import ActuatorHealthStatus
 from python_framework.api.src.model import ActuatorHealth
-from python_framework.api.src.service.flask.FlaskManager import Service, ServiceMethod
+from python_framework.api.src.annotation.ServiceAnnotation import Service, ServiceMethod
 
 @Service()
 class ActuatorHealthService:
