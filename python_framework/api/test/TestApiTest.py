@@ -86,7 +86,9 @@ POST_PAYLOAD_ONE = f'{TEST_CONTROLLER}/payload-validation-test'
 GET_NONE_ONE_BATCH = f'{TEST_BATCH_CONTROLLER}/all-fine-if-its-none'
 POST_PAYLOAD_ONE_BATCH = f'{TEST_BATCH_CONTROLLER}/payload-validation-test'
 
-@Test()
+@Test(environmentVariables={
+    SettingHelper.ACTIVE_ENVIRONMENT : 'dev'
+})
 def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
     # arrange
     muteLogs = False
@@ -96,7 +98,7 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
         muteLogs = muteLogs
     )
-    BASE_URL = f'http://localhost:{serverPort}/local-test-api'
+    BASE_URL = f'http://localhost:{serverPort}/dev-test-api'
     payload = {'me':'and you'}
     payloadList = [payload]
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
