@@ -7,6 +7,7 @@ from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import SqlAlchemyProxy
 from python_framework.api.src.service import Security
+from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.service.openapi import OpenApiManager
 
 DOT_PY = '.py'
@@ -107,7 +108,8 @@ def initialize(
     app = Flask(rootName)
     api = Api(app)
     addGlobalsTo(api)
-    securityKey = api.globals.getSetting('api.security.secret')
+    SchedulerManager.addScheduler(api, app)
+    securityKey = api.globals.getApiSetting('api.security.secret')
     if SettingHelper.LOCAL_ENVIRONMENT == SettingHelper.getActiveEnvironment() :
         log.setting(initialize, f'JWT secret: {securityKey}')
     jwt = Security.getJwtMannager(app, securityKey)
@@ -216,20 +218,21 @@ def addFlaskApiResources(
         converterList,
         model
     ) :
-    apiInstance.scheme = apiInstance.globals.getSetting('api.server.scheme')
-    apiInstance.host = apiInstance.globals.getSetting('api.server.host')
-    apiInstance.port = apiInstance.globals.getSetting('api.server.port')
-    apiInstance.baseUrl = apiInstance.globals.getSetting('api.server.base-url')
+    apiInstance.scheme = apiInstance.globals.getApiSetting('api.server.scheme')
+    apiInstance.host = apiInstance.globals.getApiSetting('api.server.host')
+    apiInstance.port = apiInstance.globals.getApiSetting('api.server.port')
+    apiInstance.baseUrl = apiInstance.globals.getApiSetting('api.server.base-url')
     OpenApiManager.newDocumentation(apiInstance, appInstance)
     addResourceAttibutes(apiInstance)
     addRepositoryTo(apiInstance, repositoryList, model)
-    addServiceListTo(apiInstance, serviceList)
-    addClientListTo(apiInstance, clientList)
     addSchedulerListTo(apiInstance, schedulerList)
+    addClientListTo(apiInstance, clientList)
+    addServiceListTo(apiInstance, serviceList)
     addControllerListTo(apiInstance, controllerList)
     addValidatorListTo(apiInstance, validatorList)
     addMapperListTo(apiInstance, mapperList)
     addHelperListTo(apiInstance, helperList)
     addConverterListTo(apiInstance, converterList)
+    SchedulerManager.initialize(apiInstance, appInstance)
     Security.addJwt(jwtInstance)
     OpenApiManager.addSwagger(apiInstance, appInstance)

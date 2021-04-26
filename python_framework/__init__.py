@@ -4,6 +4,7 @@ from python_framework.api.src.helper import Serializer
 
 from python_framework.api.src.service.GlobalException import GlobalException
 from python_framework.api.src.service import Security
+from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.service import SqlAlchemyProxy
 from python_framework.api.src.service import WebBrowser
 
