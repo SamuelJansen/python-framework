@@ -438,7 +438,7 @@ def ControllerMethod(
 @Function
 def SimpleClient() :
     def Wrapper(OuterClass, *args, **kwargs):
-        log.debug(Client,f'''wrapping {OuterClass.__name__}''')
+        log.debug(SimpleClient,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
@@ -451,7 +451,7 @@ def SimpleClient() :
 @Function
 def SimpleClientMethod(requestClass=None):
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
-        log.debug(ClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        log.debug(SimpleClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
             try :
