@@ -19,18 +19,17 @@ def Scheduler() :
 
 @Function
 def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
-    methodClassName = ReflectionHelper.getMethodClassName(resourceInstanceMethod)
-    methodName = ReflectionHelper.getName(resourceInstanceMethod)
-    shedulerId = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
-    instancesUpTo =  methodKwargs.pop('instancesUpTo', 1)
-    weekDays = methodKwargs.pop('weekDays', None)
-    methodKwargs['id'] = shedulerId
-    methodKwargs['max_instances'] = instancesUpTo
-    methodKwargs['day_of_week'] = weekDays
-    shedulerArgs = [*methodArgs]
-    shedulerKwargs = {**methodKwargs}
     def innerMethodWrapper(resourceInstanceMethod, *innerMethodArgs, **innerMethodKwargs) :
         log.debug(SchedulerMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        methodClassName = ReflectionHelper.getMethodClassName(resourceInstanceMethod)
+        methodName = ReflectionHelper.getName(resourceInstanceMethod)
+        methodKwargs['id'] = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
+        # instancesUpTo = methodKwargs.pop('instancesUpTo', 1)
+        # weekDays = methodKwargs.pop('weekDays', None)
+        # methodKwargs['max_instances'] = instancesUpTo
+        # methodKwargs['day_of_week'] = weekDays
+        shedulerArgs = [*methodArgs]
+        shedulerArgs = {**methodKwargs}
         apiInstance = resourceInstanceMethod.__self__.globals.api
         @apiInstance.scheduler.task(*shedulerArgs, **shedulerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
