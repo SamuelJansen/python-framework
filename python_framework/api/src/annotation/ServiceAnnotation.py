@@ -9,9 +9,8 @@ def Service() :
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
-                OuterClass.__init__(self,*args,**kwargs)
                 apiInstance = FlaskManager.getApi()
-                self.globals = apiInstance.globals
+                OuterClass.__init__(self,*args,**kwargs)
                 self.service = apiInstance.resource.service
                 self.client = apiInstance.resource.client
                 self.repository = apiInstance.resource.repository
@@ -19,6 +18,7 @@ def Service() :
                 self.mapper = apiInstance.resource.mapper
                 self.helper = apiInstance.resource.helper
                 self.converter = apiInstance.resource.converter
+                self.globals = apiInstance.globals
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper

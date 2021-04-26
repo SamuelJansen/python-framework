@@ -1,3 +1,5 @@
+from python_helper import EnvironmentHelper, log
+
 from python_helper import SettingHelper
 
 import globals
@@ -8,9 +10,9 @@ globalsInstance = globals.newGlobalsInstance(__file__
     , successStatus = True
     , errorStatus = True
 
-    , debugStatus = True
-    , failureStatus = True
-    , warningStatus = True
+    # , debugStatus = True
+    # , failureStatus = True
+    # , warningStatus = True
     # , wrapperStatus = True
     # , logStatus = True
     # , testStatus = True
@@ -29,3 +31,5 @@ def runFlaskApplication(app):
 
 if __name__ == '__main__' :
     runFlaskApplication(app)
+
+log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')

@@ -7,7 +7,7 @@ from python_helper import Test, ObjectHelper, SettingHelper, EnvironmentHelper, 
 import subprocess, psutil
 
 CURRENT_PATH = str(Path(__file__).parent.absolute())
-ESTIMATED_BUILD_TIME_IN_SECONDS = 4
+ESTIMATED_BUILD_TIME_IN_SECONDS = 6
 
 def killProcesses(givenProcess) :
     try :
@@ -100,7 +100,7 @@ def debugRequests() :
 @Test(environmentVariables={
     SettingHelper.ACTIVE_ENVIRONMENT : 'local'
 })
-def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
+def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
     # arrange
     muteLogs = False
     serverPort = 5001
@@ -115,7 +115,10 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
 
     # act
-    headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36"}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
+        'Cache-Control': 'no-cache'
+    }
 
     session = requests.Session()
 
@@ -198,7 +201,7 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_0() :
 @Test(environmentVariables={
     SettingHelper.ACTIVE_ENVIRONMENT : 'dev'
 })
-def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_1() :
+def appRun_whenEnvironmentIsLocalFromDevConfig_withSuccess() :
     # arrange
     muteLogs = False
     serverPort = 5002
@@ -209,6 +212,11 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_1() :
     )
     BASE_URL = f'http://localhost:{serverPort}/dev-test-api'
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
+        'Cache-Control': 'no-cache'
+    }
 
     # act
     responseGetHealth = requests.post(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER_TEST, json={'status': 'UP'})
@@ -222,80 +230,81 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_1() :
 
     killProcesses(process)
 
+@Test()
+def testing_Client() :
+    #arrange
+    muteLogs = False
+    serverPort = 5010
+    process = getProcess(
+        f'flask run --host=localhost --port={serverPort}',
+        f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
+        muteLogs = muteLogs
+    )
+    log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
+    BASE_URL = f'http://localhost:{serverPort}/local-test-api'
+    params = {'first': 'first_p', 'second': 'second_p', 'ytu': 'uty', 'ytv': 'vty'}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
+        'Cache-Control': 'no-cache',
+        "Pragma" : 'no-cache',
+        'Expires' : '0',
+        'Cache-Control' : 'public, max-age=0'
+    }
+    headers = {'firstHeader': 'firstHeader_h', 'secondHeader': 'secondHeader_h', 'ytu': 'uty', 'ytv': 'vty', **headers}
+    log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
+    time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
 
-# @Test()
-# def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_2() :
-#     # arrange
-#     muteLogs = False
-#     serverPort = 5003
-#     process = getProcess(
-#         f'flask run --host=localhost --port={serverPort}',
-#         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
-#         muteLogs = muteLogs
-#     )
-#     BASE_URL = f'http://localhost:{serverPort}/local-test-api'
-#     payload = {'me':'and you'}
-#     payloadList = [payload]
-#     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
-#
-#     # act
-#     responseGetHealth = requests.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER)
-#
-#     responseGetNone = requests.get(BASE_URL + GET_NONE_ONE)
-#     responseGetNoneBatch = requests.post(BASE_URL + GET_NONE_ONE_BATCH, json=payload)
-#
-#     responsePostSendPayload = requests.post(BASE_URL + POST_PAYLOAD_ONE, json=payload)
-#     responsePostSendPayloadList = requests.post(BASE_URL + POST_PAYLOAD_ONE, json=payloadList)
-#     responsePostSendPayloadBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload)
-#     responsePostSendPayloadListBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList)
-#
-#     # assert
-#     assert ObjectHelper.equals(
-#         {'status':'UP'},
-#         responseGetHealth.json()
-#     )
-#     assert 200 == responseGetHealth.status_code
-#
-#     {'message': 'OK'}
-#     {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.299735'}
-#     {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'}
-#     {'me': 'and you'}
-#     {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'}
-#     {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'}
-#     assert ObjectHelper.equals(
-#         {'message': 'OK'},
-#         responseGetNone.json()
-#     )
-#     assert 200 == responseGetNone.status_code
-#     assert ObjectHelper.equals(
-#         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.299735'},
-#         responseGetNoneBatch.json(),
-#         ignoreKeyList=['timestamp']
-#     )
-#     assert 500 == responseGetNoneBatch.status_code
-#     assert ObjectHelper.equals(
-#         {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'},
-#         responsePostSendPayload.json(),
-#         ignoreKeyList=['timestamp']
-#     )
-#     assert 400 == responsePostSendPayload.status_code
-#     assert ObjectHelper.equals(
-#         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-19 08:36:20.925177'},
-#         responsePostSendPayloadList.json(),
-#         ignoreKeyList=['timestamp']
-#     )
-#     assert 500 == responsePostSendPayloadList.status_code
-#     assert ObjectHelper.equals(
-#         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'},
-#         responsePostSendPayloadBatch.json(),
-#         ignoreKeyList=['timestamp']
-#     )
-#     assert 500 == responsePostSendPayloadBatch.status_code
-#     assert ObjectHelper.equals(
-#         {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'},
-#         responsePostSendPayloadListBatch.json(),
-#         ignoreKeyList=['timestamp']
-#     )
-#     assert 400 == responsePostSendPayloadListBatch.status_code
-#
-#     killProcesses(process)
+    #act
+    responseComplete = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi', params=params, headers=headers)
+    responseWithoutParams = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi', headers=headers)
+    responseWithoutHeaders = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi', params=params)
+    responseWithoutHeadersAndWithoutParams = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi')
+    log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
+
+    #assert
+    assert ObjectHelper.equals(
+        {
+            "first": "first_p",
+            "firstHeader": "firstHeader_h",
+            "second": "second_p",
+            "secondHeader": "secondHeader_h",
+            "status": "abcdefoi"
+        },
+        responseComplete.json()
+    )
+    assert 200 == responseComplete.status_code
+    assert ObjectHelper.equals(
+        {
+            "first": None,
+            "firstHeader": "firstHeader_h",
+            "second": None,
+            "secondHeader": "secondHeader_h",
+            "status": "abcdefoi"
+        },
+        responseWithoutParams.json()
+    )
+    assert 200 == responseWithoutParams.status_code
+    assert ObjectHelper.equals(
+        {
+            "first": "first_p",
+            "firstHeader": None,
+            "second": "second_p",
+            "secondHeader": None,
+            "status": "abcdefoi"
+        },
+        responseWithoutHeaders.json()
+    )
+    assert 200 == responseWithoutHeaders.status_code
+    assert ObjectHelper.equals(
+        {
+            "first": None,
+            "firstHeader": None,
+            "second": None,
+            "secondHeader": None,
+            "status": "abcdefoi"
+        },
+        responseWithoutHeadersAndWithoutParams.json()
+    )
+    assert 200 == responseWithoutHeadersAndWithoutParams.status_code
+    log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
+    killProcesses(process)

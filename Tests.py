@@ -1,10 +1,16 @@
+import importlib
+importlib.invalidate_caches()
+from python_helper import EnvironmentHelper, log, RandomHelper
+EnvironmentHelper.update("URL_VARIANT", RandomHelper.integer(minimum=0, maximum=10000))
+log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
+
 from python_helper import TestHelper
 TestHelper.run(__file__)
 
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
-#         'TestApiTest.appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess_1'
+#         'TestApiTest.testing_Client'
 #     ]
 # )
 # TestHelper.run(
@@ -50,3 +56,5 @@ TestHelper.run(__file__)
 #         'EnumAnnotationTest.Enum_whenHaveMoreThanOneInnerValue'
 #     ]
 # )
+
+log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')

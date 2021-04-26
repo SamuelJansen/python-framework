@@ -60,6 +60,9 @@ PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
 }
 KW_RESOURCE_LIST = list(PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.keys())
 
+KW_PARAMETERS = 'params'
+KW_HEADERS = 'headers'
+
 def runGlobals(
     filePath
     , successStatus = False
@@ -158,13 +161,44 @@ def validateBodyAsJson(requestBodyAsJson, requestClass) :
 
 @Function
 @Security.jwtRequired
-def securedControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logRequest) :
+def securedControllerMethod(
+    args,
+    kwargs,
+    contentType,
+    resourceInstance,
+    resourceInstanceMethod,
+    roleRequired,
+    requestHeaderClass,
+    requestParamClass,
+    requestClass,
+    logRequest
+) :
     if not Security.getRole() in roleRequired :
         raise GlobalException.GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDEN)
-    return publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logRequest)
+    return publicControllerMethod(
+        args,
+        kwargs,
+        contentType,
+        resourceInstance,
+        resourceInstanceMethod,
+        requestHeaderClass,
+        requestParamClass,
+        requestClass,
+        logRequest
+    )
 
 @Function
-def publicControllerMethod(args, kwargs, contentType, resourceInstance, resourceInstanceMethod, requestClass, logRequest) :
+def publicControllerMethod(
+    args,
+    kwargs,
+    contentType,
+    resourceInstance,
+    resourceInstanceMethod,
+    requestHeaderClass,
+    requestParamClass,
+    requestClass,
+    logRequest
+) :
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
         if logRequest :
@@ -178,10 +212,17 @@ def publicControllerMethod(args, kwargs, contentType, resourceInstance, resource
         if Serializer.requestBodyIsPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(args, serializerReturn)
+    addToKwargs(KW_HEADERS, requestHeaderClass, request.headers, kwargs)
+    addToKwargs(KW_PARAMETERS, requestParamClass, request.args, kwargs)
     response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
     if response and Serializer.isSerializerCollection(response) and 2 == len(response) :
         return response
     raise GlobalException.GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
+
+def addToKwargs(key, givenClass, valuesAsDictionary, kwargs) :
+    if ObjectHelper.isNotEmpty(givenClass) :
+        toClass = givenClass if ObjectHelper.isNotList(givenClass) else givenClass[0]
+        kwargs[key] = Serializer.convertFromJsonToObject({k:v for k,v in valuesAsDictionary.items()}, toClass)
 
 @Function
 def jsonifyResponse(response, contentType, status) :
@@ -191,7 +232,8 @@ def jsonifyResponse(response, contentType, status) :
 def getArgsWithSerializerReturnAppended(args, argument) :
     args = [arg for arg in args]
     args.append(argument)
-    return [arg for arg in args]
+    # return [arg for arg in args]
+    return args
 
 @Function
 def getArgumentInFrontOfArgs(args, argument) :
@@ -212,7 +254,7 @@ def getResourceFinalName(resourceInstance, resourceName=None) :
         resourceName = resourceInstance.__class__.__name__
     for resourceType in KW_RESOURCE_LIST :
         if resourceName.endswith(resourceType) :
-            resourceName = resourceName.replace(resourceType, c.NOTHING)
+            resourceName = resourceName[:-len(resourceType)]
             break
     return f'{resourceName[0].lower()}{resourceName[1:]}'
 
@@ -240,40 +282,54 @@ def validateArgs(args, requestClass, method) :
     if ObjectHelper.isNotNone(requestClass) :
         resourceInstance = args[0]
         if Serializer.isSerializerList(requestClass) :
-            for index in range(len(requestClass)) :
-                if Serializer.isSerializerList(args[index + 1]) and len(args[index + 1]) > 0 :
-                    expecteObjectClass = requestClass[index][0]
-                    for objectInstance in args[index + 1] :
-                        GlobalException.validateArgs(resourceInstance, method, objectInstance, expecteObjectClass)
-                else :
-                    objectRequest = args[index + 1]
-                    expecteObjectClass = requestClass[index]
-                    GlobalException.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
+            if 0 < len(requestClass) :
+                for index in range(len(requestClass)) :
+                    if Serializer.isSerializerList(args[index + 1]) and len(args[index + 1]) > 0 :
+                        expecteObjectClass = requestClass[index][0]
+                        for objectInstance in args[index + 1] :
+                            GlobalException.validateArgs(resourceInstance, method, objectInstance, expecteObjectClass)
+                    else :
+                        objectRequest = args[index + 1]
+                        expecteObjectClass = requestClass[index]
+                        GlobalException.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
         else :
             objectRequest = args[1]
             expecteObjectClass = requestClass
             GlobalException.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
 
+def validateKwargs(kwargs, resourceInstance, innerResourceInstanceMethod, requestHeaderClass=None, requestParamClass=None) :
+    classListToValidate = []
+    instanceListToValidate = []
+    if ObjectHelper.isNotEmpty(requestHeaderClass) :
+        classListToValidate.append(requestHeaderClass if ObjectHelper.isNotList(requestHeaderClass) else requestHeaderClass[0])
+        instanceListToValidate.append(kwargs.get(KW_HEADERS, {}))
+    if ObjectHelper.isNotEmpty(requestParamClass) :
+        classListToValidate.append(requestParamClass if ObjectHelper.isNotList(requestParamClass) else requestParamClass[0])
+        instanceListToValidate.append(kwargs.get(KW_PARAMETERS, {}))
+    validateArgs([resourceInstance, *instanceListToValidate], classListToValidate, innerResourceInstanceMethod)
+
 @Function
 def Controller(
-    url=c.SLASH,
-    tag='Tag not defined',
-    description='Controller not descripted'
+    url = c.SLASH,
+    tag = 'Tag not defined',
+    description = 'Controller not descripted'
 ) :
     controllerUrl = url
     controllerTag = tag
     controllerDescription = description
     def Wrapper(OuterClass,*args,**kwargs):
         log.debug(Controller, f'''wrapping {OuterClass.__name__}''', None)
-        class InnerClass(OuterClass,flask_restful.Resource):
+        class InnerClass(OuterClass, flask_restful.Resource):
             url = controllerUrl
             tag = controllerTag
             description = controllerDescription
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})', None)
+                apiInstance = getApi()
                 OuterClass.__init__(self)
                 flask_restful.Resource.__init__(self,*args,**kwargs)
-                self.service = getApi().resource.service
+                self.service = apiInstance.resource.service
+                self.globals = apiInstance.globals
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -281,6 +337,8 @@ def Controller(
 @Function
 def ControllerMethod(
     url = c.SLASH,
+    requestHeaderClass = None,
+    requestParamClass = None,
     requestClass = None,
     responseClass = None,
     roleRequired = None,
@@ -290,6 +348,8 @@ def ControllerMethod(
     logResponse = False
 ):
     controllerMethodUrl = url
+    controllerMethodRequestHeaderClass = requestHeaderClass
+    controllerMethodRequestParamClass = requestParamClass
     controllerMethodRequestClass = requestClass
     controllerMethodResponseClass = responseClass
     controllerMethodRoleRequired = roleRequired
@@ -300,13 +360,38 @@ def ControllerMethod(
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
         log.debug(ControllerMethod, f'''wrapping {resourceInstanceMethod.__name__}''', None)
         def innerResourceInstanceMethod(*args,**kwargs) :
+            # r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            # r.headers["Pragma"] = "no-cache"
+            # r.headers["Expires"] = "0"
+            # r.headers['Cache-Control'] = 'public, max-age=0'
             resourceInstance = args[0]
             completeResponse = None
             try :
                 if ObjectHelper.isNotEmptyCollection(roleRequired) :
-                    completeResponse = securedControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, roleRequired, requestClass, logRequest)
+                    completeResponse = securedControllerMethod(
+                        args,
+                        kwargs,
+                        consumes,
+                        resourceInstance,
+                        resourceInstanceMethod,
+                        roleRequired,
+                        requestHeaderClass,
+                        requestParamClass,
+                        requestClass,
+                        logRequest
+                    )
                 else :
-                    completeResponse = publicControllerMethod(args, kwargs, consumes, resourceInstance, resourceInstanceMethod, requestClass, logRequest)
+                    completeResponse = publicControllerMethod(
+                        args,
+                        kwargs,
+                        consumes,
+                        resourceInstance,
+                        resourceInstanceMethod,
+                        requestHeaderClass,
+                        requestParamClass,
+                        requestClass,
+                        logRequest
+                    )
                 # print(f'completeResponse: {completeResponse}')
                 validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
@@ -338,6 +423,8 @@ def ControllerMethod(
             return jsonifyResponse(controllerResponse, produces, status)
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         innerResourceInstanceMethod.url = controllerMethodUrl
+        innerResourceInstanceMethod.requestHeaderClass = controllerMethodRequestHeaderClass
+        innerResourceInstanceMethod.requestParamClass = controllerMethodRequestParamClass
         innerResourceInstanceMethod.requestClass = controllerMethodRequestClass
         innerResourceInstanceMethod.responseClass = controllerMethodResponseClass
         innerResourceInstanceMethod.roleRequired = controllerMethodRoleRequired
@@ -349,7 +436,7 @@ def ControllerMethod(
     return innerMethodWrapper
 
 @Function
-def Client() :
+def SimpleClient() :
     def Wrapper(OuterClass, *args, **kwargs):
         log.debug(Client,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
@@ -362,7 +449,7 @@ def Client() :
     return Wrapper
 
 @Function
-def ClientMethod(requestClass=None):
+def SimpleClientMethod(requestClass=None):
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
         log.debug(ClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs) :

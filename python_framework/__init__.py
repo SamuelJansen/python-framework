@@ -17,6 +17,8 @@ from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.enumeration.ActuatorHealthStatus import ActuatorHealthStatus
 from python_framework.api.src.enumeration.SchedulerType import SchedulerType
 
+from python_framework.api.src.converter.static import StaticConverter
+
 from python_framework.api.src.model import FrameworkModel
 from python_framework.api.src.model import ErrorLog
 from python_framework.api.src.model import ActuatorHealth

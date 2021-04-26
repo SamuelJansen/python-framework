@@ -105,6 +105,8 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
     for attributeName in attributeNameList :
         # print(f'        fromJson.get({attributeName}) = {fromJson.get(attributeName)}')
         jsonAttributeValue = fromJson.get(attributeName)
+        if ObjectHelper.isNone(jsonAttributeValue) :
+            jsonAttributeValue = fromJson.get(f'{attributeName[0].upper()}{attributeName[1:].lower()}')
         if ObjectHelper.isNotNone(jsonAttributeValue) :
             # print(f'jsonAttributeValue: {jsonAttributeValue}')
             fromJsonToDictionary[attributeName] = resolveValue(jsonAttributeValue, attributeName, classRole, fatherClass=fatherClass)

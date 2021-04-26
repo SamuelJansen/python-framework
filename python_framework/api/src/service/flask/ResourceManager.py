@@ -67,6 +67,8 @@ def getControllerList(resourceName, resourceModuleName) :
         resource = globals.importResource(controllerName, resourceModuleName=resourceModuleName)
         if resource :
             importedControllerList.append(resource)
+    if 0 == len(importedControllerList) :
+        raise Exception(f'Not possible to import {resourceName} controller')
     return importedControllerList
 
 @Function

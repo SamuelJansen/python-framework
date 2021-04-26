@@ -17,8 +17,8 @@ def KW_RESOURCE_LIST_isInCorrectOrder() :
     ]
 
     # act
-    print(resourceNameCorrectOrder)
-    print(FlaskManager.KW_RESOURCE_LIST)
+    # print(resourceNameCorrectOrder)
+    # print(FlaskManager.KW_RESOURCE_LIST)
 
     # assert
     assert len(resourceNameCorrectOrder) == len(FlaskManager.KW_RESOURCE_LIST)
