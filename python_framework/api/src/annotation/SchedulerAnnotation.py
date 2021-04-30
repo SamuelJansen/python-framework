@@ -1,6 +1,9 @@
 from python_helper import Constant as c
-from python_helper import ReflectionHelper, ObjectHelper, log, Function
+from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringHelper
+from python_framework.api.src.enumeration.SchedulerType import SchedulerType
 from python_framework.api.src.service.flask import FlaskManager
+
+
 
 @Function
 def Scheduler() :
@@ -27,8 +30,10 @@ def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
         methodKwargs['id'] = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
         instancesUpTo = methodKwargs.pop('instancesUpTo', 1)
         weekDays = methodKwargs.pop('weekDays', None)
-        methodKwargs['max_instances'] = instancesUpTo
-        methodKwargs['day_of_week'] = weekDays
+        if ObjectHelper.isNotEmpty(methodArgs) and SchedulerType.CRON == methodArgs[0] and ObjectHelper.isNotNone(weekDays) and StringHelper.isNotBlank(weekDays) :
+            methodKwargs['day_of_week'] = weekDays
+        if ObjectHelper.isNotNone(instancesUpTo) and and StringHelper.isNotBlank(weekDays)
+            methodKwargs['max_instances'] = instancesUpTo
         shedulerArgs = [*methodArgs]
         shedulerKwargs = {**methodKwargs}
         @apiInstance.scheduler.task(*shedulerArgs, **shedulerKwargs)
