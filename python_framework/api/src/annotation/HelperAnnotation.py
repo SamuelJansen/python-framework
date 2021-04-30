@@ -6,7 +6,7 @@ from python_framework.api.src.service.flask import FlaskManager
 def Helper() :
     def Wrapper(OuterClass, *args, **kwargs):
         log.debug(Helper,f'''wrapping {OuterClass.__name__}''')
-        class InnerClass(OuterClass,flask_restful.Resource):
+        class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
