@@ -21,6 +21,7 @@ def Scheduler() :
 def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
     def innerMethodWrapper(resourceInstanceMethod, *innerMethodArgs, **innerMethodKwargs) :
         log.debug(SchedulerMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        apiInstance = FlaskManager.getApi()
         methodClassName = ReflectionHelper.getMethodClassName(resourceInstanceMethod)
         methodName = ReflectionHelper.getName(resourceInstanceMethod)
         methodKwargs['id'] = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
@@ -30,7 +31,6 @@ def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
         methodKwargs['day_of_week'] = weekDays
         shedulerArgs = [*methodArgs]
         shedulerArgs = {**methodKwargs}
-        apiInstance = resourceInstanceMethod.__self__.globals.api
         @apiInstance.scheduler.task(*shedulerArgs, **shedulerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
             args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, methodClassName[:-len('Scheduler')].lower()))
