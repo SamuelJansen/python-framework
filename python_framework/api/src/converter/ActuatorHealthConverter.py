@@ -1,4 +1,4 @@
-from python_framework.api.src.service.flask.FlaskManager import Converter, ConverterMethod
+from python_framework.api.src.annotation.ConverterAnnotation import Converter, ConverterMethod
 from python_framework.api.src.model import ActuatorHealth
 from python_framework.api.src.dto import ActuatorHealthDto
 

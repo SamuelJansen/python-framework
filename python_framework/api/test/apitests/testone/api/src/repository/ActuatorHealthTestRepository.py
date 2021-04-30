@@ -1,5 +1,5 @@
 from python_helper import ObjectHelper
-from python_framework.api.src.service.flask.FlaskManager import Repository
+from python_framework.api.src.annotation.RepositoryAnnotation import Repository
 from python_framework.api.src.model import ActuatorHealth
 
 @Repository(model = ActuatorHealth.ActuatorHealth)
