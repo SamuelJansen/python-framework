@@ -30,7 +30,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
         methodKwargs['max_instances'] = instancesUpTo
         methodKwargs['day_of_week'] = weekDays
         shedulerArgs = [*methodArgs]
-        shedulerArgs = {**methodKwargs}
+        shedulerKwargs = {**methodKwargs}
         @apiInstance.scheduler.task(*shedulerArgs, **shedulerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
             args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, methodClassName[:-len('Scheduler')].lower()))
