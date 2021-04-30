@@ -32,7 +32,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
         weekDays = methodKwargs.pop('weekDays', None)
         if ObjectHelper.isNotEmpty(methodArgs) and SchedulerType.CRON == methodArgs[0] and ObjectHelper.isNotNone(weekDays) and StringHelper.isNotBlank(weekDays) :
             methodKwargs['day_of_week'] = weekDays
-        if ObjectHelper.isNotNone(instancesUpTo) and and StringHelper.isNotBlank(weekDays)
+        if ObjectHelper.isNotNone(instancesUpTo) and StringHelper.isNotBlank(weekDays)
             methodKwargs['max_instances'] = instancesUpTo
         shedulerArgs = [*methodArgs]
         shedulerKwargs = {**methodKwargs}
