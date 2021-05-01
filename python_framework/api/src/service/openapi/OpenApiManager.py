@@ -257,7 +257,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                     dtoClassDoc[k.REQUIRED] = ReflectionHelper.getAttributeNameList(dtoClass)
                     for attributeName in dtoClassDoc[k.REQUIRED] :
                         attributeType = getTypeFromAttributeNameAndChildDtoClass(attributeName)
-                        childDtoClass = getNullableChildDtoClass(attributeName, dtoClass,  verb, url, documentation)
+                        childDtoClass = getNullableChildDtoClass(attributeName, dtoClass,  verb, url, documentation, where=where)
                         if childDtoClass :
                             dtoClassDoc[k.PROPERTIES][attributeName] = getDtoSchema(attributeName, attributeType, childDtoClass)
                         else :
@@ -352,13 +352,13 @@ def addSecurity(verb, url, roleRequired, documentation):
         })
 
 
-def getNullableChildDtoClass(attributeName, dtoClass, verb, url, documentation):
+def getNullableChildDtoClass(attributeName, dtoClass, verb, url, documentation, where=None):
     log.log(getNullableChildDtoClass, f'attributeName: {attributeName}, dtoClass: {dtoClass}, verb: {verb}, url: {url}')
     childDtoClass = Serializer.getTargetClassFromFatherClassAndChildMethodName(dtoClass, attributeName)
     log.log(getNullableChildDtoClass, f'childDtoClass: {childDtoClass}')
     if childDtoClass :
         if ReflectionHelper.getName(type(type)) == ReflectionHelper.getName(type(childDtoClass)) :
-            addDtoToUrlVerb(verb, url, childDtoClass, documentation)
+            addDtoToUrlVerb(verb, url, childDtoClass, documentation, where=where)
         else :
-            addDtoToUrlVerb(verb, url, type(childDtoClass), documentation)
+            addDtoToUrlVerb(verb, url, type(childDtoClass), documentation, where=where)
     return childDtoClass
