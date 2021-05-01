@@ -230,6 +230,7 @@ def getUrl(endPointUrl, baseUrl):
     return f'{c.SLASH}{c.SLASH.join(urlList)}'
 
 def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=None):
+    log.log(addDtoToUrlVerb, f'verb: {verb}, url: {url}, dtoClass: {dtoClass}, dtoType: {dtoType}, where: {where}')
     if dtoClass :
         if not isinstance(dtoClass, list) :
             if not c.TYPE_DICT == ReflectionHelper.getName(dtoClass, muteLogs=True) :
@@ -323,6 +324,7 @@ def getDtoDocumentationName(objectClass) :
         return ReflectionHelper.getName(objectClass, muteLogs=True)
 
 def getDtoSchema(attributeName, attributeType, dtoClass):
+    log.log(getDtoSchema, f'attributeName: {attributeName}, attributeType: {attributeType}, dtoClass: {dtoClass}')
     if dtoClass :
         dtoName = getDtoDocumentationName(dtoClass)
         if v.ARRAY == attributeType :
@@ -351,7 +353,9 @@ def addSecurity(verb, url, roleRequired, documentation):
 
 
 def getNullableChildDtoClass(attributeName, dtoClass, verb, url, documentation):
+    log.log(getNullableChildDtoClass, f'attributeName: {attributeName}, dtoClass: {dtoClass}, verb: {verb}, url: {url}')
     childDtoClass = Serializer.getTargetClassFromFatherClassAndChildMethodName(dtoClass, attributeName)
+    log.log(getNullableChildDtoClass, f'childDtoClass: {childDtoClass}')
     if childDtoClass :
         if ReflectionHelper.getName(type(type)) == ReflectionHelper.getName(type(childDtoClass)) :
             addDtoToUrlVerb(verb, url, childDtoClass, documentation)

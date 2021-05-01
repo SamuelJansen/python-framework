@@ -249,6 +249,7 @@ def getTargetClassFromFatherClassAndChildMethodName(fatherClass, childAttributeN
     classRole = getClassRole(fatherClass)
     dtoClassName = getResourceName(childAttributeName, classRole)
     dtoModuleName  = getResourceModuleName(childAttributeName, classRole)
+    print(f'classRole: {classRole}, dtoClassName: {dtoClassName}, dtoModuleName: {dtoModuleName}')
     return globals.importResource(dtoClassName, resourceModuleName=dtoModuleName)
 
 def getListRemovedFromKey(key) :
