@@ -256,7 +256,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                     dtoClassDoc[k.PROPERTIES] = {}
                     dtoClassDoc[k.REQUIRED] = ReflectionHelper.getAttributeNameList(dtoClass)
                     for attributeName in dtoClassDoc[k.REQUIRED] :
-                        attributeType = getTypeFromAttributeNameAndChildDtoClass(attributeName)
+                        attributeType = getTypeFromAttributeNameAndChildDtoClass(attributeName, dtoType)
                         childDtoClass = getNullableChildDtoClass(attributeName, dtoClass,  verb, url, documentation, where=where)
                         if childDtoClass :
                             dtoClassDoc[k.PROPERTIES][attributeName] = getDtoSchema(attributeName, attributeType, childDtoClass)
@@ -307,12 +307,12 @@ def addResponseToUrlVerb(verb, url, responseClass, documentation):
         }
     addDtoToUrlVerb(verb, url, responseClass, documentation, where=KW_RESPONSE)
 
-def getTypeFromAttributeNameAndChildDtoClass(attributeName):
+def getTypeFromAttributeNameAndChildDtoClass(attributeName, fatherType):
     if attributeName :
-        if Serializer.DTO_SUFIX in attributeName :
-            return v.OBJECT
         if Serializer.LIST_SUFIX in attributeName :
             return v.ARRAY
+        if Serializer.DTO_SUFIX in attributeName or v.OBJECT == fatherType :
+            return v.OBJECT
 
 def getRefferenceValue(name):
     return f'#/{k.DEFINITIONS}/{name}'
