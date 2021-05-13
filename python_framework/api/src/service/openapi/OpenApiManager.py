@@ -25,7 +25,7 @@ VERB_LIST = [
 ABLE_TO_RECIEVE_BODY_LIST = [
     KW_POST
     , KW_PUT
-    # , KW_PATCH
+    , KW_PATCH
 ]
 
 DEFAULT_CONTENT_TYPE = 'application/json'
