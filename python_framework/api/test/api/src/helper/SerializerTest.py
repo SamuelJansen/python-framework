@@ -682,3 +682,38 @@ def convertFromJsonToObject_whenThereAreEnums() :
         ],
         Serializer.getObjectAsDictionary(toAssert)
     )
+
+@Test()
+def weirdIdList() :
+    #arrange
+    class TestContact(MODEL):
+        __tablename__ = 'TestContact'
+        id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
+        key = sap.Column(sap.String(128), nullable=False)
+        def __init__(self,
+            id = None,
+            key = None
+        ):
+            self.id = id
+            self.key = key
+        def __repr__(self):
+            return f'{self.__tablename__}(id: {self.id}, key: {self.key})'
+    class TestContactRequestDto :
+        def __init__(self,
+            key = None
+        ) :
+            self.key = key
+    class TestContactResponseDto :
+        def __init__(self,
+            id = None,
+            key = None
+        ) :
+            self.id = id
+            self.key = key
+    model = TestContact(id=2, key="a")
+
+    #act
+    dto = Serializer.convertFromObjectToObject(model, TestContactResponseDto)
+
+    assert int == type(dto.id)
+    assert 2 == dto.id

@@ -6,7 +6,6 @@ log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
 
 from python_helper import TestHelper
 TestHelper.run(__file__)
-
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
@@ -34,7 +33,8 @@ TestHelper.run(__file__)
 #         'SerializerTest.convertFromObjectToObject_whenTargetClassIsList',
 #         'SerializerTest.isModelTest',
 #         'SerializerTest.isJsonifyable',
-#         'SerializerTest.jsonifyIt'
+#         'SerializerTest.jsonifyIt',
+#         'SerializerTest.weirdIdList'
 #     ]
 # )
 # TestHelper.run(

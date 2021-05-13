@@ -81,8 +81,7 @@ def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
 
 @Function
 def serializeIt(fromJson, toClass, fatherClass=None) :
-    # print(fromJson)
-    # print(f'toClass: {toClass}')
+    # print(f'fromJson: {fromJson}, toClass: {toClass}, fatherClass: {fatherClass}')
     if ObjectHelper.isDictionary(fromJson) and ObjectHelper.isDictionaryClass(toClass) :
         # objectInstance = {}
         # for key, value in fromJson.items() :
@@ -135,6 +134,7 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
             args.append(value)
             del kwargs[key]
         # print(f'args = {args}, kwargs = {kwargs}')
+    # print(f'args = {args}, kwargs = {kwargs}')
     if ObjectHelper.isNone(objectInstance) :
         raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class')
     # print(objectInstance)
@@ -148,6 +148,7 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
 def convertFromJsonToObject(fromJson, toClass, fatherClass=None) :
     if ObjectHelper.isNone(fatherClass) :
         fatherClass = toClass
+    # print(f'isSerializerList(toClass): {isSerializerList(toClass)}')
     if isSerializerList(toClass) :
         for innerToObjectClass in toClass :
             if isSerializerList(innerToObjectClass) :
@@ -163,8 +164,11 @@ def convertFromJsonToObject(fromJson, toClass, fatherClass=None) :
 
 @Function
 def convertFromObjectToObject(fromObject, toClass) :
+    # print(f'jsonifyIt({fromObject}): {jsonifyIt(fromObject)}, toClass: {toClass}')
     fromJson = json.loads(jsonifyIt(fromObject))
+    # print(f'fromJson: {fromJson}')
     # log.prettyPython(convertFromObjectToObject, 'convertFromObjectToObject', fromJson, logLevel=log.DEBUG)
+    # print(f'convertFromJsonToObject(fromJson, toClass): {convertFromJsonToObject(fromJson, toClass)}')
     return convertFromJsonToObject(fromJson, toClass)
 
 @Function

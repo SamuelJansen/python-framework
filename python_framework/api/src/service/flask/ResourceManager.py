@@ -82,14 +82,19 @@ def getResourceList(apiInstance, resourceType) :
         resourceNameList += getPythonFrameworkResourceByType(resourceType)
     resourceList = []
     for resourceName in resourceNameList :
+        resource = None
         ajustedResourceName = getResourceNameAjusted(apiInstance, resourceType, resourceName)
         ajustedResourceModuleName = getResourceModuleNameAjusted(apiInstance, resourceType, resourceName)
         if isControllerResourceName(resourceName) :
-            resourceList += getControllerList(ajustedResourceName, ajustedResourceModuleName)
+            resource = getControllerList(ajustedResourceName, ajustedResourceModuleName)
         else :
             resource = globals.importResource(ajustedResourceName, resourceModuleName=ajustedResourceModuleName)
-            if resource :
-                resourceList.append(resource)
+        if ObjectHelper.isEmpty(resource) :
+            raise Exception(f'Error while importing {ajustedResourceName} resource from {ajustedResourceModuleName} module. Resource not found.')
+        elif ObjectHelper.isList(resource) :
+            resourceList += resource
+        else :
+            resourceList.append(resource)
     return resourceList
 
 @Function

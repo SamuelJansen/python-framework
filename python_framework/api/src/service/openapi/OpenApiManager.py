@@ -23,9 +23,9 @@ VERB_LIST = [
 ]
 
 ABLE_TO_RECIEVE_BODY_LIST = [
-    KW_POST,
-    KW_PUT,
-    KW_PATCH
+    KW_POST
+    , KW_PUT
+    # , KW_PATCH
 ]
 
 DEFAULT_CONTENT_TYPE = 'application/json'
@@ -244,7 +244,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                         k.DESCRIPTION : None,
                         k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
                     })
-                if KW_RESPONSE == where :
+                elif KW_RESPONSE == where :
                     documentation[k.PATHS][url][verb][k.RESPONSES][k.DEFAULT_STATUS_CODE] = {
                         k.DESCRIPTION : v.DEFAULT_RESPONSE,
                         k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
@@ -257,7 +257,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                     dtoClassDoc[k.REQUIRED] = ReflectionHelper.getAttributeNameList(dtoClass)
                     for attributeName in dtoClassDoc[k.REQUIRED] :
                         attributeType = getTypeFromAttributeNameAndChildDtoClass(attributeName, dtoType)
-                        childDtoClass = getNullableChildDtoClass(attributeName, dtoClass,  verb, url, documentation, where=where)
+                        childDtoClass = getNullableChildDtoClass(attributeName, dtoClass,  verb, url, documentation)
                         if childDtoClass :
                             dtoClassDoc[k.PROPERTIES][attributeName] = getDtoSchema(attributeName, attributeType, childDtoClass)
                         else :
@@ -276,7 +276,7 @@ def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=
                         k.DESCRIPTION : None,
                         k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
                     })
-                if KW_RESPONSE == where :
+                elif KW_RESPONSE == where :
                     documentation[k.PATHS][url][verb][k.RESPONSES][k.DEFAULT_STATUS_CODE] = {
                         k.DESCRIPTION : v.DEFAULT_RESPONSE,
                         k.SCHEMA : getDtoSchema(dtoName, dtoType, dtoClass)
@@ -352,13 +352,13 @@ def addSecurity(verb, url, roleRequired, documentation):
         })
 
 
-def getNullableChildDtoClass(attributeName, dtoClass, verb, url, documentation, where=None):
+def getNullableChildDtoClass(attributeName, dtoClass, verb, url, documentation):
     log.log(getNullableChildDtoClass, f'attributeName: {attributeName}, dtoClass: {dtoClass}, verb: {verb}, url: {url}')
     childDtoClass = Serializer.getTargetClassFromFatherClassAndChildMethodName(dtoClass, attributeName)
     log.log(getNullableChildDtoClass, f'childDtoClass: {childDtoClass}')
     if childDtoClass :
         if ReflectionHelper.getName(type(type)) == ReflectionHelper.getName(type(childDtoClass)) :
-            addDtoToUrlVerb(verb, url, childDtoClass, documentation, where=where)
+            addDtoToUrlVerb(verb, url, childDtoClass, documentation)
         else :
-            addDtoToUrlVerb(verb, url, type(childDtoClass), documentation, where=where)
+            addDtoToUrlVerb(verb, url, type(childDtoClass), documentation)
     return childDtoClass
