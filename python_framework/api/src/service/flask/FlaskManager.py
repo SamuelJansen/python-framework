@@ -119,7 +119,7 @@ def initialize(
         )
     defaultUrl
     openInBrowser
-    url = f'{apiInstance.scheme}://{apiInstance.host}{c.NOTHING if ObjectHelper.isEmpty(apiInstance.port) else f"{c.COLON}{apiInstance.port}"}{apiInstance.baseUrl}'
+    url = getApiUrl(apiInstance)
     if defaultUrl :
         url = f'{url}{defaultUrl}'
     def inBetweenFunction(function,*argument,**keywordArgument) :
@@ -136,6 +136,37 @@ def initialize(
             return functionReturn
         return innerFunction
     return inBetweenFunction
+
+def runApi(*args, api=None, **kwargs) :
+    if ObjectHelper.isNone(api) :
+        api = getApi()
+    muteLogs(api.app)
+    if 'host' not in kwargs and api.host :
+        kwargs['host'] = api.host
+    if 'port' not in kwargs and api.port :
+        kwargs['port'] = api.port
+    apiUrl = getApiUrl(api)
+    log.success(runApi, f'Api will run at {apiUrl}')
+    log.success(runApi, f'Documentation will be available at {apiUrl}/swagger')
+    api.app.run(*args, **kwargs)
+
+@Function
+def getApiUrl(api) :
+    apiUrl = None
+    try :
+        apiUrl = f'{api.scheme}://{api.host}{c.BLANK if ObjectHelper.isEmpty(api.port) else f"{c.COLON}{api.port}"}{api.baseUrl}'
+    except Exception as exception :
+        log.error(getApiUrl.__class__, 'Not possible to parse pai url', exception)
+    return apiUrl
+
+@Function
+def muteLogs(app) :
+    import logging
+    from werkzeug.serving import WSGIRequestHandler
+    werkzeug_logger = logging.getLogger('werkzeug')
+    werkzeug_logger.disabled = True
+    app.logger.disabled = True
+    WSGIRequestHandler.log = lambda self, type, message, *args: None ###- getattr(werkzeug_logger, type)('%s %s' % (self.address_string(), message % args))
 
 @Function
 def getRequestBodyAsJson(contentType, requestClass) :

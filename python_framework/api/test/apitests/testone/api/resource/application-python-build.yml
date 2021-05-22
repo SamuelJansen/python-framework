@@ -1,0 +1,8 @@
+print-status: False
+
+api:
+    server:
+        base-url: /python-build
+        scheme: http
+        port: 50010
+        host: localhost

@@ -18,18 +18,19 @@ globalsInstance = globals.newGlobalsInstance(__file__
     # , testStatus = True
 )
 
-from python_framework.api.src.service.flask.FlaskManager import initialize
+from python_framework.api.src.service.flask import FlaskManager
 import TestApi
 app = TestApi.app
 api = TestApi.api
 jwt = TestApi.jwt
 
-@initialize(api, defaultUrl = '/swagger', openInBrowser=False)
-def runFlaskApplication(app):
-    app.run(debug=False, use_reloader=False)
+@FlaskManager.initialize(api, defaultUrl = '/swagger', openInBrowser=False)
+def runFlaskApplication(app=None):
+    FlaskManager.runApi(debug=False, use_reloader=False)
+    # app.run(debug=False, use_reloader=False)
     # app.run(debug=True)
 
 if __name__ == '__main__' :
-    runFlaskApplication(app)
+    runFlaskApplication()
 
 log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')

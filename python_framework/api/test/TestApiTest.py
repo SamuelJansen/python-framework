@@ -308,3 +308,18 @@ def testing_Client() :
     assert 200 == responseWithoutHeadersAndWithoutParams.status_code
     log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
     killProcesses(process)
+
+@Test(environmentVariables={
+    SettingHelper.ACTIVE_ENVIRONMENT : 'python-build'
+})
+def testing_Client() :
+    #arrange
+    muteLogs = False
+    process = getProcess(
+        f'python app.py',
+        f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
+        muteLogs = muteLogs
+    )
+    time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
+    log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
+    killProcesses(process)
