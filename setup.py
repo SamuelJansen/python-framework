@@ -5,7 +5,7 @@ print('''On linux, run:
 sudo apt install libpq-dev python3-dev
 pip3.9 install --no-cache-dir python-framework --force --upgrade''')
 
-VERSION = '0.1.10-29'
+VERSION = '0.1.10-30'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -67,13 +67,14 @@ setup(
         'Flask-RESTful==0.3.8',
         'Flask-JWT-Extended==3.24.1',
         # 'PyJWT==2.0.0' ###- 'PyJWT==1.7.1' for PyJWT 2.0.0 issue ...
-        'flask-restful-swagger-2==0.35',
+        # 'flask-restful-swagger-2==0.35',
         # 'safrs==2.10.4',
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
         'globals>=0.3.0-04',
-        'Flask-APScheduler==1.12.1',
+        'python_helper>=0.3.0-07'
+        'Flask-APScheduler==1.12.2',
         'psutil==5.8.0',
         'requests==2.24.0'
     ],

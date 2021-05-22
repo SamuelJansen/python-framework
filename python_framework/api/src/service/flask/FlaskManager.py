@@ -479,7 +479,7 @@ def getCompleteResponseByException(exception, resourceInstance, resourceInstance
         if HttpStatus.INTERNAL_SERVER_ERROR <= exception.status :
             log.error(resourceInstance.__class__, logErrorMessage, exception)
         else :
-            log.warning(resourceInstance.__class__, logErrorMessage, exception=exception)
+            log.failure(resourceInstance.__class__, logErrorMessage, exception=exception)
     except Exception as logErrorMessageException :
         log.log(getCompleteResponseByException, 'Error logging exception at controller', exception=logErrorMessageException)
         log.error(log.error, 'Error processing request', exception)

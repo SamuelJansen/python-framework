@@ -124,8 +124,17 @@ def initialize(
         args.append(getResourceList(api, resourceType))
     args.append(refferenceModel)
     addFlaskApiResources(*args)
-
+    muteLogs(app)
     return api, app, jwt
+
+@Function
+def muteLogs(app) :
+    import logging
+    from werkzeug.serving import WSGIRequestHandler
+    werkzeug_logger = logging.getLogger('werkzeug')
+    werkzeug_logger.disabled = True
+    app.logger.disabled = True
+    WSGIRequestHandler.log = lambda self, type, message, *args: None ###- getattr(werkzeug_logger, type)('%s %s' % (self.address_string(), message % args))
 
 @Function
 def addControllerListTo(apiInstance, controllerList) :
