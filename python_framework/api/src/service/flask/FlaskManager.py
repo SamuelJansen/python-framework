@@ -376,7 +376,8 @@ def ControllerMethod(
     consumes = OpenApiManager.DEFAULT_CONTENT_TYPE,
     produces = OpenApiManager.DEFAULT_CONTENT_TYPE,
     logRequest = False,
-    logResponse = False
+    logResponse = False,
+    muteStacktraceOnBusinessRuleException = True
 ):
     controllerMethodUrl = url
     controllerMethodRequestHeaderClass = requestHeaderClass
@@ -388,6 +389,7 @@ def ControllerMethod(
     controllerMethodConsumes = consumes
     controllerMethodLogRequest = logRequest
     controllerMethodLogResponse = logResponse
+    controllerMethodMuteStacktraceOnBusinessRuleException = muteStacktraceOnBusinessRuleException
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
         log.debug(ControllerMethod, f'''wrapping {resourceInstanceMethod.__name__}''', None)
         def innerResourceInstanceMethod(*args,**kwargs) :
@@ -427,7 +429,12 @@ def ControllerMethod(
                 validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
                 # print(exception)
-                completeResponse = getCompleteResponseByException(exception, resourceInstance, resourceInstanceMethod)
+                completeResponse = getCompleteResponseByException(
+                    exception,
+                    resourceInstance,
+                    resourceInstanceMethod,
+                    controllerMethodMuteStacktraceOnBusinessRuleException
+                )
                 ###- request.method:              GET
                 ###- request.url:                 http://127.0.0.1:5000/alert/dingding/test?x=y
                 ###- request.base_url:            http://127.0.0.1:5000/alert/dingding/test
@@ -463,6 +470,7 @@ def ControllerMethod(
         innerResourceInstanceMethod.consumes = controllerMethodConsumes
         innerResourceInstanceMethod.logRequest = controllerMethodLogRequest
         innerResourceInstanceMethod.logResponse = controllerMethodLogResponse
+        innerResourceInstanceMethod.muteStacktraceOnBusinessRuleException = controllerMethodMuteStacktraceOnBusinessRuleException
         return innerResourceInstanceMethod
     return innerMethodWrapper
 
@@ -502,7 +510,12 @@ def getGlobalException(exception, resourceInstance, resourceInstanceMethod):
 def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod) :
     raise getGlobalException(exception, resourceInstance, resourceInstanceMethod)
 
-def getCompleteResponseByException(exception, resourceInstance, resourceInstanceMethod) :
+def getCompleteResponseByException(
+    exception,
+    resourceInstance,
+    resourceInstanceMethod,
+    muteStacktraceOnBusinessRuleException
+) :
     exception = getGlobalException(exception, resourceInstance, resourceInstanceMethod)
     completeResponse = [{'message':exception.message, 'timestamp':str(exception.timeStamp)},exception.status]
     try :
@@ -510,7 +523,7 @@ def getCompleteResponseByException(exception, resourceInstance, resourceInstance
         if HttpStatus.INTERNAL_SERVER_ERROR <= exception.status :
             log.error(resourceInstance.__class__, logErrorMessage, exception)
         else :
-            log.failure(resourceInstance.__class__, logErrorMessage, exception=exception)
+            log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=muteStacktraceOnBusinessRuleException)
     except Exception as logErrorMessageException :
         log.log(getCompleteResponseByException, 'Error logging exception at controller', exception=logErrorMessageException)
         log.error(log.error, 'Error processing request', exception)
