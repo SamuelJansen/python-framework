@@ -9,7 +9,8 @@ class MyController:
         requestClass = [[dict]],
         responseClass = [dict],
         logRequest = True,
-        logResponse = True
+        logResponse = True,
+        muteStacktraceOnBusinessRuleException = False
     )
     def post(self, requestBodyList):
         return requestBodyList, HttpStatus.OK

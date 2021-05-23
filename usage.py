@@ -10,7 +10,7 @@ log.debug(ErrorLog, 'imported')
 from python_framework.api.src.helper import Serializer
 log.debug(Serializer, 'imported')
 
-from python_framework.api.src.service import GlobalException
+from python_framework.api.src.service.ExceptionHandler import GlobalException
 log.debug(GlobalException, 'imported')
 
 from python_framework.api.src.service import Security

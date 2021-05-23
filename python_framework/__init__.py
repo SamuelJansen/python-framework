@@ -2,7 +2,8 @@ from python_framework.api.src.annotation import EnumAnnotation
 
 from python_framework.api.src.helper import Serializer
 
-from python_framework.api.src.service.GlobalException import GlobalException
+from python_framework.api.src.service import ExceptionHandler
+from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.service import Security
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.service import SqlAlchemyProxy

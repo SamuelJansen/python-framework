@@ -5,7 +5,8 @@ from flask import Response, request
 import flask_restful
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.helper import Serializer
-from python_framework.api.src.service import GlobalException
+from python_framework.api.src.service import ExceptionHandler
+from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.service import Security
 from python_framework.api.src.service.openapi import OpenApiManager
 import globals
@@ -149,6 +150,8 @@ def runApi(*args, api=None, **kwargs) :
     log.success(runApi, f'Api will run at {apiUrl}')
     log.success(runApi, f'Documentation will be available at {apiUrl}/swagger')
     api.app.run(*args, **kwargs)
+    import atexit
+    atexit.register(lambda: api.scheduler.shutdown(wait=False))
 
 @Function
 def getApiUrl(api) :
@@ -178,7 +181,7 @@ def getRequestBodyAsJson(contentType, requestClass) :
         else :
             raise Exception(f'Content type "{contentType}" not implemented')
     except Exception as exception :
-        raise GlobalException.GlobalException(message='Not possible to parse the request', logMessage=str(exception), status=HttpStatus.BAD_REQUEST)
+        raise GlobalException(message='Not possible to parse the request', logMessage=str(exception), status=HttpStatus.BAD_REQUEST)
     validateBodyAsJson(requestBodyAsJson, requestClass)
     return requestBodyAsJson
 
@@ -188,7 +191,7 @@ def validateBodyAsJson(requestBodyAsJson, requestClass) :
         requestBodyAsJsonIsList = ObjectHelper.isList(requestBodyAsJson)
         requestClassIsList = ObjectHelper.isList(requestClass) and ObjectHelper.isList(requestClass[0])
         if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)) :
-            raise GlobalException.GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
+            raise GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
 
 @Function
 @Security.jwtRequired
@@ -205,7 +208,7 @@ def securedControllerMethod(
     logRequest
 ) :
     if not Security.getRole() in roleRequired :
-        raise GlobalException.GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDEN)
+        raise GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDEN)
     return publicControllerMethod(
         args,
         kwargs,
@@ -248,7 +251,7 @@ def publicControllerMethod(
     response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
     if response and Serializer.isSerializerCollection(response) and 2 == len(response) :
         return response
-    raise GlobalException.GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
+    raise GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
 
 def addToKwargs(key, givenClass, valuesAsDictionary, kwargs) :
     if ObjectHelper.isNotEmpty(givenClass) :
@@ -318,15 +321,15 @@ def validateArgs(args, requestClass, method) :
                     if Serializer.isSerializerList(args[index + 1]) and len(args[index + 1]) > 0 :
                         expecteObjectClass = requestClass[index][0]
                         for objectInstance in args[index + 1] :
-                            GlobalException.validateArgs(resourceInstance, method, objectInstance, expecteObjectClass)
+                            ExceptionHandler.validateArgs(resourceInstance, method, objectInstance, expecteObjectClass)
                     else :
                         objectRequest = args[index + 1]
                         expecteObjectClass = requestClass[index]
-                        GlobalException.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
+                        ExceptionHandler.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
         else :
             objectRequest = args[1]
             expecteObjectClass = requestClass
-            GlobalException.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
+            ExceptionHandler.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
 
 def validateKwargs(kwargs, resourceInstance, innerResourceInstanceMethod, requestHeaderClass=None, requestParamClass=None) :
     classListToValidate = []
@@ -505,7 +508,7 @@ def SimpleClientMethod(requestClass=None):
 
 def getGlobalException(exception, resourceInstance, resourceInstanceMethod):
     apiInstance = getNullableApi()
-    return GlobalException.handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, apiInstance)
+    return ExceptionHandler.handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, apiInstance)
 
 def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod) :
     raise getGlobalException(exception, resourceInstance, resourceInstanceMethod)
