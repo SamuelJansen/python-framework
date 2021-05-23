@@ -31,8 +31,8 @@ def openUrl(url) :
     parsedUrl = getParsedUrl(getParsedUrl)
     webbrowser.open_new(parsedUrl)
 
-def getParsedUrl(url) :
-    return str(url).replace('0.0.0.0', 'localhost')
+def getParsedUrl(url, host='localhost') :
+    return str(url).replace('0.0.0.0', host)
 
 # import time
 # import subprocess
