@@ -1,6 +1,5 @@
 from flask import send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
-from python_framework.api.src.service import WebBrowser
 from python_helper import Constant as c
 from python_helper import log, StringHelper, ReflectionHelper, ObjectHelper
 from python_framework.api.src.helper import Serializer
@@ -228,7 +227,10 @@ def getUrl(endPointUrl, baseUrl):
                     urlList.append(f'{c.OPEN_DICTIONARY}{splittedUrlPiece[1].split(c.BIGGER)[0]}{c.CLOSE_DICTIONARY}')
             else :
                 urlList.append(urlPiece)
-    return WebBrowser.getParsedUrl(f'{c.SLASH}{c.SLASH.join(urlList)}')
+    return f'{c.SLASH}{c.SLASH.join(urlList)}'
+
+def getApiUrl(apiInstance):
+    return f'{apiInstance.scheme}://{apiInstance.documentation[k.HOST]}{c.BLANK if ObjectHelper.isEmpty(apiInstance.port) else f"{c.COLON}{apiInstance.port}"}{apiInstance.baseUrl}'
 
 def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=None):
     log.log(addDtoToUrlVerb, f'verb: {verb}, url: {url}, dtoClass: {dtoClass}, dtoType: {dtoType}, where: {where}')

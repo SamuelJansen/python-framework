@@ -157,7 +157,7 @@ def runApi(*args, api=None, **kwargs) :
 def getApiUrl(api) :
     apiUrl = None
     try :
-        apiUrl = WebBrowser.getParsedUrl(f'{api.scheme}://{api.host}{c.BLANK if ObjectHelper.isEmpty(api.port) else f"{c.COLON}{api.port}"}{api.baseUrl}')
+        apiUrl = OpenApiManaget.getApiUrl(api)
     except Exception as exception :
         log.error(getApiUrl.__class__, 'Not possible to parse pai url', exception)
     return apiUrl
