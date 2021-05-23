@@ -18,18 +18,21 @@ def getBrowserPath(browserName) :
         return ''
 
 def openUrlInChrome(url, anonymous=False) :
-    # webbrowser.open_new(url)
+    parsedUrl = getParsedUrl(getParsedUrl)
+    # webbrowser.open_new(parsedUrl)
     if anonymous :
         try :
-            webbrowser.get(f'{getBrowserPath("chrome")}{" --incognito"}').open_new_tab(url)
+            webbrowser.get(f'{getBrowserPath("chrome")}{" --incognito"}').open_new_tab(parsedUrl)
         except :
-            webbrowser.get(getBrowserPath('chrome')).open_new_tab(url)
-    return webbrowser.get(getBrowserPath('chrome')).open_new_tab(url)
+            webbrowser.get(getBrowserPath('chrome')).open_new_tab(parsedUrl)
+    return webbrowser.get(getBrowserPath('chrome')).open_new_tab(parsedUrl)
 
 def openUrl(url) :
-    webbrowser.open_new(url)
+    parsedUrl = getParsedUrl(getParsedUrl)
+    webbrowser.open_new(parsedUrl)
 
-
+def getParsedUrl(url) :
+    return str(url).replace('0.0.0.0', 'localhost')
 
 # import time
 # import subprocess

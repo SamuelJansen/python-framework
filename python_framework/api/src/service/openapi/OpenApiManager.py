@@ -99,7 +99,7 @@ def addInfo(apiInstance):
 
 def addHostAndBasePath(apiInstance, appInstance):
     globals = apiInstance.globals
-    apiInstance.documentation[k.HOST] = globals.getSetting(f'{KW_OPEN_API}.{KW_HOST}')
+    apiInstance.documentation[k.HOST] = str(globals.getSetting(f'{KW_OPEN_API}.{KW_HOST}')).replace('0.0.0.0', 'localhost')
     apiInstance.documentation[k.SCHEMES] = globals.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}')
     apiInstance.documentation[k.BASE_PATH] = apiInstance.baseUrl
     # completeUrl = appInstance.test_request_context().request.host_url[:-1] ###- request.remote_addr
