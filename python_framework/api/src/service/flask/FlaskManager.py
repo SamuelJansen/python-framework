@@ -148,7 +148,7 @@ def runApi(*args, api=None, **kwargs) :
         kwargs['port'] = api.port
     apiUrl = getApiUrl(api)
     log.success(runApi, f'Api will run at {apiUrl}')
-    log.success(runApi, f'Documentation will be available at {apiUrl}/swagger')
+    log.success(runApi, f'Documentation will be available at {OpenApiManager.getDocumentationUrl(api)}')
     api.app.run(*args, **kwargs)
     import atexit
     atexit.register(lambda: api.scheduler.shutdown(wait=False))
@@ -157,7 +157,7 @@ def runApi(*args, api=None, **kwargs) :
 def getApiUrl(api) :
     apiUrl = None
     try :
-        apiUrl = OpenApiManaget.getApiUrl(api)
+        apiUrl = f'{api.scheme}://{api.host}{c.BLANK if ObjectHelper.isEmpty(api.port) else f"{c.COLON}{api.port}"}{api.baseUrl}'
     except Exception as exception :
         log.error(getApiUrl.__class__, 'Not possible to parse pai url', exception)
     return apiUrl

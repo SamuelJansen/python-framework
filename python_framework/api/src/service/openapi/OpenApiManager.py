@@ -54,8 +54,10 @@ KW_METHOD = '__METHOD__'
 KW_REQUEST = '__KW_REQUEST__'
 KW_RESPONSE = '__KW_RESPONSE__'
 
+DOCUMENTATION_ENDPOINT = f'{c.SLASH}{KW_OPEN_API}'
+
 def addSwagger(apiInstance, appInstance):
-    documentationUrl = f'{apiInstance.baseUrl}{c.SLASH}{KW_OPEN_API}'
+    documentationUrl = f'{apiInstance.baseUrl}{DOCUMENTATION_ENDPOINT}'
     swaggerUi = get_swaggerui_blueprint(
         documentationUrl,
         OpenApiDocumentationFile.getDocumentationFileName(apiInstance)
@@ -231,6 +233,9 @@ def getUrl(endPointUrl, baseUrl):
 
 def getApiUrl(apiInstance):
     return f'{apiInstance.scheme}://{apiInstance.documentation[k.HOST]}{c.BLANK if ObjectHelper.isEmpty(apiInstance.port) else f"{c.COLON}{apiInstance.port}"}{apiInstance.baseUrl}'
+
+def getDocumentationUrl(apiInstance):
+    return f'{getApiUrl(apiInstance)}{DOCUMENTATION_ENDPOINT}'
 
 def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=None):
     log.log(addDtoToUrlVerb, f'verb: {verb}, url: {url}, dtoClass: {dtoClass}, dtoType: {dtoType}, where: {where}')
