@@ -13,3 +13,7 @@ def addScheduler(api, app) :
 def initialize(api, app) :
     api.scheduler.init_app(app)
     api.scheduler.start()
+
+def shutdown(api, app) :
+    import atexit
+    atexit.register(lambda: api.scheduler.shutdown(wait=False))

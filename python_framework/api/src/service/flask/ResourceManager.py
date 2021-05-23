@@ -103,6 +103,10 @@ def addGlobalsTo(apiInstance) :
     apiInstance.globals = FlaskManager.getGlobals()
     apiInstance.globals.api = apiInstance
     apiInstance.bindResource = FlaskManager.bindResource
+    apiInstance.scheme = apiInstance.globals.getApiSetting('api.server.scheme')
+    apiInstance.host = apiInstance.globals.getApiSetting('api.server.host')
+    apiInstance.port = apiInstance.globals.getApiSetting('api.server.port')
+    apiInstance.baseUrl = apiInstance.globals.getApiSetting('api.server.base-url')
 
 @Function
 def initialize(
@@ -223,10 +227,6 @@ def addFlaskApiResources(
         converterList,
         model
     ) :
-    apiInstance.scheme = apiInstance.globals.getApiSetting('api.server.scheme')
-    apiInstance.host = apiInstance.globals.getApiSetting('api.server.host')
-    apiInstance.port = apiInstance.globals.getApiSetting('api.server.port')
-    apiInstance.baseUrl = apiInstance.globals.getApiSetting('api.server.base-url')
     OpenApiManager.newDocumentation(apiInstance, appInstance)
     addResourceAttibutes(apiInstance)
     addRepositoryTo(apiInstance, repositoryList, model)

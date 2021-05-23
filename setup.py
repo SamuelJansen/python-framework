@@ -5,7 +5,7 @@ print('''On linux, run:
 sudo apt install libpq-dev python3-dev
 pip3.9 install --no-cache-dir python-framework --force --upgrade''')
 
-VERSION = '0.1.13-04'
+VERSION = '0.1.13-05'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 

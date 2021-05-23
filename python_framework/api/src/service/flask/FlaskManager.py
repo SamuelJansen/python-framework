@@ -9,6 +9,7 @@ from python_framework.api.src.service import ExceptionHandler
 from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.service import Security
 from python_framework.api.src.service.openapi import OpenApiManager
+from python_framework.api.src.service import SchedulerManager
 import globals
 import json
 
@@ -150,8 +151,7 @@ def runApi(*args, api=None, **kwargs) :
     log.success(runApi, f'Api will run at {apiUrl}')
     log.success(runApi, f'Documentation will be available at {OpenApiManager.getDocumentationUrl(api)}')
     api.app.run(*args, **kwargs)
-    import atexit
-    atexit.register(lambda: api.scheduler.shutdown(wait=False))
+    SchedulerManager.shutdown(api, api.app)
 
 @Function
 def getApiUrl(api) :
