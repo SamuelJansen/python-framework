@@ -232,7 +232,7 @@ def getUrl(endPointUrl, baseUrl):
     return f'{c.SLASH}{c.SLASH.join(urlList)}'
 
 def getApiUrl(apiInstance):
-    return f'{apiInstance.scheme}://{apiInstance.documentation[k.HOST]}{c.BLANK if ObjectHelper.isEmpty(apiInstance.port) else f"{c.COLON}{apiInstance.port}"}{apiInstance.baseUrl}'
+    return f'{apiInstance.scheme}://{apiInstance.documentation[k.HOST]}{apiInstance.baseUrl}'
 
 def getDocumentationUrl(apiInstance):
     return f'{getApiUrl(apiInstance)}{DOCUMENTATION_ENDPOINT}'

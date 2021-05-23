@@ -4,8 +4,8 @@ api:
     server:
         base-url: /python-build
         scheme: http
-        port: 50010
+        port: 5010
         host: 0.0.0.0
 
 swagger:
-    host: localhost
+    host: localhost:${api.server.port}
