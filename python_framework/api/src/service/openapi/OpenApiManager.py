@@ -1,5 +1,6 @@
 from flask import send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
+from python_framework.api.src.service import WebBrowser
 from python_helper import Constant as c
 from python_helper import log, StringHelper, ReflectionHelper, ObjectHelper
 from python_framework.api.src.helper import Serializer
@@ -99,7 +100,7 @@ def addInfo(apiInstance):
 
 def addHostAndBasePath(apiInstance, appInstance):
     globals = apiInstance.globals
-    apiInstance.documentation[k.HOST] = str(globals.getSetting(f'{KW_OPEN_API}.{KW_HOST}')).replace('0.0.0.0', 'localhost')
+    apiInstance.documentation[k.HOST] = globals.getSetting(f'{KW_OPEN_API}.{KW_HOST}')
     apiInstance.documentation[k.SCHEMES] = globals.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}')
     apiInstance.documentation[k.BASE_PATH] = apiInstance.baseUrl
     # completeUrl = appInstance.test_request_context().request.host_url[:-1] ###- request.remote_addr
@@ -227,7 +228,7 @@ def getUrl(endPointUrl, baseUrl):
                     urlList.append(f'{c.OPEN_DICTIONARY}{splittedUrlPiece[1].split(c.BIGGER)[0]}{c.CLOSE_DICTIONARY}')
             else :
                 urlList.append(urlPiece)
-    return f'{c.SLASH}{c.SLASH.join(urlList)}'
+    return WebBrowser.getParsedUrl(f'{c.SLASH}{c.SLASH.join(urlList)}')
 
 def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=None):
     log.log(addDtoToUrlVerb, f'verb: {verb}, url: {url}, dtoClass: {dtoClass}, dtoType: {dtoType}, where: {where}')

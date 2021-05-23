@@ -1,8 +1,8 @@
+from flask import Response, request
+import flask_restful
 from python_framework.api.src.service import WebBrowser
 from python_helper import Constant as c
 from python_helper import log, StringHelper, Function, ReflectionHelper, ObjectHelper, SettingHelper
-from flask import Response, request
-import flask_restful
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service import ExceptionHandler
@@ -157,7 +157,7 @@ def runApi(*args, api=None, **kwargs) :
 def getApiUrl(api) :
     apiUrl = None
     try :
-        apiUrl = f'{api.scheme}://{str(api.host).replace("0.0.0.0","localhost")}{c.BLANK if ObjectHelper.isEmpty(api.port) else f"{c.COLON}{api.port}"}{api.baseUrl}'
+        apiUrl = WebBrowser.getParsedUrl(f'{api.scheme}://{api.host}{c.BLANK if ObjectHelper.isEmpty(api.port) else f"{c.COLON}{api.port}"}{api.baseUrl}')
     except Exception as exception :
         log.error(getApiUrl.__class__, 'Not possible to parse pai url', exception)
     return apiUrl
