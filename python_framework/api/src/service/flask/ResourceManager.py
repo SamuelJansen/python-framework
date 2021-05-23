@@ -117,6 +117,7 @@ def initialize(
     app = Flask(rootName)
     api = Api(app)
     addGlobalsTo(api)
+    OpenApiManager.newDocumentation(api, app)
     SchedulerManager.addScheduler(api, app)
     securityKey = api.globals.getApiSetting('api.security.secret')
     if SettingHelper.LOCAL_ENVIRONMENT == SettingHelper.getActiveEnvironment() :
@@ -227,7 +228,6 @@ def addFlaskApiResources(
         converterList,
         model
     ) :
-    OpenApiManager.newDocumentation(apiInstance, appInstance)
     addResourceAttibutes(apiInstance)
     addRepositoryTo(apiInstance, repositoryList, model)
     addSchedulerListTo(apiInstance, schedulerList)
