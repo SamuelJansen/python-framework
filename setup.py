@@ -5,7 +5,7 @@ print('''On linux, run:
 sudo apt install libpq-dev python3-dev
 pip3.9 install --no-cache-dir python-framework --force --upgrade''')
 
-VERSION = '0.1.11-00'
+VERSION = '0.1.11-01'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -73,7 +73,7 @@ setup(
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
         'globals>=0.3.0-04',
-        'python_helper>=0.3.1'
+        'python_helper>=0.3.1',
         'Flask-APScheduler==1.12.2',
         'psutil==5.8.0',
         'requests==2.24.0'
