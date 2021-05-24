@@ -32,7 +32,10 @@ def openUrl(url) :
     webbrowser.open_new(parsedUrl)
 
 def getParsedUrl(url, host='localhost') :
-    return str(url).replace('0.0.0.0', host)
+    urlAsString = str(url)
+    if '0.0.0.0' in urlAsString :
+        urlAsString = urlAsString.replace('0.0.0.0', host)
+    return urlAsString
 
 # import time
 # import subprocess
