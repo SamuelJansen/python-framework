@@ -18,7 +18,7 @@ def getBrowserPath(browserName) :
         return ''
 
 def openUrlInChrome(url, anonymous=False) :
-    parsedUrl = getParsedUrl(getParsedUrl)
+    parsedUrl = getParsedUrl(url)
     # webbrowser.open_new(parsedUrl)
     if anonymous :
         try :
@@ -28,7 +28,7 @@ def openUrlInChrome(url, anonymous=False) :
     return webbrowser.get(getBrowserPath('chrome')).open_new_tab(parsedUrl)
 
 def openUrl(url) :
-    parsedUrl = getParsedUrl(getParsedUrl)
+    parsedUrl = getParsedUrl(url)
     webbrowser.open_new(parsedUrl)
 
 def getParsedUrl(url, host='localhost') :
