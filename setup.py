@@ -5,14 +5,14 @@ print('''On linux, run:
 sudo apt install libpq-dev python3-dev
 pip3.9 install --no-cache-dir python-framework --force --upgrade''')
 
-VERSION = '0.1.13-08'
+VERSION = '0.1.14'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
 OS_SEPARATOR = os.path.sep
-SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
-STATIC_PACKAGE_PATH = f'statics{OS_SEPARATOR}{SWAGGER_RELATIVE_PATH}'
-print(f'[SETUP  ] Static package: "{STATIC_PACKAGE_PATH}"')
+# SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
+# STATIC_PACKAGE_PATH = f'statics{OS_SEPARATOR}{SWAGGER_RELATIVE_PATH}'
+# print(f'[SETUP  ] Static package: "{STATIC_PACKAGE_PATH}"')
 
 setup(
     name = NAME,
@@ -35,24 +35,24 @@ setup(
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource',
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
     ],
-    data_files = [
-        (STATIC_PACKAGE_PATH, [
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-16x16.png',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-32x32.png',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}index.template.html',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}oauth2-redirect.html',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js.map',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js.map',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css.map',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js.map',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}LICENSE',
-            f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}VERSION'
-        ])
-    ],
+    # data_files = [
+    #     (STATIC_PACKAGE_PATH, [
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-16x16.png',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-32x32.png',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}index.template.html',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}oauth2-redirect.html',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js.map',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js.map',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css.map',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js.map',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}LICENSE',
+    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}VERSION'
+    #     ])
+    # ],
     version = VERSION,
     license = 'MIT',
     description = 'Flask wrapper',
@@ -72,8 +72,8 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals>=0.3.0-04',
-        'python_helper>=0.3.1',
+        'globals>=0.3.1',
+        'python_helper>=0.3.2',
         'Flask-APScheduler==1.12.2',
         'psutil==5.8.0',
         'requests==2.24.0'

@@ -322,4 +322,5 @@ def testing_Client() :
     )
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
     log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
+    # time.sleep(20000)
     killProcesses(process)

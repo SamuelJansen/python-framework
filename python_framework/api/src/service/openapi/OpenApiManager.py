@@ -6,7 +6,7 @@ from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.openapi.OpenApiKey import Key as k
 from python_framework.api.src.service.openapi.OpenApiValue import Value as v
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile
-from python_framework.api.src.service.openapi.OpenApiDocumentationFile import KW_OPEN_API, KW_RESOURCE, KW_UI
+from python_framework.api.src.service.openapi.OpenApiDocumentationFile import KW_OPEN_API, KW_UI
 
 KW_GET = 'get'
 KW_POST = 'post'
@@ -57,13 +57,15 @@ KW_RESPONSE = '__KW_RESPONSE__'
 DOCUMENTATION_ENDPOINT = f'{c.SLASH}{KW_OPEN_API}'
 
 def addSwagger(apiInstance, appInstance):
+    ###- The ugliest thing I ever seen, but thats the way flask_swagger_ui works...
     documentationUrl = f'{apiInstance.baseUrl}{DOCUMENTATION_ENDPOINT}'
     swaggerUi = get_swaggerui_blueprint(
         documentationUrl,
         OpenApiDocumentationFile.getDocumentationFileName(apiInstance)
     )
-    log.debug(addSwagger,f'swaggerUi._static_folder before reassignment: "{swaggerUi._static_folder}"')
-    swaggerUi._static_folder = getStaticFolder(apiInstance, appInstance)
+    @appInstance.route(f'{documentationUrl}/{OpenApiDocumentationFile.getDocumentationFileName(apiInstance)}', methods=['GET'])
+    def getSwagger() :
+        return apiInstance.documentation
     appInstance.register_blueprint(swaggerUi, url_prefix=documentationUrl)
     OpenApiDocumentationFile.overrideDocumentation(apiInstance)
 
