@@ -10,11 +10,11 @@ I did it because it's cool and makes Flask better :D
 - OpenApiDocumentation 
 - JwtSecutiry
 - Suport for services, validators, helpers, converters, mappers, and repository
-- SqlAlhemyProxy without the need to "open connection" due to circular import issues. You call them and it works like a horse
+- SqlAlchemyProxy without the need to "open connection" due to circular import issues. You call them and it works like a horse
 
 ### Requirements
 - Add `python_framework==0.1.0.-05` in your `requirements.txt` file (or `python_framework==0.1.0.-post05`. In some environments, life is tuff)
-- It comes with a lot of stuffs. Check on [setup.py](https://github.com/SamuelJansen/python_framework/blob/master/setup.py "setup.py"). If you need a different version of some of them, you can add it bellow `python_framework==0.1.0.-05`
+- It comes with a lot of stuff. Check on [setup.py](https://github.com/SamuelJansen/python_framework/blob/master/setup.py "setup.py"). If you need a different version of some of them, you can add it bellow `python_framework==0.1.0.-05`
 
 Something like this:
 
@@ -45,7 +45,7 @@ so_on_so_forth==1.0.2
 ![app.py and MyApi.py](https://i.pinimg.com/originals/e8/99/ff/e899ff77f1ecde64bf22175422691e63.jpg?raw=true "app_and_MyApi")
 
 ### Documentation example
-https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to load as heroku sometime sleeps...
+https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to load as heroku sleeps sometimes...
 
 - No configurations needed. Just code you controllers and it will be there at `GET: whathever-your-host-is/basic-deploy-url/swagger` endpoint
 
@@ -106,13 +106,13 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 ### - v0.1.0-05 
 ### - v0.1.8-2
 - Of course it's open source
-- If you don't follow package pattern, it wont happens
-- I just hate OS environments lose all over the project. That's why I made Globals.py, so we can centralize it in there. Unfortnatelly, `globals` module isn't perfect yet. That's my next goal
-- Repository connections are much alike SqlAlchemy native sintax. So, any specific implementation can be written in SqlAlchemy native sintax. Any issue, contact me, so I can fix it.
+- If you don't follow package pattern, it wont happen
+- I just hate OS environments lose all over the project. That's why I made Globals.py, so we can centralize it in there. Unfortunately, `globals` module isn't perfect yet. That's my next goal
+- Repository connections are much alike SqlAlchemy native syntax. So, any specific implementation can be written in SqlAlchemy native syntax. Any issue, contact me, so I can fix it.
 - Same for migrations. Use any SqlAlchemy migrations engine you like. For `python_framework`, a liquibase migration like is being implemented, but won't be release before 2021, july 
-- The auto-serialization stuff is just magic. But it comes with a price: Models and Dtos must have all its attributes initialyzed with None value. I'll fix it by 2021, february
-- Yes, api code/file imports are simplifyed. You can move a service from one package to another without impact on API behaviour. Just make shure it's somewhere inside the `service` package.
-- Unit tests requires instance injection in runtime. I'm implementing a module to handle it, so as its Mocks. It will be release by 2021, february
+- The auto-serialization stuff is just magic. But it comes with a price: Models and Dtos must have all their attributes initialized with None value. I'll fix it by 2021, february
+- Yes, api code/file imports are simplified. You can move a service from one package to another without impact on API behaviour. Just make sure it's somewhere inside the `service` package.
+- Unit tests require instance injection in runtime. I'm implementing a module to handle it, so as its Mocks. It will be released by 2021, february
 - `python_framework` comes with a LogError table by default (an auditory like stuff for api errors or bad behaviours). Contact me if you don't want it, so I'll release a feature to enable it only when it's actually desired
 - Any issues with deploy, contact me so I can fix it
 - I may release further versions. Don't use them before a proper release here
