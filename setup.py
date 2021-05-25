@@ -5,7 +5,7 @@ print('''On linux, run:
 sudo apt install libpq-dev python3-dev
 pip3.9 install --no-cache-dir python-framework --force --upgrade''')
 
-VERSION = '0.1.14'
+VERSION = '0.2.0'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -32,8 +32,7 @@ setup(
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}service',
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}service{OS_SEPARATOR}openapi',
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}service{OS_SEPARATOR}flask',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
+        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource'
     ],
     # data_files = [
     #     (STATIC_PACKAGE_PATH, [
