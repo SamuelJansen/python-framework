@@ -112,9 +112,15 @@ def addGlobalsTo(apiInstance) :
 def initialize(
     rootName,
     refferenceModel,
+    staticPackage = 'static',
+    viewsPackage = 'views'
 ) :
 
-    app = Flask(rootName)
+    app = Flask(
+        rootName,
+        static_folder = staticPackage,
+        template_folder = viewsPackage
+    )
     api = Api(app)
     addGlobalsTo(api)
     OpenApiManager.newDocumentation(api, app)
