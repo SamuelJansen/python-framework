@@ -34,28 +34,28 @@ def updateEnumItem(enumItem, key, value) :
     ReflectionHelper.setAttributeOrMethod(enumItem, key, ENUM_ITEM_CLASS_DICTIONARY.get(type(value))(value))
 
 class EnumItem :
-    def __init__(self, *args, **kwargs) :
+    def __init__(self, *args, **kwargs):
         self.__enumItemMap__ = {}
         self.__enumItemEqMap__ = {}
-        for key, value in kwargs.items() :
+        for key, value in kwargs.items():
             updateEnumItem(self, key, value)
 
-    def __get__(self, obj, objtype=None) :
+    def __get__(self, obj, objtype=None):
         return self if not ReflectionHelper.hasAttributeOrMethod(self, ENUM_VALUE_AS_STRING_KEY) else self.enumValue
 
-    def __str__(self) :
+    def __str__(self):
         return str(ReflectionHelper.getAttributeOrMethod(self, ENUM_VALUE_AS_STRING_KEY, muteLogs=True))
 
-    def __repr__(self) :
+    def __repr__(self):
         return self.__str__()
 
-    def __eq__(self, other) :
-        if isinstance(other, EnumItem) :
+    def __eq__(self, other):
+        if isinstance(other, EnumItem):
             return str(other.__enumItemEqMap__) == str(self.__enumItemEqMap__)
         return self.enumValue == other
 
-    def __ne__(self, other) :
-        if isinstance(other, EnumItem) :
+    def __ne__(self, other):
+        if isinstance(other, EnumItem):
             return str(other.__enumItemEqMap__) != str(self.__enumItemEqMap__)
         return self.enumValue != other
 

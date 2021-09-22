@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Api
+from flask_cors import CORS
 from python_helper import Constant as c
 from python_helper import log, Function, ReflectionHelper, SettingHelper, ObjectHelper, StringHelper
 import globals
@@ -122,6 +123,7 @@ def initialize(
         template_folder = viewsPackage
     )
     api = Api(app)
+    cors = CORS(app)
     addGlobalsTo(api)
     OpenApiManager.newDocumentation(api, app)
     SchedulerManager.addScheduler(api, app)

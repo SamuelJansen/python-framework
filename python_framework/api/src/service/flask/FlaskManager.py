@@ -144,7 +144,7 @@ def runApi(*args, api=None, **kwargs) :
         api = getApi()
     muteLogs(api.app)
     if 'host' not in kwargs and api.host :
-        kwargs['host'] = api.host
+        kwargs['host'] = api.host if not 'localhost' == api.host else '0.0.0.0'
     if 'port' not in kwargs and api.port :
         kwargs['port'] = api.port
     apiUrl = getApiUrl(api)

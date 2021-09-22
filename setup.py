@@ -1,11 +1,19 @@
 from distutils.core import setup
 import os
 
-print('''On linux, run:
+print('''Installation on linux, run:
 sudo apt install libpq-dev python3-dev
-pip3.9 install --no-cache-dir python-framework --force --upgrade''')
+pip3.9 install --no-cache-dir python-framework --force --upgrade
 
-VERSION = '0.2.1'
+Aliases:
+sudo rm /usr/bin/python
+sudo ln -s /usr/local/bin/python3.9 /usr/bin/python
+
+sudo rm /usr/bin/pip
+sudo ln -s /usr/local/bin/pip3.9 /usr/bin/pip
+''')
+
+VERSION = '0.2.2'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -62,9 +70,10 @@ setup(
     keywords = ['flask', 'sqlalchemy', 'open api', 'jwt', 'serializer'],
     install_requires = [
         'gunicorn==20.0.4',
-        'Flask==1.1.2',
+        'Flask==1.1.4', ###- 1.1.2',
         'Flask-RESTful==0.3.8',
         'Flask-JWT-Extended==3.24.1',
+        'Flask-Cors==3.0.9'
         # 'PyJWT==2.0.0' ###- 'PyJWT==1.7.1' for PyJWT 2.0.0 issue ...
         # 'flask-restful-swagger-2==0.35',
         # 'safrs==2.10.4',
@@ -72,7 +81,7 @@ setup(
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
         'globals>=0.3.1',
-        'python_helper>=0.3.2',
+        'python_helper>=0.3.3',
         'Flask-APScheduler==1.12.2',
         'psutil==5.8.0',
         'requests==2.24.0'
