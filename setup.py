@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pip3.9 /usr/bin/pip
 ''')
 
-VERSION = '0.2.3'
+VERSION = '0.2.4'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -72,7 +72,8 @@ setup(
         'gunicorn==20.0.4',
         'Flask==1.1.4', ###- 1.1.2',
         'Flask-RESTful==0.3.8',
-        'Flask-JWT-Extended==3.24.1',
+        # 'Flask-JWT-Extended==3.24.1',
+        'Flask-JWT-Extended==3.25.0',
         'Flask-Cors==3.0.9',
         # 'PyJWT==2.0.0' ###- 'PyJWT==1.7.1' for PyJWT 2.0.0 issue ...
         # 'flask-restful-swagger-2==0.35',
