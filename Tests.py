@@ -9,6 +9,12 @@ TestHelper.run(__file__)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
+#         'GlobalExceptionAnnotationTest.encapsulateItWithGlobalException_withParameters_GlobalException'
+#     ]
+# )
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
 #         'TestApiTest.testing_Client'
 #     ]
 # )

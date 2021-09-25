@@ -8,6 +8,9 @@ from python_helper import Constant as c
 from python_helper import log, Function
 import datetime
 
+from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
+
 BLACK_LIST = set()
 
 KW_JTI = 'jti'
@@ -18,17 +21,19 @@ KW_EXPIRATION = 'exp'
 KW_NFB = 'nbf'
 KW_IAT = 'iat'
 
-
 KW_JWT_SECRET_KEY = 'JWT_SECRET_KEY'
 KW_JWT_BLACKLIST_ENABLED = 'JWT_BLACKLIST_ENABLED'
 
 DOT_SPACE_CAUSE = f'''{c.DOT_SPACE}{c.LOG_CAUSE}'''
 
-@Function
+UNAUTHORIZED_MESSAGE = 'Unauthorized'
+FORBIDDEN_MESSAGE = 'Frobidden'
+
+@EncapsulateItWithGlobalException(message=UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getRawJwt(*arg,**kwargs) :
     return get_raw_jwt(*arg,**kwargs)
 
-@Function
+@EncapsulateItWithGlobalException(message=UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def jwtRequired(*arg,**kwargs) :
     return jwt_required(*arg,**kwargs)
 
@@ -36,11 +41,11 @@ def jwtRequired(*arg,**kwargs) :
 def getJti(*arg,**kwargs) :
     return getRawJwt(*arg,**kwargs)[KW_JTI]
 
-@Function
+@EncapsulateItWithGlobalException(message=FORBIDDEN_MESSAGE, status=HttpStatus.FORBIDDEN)
 def getRole(*arg,**kwargs) :
     return getRawJwt(*arg,**kwargs)[KW_USER_CLAIMS]
 
-@Function
+@EncapsulateItWithGlobalException(message=UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(*arg,**kwargs) :
     return getRawJwt(*arg,**kwargs)[KW_IDENTITY]
 

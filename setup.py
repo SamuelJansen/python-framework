@@ -13,14 +13,11 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pip3.9 /usr/bin/pip
 ''')
 
-VERSION = '0.2.4'
+VERSION = '0.2.5'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
 OS_SEPARATOR = os.path.sep
-# SWAGGER_RELATIVE_PATH = f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource{OS_SEPARATOR}swaggerui'
-# STATIC_PACKAGE_PATH = f'statics{OS_SEPARATOR}{SWAGGER_RELATIVE_PATH}'
-# print(f'[SETUP  ] Static package: "{STATIC_PACKAGE_PATH}"')
 
 setup(
     name = NAME,
@@ -44,20 +41,8 @@ setup(
     ],
     # data_files = [
     #     (STATIC_PACKAGE_PATH, [
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-16x16.png',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}favicon-32x32.png',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}index.template.html',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}oauth2-redirect.html',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-bundle.js.map',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui-standalone-preset.js.map',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.css.map',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}swagger-ui.js.map',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}LICENSE',
-    #         f'{SWAGGER_RELATIVE_PATH}{OS_SEPARATOR}VERSION'
+    #         f'{RELATIVE_PATH}{OS_SEPARATOR}resource_1.extension',
+    #         f'{RELATIVE_PATH}{OS_SEPARATOR}resource_2.extension'
     #     ])
     # ],
     version = VERSION,
@@ -67,22 +52,18 @@ setup(
     author_email = 'samuel.jansenn@gmail.com',
     url = URL,
     download_url = f'{URL}archive/v{VERSION}.tar.gz',
-    keywords = ['flask', 'sqlalchemy', 'open api', 'jwt', 'serializer'],
+    keywords = ['flask', 'sqlalchemy', 'open api', 'jwt', 'serializer', 'scheduler'],
     install_requires = [
         'gunicorn==20.0.4',
         'Flask==1.1.4', ###- 1.1.2',
         'Flask-RESTful==0.3.8',
-        # 'Flask-JWT-Extended==3.24.1',
         'Flask-JWT-Extended==3.25.0',
         'Flask-Cors==3.0.9',
-        # 'PyJWT==2.0.0' ###- 'PyJWT==1.7.1' for PyJWT 2.0.0 issue ...
-        # 'flask-restful-swagger-2==0.35',
-        # 'safrs==2.10.4',
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.3.20',
-        'globals>=0.3.1',
-        'python_helper>=0.3.3',
+        'globals>=0.3.4',
+        'python_helper>=0.3.8',
         'Flask-APScheduler==1.12.2',
         'psutil==5.8.0',
         'requests==2.24.0'

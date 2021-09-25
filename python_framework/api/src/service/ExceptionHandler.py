@@ -1,7 +1,7 @@
 import datetime
 from flask import request
 from flask_jwt_extended.exceptions import NoAuthorizationError, RevokedTokenError
-from jwt import ExpiredSignatureError
+from jwt import ExpiredSignatureError, InvalidSignatureError
 from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
@@ -9,7 +9,7 @@ from python_framework.api.src.model import ErrorLog
 
 DEFAULT_MESSAGE = 'Something bad happened. Please, try again later'
 DEFAULT_STATUS = HttpStatus.INTERNAL_SERVER_ERROR
-DEFAULT_LOG_MESSAGE = c.NOTHING
+DEFAULT_LOG_MESSAGE = 'Log message not present'
 
 DEFAULT_LOG_RESOURCE = c.NOTHING
 DEFAULT_LOG_RESOURCE_METHOD = c.NOTHING
@@ -81,6 +81,7 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
         logMessage = None
         if (isinstance(exception.__class__, NoAuthorizationError) or NoAuthorizationError.__name__ == exception.__class__.__name__ or
             isinstance(exception.__class__, RevokedTokenError) or RevokedTokenError.__name__ == exception.__class__.__name__ or
+            isinstance(exception.__class__, InvalidSignatureError) or InvalidSignatureError.__name__ == exception.__class__.__name__ or
             isinstance(exception.__class__, ExpiredSignatureError) or ExpiredSignatureError.__name__ == exception.__class__.__name__):
             if not message :
                 message = c.NOTHING
