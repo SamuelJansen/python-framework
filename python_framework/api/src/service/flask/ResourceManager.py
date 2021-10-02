@@ -132,13 +132,13 @@ def initialize(
         log.setting(initialize, f'JWT secret: {securityKey}')
     api.jwt = Security.getJwtMannager(app, securityKey)
 
-    args = [api, app, jwt]
+    args = [api, app, api.jwt]
     for resourceType in FlaskManager.KW_RESOURCE_LIST :
         args.append(getResourceList(api, resourceType))
     args.append(refferenceModel)
     addFlaskApiResources(*args)
     api.app = app
-    return api, app, jwt
+    return api, api.app, api.jwt
 
 @Function
 def addControllerListTo(apiInstance, controllerList) :
