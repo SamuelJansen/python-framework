@@ -62,9 +62,11 @@ def attributeIt(modelName) :
 def getManyToMany(sister, brother, refferenceModel) :
     # featureList = relationship(FEATURE, secondary=featureToSampleAssociation, back_populates=attributeIt(f'{__tablename__}{LIST}'))
     # sampleList = relationship(SAMPLE, secondary=featureToSampleAssociation, back_populates=attributeIt(f'{__tablename__}{LIST}'))
-    manySisterToManyBrother = Table(f'{sister}{MANY_TO_MANY}{brother}', refferenceModel.metadata,
-        Column(f'{attributeIt(sister)}{ID}', Integer(), ForeignKey(f'{sister}{c.DOT}{attributeIt(ID)}')),
-        Column(f'{attributeIt(brother)}{ID}', Integer(), ForeignKey(f'{brother}{c.DOT}{attributeIt(ID)}')))
+    manySisterToManyBrother = sap.Table(
+        f'{sister}{sap.MANY_TO_MANY}{brother}', refferenceModel.metadata,
+        sap.Column(f'{sap.attributeIt(sister)}{sap.ID}', sap.Integer(), sap.ForeignKey(f'{sister}{c.DOT}{sap.attributeIt(sap.ID)}'), primary_key=True),
+        sap.Column(f'{sap.attributeIt(brother)}{sap.ID}', sap.Integer(), sap.ForeignKey(f'{brother}{c.DOT}{sap.attributeIt(sap.ID)}'), primary_key=True)
+    )
     sisterList = relationship(sister, secondary=manySisterToManyBrother, back_populates=attributeIt(f'{brother}{LIST}'))
     brotherList = relationship(brother, secondary=manySisterToManyBrother, back_populates=attributeIt(f'{sister}{LIST}'))
     ### sister recieves the brotherList
@@ -147,8 +149,8 @@ class SqlAlchemyProxy:
         self.session = scoped_session(sessionmaker(self.engine)) ###- sessionmaker(bind=self.engine)()
         self.model = model
         self.model.metadata.bind = self.engine
-        self.model.metadata.reflect()
-        
+        # self.model.metadata.reflect()
+
         self.run()
 
     def getNewEngine(self, dialect, echo, connectArgs) :
