@@ -123,14 +123,14 @@ def initialize(
         template_folder = viewsPackage
     )
     api = Api(app)
-    cors = CORS(app)
+    api.cors = CORS(app)
     addGlobalsTo(api)
     OpenApiManager.newDocumentation(api, app)
     SchedulerManager.addScheduler(api, app)
     securityKey = api.globals.getApiSetting('api.security.secret')
     if SettingHelper.LOCAL_ENVIRONMENT == SettingHelper.getActiveEnvironment() :
         log.setting(initialize, f'JWT secret: {securityKey}')
-    jwt = Security.getJwtMannager(app, securityKey)
+    api.jwt = Security.getJwtMannager(app, securityKey)
 
     args = [api, app, jwt]
     for resourceType in FlaskManager.KW_RESOURCE_LIST :

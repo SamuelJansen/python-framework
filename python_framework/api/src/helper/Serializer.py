@@ -80,6 +80,24 @@ def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
     return instance
 
 @Function
+def pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDictionary):
+    args = []
+    kwargs = fromJsonToDictionary.copy()
+    objectInstance = None
+    args = []
+    kwargs = fromJsonToDictionary.copy()
+    kwargs.pop('registry') ###- this particular job from SqlAlchemy was a big shity one...
+    objectInstance = None
+    for key,value in fromJsonToDictionary.items() :
+        try :
+            objectInstance = toClass(*args,**kwargs)
+            break
+        except Exception as exception :
+            args.append(value)
+            kwargs.pop(key)
+    return objectInstance
+
+@Function
 def serializeIt(fromJson, toClass, fatherClass=None) :
     # print(f'fromJson: {fromJson}, toClass: {toClass}, fatherClass: {fatherClass}')
     if ObjectHelper.isDictionary(fromJson) and ObjectHelper.isDictionaryClass(toClass) :
@@ -121,20 +139,25 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
             fromJsonToDictionary[attributeName] = jsonAttributeValue
         # if jsonAttributeValue :
         #     ReflectionHelper.setAttributeOrMethod(fromObject, attributeName, jsonAttributeValue)
-    args = []
-    kwargs = fromJsonToDictionary.copy()
-    # print(f'fromJsonToDictionary = {fromJsonToDictionary}')
-    objectInstance = None
-    for key,value in fromJsonToDictionary.items() :
-        # print(f'*args{args},**kwargs{kwargs}')
-        try :
-            objectInstance = toClass(*args,**kwargs)
-            break
-        except :
-            args.append(value)
-            del kwargs[key]
-        # print(f'args = {args}, kwargs = {kwargs}')
-    # print(f'args = {args}, kwargs = {kwargs}')
+
+    if isModelClass(toClass):
+        objectInstance = pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDictionary)
+    else:
+        args = []
+        kwargs = fromJsonToDictionary.copy()
+        # print(f'fromJsonToDictionary = {fromJsonToDictionary}')
+        objectInstance = None
+        for key,value in fromJsonToDictionary.items() :
+            # print(f'*args{args},**kwargs{kwargs}')
+            try :
+                objectInstance = toClass(*args,**kwargs)
+                break
+            except Exception as exception :
+                # print(exception)
+                args.append(value)
+                # del kwargs[key]
+                kwargs.pop(key)
+
     if ObjectHelper.isNone(objectInstance) :
         raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class')
     # print(objectInstance)

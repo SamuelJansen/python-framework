@@ -147,7 +147,8 @@ class SqlAlchemyProxy:
         self.session = scoped_session(sessionmaker(self.engine)) ###- sessionmaker(bind=self.engine)()
         self.model = model
         self.model.metadata.bind = self.engine
-
+        self.model.metadata.reflect()
+        
         self.run()
 
     def getNewEngine(self, dialect, echo, connectArgs) :
