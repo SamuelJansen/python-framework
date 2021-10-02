@@ -62,10 +62,10 @@ def attributeIt(modelName) :
 def getManyToMany(sister, brother, refferenceModel) :
     # featureList = relationship(FEATURE, secondary=featureToSampleAssociation, back_populates=attributeIt(f'{__tablename__}{LIST}'))
     # sampleList = relationship(SAMPLE, secondary=featureToSampleAssociation, back_populates=attributeIt(f'{__tablename__}{LIST}'))
-    manySisterToManyBrother = sap.Table(
-        f'{sister}{sap.MANY_TO_MANY}{brother}', refferenceModel.metadata,
-        sap.Column(f'{sap.attributeIt(sister)}{sap.ID}', sap.Integer(), sap.ForeignKey(f'{sister}{c.DOT}{sap.attributeIt(sap.ID)}'), primary_key=True),
-        sap.Column(f'{sap.attributeIt(brother)}{sap.ID}', sap.Integer(), sap.ForeignKey(f'{brother}{c.DOT}{sap.attributeIt(sap.ID)}'), primary_key=True)
+    manySisterToManyBrother = Table(
+        f'{sister}{MANY_TO_MANY}{brother}', refferenceModel.metadata,
+        Column(f'{attributeIt(sister)}{ID}', Integer(), ForeignKey(f'{sister}{c.DOT}{attributeIt(ID)}'), primary_key=True),
+        Column(f'{attributeIt(brother)}{ID}', Integer(), ForeignKey(f'{brother}{c.DOT}{attributeIt(ID)}'), primary_key=True)
     )
     sisterList = relationship(sister, secondary=manySisterToManyBrother, back_populates=attributeIt(f'{brother}{LIST}'))
     brotherList = relationship(brother, secondary=manySisterToManyBrother, back_populates=attributeIt(f'{sister}{LIST}'))
@@ -154,9 +154,9 @@ class SqlAlchemyProxy:
         self.run()
 
     def getNewEngine(self, dialect, echo, connectArgs) :
-        # MODEL = MODEL = sap.getNewModel()
-        # schemaFromEnvironment = EnvironmentHelper.get(sap.SqlAlchemyProxy.ENV_DATABASE_SCHEMA)
-        # schemaProperty = globalsInstance.getSetting(f'{sap.SqlAlchemyProxy.KW_API}{c.DOT}{sap.SqlAlchemyProxy.KW_DATABASE}{c.DOT}{sap.SqlAlchemyProxy.KW_REPOSITORY_SCHEMA}')
+        # MODEL = MODEL = getNewModel()
+        # schemaFromEnvironment = EnvironmentHelper.get(SqlAlchemyProxy.ENV_DATABASE_SCHEMA)
+        # schemaProperty = globalsInstance.getSetting(f'{SqlAlchemyProxy.KW_API}{c.DOT}{SqlAlchemyProxy.KW_DATABASE}{c.DOT}{SqlAlchemyProxy.KW_REPOSITORY_SCHEMA}')
         # if ObjectHelper.isNotNone(schemaFromEnvironment) :
         #     MODEL.metadata.schema = schemaFromEnvironment
         # elif ObjectHelper.isNotNone(schemaProperty) :
