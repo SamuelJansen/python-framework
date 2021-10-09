@@ -241,7 +241,7 @@ def publicControllerMethod(
                 'bodyRequest',
                 requestBodyAsJson,
                 condition = logRequest,
-                logLevel = log.DEBUG
+                logLevel = log.INFO
             )
         if Serializer.requestBodyIsPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
@@ -459,7 +459,7 @@ def ControllerMethod(
                     'bodyResponse',
                     json.loads(Serializer.jsonifyIt(controllerResponse)),
                     condition = logResponse,
-                    logLevel = log.DEBUG
+                    logLevel = log.INFO
                 )
             return jsonifyResponse(controllerResponse, produces, status)
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
@@ -539,7 +539,7 @@ def getCompleteResponseByException(
         else :
             log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=muteStacktraceOnBusinessRuleException)
     except Exception as logErrorMessageException :
-        log.log(getCompleteResponseByException, 'Error logging exception at controller', exception=logErrorMessageException)
+        log.debug(getCompleteResponseByException, 'Error logging exception at controller', exception=logErrorMessageException)
         log.error(log.error, 'Error processing request', exception)
     return completeResponse
 
