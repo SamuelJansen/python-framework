@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pip3.9 /usr/bin/pip
 ''')
 
-VERSION = '0.2.14'
+VERSION = '0.2.15'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -58,6 +58,7 @@ setup(
         'Flask==1.1.4', ###- 1.1.2',
         'Flask-RESTful==0.3.8',
         'Flask-JWT-Extended==3.25.0',
+        'PyJWT==1.7.1',
         'Flask-Cors==3.0.9',
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary==2.8.6',
