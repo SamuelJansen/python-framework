@@ -11,8 +11,8 @@ DEFAULT_MESSAGE = 'Something bad happened. Please, try again later'
 DEFAULT_STATUS = HttpStatus.INTERNAL_SERVER_ERROR
 DEFAULT_LOG_MESSAGE = 'Log message not present'
 
-DEFAULT_LOG_RESOURCE = c.NOTHING
-DEFAULT_LOG_RESOURCE_METHOD = c.NOTHING
+DEFAULT_LOG_RESOURCE = 'ResourceNotInformed'
+DEFAULT_LOG_RESOURCE_METHOD = 'resourceMethodNotInformed'
 
 DOT_SPACE_CAUSE = f'''{c.DOT_SPACE}{c.LOG_CAUSE}'''
 
@@ -38,12 +38,12 @@ class GlobalException(Exception):
     ):
         self.timeStamp = datetime.datetime.now()
         self.status = status if ObjectHelper.isNotNone(status) else DEFAULT_STATUS
-        self.message = message if ObjectHelper.isNotEmpty(message) else DEFAULT_MESSAGE if 500 <= self.status else self.status.enumName
+        self.message = message if ObjectHelper.isNotEmpty(message) and StringHelper.isNotBlank(message) else DEFAULT_MESSAGE if 500 <= self.status else self.status.enumName
         self.verb = safellyGetVerb()
         self.url = safellyGetUrl()
-        self.logMessage = logMessage if logMessage else DEFAULT_LOG_MESSAGE
-        self.logResource = logResource if logResource else DEFAULT_LOG_RESOURCE
-        self.logResourceMethod = logResourceMethod if logResourceMethod else DEFAULT_LOG_RESOURCE_METHOD
+        self.logMessage = logMessage if ObjectHelper.isNotEmpty(logMessage) and StringHelper.isNotBlank(logMessage) else DEFAULT_LOG_MESSAGE
+        self.logResource = logResource if ObjectHelper.isNotEmpty(logResource) else DEFAULT_LOG_RESOURCE
+        self.logResourceMethod = logResourceMethod if ObjectHelper.isNotEmpty(logResourceMethod) else DEFAULT_LOG_RESOURCE_METHOD
         self.logPayload = self.getRequestBody()
 
     def __str__(self):
@@ -73,9 +73,9 @@ def validateArgs(self, method, objectRequest, expecteObjectClass):
         raise GlobalException(logMessage = f'Failed to validate args of {method.__name__} method{DOT_SPACE_CAUSE}{str(exception)}')
 
 @Function
-def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, apiInstance) :
+def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, api = None, logMessage: str = None) :
     if not (isinstance(exception.__class__, GlobalException) or GlobalException.__name__ == exception.__class__.__name__) :
-        log.warning(handleLogErrorException, f'Failed to excecute {resourceInstanceMethod.__name__} method due to {exception.__class__.__name__} exception', exception=exception)
+        log.debug(handleLogErrorException, f'Failed to excecute {resourceInstanceMethod.__name__} method due to {exception.__class__.__name__} exception', exception=exception)
         message = None
         status = None
         logMessage = None
@@ -83,13 +83,25 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
             isinstance(exception.__class__, RevokedTokenError) or RevokedTokenError.__name__ == exception.__class__.__name__ or
             isinstance(exception.__class__, InvalidSignatureError) or InvalidSignatureError.__name__ == exception.__class__.__name__ or
             isinstance(exception.__class__, ExpiredSignatureError) or ExpiredSignatureError.__name__ == exception.__class__.__name__):
-            if not message :
-                message = c.NOTHING
-            message += str(exception)
+            message = 'Unauthorized' if ObjectHelper.isNone(exception) or StringHelper.isBlank(str(exception)) else str(exception)
             status = HttpStatus.UNAUTHORIZED
-            if ObjectHelper.isNotEmpty(str(exception)) :
+        if ObjectHelper.isNotNone(exception) and StringHelper.isNotBlank(str(exception)) :
+            if ObjectHelper.isNone(logMessage):
                 logMessage = str(exception)
-        exception = GlobalException(message=message, logMessage=logMessage, logResource=resourceInstance, logResourceMethod=resourceInstanceMethod, status=status)
+            else:
+                logMessage = f'{logMessage}{c.DOT_SPACE_CAUSE}{str(exception)}'
+        else:
+            if ObjectHelper.isNone(logMessage):
+                logMessage = DEFAULT_LOG_MESSAGE
+            else:
+                logMessage = f'{logMessage}{c.DOT_SPACE_CAUSE}{str(exception)}'
+        exception = GlobalException(
+            message = message,
+            logMessage = logMessage,
+            logResource = resourceInstance,
+            logResourceMethod = resourceInstanceMethod,
+            status = status
+        )
     try :
         if not exception.logResource or c.NOTHING == exception.logResource or not resourceInstance == exception.logResource :
             exception.logResource = resourceInstance

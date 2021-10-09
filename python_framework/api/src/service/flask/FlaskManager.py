@@ -506,12 +506,23 @@ def SimpleClientMethod(requestClass=None):
         return innerResourceInstanceMethod
     return innerMethodWrapper
 
-def getGlobalException(exception, resourceInstance, resourceInstanceMethod):
-    apiInstance = getNullableApi()
-    return ExceptionHandler.handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, apiInstance)
+def getGlobalException(
+    exception,
+    resourceInstance,
+    resourceInstanceMethod,
+    api: flask_restful.Api = None,
+    logMessage: str = None
+):
+    return ExceptionHandler.handleLogErrorException(
+        exception,
+        resourceInstance,
+        resourceInstanceMethod,
+        api = api if ObjectHelper.isNotNone(api) else getNullableApi(),
+        logMessage = logMessage
+    )
 
-def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod) :
-    raise getGlobalException(exception, resourceInstance, resourceInstanceMethod)
+def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod, logMessage: str = None) :
+    raise getGlobalException(exception, resourceInstance, resourceInstanceMethod, logMessage=logMessage)
 
 def getCompleteResponseByException(
     exception,
