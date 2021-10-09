@@ -3,7 +3,7 @@ from flask import request
 from flask_jwt_extended.exceptions import NoAuthorizationError, RevokedTokenError
 from jwt import ExpiredSignatureError, InvalidSignatureError
 from python_helper import Constant as c
-from python_helper import log, Function, ObjectHelper
+from python_helper import log, Function, ObjectHelper, StringHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.model import ErrorLog
 
