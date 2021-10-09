@@ -109,6 +109,11 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
             exception.logResourceMethod = resourceInstanceMethod
         httpErrorLog = ErrorLog.ErrorLog()
         httpErrorLog.override(exception)
+        if ObjectHelper.isNone(api):
+            from python_framework import FlaskManager
+            apiInstance = FlaskManager.getApi()
+        else:
+            apiInstance = api
         apiInstance.repository.saveAndCommit(httpErrorLog)
     except Exception as errorLogException :
         log.warning(resourceInstance.__class__, f'Failed to persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
