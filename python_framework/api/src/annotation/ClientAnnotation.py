@@ -7,11 +7,11 @@ from python_framework.api.src.helper import Serializer
 
 @Function
 def Client(url=c.SLASH) :
-    controllerUrl = url
+    clientUrl = url
     def Wrapper(OuterClass, *args, **kwargs):
         log.debug(Client,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
-            url = controllerUrl
+            url = clientUrl
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 apiInstance = FlaskManager.getApi()
@@ -34,16 +34,16 @@ def ClientMethod(
     logRequest = False,
     logResponse = False
 ):
-    controllerMethodUrl = url
-    controllerMethodRequestHeaderClass = requestHeaderClass
-    controllerMethodRequestParamClass = requestParamClass
-    controllerMethodRequestClass = requestClass
-    controllerMethodResponseClass = responseClass
-    controllerMethodRoleRequired = roleRequired
-    controllerMethodProduces = produces
-    controllerMethodConsumes = consumes
-    controllerMethodLogRequest = logRequest
-    controllerMethodLogResponse = logResponse
+    clientMethodUrl = url
+    clientMethodRequestHeaderClass = requestHeaderClass
+    clientMethodRequestParamClass = requestParamClass
+    clientMethodRequestClass = requestClass
+    clientMethodResponseClass = responseClass
+    clientMethodRoleRequired = roleRequired
+    clientMethodProduces = produces
+    clientMethodConsumes = consumes
+    clientMethodLogRequest = logRequest
+    clientMethodLogResponse = logResponse
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
         log.debug(ClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs) :
@@ -55,7 +55,7 @@ def ClientMethod(
                     'bodyRequest',
                     json.loads(Serializer.jsonifyIt(args[1:])),
                     condition = logRequest,
-                    logLevel = log.DEBUG
+                    logLevel = log.INFO
                 )
             try :
                 FlaskManager.validateKwargs(
@@ -69,28 +69,28 @@ def ClientMethod(
                 completeResponse = resourceInstanceMethod(*args,**kwargs)
                 FlaskManager.validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
-                log.warning(innerResourceInstanceMethod, 'Not posssible to complete request', exception=exception)
+                log.debug(innerResourceInstanceMethod, 'Not posssible to complete request', exception=exception)
                 raise exception
-            controllerResponse = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : completeResponse[1].enumName}
+            clientResponse = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : completeResponse[1].enumName}
             if logResponse :
                 log.prettyJson(
                     resourceInstanceMethod,
                     'bodyResponse',
-                    json.loads(Serializer.jsonifyIt(controllerResponse)),
+                    json.loads(Serializer.jsonifyIt(clientResponse)),
                     condition = logResponse,
-                    logLevel = log.DEBUG
+                    logLevel = log.INFO
                 )
             return completeResponse[0]
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
-        innerResourceInstanceMethod.url = controllerMethodUrl
-        innerResourceInstanceMethod.requestHeaderClass = controllerMethodRequestHeaderClass
-        innerResourceInstanceMethod.requestParamClass = controllerMethodRequestParamClass
-        innerResourceInstanceMethod.requestClass = controllerMethodRequestClass
-        innerResourceInstanceMethod.responseClass = controllerMethodResponseClass
-        innerResourceInstanceMethod.roleRequired = controllerMethodRoleRequired
-        innerResourceInstanceMethod.produces = controllerMethodProduces
-        innerResourceInstanceMethod.consumes = controllerMethodConsumes
-        innerResourceInstanceMethod.logRequest = controllerMethodLogRequest
-        innerResourceInstanceMethod.logResponse = controllerMethodLogResponse
+        innerResourceInstanceMethod.url = clientMethodUrl
+        innerResourceInstanceMethod.requestHeaderClass = clientMethodRequestHeaderClass
+        innerResourceInstanceMethod.requestParamClass = clientMethodRequestParamClass
+        innerResourceInstanceMethod.requestClass = clientMethodRequestClass
+        innerResourceInstanceMethod.responseClass = clientMethodResponseClass
+        innerResourceInstanceMethod.roleRequired = clientMethodRoleRequired
+        innerResourceInstanceMethod.produces = clientMethodProduces
+        innerResourceInstanceMethod.consumes = clientMethodConsumes
+        innerResourceInstanceMethod.logRequest = clientMethodLogRequest
+        innerResourceInstanceMethod.logResponse = clientMethodLogResponse
         return innerResourceInstanceMethod
     return innerMethodWrapper
