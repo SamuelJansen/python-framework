@@ -208,7 +208,7 @@ def securedControllerMethod(
     logRequest
 ) :
     if not Security.getRole() in roleRequired :
-        raise GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDEN)
+        raise GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDDEN)
     return publicControllerMethod(
         args,
         kwargs,
@@ -510,19 +510,17 @@ def getGlobalException(
     exception,
     resourceInstance,
     resourceInstanceMethod,
-    api: flask_restful.Api = None,
-    logMessage: str = None
+    api: flask_restful.Api = None
 ):
     return ExceptionHandler.handleLogErrorException(
         exception,
         resourceInstance,
         resourceInstanceMethod,
-        api = api if ObjectHelper.isNotNone(api) else getNullableApi(),
-        logMessage = logMessage
+        api = api if ObjectHelper.isNotNone(api) else getNullableApi()
     )
 
-def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod, logMessage: str = None) :
-    raise getGlobalException(exception, resourceInstance, resourceInstanceMethod, logMessage=logMessage)
+def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod) :
+    raise getGlobalException(exception, resourceInstance, resourceInstanceMethod)
 
 def getCompleteResponseByException(
     exception,
@@ -531,7 +529,7 @@ def getCompleteResponseByException(
     muteStacktraceOnBusinessRuleException
 ) :
     exception = getGlobalException(exception, resourceInstance, resourceInstanceMethod)
-    completeResponse = [{'message':exception.message, 'timestamp':str(exception.timeStamp)},exception.status]
+    completeResponse = [{'message':exception.message, 'timestamp':str(exception.timeStamp)}, exception.status]
     try :
         logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request'
         if HttpStatus.INTERNAL_SERVER_ERROR <= exception.status :
