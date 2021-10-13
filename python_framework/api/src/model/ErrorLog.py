@@ -18,7 +18,7 @@ class ErrorLog(MODEL):
     __tablename__ = ERROR_LOG
 
     id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
-    status = sap.Column(sap.Integer(), default=DEFAULT_STATUS.value)
+    status = sap.Column(sap.Integer(), default=DEFAULT_STATUS.enumValue)
     verb = sap.Column(sap.String(MAX_VERB_SIZE))
     url = sap.Column(sap.String(MAX_URL_SIZE))
     message = sap.Column(sap.String(MAX_MESSAGE_SIZE))
@@ -41,7 +41,7 @@ class ErrorLog(MODEL):
         timeStamp = None
     ):
         self.id = id
-        self.status = HttpStatus.map(ConverterStatic.getValueOrDefault(status, DEFAULT_STATUS)).value
+        self.status = HttpStatus.map(ConverterStatic.getValueOrDefault(status, DEFAULT_STATUS)).enumValue
         self.verb = str(verb)[:MAX_VERB_SIZE-1]
         self.url = str(url)[:MAX_URL_SIZE-1]
         self.message = str(message)[:MAX_MESSAGE_SIZE-1]
@@ -52,7 +52,7 @@ class ErrorLog(MODEL):
         self.timeStamp = timeStamp
 
     def override(self, globalException):
-        self.status = HttpStatus.map(ConverterStatic.getValueOrDefault(globalException.status, DEFAULT_STATUS)).value
+        self.status = HttpStatus.map(ConverterStatic.getValueOrDefault(globalException.enumValue, DEFAULT_STATUS)).enumValue
         self.verb = str(globalException.verb)[:MAX_VERB_SIZE-1]
         self.url = str(globalException.url)[:MAX_URL_SIZE-1]
         self.message = str(globalException.message)[:MAX_MESSAGE_SIZE-1]

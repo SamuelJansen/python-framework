@@ -9,6 +9,12 @@ TestHelper.run(__file__)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
+#         'EnumAnnotationTest.Enum_comparing'
+#     ]
+# )
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
 #         'GlobalExceptionAnnotationTest.encapsulateItWithGlobalException_withParameters_GlobalException'
 #     ]
 # )
@@ -54,12 +60,6 @@ TestHelper.run(__file__)
 #     __file__,
 #     runOnly = [
 #         'SerializerTest.convertFromJsonToObject_whenThereAreEnums'
-#     ]
-# )
-# TestHelper.run(
-#     __file__,
-#     runOnly = [
-#         'EnumAnnotationTest.Enum_whenHaveMoreThanOneInnerValue'
 #     ]
 # )
 

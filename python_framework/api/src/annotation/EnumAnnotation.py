@@ -59,6 +59,22 @@ class EnumItem :
             return str(other.__enumItemEqMap__) != str(self.__enumItemEqMap__)
         return self.enumValue != other
 
+    def __lt__(self, other):
+        if isinstance(other, EnumItem) and not isinstance(self.enumValue, EnumItem):
+            return self.enumValue < other.enumValue
+        return self < other
+
+    def __gt__(self, other):
+        if isinstance(other, EnumItem) and not isinstance(self.enumValue, EnumItem):
+            return self.enumValue > other.enumValue
+
+    def __le__(self, other):
+        return self.__eq__(other) or self.__lt__(other)
+
+    def __ge__(self, other):
+        return self.__eq__(other) or self.__gt__(other)
+
+
 ENUM_ITEM_CLASS_DICTIONARY = {
     str : EnumItemStr,
     EnumItemStr : EnumItemStr,

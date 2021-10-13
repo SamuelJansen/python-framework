@@ -610,3 +610,37 @@ def Enum_strInOutput() :
     assert str(type(b[0])) == '''<class 'python_framework.api.src.annotation.EnumAnnotation.EnumItemStr'>'''
     # print(MY_THIRD_ENUM_TEST)
     # print(type(MY_THIRD_ENUM_TEST))
+
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **FULL_LOG_HELPER_SETTINGS
+    }
+)
+def Enum_comparing() :
+    # arrange, act and assert
+    assert HttpStatus.OK < HttpStatus.CREATED
+    assert not HttpStatus.CREATED < HttpStatus.OK
+    assert not HttpStatus.OK > HttpStatus.CREATED
+    assert HttpStatus.CREATED > HttpStatus.OK
+    assert HttpStatus.OK <= HttpStatus.CREATED
+    assert not HttpStatus.CREATED <= HttpStatus.OK
+    assert not HttpStatus.OK >= HttpStatus.CREATED
+    assert HttpStatus.CREATED >= HttpStatus.OK
+
+    assert 200 < HttpStatus.CREATED
+    assert not 201 < HttpStatus.OK
+    assert not 200 > HttpStatus.CREATED
+    assert 201 > HttpStatus.OK
+    assert 200 <= HttpStatus.CREATED
+    assert not 201 <= HttpStatus.OK
+    assert not 200 >= HttpStatus.CREATED
+    assert 201 >= HttpStatus.OK
+
+    assert HttpStatus.OK < 201
+    assert not HttpStatus.CREATED < 200
+    assert not HttpStatus.OK > 201
+    assert HttpStatus.CREATED > 200
+    assert HttpStatus.OK <= 201
+    assert not HttpStatus.CREATED <= 200
+    assert not HttpStatus.OK >= 201
+    assert HttpStatus.CREATED >= 200
