@@ -194,7 +194,7 @@ def validateBodyAsJson(requestBodyAsJson, requestClass) :
         if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)) :
             raise GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
 
-@EncapsulateItWithGlobalException(message=UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=Security.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 @Security.jwtRequired
 def securedControllerMethod(
     args,
