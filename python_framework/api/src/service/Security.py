@@ -24,8 +24,6 @@ KW_IAT = 'iat'
 KW_JWT_SECRET_KEY = 'JWT_SECRET_KEY'
 KW_JWT_BLACKLIST_ENABLED = 'JWT_BLACKLIST_ENABLED'
 
-DOT_SPACE_CAUSE = f'''{c.DOT_SPACE}{c.LOG_CAUSE}'''
-
 UNAUTHORIZED_MESSAGE = 'Unauthorized'
 FORBIDDEN_MESSAGE = 'Frobidden'
 
@@ -37,7 +35,7 @@ def getRawJwt(*arg,**kwargs) :
 def jwtRequired(*arg,**kwargs) :
     return jwt_required(*arg,**kwargs)
 
-@Function
+@EncapsulateItWithGlobalException(message=UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJti(*arg,**kwargs) :
     return getRawJwt(*arg,**kwargs)[KW_JTI]
 
@@ -56,7 +54,7 @@ def addUserToBlackList() :
 @Function
 def getJwtMannager(appInstance, jwtSecret) :
     if not jwtSecret :
-        log.warning(JWTManager, f'Not possible to instanciate jwtManager{DOT_SPACE_CAUSE}Missing jwt secret')
+        log.warning(JWTManager, f'Not possible to instanciate jwtManager{c.DOT_SPACE_CAUSE}Missing jwt secret')
     else :
         jwtMannager = JWTManager(appInstance)
         appInstance.config[KW_JWT_SECRET_KEY] = jwtSecret
@@ -73,7 +71,7 @@ def addJwt(jwtInstance) :
     def invalidAccess() :
         return {'message': 'Access denied'}, HttpStatus.UNAUTHORIZED
 
-@Function
+@EncapsulateItWithGlobalException(message=UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(user, deltaMinutes=None) :
     ###- datetime.datetime.utcnow()
     if deltaMinutes :

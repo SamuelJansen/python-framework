@@ -12,12 +12,12 @@ def EncapsulateItWithGlobalException(message=DEFAULT_MESSAGE, status=HttpStatus.
             try :
                 functionReturn = function(*args,**kwargs)
             except Exception as exception :
-                safeLogMessage = str(exception) if StringHelper.isNotBlank(str(exception)) else LOG_MESSAGE_NOT_PRESENT
-                isGlobalException = isinstance(exception, GlobalException)
-                logMessage = safeLogMessage if not isGlobalException else f'{exception.message} with status {HttpStatus.map(exception.status).enumName}{c.DOT_SPACE_CAUSE}{exception.logMessage}'
+                if isinstance(exception, GlobalException):
+                    raise exception
+                logMessage = str(exception) if StringHelper.isNotBlank(str(exception)) else LOG_MESSAGE_NOT_PRESENT
                 functionName = ReflectionHelper.getName(function, typeName=c.TYPE_FUNCTION)
                 log.wraper(EncapsulateItWithGlobalException, f'''Failed to execute "{functionName}(args={args}, kwargs={kwargs})" {c.TYPE_FUNCTION} call''', exception)
-                raise GlobalException(message=message, logMessage=logMessage, logResource=ReflectionHelper.getParentClass(function), logResourceMethod=function, status=status)
+                raise GlobalException(message=message, logMessage=logMessage, logResource=ReflectionHelper.getParentClass(function), logResourceMethod=function, status=HttpStatus.map(status))
             return functionReturn
         ReflectionHelper.overrideSignatures(wrapedFunction, function)
         return wrapedFunction

@@ -208,7 +208,11 @@ def securedControllerMethod(
     logRequest
 ) :
     if not Security.getRole() in roleRequired :
-        raise GlobalException(message='Role not allowed', logMessage=f'''Role {Security.getRole()} trying to access denied resourse''', status=HttpStatus.FORBIDDEN)
+        raise GlobalException(
+            message = 'Role not allowed', 
+            logMessage = f'''Role {Security.getRole()} trying to access denied resourse''',
+            status = HttpStatus.FORBIDDEN
+        )
     return publicControllerMethod(
         args,
         kwargs,
