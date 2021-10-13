@@ -276,6 +276,10 @@ def python_framework_status() :
     # assert
     assert 200 == HttpStatus.OK
     assert 'UP' == ActuatorHealthStatus.UP
+    assert 200 == HttpStatus.map(HttpStatus.OK)
+    assert 200 == HttpStatus.map(200)
+    assert HttpStatus.OK == HttpStatus.map(HttpStatus.OK)
+    assert HttpStatus.OK == HttpStatus.map(200)
 
 @Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,

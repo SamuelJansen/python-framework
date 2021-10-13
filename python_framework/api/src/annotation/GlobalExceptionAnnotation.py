@@ -7,6 +7,7 @@ from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 
 @Function
 def EncapsulateItWithGlobalException(message=DEFAULT_MESSAGE, status=HttpStatus.INTERNAL_SERVER_ERROR) :
+    encapsulateItWithGlobalExceptionStatus = status
     def wrapper(function,*args,**kwargs) :
         log.debug(wrapper, f'Wrapping {function} function with (*{args} args and **{kwargs} kwargs)')
         def wrapedFunction(*args,**kwargs) :
@@ -23,7 +24,7 @@ def EncapsulateItWithGlobalException(message=DEFAULT_MESSAGE, status=HttpStatus.
                     logMessage=logMessage,
                     logResource=ReflectionHelper.getParentClass(function),
                     logResourceMethod=function,
-                    status=HttpStatus.map(status)
+                    status=HttpStatus.map(encapsulateItWithGlobalExceptionStatus)
                 )
             return functionReturn
         ReflectionHelper.overrideSignatures(wrapedFunction, function)
