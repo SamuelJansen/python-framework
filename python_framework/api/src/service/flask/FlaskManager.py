@@ -10,6 +10,7 @@ from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.service import Security
 from python_framework.api.src.service.openapi import OpenApiManager
 from python_framework.api.src.service import SchedulerManager
+from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
 import globals
 import json
 
@@ -193,6 +194,7 @@ def validateBodyAsJson(requestBodyAsJson, requestClass) :
         if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)) :
             raise GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
 
+@EncapsulateItWithGlobalException(message=UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 @Security.jwtRequired
 def securedControllerMethod(
     args,
