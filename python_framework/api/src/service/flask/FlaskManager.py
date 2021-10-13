@@ -265,7 +265,7 @@ def addToKwargs(key, givenClass, valuesAsDictionary, kwargs) :
 
 @Function
 def jsonifyResponse(response, contentType, status) :
-    return Response(Serializer.jsonifyIt(response),  mimetype=contentType, status=status)
+    return Response(Serializer.jsonifyIt(response),  mimetype=contentType, status=HttpStatus.map(status).enumValue)
 
 @Function
 def getArgsWithSerializerReturnAppended(args, argument) :

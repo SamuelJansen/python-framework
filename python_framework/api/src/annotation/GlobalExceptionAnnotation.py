@@ -24,7 +24,7 @@ def EncapsulateItWithGlobalException(message=DEFAULT_MESSAGE, status=HttpStatus.
                     logMessage=logMessage,
                     logResource=ReflectionHelper.getParentClass(function),
                     logResourceMethod=function,
-                    status=HttpStatus.map(encapsulateItWithGlobalExceptionStatus)
+                    status=HttpStatus.map(encapsulateItWithGlobalExceptionStatus).enumValue
                 )
             return functionReturn
         ReflectionHelper.overrideSignatures(wrapedFunction, function)

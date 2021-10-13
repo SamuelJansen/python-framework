@@ -37,7 +37,7 @@ class GlobalException(Exception):
         logResourceMethod = None
     ):
         self.timeStamp = datetime.datetime.now()
-        self.status = DEFAULT_STATUS if ObjectHelper.isNone(status) else status
+        self.status = HttpStatus.map(DEFAULT_STATUS if ObjectHelper.isNone(status) else status).enumValue
         self.message = message if ObjectHelper.isNotEmpty(message) and StringHelper.isNotBlank(message) else DEFAULT_MESSAGE if 500 <= self.status else self.status.enumName
         self.verb = safellyGetVerb()
         self.url = safellyGetUrl()
