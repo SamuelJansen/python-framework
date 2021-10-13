@@ -1,5 +1,5 @@
 import json
-from python_helper import log, Test, RandomHelper, ReflectionHelper, ObjectHelper
+from python_helper import log, Test, RandomHelper, ReflectionHelper, ObjectHelper, StringHelper
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service import SqlAlchemyProxy as sap
 from MyDto import MyDto
@@ -334,9 +334,10 @@ def fromDtoToModel() :
         },
         Serializer.getObjectAsDictionary(toAssert),
         ignoreKeyList = [
-            'timedelta'
+            'timedelta',
+            'registry'
         ]
-    )
+    ), StringHelper.prettyPython(Serializer.getObjectAsDictionary(toAssert))
     assert ObjectHelper.isNotEmpty(listToAssert)
     assert ObjectHelper.equals(
         [
@@ -365,7 +366,8 @@ def fromDtoToModel() :
         ],
         Serializer.getObjectAsDictionary(listToAssert),
         ignoreKeyList = [
-            'timedelta'
+            'timedelta',
+            'registry'
         ]
     )
 
@@ -435,7 +437,7 @@ def jsonifyIt() :
     myGenerator = generatorFunction()
     assert myGenerator == Serializer.jsonifyIt(myGenerator)
     assert '{"myAttribute": null, "myNeutralAttribute": "someString"}' == Serializer.jsonifyIt(MyClass())
-    assert '{"id": null}' == Serializer.jsonifyIt(MyEntityClass())
+    assert ObjectHelper.equals('{"id": null}', Serializer.jsonifyIt(MyEntityClass()), ignoreKeyList=['registry'])
 
     father = Father()
     child = Child()

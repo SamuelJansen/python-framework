@@ -10,6 +10,10 @@ NOT_SERIALIZABLE_CLASS_NAME_LIST = [
     ObjectHelper.UNKNOWN_OBJECT_CLASS_NAME
 ]
 
+
+SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE = 'registry'
+
+
 UTF8_ENCODE = 'utf8'
 
 EXPAND_ALL_FIELDS = 'EXPAND_ALL_FIELDS'
@@ -86,7 +90,8 @@ def pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDict
     objectInstance = None
     args = []
     kwargs = fromJsonToDictionary.copy()
-    kwargs.pop('registry') ###- this particular job from SqlAlchemy was a big shity one...
+    if SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE in kwargs:
+        kwargs.pop(SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE) ###- this particular job from SqlAlchemy was a big shity one...
     objectInstance = None
     for key,value in fromJsonToDictionary.items() :
         try :
@@ -96,6 +101,11 @@ def pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDict
             args.append(value)
             kwargs.pop(key)
     return objectInstance
+
+@Function
+def getAttributeNameList_andPleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(instanceClass):
+    attributeNameList = ReflectionHelper.getAttributeNameList(instanceClass)
+    return attributeNameList if not isModelClass(instanceClass) else [attributeName for attributeName in attributeNameList if not SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE == attributeName]
 
 @Function
 def serializeIt(fromJson, toClass, fatherClass=None) :
@@ -114,7 +124,7 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
     # print(f'toClass: {toClass}')
     if ObjectHelper.isNativeClassInstance(fromJson) and toClass == fromJson.__class__ :
         return fromJson
-    attributeNameList = ReflectionHelper.getAttributeNameList(toClass)
+    attributeNameList = getAttributeNameList_andPleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass)
     classRole = getClassRole(toClass)
     # print(f'        classRole = {classRole}')
     # print(f'        attributeNameList = {attributeNameList}')
@@ -198,7 +208,8 @@ def convertFromObjectToObject(fromObject, toClass) :
 def prettify(objectAsDict) :
     if ObjectHelper.isNativeClassInstance(objectAsDict) :
         return objectAsDict
-    return StringHelper.prettyJson(objectAsDict)
+    ###- someone please give a hint on SqlAlchemy developers on this fucking "registry" thing...
+    return StringHelper.prettyJson(objectAsDict, ignoreKeyList=[SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE] if isModel(objectAsDict) else [])
 
 def getTypeName(thingInstance) :
     if not type(type) == type(thingInstance) :
@@ -210,14 +221,16 @@ def isJsonifyable(thing) :
     return getTypeName(thing) not in NOT_SERIALIZABLE_CLASS_NAME_LIST
 
 def isModel(thing) :
+    if ObjectHelper.isNone(thing):
+        return False
     return (
-        isModelClass(thing.__class__) or (
+        isinstance(thing, DeclarativeMeta) or isModelClass(thing.__class__) or (
             isSerializerCollection(thing) and len(thing) > 0 and isModel(thing[0]) if ObjectHelper.isNotDictionary(thing) else isModel(thing.values()[0])
         )
     )
 
 def isModelClass(thingClass) :
-    return isinstance(thingClass, DeclarativeMeta)
+    return ObjectHelper.isNotNone(thingClass) and (thingClass == DeclarativeMeta or isinstance(thingClass, DeclarativeMeta))
 
 def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedIdInstances=None) :
     # print(instance)
@@ -248,7 +261,7 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
         try :
             # print(id(instance))
             innerVisitedIdInstances.append(id(instance))
-            atributeNameList = ReflectionHelper.getAttributeNameList(instance.__class__)
+            atributeNameList = getAttributeNameList_andPleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(instance.__class__)
             for attributeName in atributeNameList :
                 attributeValue = getattr(instance, attributeName)
                 if ReflectionHelper.isNotMethodInstance(attributeValue):

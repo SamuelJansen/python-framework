@@ -2,6 +2,7 @@ import datetime
 from python_helper import Constant as c
 import python_framework.api.src.service.SqlAlchemyProxy as sap
 from python_framework.api.src.model.FrameworkModel import ERROR_LOG, MODEL
+from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 
 MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE = 16384
 MAX_MESSAGE_SIZE = 512
@@ -13,7 +14,8 @@ MAX_RESOURCE_METHOD_NAME_SIZE = 128
 class ErrorLog(MODEL):
     __tablename__ = ERROR_LOG
 
-    status = sap.Column(sap.Integer())
+    id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
+    status = sap.Column(sap.Integer(), default=HttpStatus.INTERNAL_SERVER_ERROR.value)
     verb = sap.Column(sap.String(MAX_VERB_SIZE))
     url = sap.Column(sap.String(MAX_URL_SIZE))
     message = sap.Column(sap.String(MAX_MESSAGE_SIZE))
@@ -22,9 +24,9 @@ class ErrorLog(MODEL):
     logResource = sap.Column(sap.String(MAX_RESOURCE_NAME_SIZE))
     logResourceMethod = sap.Column(sap.String(MAX_RESOURCE_METHOD_NAME_SIZE))
     timeStamp = sap.Column(sap.DateTime(), default=datetime.datetime.utcnow)
-    id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
 
     def __init__(self,
+        id = None,
         status = None,
         verb = None,
         url = None,
@@ -33,10 +35,10 @@ class ErrorLog(MODEL):
         logPayload = None,
         logResource = None,
         logResourceMethod = None,
-        timeStamp = None,
-        id = None
+        timeStamp = None
     ):
-        self.status = status
+        self.id = id
+        self.status = HttpStatus.map(status).value
         self.verb = str(verb)[:MAX_VERB_SIZE-1]
         self.url = str(url)[:MAX_URL_SIZE-1]
         self.message = str(message)[:MAX_MESSAGE_SIZE-1]
@@ -45,10 +47,9 @@ class ErrorLog(MODEL):
         self.logResource = str(logResource)[:MAX_RESOURCE_NAME_SIZE-1]
         self.logResourceMethod = str(logResourceMethod)[:MAX_RESOURCE_METHOD_NAME_SIZE-1]
         self.timeStamp = timeStamp
-        self.id = id
 
     def override(self, globalException):
-        self.status = globalException.status
+        self.status = HttpStatus.map(globalException.status).value
         self.verb = str(globalException.verb)[:MAX_VERB_SIZE-1]
         self.url = str(globalException.url)[:MAX_URL_SIZE-1]
         self.message = str(globalException.message)[:MAX_MESSAGE_SIZE-1]

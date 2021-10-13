@@ -18,7 +18,13 @@ def EncapsulateItWithGlobalException(message=DEFAULT_MESSAGE, status=HttpStatus.
                 logMessage = str(exception) if StringHelper.isNotBlank(str(exception)) else LOG_MESSAGE_NOT_PRESENT
                 functionName = ReflectionHelper.getName(function, typeName=c.TYPE_FUNCTION)
                 log.wraper(EncapsulateItWithGlobalException, f'''Failed to execute "{functionName}(args={args}, kwargs={kwargs})" {c.TYPE_FUNCTION} call''', exception)
-                raise GlobalException(message=message, logMessage=logMessage, logResource=ReflectionHelper.getParentClass(function), logResourceMethod=function, status=HttpStatus.map(status))
+                raise GlobalException(
+                    message=message,
+                    logMessage=logMessage,
+                    logResource=ReflectionHelper.getParentClass(function),
+                    logResourceMethod=function,
+                    status=HttpStatus.map(status)
+                )
             return functionReturn
         ReflectionHelper.overrideSignatures(wrapedFunction, function)
         return wrapedFunction

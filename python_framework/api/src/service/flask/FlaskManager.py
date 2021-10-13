@@ -537,7 +537,7 @@ def getCompleteResponseByException(
     completeResponse = [{'message':exception.message, 'timestamp':str(exception.timeStamp)}, exception.status]
     try :
         logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request'
-        if HttpStatus.INTERNAL_SERVER_ERROR <= exception.status :
+        if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status) :
             log.error(resourceInstance.__class__, logErrorMessage, exception)
         else :
             log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=muteStacktraceOnBusinessRuleException)
