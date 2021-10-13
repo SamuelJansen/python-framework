@@ -193,7 +193,6 @@ def validateBodyAsJson(requestBodyAsJson, requestClass) :
         if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)) :
             raise GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
 
-@Function
 @Security.jwtRequired
 def securedControllerMethod(
     args,
@@ -209,7 +208,7 @@ def securedControllerMethod(
 ) :
     if not Security.getRole() in roleRequired :
         raise GlobalException(
-            message = 'Role not allowed', 
+            message = 'Role not allowed',
             logMessage = f'''Role {Security.getRole()} trying to access denied resourse''',
             status = HttpStatus.FORBIDDEN
         )
