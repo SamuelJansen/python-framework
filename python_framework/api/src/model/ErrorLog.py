@@ -3,6 +3,7 @@ from python_helper import Constant as c
 import python_framework.api.src.service.SqlAlchemyProxy as sap
 from python_framework.api.src.model.FrameworkModel import ERROR_LOG, MODEL
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.converter.static import ConverterStatic
 
 MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE = 16384
 MAX_MESSAGE_SIZE = 512
@@ -11,11 +12,13 @@ MAX_VERB_SIZE = 8
 MAX_RESOURCE_NAME_SIZE = 128
 MAX_RESOURCE_METHOD_NAME_SIZE = 128
 
+DEFAULT_STATUS: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+
 class ErrorLog(MODEL):
     __tablename__ = ERROR_LOG
 
     id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
-    status = sap.Column(sap.Integer(), default=HttpStatus.INTERNAL_SERVER_ERROR.value)
+    status = sap.Column(sap.Integer(), default=DEFAULT_STATUS.value)
     verb = sap.Column(sap.String(MAX_VERB_SIZE))
     url = sap.Column(sap.String(MAX_URL_SIZE))
     message = sap.Column(sap.String(MAX_MESSAGE_SIZE))
@@ -38,7 +41,7 @@ class ErrorLog(MODEL):
         timeStamp = None
     ):
         self.id = id
-        self.status = HttpStatus.map(status).value
+        self.status = HttpStatus.map(ConverterStatic.getValueOrDefault(status, DEFAULT_STATUS)).value
         self.verb = str(verb)[:MAX_VERB_SIZE-1]
         self.url = str(url)[:MAX_URL_SIZE-1]
         self.message = str(message)[:MAX_MESSAGE_SIZE-1]
@@ -49,7 +52,7 @@ class ErrorLog(MODEL):
         self.timeStamp = timeStamp
 
     def override(self, globalException):
-        self.status = HttpStatus.map(globalException.status).value
+        self.status = HttpStatus.map(ConverterStatic.getValueOrDefault(globalException.status, DEFAULT_STATUS)).value
         self.verb = str(globalException.verb)[:MAX_VERB_SIZE-1]
         self.url = str(globalException.url)[:MAX_URL_SIZE-1]
         self.message = str(globalException.message)[:MAX_MESSAGE_SIZE-1]
