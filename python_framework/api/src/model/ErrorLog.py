@@ -52,7 +52,7 @@ class ErrorLog(MODEL):
         self.timeStamp = timeStamp
 
     def override(self, globalException):
-        self.status = HttpStatus.map(ConverterStatic.getValueOrDefault(globalException.enumValue, DEFAULT_STATUS)).enumValue
+        self.status = HttpStatus.map(ConverterStatic.getValueOrDefault(globalException.status, DEFAULT_STATUS)).enumValue
         self.verb = str(globalException.verb)[:MAX_VERB_SIZE-1]
         self.url = str(globalException.url)[:MAX_URL_SIZE-1]
         self.message = str(globalException.message)[:MAX_MESSAGE_SIZE-1]
