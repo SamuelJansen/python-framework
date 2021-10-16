@@ -143,7 +143,7 @@ def initialize(
 def runApi(*args, api=None, **kwargs) :
     if ObjectHelper.isNone(api) :
         api = getApi()
-    muteLogs(api.app)
+    muteLogs(api)
     if 'host' not in kwargs and api.host :
         kwargs['host'] = api.host if not 'localhost' == api.host else '0.0.0.0'
     if 'port' not in kwargs and api.port :
@@ -164,14 +164,14 @@ def getApiUrl(api) :
     return apiUrl
 
 @Function
-def muteLogs(app) :
+def muteLogs(api) :
     import logging
     from werkzeug.serving import WSGIRequestHandler
     werkzeug_logger = logging.getLogger('werkzeug')
     werkzeug_logger.disabled = True
-    app.logger.disabled = True
+    api.app.logger.disabled = True
     apscheduler_logger = logging.getLogger('apscheduler.scheduler')
-    apschedulerLoggerEnabled = app.globals.getApiSetting('api.scheduler.enable')
+    apschedulerLoggerEnabled = api.globals.getApiSetting('api.scheduler.enable')
     apscheduler_logger.disabled = True if ObjectHelper.isNone(apschedulerLoggerEnabled) else not apschedulerLoggerEnabled
     apscheduler_logger.propagate = not apscheduler_logger.disabled
     WSGIRequestHandler.log = lambda self, type, message, *args: None ###- getattr(werkzeug_logger, type)('%s %s' % (self.address_string(), message % args))

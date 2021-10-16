@@ -23,7 +23,7 @@
                 }
             }
         },
-        "/test/actuator/health/4404/{status}/{secondStatus}": {
+        "/test/actuator/health/7490/{status}/{secondStatus}": {
             "get": {
                 "parameters": [
                     {
@@ -97,7 +97,7 @@
                 }
             }
         },
-        "/test/actuator/health/4404": {
+        "/test/actuator/health/7490": {
             "put": {
                 "parameters": [
                     {
