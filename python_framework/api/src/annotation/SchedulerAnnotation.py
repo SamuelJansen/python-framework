@@ -41,6 +41,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
         def innerResourceInstanceMethod(*args, **kwargs) :
             if self.enabled:
                 resourceInstanceName = methodClassName[:-len(FlaskManager.KW_SCHEDULER_RESOURCE)]
+                log.debug(resourceInstanceMethod, f'Running with args={methodArgs} and kwargs={methodKwargs}')
                 resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
                 args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, resourceInstanceName))
                 resourceInstance = args[0]
@@ -51,7 +52,9 @@ def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
                 except Exception as exception :
                     FlaskManager.raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
                     log.log(innerResourceInstanceMethod, f'Not possible to run {shedulerId} properly', exception=exception)
+                log.debug(resourceInstanceMethod, f'Completed')
                 return methodReturn
+            log.debug(resourceInstanceMethod, f'Not running. Scheadulers are disabled')
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
