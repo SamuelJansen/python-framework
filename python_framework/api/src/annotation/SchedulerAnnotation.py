@@ -28,11 +28,11 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=False, **methodKwarg
         apiInstance = FlaskManager.getApi()
         methodClassName = ReflectionHelper.getMethodClassName(resourceInstanceMethod)
         methodName = ReflectionHelper.getName(resourceInstanceMethod)
-        resourceInstanceMethod.disabled = disable
-        resourceInstanceMethod.shedulerId = methodKwargs['id']
         methodKwargs['id'] = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
         instancesUpTo = methodKwargs.pop('instancesUpTo', 1)
         weekDays = methodKwargs.pop('weekDays', None)
+        resourceInstanceMethod.disabled = disable
+        resourceInstanceMethod.shedulerId = methodKwargs['id']
         if ObjectHelper.isNotEmpty(methodArgs) and SchedulerType.CRON == methodArgs[0] and ObjectHelper.isNotNone(weekDays) and StringHelper.isNotBlank(weekDays) :
             methodKwargs['day_of_week'] = weekDays
         if ObjectHelper.isNotNone(instancesUpTo) :
