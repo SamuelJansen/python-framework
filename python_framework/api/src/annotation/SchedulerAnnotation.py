@@ -5,7 +5,7 @@ from python_framework.api.src.service.flask import FlaskManager
 
 
 @Function
-def Scheduler() :
+def Scheduler(*schedulerArgs, disable=False, **schedulerKwargs) :
     def Wrapper(OuterClass, *args, **kwargs):
         log.debug(Scheduler,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
@@ -16,6 +16,7 @@ def Scheduler() :
                 self.globals = apiInstance.globals
                 self.service = apiInstance.resource.service
                 self.enabled = self.globals.getApiSetting('api.scheduler.enable')
+                self.disabled = disable
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -23,7 +24,7 @@ def Scheduler() :
 @Function
 def SchedulerMethod(*methodArgs, requestClass=None, disable=False, **methodKwargs) :
     def innerMethodWrapper(resourceInstanceMethod, *innerMethodArgs, **innerMethodKwargs) :
-        resourceInstanceMethod.disable = disable
+        resourceInstanceMethod.disabled = disable
         log.debug(SchedulerMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
         methodClassName = ReflectionHelper.getMethodClassName(resourceInstanceMethod)
@@ -40,7 +41,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=False, **methodKwarg
         @apiInstance.scheduler.task(*shedulerArgs, **shedulerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
             resourceInstance = args[0]
-            if resourceInstance.enabled or not resourceInstance.disable or not resourceInstanceMethod.disable:
+            if resourceInstance.enabled or not resourceInstance.disabled or not resourceInstanceMethod.disabled:
                 resourceInstanceName = methodClassName[:-len(FlaskManager.KW_SCHEDULER_RESOURCE)]
                 log.debug(resourceInstanceMethod, f'{shedulerId} scheduler started with args={methodArgs} and kwargs={methodKwargs}')
                 resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
@@ -54,7 +55,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=False, **methodKwarg
                     FlaskManager.raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
                 log.debug(resourceInstanceMethod, f'{shedulerId} scheduler finished')
                 return methodReturn
-            log.warning(resourceInstanceMethod, f'{shedulerId} scheduler didn{c.SINGLE_QUOTE}t started. {"Schedulers are disabled" if not resourceInstance.enabled else "This scheduler is disabled" if resourceInstance.disable else "This scheduler method is disabled"}')
+            log.warning(resourceInstanceMethod, f'{shedulerId} scheduler didn{c.SINGLE_QUOTE}t started. {"Schedulers are disabled" if not resourceInstance.enabled else "This scheduler is disabled" if resourceInstance.disabled else "This scheduler method is disabled"}')
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
