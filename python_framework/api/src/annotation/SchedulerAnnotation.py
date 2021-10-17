@@ -40,12 +40,12 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=False, **methodKwarg
         shedulerKwargs = {**methodKwargs}
         @apiInstance.scheduler.task(*shedulerArgs, **shedulerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
+            resourceInstanceName = methodClassName[:-len(FlaskManager.KW_SCHEDULER_RESOURCE)]
+            resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
+            args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, resourceInstanceName))
             resourceInstance = args[0]
             if resourceInstance.enabled or not resourceInstance.disabled or not resourceInstanceMethod.disabled:
-                resourceInstanceName = methodClassName[:-len(FlaskManager.KW_SCHEDULER_RESOURCE)]
                 log.debug(resourceInstanceMethod, f'{shedulerId} scheduler started with args={methodArgs} and kwargs={methodKwargs}')
-                resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
-                args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, resourceInstanceName))
                 methodReturn = None
                 try :
                     FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
