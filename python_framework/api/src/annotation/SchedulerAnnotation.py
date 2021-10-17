@@ -24,11 +24,12 @@ def Scheduler(*schedulerArgs, disable=False, **schedulerKwargs) :
 @Function
 def SchedulerMethod(*methodArgs, requestClass=None, disable=False, **methodKwargs) :
     def innerMethodWrapper(resourceInstanceMethod, *innerMethodArgs, **innerMethodKwargs) :
-        resourceInstanceMethod.disabled = disable
         log.debug(SchedulerMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
         methodClassName = ReflectionHelper.getMethodClassName(resourceInstanceMethod)
         methodName = ReflectionHelper.getName(resourceInstanceMethod)
+        resourceInstanceMethod.disabled = disable
+        resourceInstanceMethod.shedulerId = methodKwargs['id']
         methodKwargs['id'] = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
         instancesUpTo = methodKwargs.pop('instancesUpTo', 1)
         weekDays = methodKwargs.pop('weekDays', None)
@@ -45,17 +46,17 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=False, **methodKwarg
             args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, resourceInstanceName))
             resourceInstance = args[0]
             if resourceInstance.enabled or not resourceInstance.disabled or not resourceInstanceMethod.disabled:
-                log.debug(resourceInstanceMethod, f'{shedulerId} scheduler started with args={methodArgs} and kwargs={methodKwargs}')
+                log.debug(resourceInstanceMethod, f'{resourceInstanceMethod.shedulerId} scheduler started with args={methodArgs} and kwargs={methodKwargs}')
                 methodReturn = None
                 try :
                     FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
                     methodReturn = resourceInstanceMethod(*args,**kwargs)
                 except Exception as exception :
-                    log.warning(innerResourceInstanceMethod, f'Not possible to run {shedulerId} properly', exception=exception, muteStackTrace=True)
+                    log.warning(innerResourceInstanceMethod, f'Not possible to run {resourceInstanceMethod.shedulerId} properly', exception=exception, muteStackTrace=True)
                     FlaskManager.raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
-                log.debug(resourceInstanceMethod, f'{shedulerId} scheduler finished')
+                log.debug(resourceInstanceMethod, f'{resourceInstanceMethod.shedulerId} scheduler finished')
                 return methodReturn
-            log.warning(resourceInstanceMethod, f'{shedulerId} scheduler didn{c.SINGLE_QUOTE}t started. {"Schedulers are disabled" if not resourceInstance.enabled else "This scheduler is disabled" if resourceInstance.disabled else "This scheduler method is disabled"}')
+            log.warning(resourceInstanceMethod, f'{resourceInstanceMethod.shedulerId} scheduler didn{c.SINGLE_QUOTE}t started. {"Schedulers are disabled" if not resourceInstance.enabled else "This scheduler is disabled" if resourceInstance.disabled else "This scheduler method is disabled"}')
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
