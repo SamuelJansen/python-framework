@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pip3.9 /usr/bin/pip
 ''')
 
-VERSION = '0.2.30'
+VERSION = '0.2.31'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -64,8 +64,8 @@ setup(
         'psycopg2-binary==2.8.6',
         'SQLAlchemy==1.4.25', ###- trashy SqlAlchemy job with that registry keyword...
         # 'SQLAlchemy==1.3.20',
-        'globals>=0.3.5',
-        'python_helper>=0.3.8',
+        'globals>=0.3.6',
+        'python_helper>=0.3.10',
         'Flask-APScheduler==1.12.2',
         'psutil==5.8.0',
         'requests==2.26.0'

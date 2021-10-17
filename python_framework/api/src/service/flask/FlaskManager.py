@@ -170,10 +170,13 @@ def muteLogs(api) :
     werkzeug_logger = logging.getLogger('werkzeug')
     werkzeug_logger.disabled = True
     api.app.logger.disabled = True
-    apscheduler_logger = logging.getLogger('apscheduler.scheduler')
     apschedulerLoggerEnabled = api.globals.getApiSetting('api.scheduler.enable')
+    apscheduler_logger = logging.getLogger('apscheduler.scheduler')
+    default_apscheduler_logger = logging.getLogger('apscheduler.executors.default')
     apscheduler_logger.disabled = True if ObjectHelper.isNone(apschedulerLoggerEnabled) else not apschedulerLoggerEnabled
     apscheduler_logger.propagate = not apscheduler_logger.disabled
+    default_apscheduler_logger.disabled = apscheduler_logger.disabled
+    default_apscheduler_logger.propagate = not apscheduler_logger.disabled
     WSGIRequestHandler.log = lambda self, type, message, *args: None ###- getattr(werkzeug_logger, type)('%s %s' % (self.address_string(), message % args))
 
 @Function
