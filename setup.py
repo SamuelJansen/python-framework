@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pip3.9 /usr/bin/pip
 ''')
 
-VERSION = '0.2.33'
+VERSION = '0.2.34'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
