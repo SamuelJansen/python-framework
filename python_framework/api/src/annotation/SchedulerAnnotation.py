@@ -21,8 +21,9 @@ def Scheduler() :
     return Wrapper
 
 @Function
-def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
+def SchedulerMethod(*methodArgs, requestClass=None, disable=False, **methodKwargs) :
     def innerMethodWrapper(resourceInstanceMethod, *innerMethodArgs, **innerMethodKwargs) :
+        resourceInstanceMethod.disable = disable
         log.debug(SchedulerMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
         methodClassName = ReflectionHelper.getMethodClassName(resourceInstanceMethod)
@@ -38,12 +39,12 @@ def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
         shedulerKwargs = {**methodKwargs}
         @apiInstance.scheduler.task(*shedulerArgs, **shedulerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
-            if self.enabled:
+            resourceInstance = args[0]
+            if resourceInstance.enabled or not resourceInstance.disable or not resourceInstanceMethod.disable:
                 resourceInstanceName = methodClassName[:-len(FlaskManager.KW_SCHEDULER_RESOURCE)]
                 log.debug(resourceInstanceMethod, f'{shedulerId} scheduler started with args={methodArgs} and kwargs={methodKwargs}')
                 resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
                 args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, resourceInstanceName))
-                resourceInstance = args[0]
                 methodReturn = None
                 try :
                     FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
@@ -53,7 +54,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
                     FlaskManager.raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
                 log.debug(resourceInstanceMethod, f'{shedulerId} scheduler finished')
                 return methodReturn
-            log.warning(resourceInstanceMethod, f'{shedulerId} scheduler didn{c.SINGLE_QUOTE}t started. Schedulers are disabled')
+            log.warning(resourceInstanceMethod, f'{shedulerId} scheduler didn{c.SINGLE_QUOTE}t started. {"Schedulers are disabled" if not resourceInstance.enabled else "This scheduler is disabled" if resourceInstance.disable else "This scheduler method is disabled"}')
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
