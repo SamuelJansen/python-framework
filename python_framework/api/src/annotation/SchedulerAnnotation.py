@@ -45,7 +45,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=False, **methodKwarg
             resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
             args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, resourceInstanceName))
             resourceInstance = args[0]
-            if resourceInstance.enabled or not resourceInstance.disabled or not resourceInstanceMethod.disabled:
+            if resourceInstance.enabled and not resourceInstance.disabled and not resourceInstanceMethod.disabled:
                 log.debug(resourceInstanceMethod, f'{resourceInstanceMethod.shedulerId} scheduler started with args={methodArgs} and kwargs={methodKwargs}')
                 methodReturn = None
                 try :
