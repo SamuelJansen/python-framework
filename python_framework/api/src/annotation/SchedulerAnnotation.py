@@ -16,6 +16,7 @@ def Scheduler() :
                 OuterClass.__init__(self,*args,**kwargs)
                 self.globals = apiInstance.globals
                 self.service = apiInstance.resource.service
+                self.enabled = self.globals.getApiSetting('api.scheduler.enable')
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -38,18 +39,19 @@ def SchedulerMethod(*methodArgs, requestClass=None, **methodKwargs) :
         shedulerKwargs = {**methodKwargs}
         @apiInstance.scheduler.task(*shedulerArgs, **shedulerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
-            resourceInstanceName = methodClassName[:-len(FlaskManager.KW_SCHEDULER_RESOURCE)]
-            resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
-            args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, resourceInstanceName))
-            resourceInstance = args[0]
-            methodReturn = None
-            try :
-                FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
-                methodReturn = resourceInstanceMethod(*args,**kwargs)
-            except Exception as exception :
-                FlaskManager.raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
-                log.log(innerResourceInstanceMethod, f'Not possible to run {shedulerId} properly', exception=exception)
-            return methodReturn
+            if self.enabled:
+                resourceInstanceName = methodClassName[:-len(FlaskManager.KW_SCHEDULER_RESOURCE)]
+                resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
+                args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, resourceInstanceName))
+                resourceInstance = args[0]
+                methodReturn = None
+                try :
+                    FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
+                    methodReturn = resourceInstanceMethod(*args,**kwargs)
+                except Exception as exception :
+                    FlaskManager.raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
+                    log.log(innerResourceInstanceMethod, f'Not possible to run {shedulerId} properly', exception=exception)
+                return methodReturn
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod
     return innerMethodWrapper
