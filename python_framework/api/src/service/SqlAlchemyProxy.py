@@ -95,10 +95,10 @@ def getOneToOneChild(child, parent, refferenceModel) :
     return parentAttribute, parentId
 
 def isNeitherNoneNorBlank(thing) :
-    return ObjectHelper.isNotNone(thing) and StringHelper.isNotBlank(thing)
+    return ObjectHelper.isNotNone(thing) and StringHelper.isNotBlank(str(thing))
 
 def isNoneOrBlank(thing) :
-    return ObjectHelper.isNone(thing) or StringHelper.isBlank(thing)
+    return ObjectHelper.isNone(thing) or StringHelper.isBlank(str(thing))
 
 class SqlAlchemyProxy:
 
