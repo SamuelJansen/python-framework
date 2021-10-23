@@ -1,5 +1,4 @@
-import datetime
-from python_helper import ObjectHelper, log
+from python_helper import ObjectHelper, log, DateTimeHelper
 from python_framework.api.src.enumeration.ActuatorHealthStatus import ActuatorHealthStatus
 from python_framework.api.src.model import ActuatorHealth
 from python_framework.api.src.annotation.ServiceAnnotation import Service, ServiceMethod
@@ -19,12 +18,12 @@ class ActuatorHealthService:
                 except Exception as exception :
                     log.error(self.getStatus, 'Api cannot reach database', exception)
                     model = ActuatorHealth.ActuatorHealth()
-            model.laskCheck = datetime.datetime.utcnow()
+            model.laskCheck = DateTimeHelper.dateTimeNow())
             self.repository.actuatorHealth.save(model)
         except Exception as exception:
             model = ActuatorHealth.ActuatorHealth(
                 status = ActuatorHealthStatus.DOWN,
-                laskCheck = DateTimeHelper.now()
+                laskCheck = DateTimeHelper.dateTimeNow()
             )
             log.error(self.getStatus, f'Api is {model.DOWN}', exception)
         return self.converter.actuatorHealth.fromModelToResponseDto(model)

@@ -1,5 +1,5 @@
-from python_helper import EnvironmentHelper
-from python_framework import Controller, ControllerMethod, HttpStatus
+from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.service.flask.FlaskManager import Controller, ControllerMethod
 
 @Controller(url='/doc', tag='Documentation', description='OpenApi documentation')
 class DocumentationController:

@@ -1,4 +1,6 @@
-from python_framework import Repository, OpenApiDocumentationFile
+from python_helper import EnvironmentHelper
+from python_framework.api.src.service.openapi import OpenApiDocumentationFile
+from python_framework.api.src.annotation.RepositoryAnnotation import Repository
 
 @Repository()
 class DocumentationRepository:

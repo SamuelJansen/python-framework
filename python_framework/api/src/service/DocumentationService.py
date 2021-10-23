@@ -1,4 +1,4 @@
-from python_framework import Service, ServiceMethod
+from python_framework.api.src.annotation.ServiceAnnotation import Service, ServiceMethod
 
 @Service()
 class DocumentationService:

@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.2.44'
+VERSION = '0.2.45'
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
 
@@ -55,7 +55,7 @@ setup(
     keywords = ['flask', 'sqlalchemy', 'open api', 'jwt', 'serializer', 'scheduler'],
     install_requires = [
         'gunicorn==20.0.4',
-        'Flask==1.1.4', ###- 1.1.2',
+        'Flask==1.1.4',
         'Flask-RESTful==0.3.8',
         'Flask-JWT-Extended==3.25.0',
         'PyJWT==1.7.1',
