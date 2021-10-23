@@ -6,8 +6,7 @@ from python_framework.api.src.dto import ActuatorHealthDto
 class ActuatorHealthController:
 
     @ControllerMethod(
-        responseClass=ActuatorHealthDto.ActuatorHealthResponseDto,
-        logResponse=True
+        responseClass=ActuatorHealthDto.ActuatorHealthResponseDto
     )
     def get(self):
         return self.service.actuatorHealth.getStatus(), HttpStatus.OK

@@ -9,15 +9,22 @@ class ActuatorHealthService:
 
     @ServiceMethod()
     def getStatus(self):
-        actuatorHealthList = self.repository.actuatorHealth.findAll()
-        if ObjectHelper.isList(actuatorHealthList) and 1 == len(actuatorHealthList) :
-            model = actuatorHealthList[0]
-        else :
-            try :
-                model = self.repository.actuatorHealth.save(ActuatorHealth.ActuatorHealth(status=ActuatorHealthStatus.UP))
-            except Exception as exception :
-                log.error(self.getStatus, 'Api cannot reach database', exception)
-                model = ActuatorHealth.ActuatorHealth()
-        model.laskCheck = datetime.datetime.utcnow()
-        self.repository.actuatorHealth.save(model)
+        try:
+            actuatorHealthList = self.repository.actuatorHealth.findAll()
+            if ObjectHelper.isList(actuatorHealthList) and 1 == len(actuatorHealthList) :
+                model = actuatorHealthList[0]
+            else :
+                try :
+                    model = self.repository.actuatorHealth.save(ActuatorHealth.ActuatorHealth(status=ActuatorHealthStatus.UP))
+                except Exception as exception :
+                    log.error(self.getStatus, 'Api cannot reach database', exception)
+                    model = ActuatorHealth.ActuatorHealth()
+            model.laskCheck = datetime.datetime.utcnow()
+            self.repository.actuatorHealth.save(model)
+        except Exception as exception:
+            model = ActuatorHealth.ActuatorHealth(
+                status = ActuatorHealthStatus.DOWN,
+                laskCheck = DateTimeHelper.now()
+            )
+            log.error(self.getStatus, f'Api is {model.DOWN}', exception)
         return self.converter.actuatorHealth.fromModelToResponseDto(model)

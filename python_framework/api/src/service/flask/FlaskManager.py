@@ -44,15 +44,18 @@ KW_HELPER_RESOURCE = 'Helper'
 KW_CONVERTER_RESOURCE = 'Converter'
 PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
     KW_CONTROLLER_RESOURCE : [
-        'ActuatorHealthController'
+        'ActuatorHealthController',
+        'DocumentationController'
     ],
     KW_SCHEDULER_RESOURCE : [],
     KW_SERVICE_RESOURCE : [
-        'ActuatorHealthService'
+        'ActuatorHealthService',
+        'DocumentationService'
     ],
     KW_CLIENT_RESOURCE : [],
     KW_REPOSITORY_RESOURCE : [
-        'ActuatorHealthRepository'
+        'ActuatorHealthRepository',
+        'DocumentationRepository'
     ],
     KW_VALIDATOR_RESOURCE : [],
     KW_MAPPER_RESOURCE : [],

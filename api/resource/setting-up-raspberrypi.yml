@@ -1,3 +1,11 @@
+python-related: '''
+    sudo apt-get install python-dev libatlas-base-dev
+    sudo rm /usr/bin/python
+    sudo ln -s /usr/bin/python3 /usr/bin/python
+    sudo mv /usr/bin/pip /usr/bin/pip2 # rename
+    sudo ln -s /usr/bin/pip3 /usr/bin/pip
+
+    '''
 first-boot: '''
     https://www.raspberrypi.org/software/ -> download and build Rasbian OS image
     boot raspberrypi
