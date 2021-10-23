@@ -18,7 +18,7 @@ class ActuatorHealthService:
                 except Exception as exception :
                     log.error(self.getStatus, 'Api cannot reach database', exception)
                     model = ActuatorHealth.ActuatorHealth()
-            model.laskCheck = DateTimeHelper.dateTimeNow())
+            model.laskCheck = DateTimeHelper.dateTimeNow()
             self.repository.actuatorHealth.save(model)
         except Exception as exception:
             model = ActuatorHealth.ActuatorHealth(
