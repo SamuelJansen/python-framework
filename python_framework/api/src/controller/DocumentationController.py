@@ -1,7 +1,7 @@
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.flask.FlaskManager import Controller, ControllerMethod
 
-@Controller(url='/doc', tag='Documentation', description='OpenApi documentation')
+@Controller(url='/documentation', tag='Documentation', description='OpenApi documentation')
 class DocumentationController:
 
     @ControllerMethod(responseClass=dict)
@@ -11,6 +11,6 @@ class DocumentationController:
 @Controller(url='/environment', tag='Documentation', description='Api Tree')
 class DocumentationBatchController:
 
-    @ControllerMethod(url='/environment', responseClass=dict)
+    @ControllerMethod(responseClass=dict)
     def get(self):
         return self.service.documentation.getActiveEnvironment(), HttpStatus.OK

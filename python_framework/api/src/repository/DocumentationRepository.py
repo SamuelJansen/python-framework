@@ -9,4 +9,4 @@ class DocumentationRepository:
         return OpenApiDocumentationFile.loadDocumentation(self.globals.api)
 
     def getActiveEnvironment(self):
-        return EnvironmentHelper.getAcvtiveEnvironment()
+        return EnvironmentHelper.getActiveEnvironment()

@@ -25,5 +25,5 @@ class ActuatorHealthService:
                 status = ActuatorHealthStatus.DOWN,
                 laskCheck = DateTimeHelper.dateTimeNow()
             )
-            log.error(self.getStatus, f'Api is {model.DOWN}', exception)
+            log.error(self.getStatus, f'Api is {model.status}', exception)
         return self.converter.actuatorHealth.fromModelToResponseDto(model)
