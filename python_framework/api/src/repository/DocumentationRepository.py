@@ -1,4 +1,4 @@
-from python_helper import EnvironmentHelper
+from python_helper import SettingHelperHelper
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile
 from python_framework.api.src.annotation.RepositoryAnnotation import Repository
 
@@ -9,4 +9,4 @@ class DocumentationRepository:
         return OpenApiDocumentationFile.loadDocumentation(self.globals.api)
 
     def getActiveEnvironment(self):
-        return EnvironmentHelper.getActiveEnvironment()
+        return SettingHelper.getActiveEnvironment()
