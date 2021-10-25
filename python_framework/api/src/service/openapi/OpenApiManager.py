@@ -7,6 +7,8 @@ from python_framework.api.src.service.openapi.OpenApiKey import Key as k
 from python_framework.api.src.service.openapi.OpenApiValue import Value as v
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile
 from python_framework.api.src.service.openapi.OpenApiDocumentationFile import KW_OPEN_API, KW_UI
+from python_framework.api.src.converter.static import ConverterStatic
+
 
 KW_GET = 'get'
 KW_POST = 'post'
@@ -55,6 +57,13 @@ KW_REQUEST = '__KW_REQUEST__'
 KW_RESPONSE = '__KW_RESPONSE__'
 
 DOCUMENTATION_ENDPOINT = f'{c.SLASH}{KW_OPEN_API}'
+ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST = "0.0.0.0"
+LOCALHOST_HOST =S 'localhost'
+SCHEME_HOST_SEPARATOR = '://'
+DEFAULT_DOCUMENTATION_PORT = '80'
+PORT_80_IN_URL = ':80/'
+URL_ENDS_WITH_PORT_80 = ':80'
+PORT_80_EXCLUDED_FROM_URL = '/'
 
 def addSwagger(apiInstance, appInstance):
     ###- The ugliest thing I ever seen, but thats the way flask_swagger_ui works...
@@ -234,10 +243,19 @@ def getUrl(endPointUrl, baseUrl):
     return f'{c.SLASH}{c.SLASH.join(urlList)}'
 
 def getApiUrl(apiInstance):
-    return f'{apiInstance.scheme}://{apiInstance.documentation[k.HOST]}{apiInstance.baseUrl}'
+    return f'{apiInstance.scheme}{SCHEME_HOST_SEPARATOR}{apiInstance.host}{apiInstance.baseUrl}'.replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
 
 def getDocumentationUrl(apiInstance):
-    return f'{getApiUrl(apiInstance)}{DOCUMENTATION_ENDPOINT}'
+    # return f'{getApiUrl(apiInstance)}{DOCUMENTATION_ENDPOINT}'
+    globals = apiInstance.globals
+    sheme = ConverterStatic.getValueOrDefault(globals.getApiSetting('swagger.schemes')[0], appInstance.scheme)
+    host = ConverterStatic.getValueOrDefault(globals.getApiSetting('swagger.host'), appInstance.host).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
+    colonPortIfAny = ConverterStatic.getValueOrDefault(f"{c.COLON}{globals.getApiSetting('swagger.port')}", "")
+    documentationUrl = f'{sheme}{SCHEME_HOST_SEPARATOR}{host}{colonPortIfAny}{baseUrl}{DOCUMENTATION_ENDPOINT}'
+    if documentationUrl.endswith(URL_ENDS_WITH_PORT_80):
+        documentationUrl = documentationUrl[:-len(URL_ENDS_WITH_PORT_80)]
+    documentationUrl = documentationUrl.replace(PORT_80_IN_URL, PORT_80_EXCLUDED_FROM_URL)
+    return documentationUrl.replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
 
 def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=None):
     log.log(addDtoToUrlVerb, f'verb: {verb}, url: {url}, dtoClass: {dtoClass}, dtoType: {dtoType}, where: {where}')
