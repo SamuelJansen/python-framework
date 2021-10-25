@@ -47,6 +47,7 @@ KW_EMAIL = 'email'
 KW_URL = 'url'
 KW_HOST = 'host'
 KW_SCHEMES = 'schemes'
+KW_PORT: str = 'port'
 
 KW_URL_SET = '__URL_SET__'
 KW_DESCRIPTION_LIST = '__DESCRIPTION_LIST__'
@@ -248,9 +249,9 @@ def getApiUrl(apiInstance):
 def getDocumentationUrl(apiInstance):
     # return f'{getApiUrl(apiInstance)}{DOCUMENTATION_ENDPOINT}'
     globals = apiInstance.globals
-    sheme = ConverterStatic.getValueOrDefault(globals.getApiSetting('swagger.schemes')[0], apiInstance.scheme)
-    host = ConverterStatic.getValueOrDefault(globals.getApiSetting('swagger.host'), apiInstance.host).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
-    colonPortIfAny = ConverterStatic.getValueOrDefault(f"{c.COLON}{globals.getApiSetting('swagger.port')}", "")
+    sheme = ConverterStatic.getValueOrDefault(ConverterStatic.getValueOrDefault(globals.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}'), [apiInstance.scheme]), [apiInstance.scheme])[0]
+    host = ConverterStatic.getValueOrDefault(globals.getSetting(f'{KW_OPEN_API}.{KW_HOST}'), apiInstance.host).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
+    colonPortIfAny = ConverterStatic.getValueOrDefault(f"{c.COLON}{globals.getSetting(f'{KW_OPEN_API}.{KW_PORT}')}", c.BLANK).replace(f'{c.COLON}None', c.BLANK)
     documentationUrl = f'{sheme}{SCHEME_HOST_SEPARATOR}{host}{colonPortIfAny}{apiInstance.baseUrl}{DOCUMENTATION_ENDPOINT}'
     if documentationUrl.endswith(URL_ENDS_WITH_PORT_80):
         documentationUrl = documentationUrl[:-len(URL_ENDS_WITH_PORT_80)]

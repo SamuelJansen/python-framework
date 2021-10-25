@@ -123,17 +123,15 @@ def initialize(
             , testStatus = testStatus
             , logStatus = logStatus
         )
-    defaultUrl
-    openInBrowser
-    url = getApiUrl(apiInstance)
+    innerDefaultUrl = getApiUrl(apiInstance)
     if defaultUrl :
-        url = f'{url}{defaultUrl}'
+        innerDefaultUrl = f'{innerDefaultUrl}{defaultUrl}'
     def inBetweenFunction(function,*argument,**keywordArgument) :
         log.debug(initialize,f'''{function.__name__} method''')
         if (openInBrowser) :
-            log.debug(initialize,f'''Openning "{url}" url in rowser''')
-            # WebBrowser.openUrlInChrome(url)
-            WebBrowser.openUrl(url)
+            log.debug(initialize,f'''Openning "{innerDefaultUrl}" url in rowser''')
+            # WebBrowser.openUrlInChrome(innerDefaultUrl)
+            WebBrowser.openUrl(innerDefaultUrl)
         def innerFunction(*args,**kwargs) :
             try :
                 functionReturn = function(*args,**kwargs)
