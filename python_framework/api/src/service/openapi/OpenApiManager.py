@@ -251,7 +251,7 @@ def getDocumentationUrl(apiInstance):
     sheme = ConverterStatic.getValueOrDefault(globals.getApiSetting('swagger.schemes')[0], apiInstance.scheme)
     host = ConverterStatic.getValueOrDefault(globals.getApiSetting('swagger.host'), apiInstance.host).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
     colonPortIfAny = ConverterStatic.getValueOrDefault(f"{c.COLON}{globals.getApiSetting('swagger.port')}", "")
-    documentationUrl = f'{sheme}{SCHEME_HOST_SEPARATOR}{host}{colonPortIfAny}{baseUrl}{DOCUMENTATION_ENDPOINT}'
+    documentationUrl = f'{sheme}{SCHEME_HOST_SEPARATOR}{host}{colonPortIfAny}{apiInstance.baseUrl}{DOCUMENTATION_ENDPOINT}'
     if documentationUrl.endswith(URL_ENDS_WITH_PORT_80):
         documentationUrl = documentationUrl[:-len(URL_ENDS_WITH_PORT_80)]
     documentationUrl = documentationUrl.replace(PORT_80_IN_URL, PORT_80_EXCLUDED_FROM_URL)
