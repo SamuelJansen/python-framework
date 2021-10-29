@@ -10,6 +10,7 @@ from python_framework.api.src.service import SqlAlchemyProxy
 from python_framework.api.src.service import Security
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.service.openapi import OpenApiManager
+from python_framework.api.src.converter.static import ConverterStatic
 
 DOT_PY = '.py'
 
@@ -104,10 +105,10 @@ def addGlobalsTo(apiInstance) :
     apiInstance.globals = FlaskManager.getGlobals()
     apiInstance.globals.api = apiInstance
     apiInstance.bindResource = FlaskManager.bindResource
-    apiInstance.scheme = apiInstance.globals.getApiSetting('api.server.scheme')
-    apiInstance.host = apiInstance.globals.getApiSetting('api.server.host')
-    apiInstance.port = apiInstance.globals.getApiSetting('api.server.port')
-    apiInstance.baseUrl = apiInstance.globals.getApiSetting('api.server.base-url')
+    apiInstance.scheme = apiInstance.globals.getApiSetting(ConverterStatic.API_SERVER_SCHEME)
+    apiInstance.host = apiInstance.globals.getApiSetting(ConverterStatic.API_SERVER_HOST)
+    apiInstance.port = apiInstance.globals.getApiSetting(ConverterStatic.API_SERVER_PORT)
+    apiInstance.baseUrl = apiInstance.globals.getApiSetting(ConverterStatic.API_SERVER_BASE_URL)
 
 @Function
 def initialize(
@@ -127,7 +128,7 @@ def initialize(
     addGlobalsTo(api)
     OpenApiManager.newDocumentation(api, app)
     SchedulerManager.addScheduler(api, app)
-    securityKey = api.globals.getApiSetting('api.security.secret')
+    securityKey = api.globals.getApiSetting(ConverterStatic.API_SECURITY_SECRET)
     if SettingHelper.LOCAL_ENVIRONMENT == SettingHelper.getActiveEnvironment() :
         log.setting(initialize, f'JWT secret: {securityKey}')
     api.jwt = Security.getJwtMannager(app, securityKey)
