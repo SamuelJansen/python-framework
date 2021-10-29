@@ -15,14 +15,13 @@ api:
     security:
         secret: default
     server:
+        scheme: http
         base-url: /test-api
     database:
         schema: ${DATABASE_SCHEMA:}
         url: ${DATABASE_URL:}
 
 swagger:
-    host: None
-    schemes: []
     info:
         title: {api.name}
         version: 0.0.1

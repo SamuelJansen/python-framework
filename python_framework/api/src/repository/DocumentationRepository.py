@@ -1,4 +1,4 @@
-from python_helper import SettingHelperHelper
+from python_helper import SettingHelper
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile
 from python_framework.api.src.annotation.RepositoryAnnotation import Repository
 

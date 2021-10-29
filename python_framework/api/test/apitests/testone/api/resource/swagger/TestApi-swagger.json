@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "paths": {
-        "/actuator/health": {
+        "/health": {
             "get": {
                 "parameters": [],
                 "tags": [
@@ -23,7 +23,51 @@
                 }
             }
         },
-        "/test/actuator/health/4404/{status}/{secondStatus}": {
+        "/documentation": {
+            "get": {
+                "parameters": [],
+                "tags": [
+                    "Documentation"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/json"
+                        }
+                    }
+                }
+            }
+        },
+        "/documentation/environment": {
+            "get": {
+                "parameters": [],
+                "tags": [
+                    "Documentation"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/json"
+                        }
+                    }
+                }
+            }
+        },
+        "/test/actuator/health/292/{status}/{secondStatus}": {
             "get": {
                 "parameters": [
                     {
@@ -97,7 +141,7 @@
                 }
             }
         },
-        "/test/actuator/health/4404": {
+        "/test/actuator/health/292": {
             "put": {
                 "parameters": [
                     {
@@ -404,6 +448,11 @@
                 "status"
             ]
         },
+        "json": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        },
         "TestResponseDto": {
             "type": "object",
             "properties": {
@@ -447,11 +496,6 @@
             "required": [
                 "status"
             ]
-        },
-        "json": {
-            "type": "object",
-            "properties": {},
-            "required": []
         },
         "TestCallRequestDto": {
             "type": "object",
@@ -518,6 +562,11 @@
             "externalDocs": null
         },
         {
+            "name": "Documentation",
+            "description": "OpenApi documentation. Api Tree",
+            "externalDocs": null
+        },
+        {
             "name": "HealthCheckTest",
             "description": "HealthCheck controller test",
             "externalDocs": null
@@ -534,7 +583,9 @@
         }
     ],
     "host": "localhost:5010",
-    "schemes": [],
+    "schemes": [
+        "http"
+    ],
     "basePath": "/python-build",
     "info": {
         "title": {},

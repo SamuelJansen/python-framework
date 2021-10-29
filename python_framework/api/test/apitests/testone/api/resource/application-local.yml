@@ -15,4 +15,5 @@ api:
             check_same_thread: False
 
 swagger:
+    schemes: [${api.server.scheme}]
     host: ${api.server.host}:${api.server.port}

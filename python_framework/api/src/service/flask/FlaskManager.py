@@ -11,6 +11,7 @@ from python_framework.api.src.service import Security
 from python_framework.api.src.service.openapi import OpenApiManager
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
+from python_framework.api.src.constant import ConfigurationKeyConstant
 import globals
 import json
 
@@ -171,7 +172,7 @@ def muteLogs(api) :
     werkzeug_logger = logging.getLogger('werkzeug')
     werkzeug_logger.disabled = True
     api.app.logger.disabled = True
-    apschedulerLoggerEnabled = api.globals.getApiSetting('api.scheduler.enable')
+    apschedulerLoggerEnabled = api.globals.getApiSetting(ConfigurationKeyConstant.SCHEDULER_ENABLE_KEY)
     apscheduler_logger = logging.getLogger('apscheduler.scheduler')
     default_apscheduler_logger = logging.getLogger('apscheduler.executors.default')
     apscheduler_logger.disabled = True if ObjectHelper.isNone(apschedulerLoggerEnabled) else not apschedulerLoggerEnabled
@@ -560,7 +561,7 @@ def validateResponseClass(responseClass, controllerResponse) :
     if ObjectHelper.isNotNone(responseClass) :
         if Serializer.isSerializerList(responseClass) :
             if 0 == len(responseClass) :
-                log.warning(validateResponseClass,f'"responseClass" was not defined')
+                log.log(validateResponseClass,f'"responseClass" was not defined')
             elif 1 == len(responseClass) :
                 if ObjectHelper.isNotList(responseClass[0])  :
                     if not isinstance(controllerResponse[0], responseClass[0]) :
@@ -574,7 +575,7 @@ def validateResponseClass(responseClass, controllerResponse) :
             if not isinstance(controllerResponse[0], responseClass) :
                 raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass.__name__}", response "{controllerResponse[0].__class__.__name__}"')
     else :
-        log.warning(validateResponseClass,f'"responseClass" was not defined')
+        log.log(validateResponseClass,f'"responseClass" was not defined')
 
 def getClassName(instance) :
     return instance.__class__.__name__

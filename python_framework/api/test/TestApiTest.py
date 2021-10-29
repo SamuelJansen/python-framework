@@ -75,7 +75,7 @@ def getProcess(command, path, muteLogs=False) :
 # )
 # time.sleep(3)
 
-GET_ACTUATOR_HEALTH_CONTROLLER = f'/actuator/health'
+GET_ACTUATOR_HEALTH_CONTROLLER = f'/health'
 TEST_CONTROLLER = '/test-controller'
 TEST_BATCH_CONTROLLER = f'{TEST_CONTROLLER}/batch'
 
@@ -135,13 +135,13 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
     # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
     # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
 
-    # print(f'responseGetNone: {responseGetNone.json()}')
-    # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
-    #
-    # print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
-    # print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
-    # print(f'responsePostSendPayloadBatch: {responsePostSendPayloadBatch.json()}')
-    # print(f'responsePostSendPayloadListBatch: {responsePostSendPayloadListBatch.json()}')
+    print(f'responseGetHealth: {responseGetHealth.json()}')
+    print(f'responseGetNone: {responseGetNone.json()}')
+    print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
+    print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
+    print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
+    print(f'responsePostSendPayloadBatch: {responsePostSendPayloadBatch.json()}')
+    print(f'responsePostSendPayloadListBatch: {responsePostSendPayloadListBatch.json()}')
 
     # assert
     assert ObjectHelper.equals(

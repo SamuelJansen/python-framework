@@ -2,10 +2,16 @@ from python_helper import Constant as c
 from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringHelper
 from python_framework.api.src.enumeration.SchedulerType import SchedulerType
 from python_framework.api.src.service.flask import FlaskManager
+from python_framework.api.src.constant import ConfigurationKeyConstant
+from python_framework.api.src.converter.static import ConverterStatic
+
+
+DEFAUTL_MUTE_LOGS = False
+DEFAUTL_DISABLE = False
 
 
 @Function
-def Scheduler(*schedulerArgs, disable=False, muteLogs=False, **schedulerKwargs) :
+def Scheduler(*schedulerArgs, disable=False, muteLogs=DEFAUTL_MUTE_LOGS, **schedulerKwargs) :
     def Wrapper(OuterClass, *args, **kwargs):
         log.debug(Scheduler,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
@@ -15,15 +21,15 @@ def Scheduler(*schedulerArgs, disable=False, muteLogs=False, **schedulerKwargs) 
                 OuterClass.__init__(self,*args,**kwargs)
                 self.globals = apiInstance.globals
                 self.service = apiInstance.resource.service
-                self.enabled = self.globals.getApiSetting('api.scheduler.enable')
+                self.enabled = self.globals.getApiSetting(ConfigurationKeyConstant.SCHEDULER_ENABLE_KEY)
                 self.disabled = disable
-                self.muteLogs = muteLogs
+                self.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.SCHEDULER_MUTE_LOGS_KEY), DEFAUTL_MUTE_LOGS)
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
 
 @Function
-def SchedulerMethod(*methodArgs, requestClass=None, disable=False, muteLogs=False, **methodKwargs) :
+def SchedulerMethod(*methodArgs, requestClass=None, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **methodKwargs) :
     resourceMethodDisable = disable
     resourceMethodMuteLogs = muteLogs
     def innerMethodWrapper(resourceMethod, *innerMethodArgs, **innerMethodKwargs) :
@@ -36,7 +42,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=False, muteLogs=Fals
         weekDays = methodKwargs.pop('weekDays', None)
         resourceMethod.disabled = disable
         resourceMethod.shedulerId = methodKwargs['id']
-        resourceMethod.muteLogs = muteLogs
+        resourceMethod.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.SCHEDULER_MUTE_LOGS_KEY), DEFAUTL_MUTE_LOGS)
         if ObjectHelper.isNotEmpty(methodArgs) and SchedulerType.CRON == methodArgs[0] and ObjectHelper.isNotNone(weekDays) and StringHelper.isNotBlank(weekDays) :
             methodKwargs['day_of_week'] = weekDays
         if ObjectHelper.isNotNone(instancesUpTo) :
