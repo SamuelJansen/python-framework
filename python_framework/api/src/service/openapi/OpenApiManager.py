@@ -228,14 +228,13 @@ def addQueryParamListToUrlVerb(verb, url, endPointUrl, requestParamClass, docume
                     k.DESCRIPTION : None
                 })
         elif 1 == len(requestParamClass) :
-            if ObjectHelper.isNotNone(requestParamClass[0])
-                if ObjectHelper.isNotList(requestParamClass[0]) :
+            if ObjectHelper.isNotNone(requestParamClass[0]):
+                if ObjectHelper.isNotList(requestParamClass[0]):
                     addQueryParamListToUrlVerb(verb, url, endPointUrl, requestParamClass[0], documentation) ###-, where=where
-                elif ObjectHelper.isList(requestParamClass[0]) and 1 == len(requestParamClass[0]) :
-                    if ObjectHelper.isNotNone(requestParamClass[0][0])
-                        if ObjectHelper.isNotList(requestParamClass[0][0]) :
-                            # addQueryParamListToUrlVerb(verb, url, endPointUrl, requestParamClass[0][0], documentation) ###-, where=where
-                            log.warning(addQueryParamListToUrlVerb, f'Request param class as list not implemented yet. requestParamClass: {requestParamClass}')
+                elif ObjectHelper.isList(requestParamClass[0]) and 1 == len(requestParamClass[0]):
+                    if ObjectHelper.isNotNone(requestParamClass[0][0]) and ObjectHelper.isNotList(requestParamClass[0][0]) :
+                        # addQueryParamListToUrlVerb(verb, url, endPointUrl, requestParamClass[0][0], documentation) ###-, where=where
+                        log.warning(addQueryParamListToUrlVerb, f'Request param class as list not implemented yet. requestParamClass: {requestParamClass}')
         log.warning(addQueryParamListToUrlVerb, f'Unexpected request param class. requestParamClass: {requestParamClass}')
 
 def addHeadersListToUrlVerb(verb, url, endPointUrl, requestHeaderClass, documentation):
