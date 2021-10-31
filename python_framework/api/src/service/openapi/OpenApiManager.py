@@ -197,20 +197,7 @@ def addConsumesAndProducesToUrlVerb(verb, url, consumes, produces, documentation
     if not produces in documentation[k.PATHS][url][verb][k.PRODUCES] :
         documentation[k.PATHS][url][verb][k.PRODUCES].append(produces)
 
-def addUrlParamListToUrlVerb(verb, url, endPointUrl, requestParamClass, documentation):
-    # if c.LESSER in url :
-    #     attributeList = url.split(c.LESSER)
-    #     for attributeUrl in attributeList :
-    #         if c.BIGGER in attributeUrl :
-    #             filteredAttributeUrl = attributeUrl.split(c.BIGGER)[0]
-    #             attributeUrlTypeAndName = filteredAttributeUrl.split(c.COLON)
-    #             documentation[k.PATHS][url][verb][k.PARAMETERS].append({
-    #                 k.NAME : attributeUrlTypeAndName[1],
-    #                 k.TYPE : getAttributeType(attributeUrlTypeAndName[0]),
-    #                 k.IN : v.PATH,
-    #                 k.REQUIRED: True,
-    #                 k.DESCRIPTION : None
-    #             })
+def addUrlParamListToUrlVerb(verb, url, endPointUrl, requestParamClass, documentation, requestParamType=v.OBJECT):
     if c.LESSER in endPointUrl :
         attributeList = endPointUrl.split(c.LESSER)
         for attributeUrl in attributeList :
@@ -225,14 +212,25 @@ def addUrlParamListToUrlVerb(verb, url, endPointUrl, requestParamClass, document
                     k.DESCRIPTION : None
                 })
     if ObjectHelper.isNotNone(requestParamClass):
-        for attributeName in ReflectionHelper.getAttributeOrMethodNameList(requestParamClass):
-            documentation[k.PATHS][url][verb][k.PARAMETERS].append({
-                k.NAME : attributeName,
-                k.TYPE : v.STRING,
-                k.IN : v.QUERY,
-                k.REQUIRED: False,
-                k.DESCRIPTION : None
-            })
+        log.log(addUrlParamListToUrlVerb, f'verb: {verb}, url: {url}, requestParamClass: {requestParamClass}')
+        if ObjectHelper.isNotList(requestParamClass):
+            for attributeName in ReflectionHelper.getAttributeOrMethodNameList(requestParamClass):
+                documentation[k.PATHS][url][verb][k.PARAMETERS].append({
+                    k.NAME : attributeName,
+                    k.TYPE : v.STRING,
+                    k.IN : v.QUERY,
+                    k.REQUIRED: False,
+                    k.DESCRIPTION : None
+                })
+        elif 1 == len(requestParamClass) :
+            if requestParamClass[0] and ObjectHelper.isNotList(requestParamClass[0]) :
+                addUrlParamListToUrlVerb(verb, url, endPointUrl, requestParamClass[0], documentation) ###-, where=where
+            elif 1 == len(requestParamClass[0]) :
+                if dtoClass[0][0] and ObjectHelper.isNotList(dtoClass[0][0]) :
+                    # addUrlParamListToUrlVerb(verb, url, endPointUrl, requestParamClass[0][0], documentation, requestParamType=v.ARRAY) ###-, where=where
+                    log.warning(addUrlParamListToUrlVerb, f'Query param as list not implemented yet. requestParamClass: {requestParamClass}')
+        raise log.warning(addUrlParamListToUrlVerb, f'Unexpected queryParam: {requestParamClass}')
+
 
 def getAttributeType(typeUrlParam):
     if c.TYPE_INTEGER == typeUrlParam :
