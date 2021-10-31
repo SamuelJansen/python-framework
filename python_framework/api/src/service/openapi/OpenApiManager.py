@@ -133,6 +133,7 @@ def addEndPointDocumentation(endPointUrl, controllerMethod, controller, apiInsta
             addTagToUrlVerb(verb, url, controller.tag, apiInstance.documentation)
             addConsumesAndProducesToUrlVerb(verb, url, controllerMethod.consumes, controllerMethod.produces, apiInstance.documentation)
             addSecurity(verb, url, controllerMethod.roleRequired, apiInstance.documentation)
+            addHeadersListToUrlVerb(verb, url, endPointUrl, controllerMethod.requestHeaderClass, apiInstance.documentation)
             addUrlParamListToUrlVerb(verb, url, endPointUrl, apiInstance.documentation)
             addQueryParamListToUrlVerb(verb, url, endPointUrl, controllerMethod.requestParamClass, apiInstance.documentation)
             addRequestToUrlVerb(verb, url, controllerMethod.requestClass, apiInstance.documentation)
@@ -238,26 +239,28 @@ def addQueryParamListToUrlVerb(verb, url, endPointUrl, requestParamClass, docume
         log.warning(addQueryParamListToUrlVerb, f'Unexpected request param class. requestParamClass: {requestParamClass}')
 
 def addHeadersListToUrlVerb(verb, url, endPointUrl, requestHeaderClass, documentation):
-    # if ObjectHelper.isNotNone(requestParamClass):
-    #     log.log(addQueryParamListToUrlVerb, f'verb: {verb}, url: {url}, requestParamClass: {requestParamClass}')
-    #     if ObjectHelper.isNotList(requestParamClass):
-    #         for attributeName in ReflectionHelper.getAttributeOrMethodNameList(requestParamClass):
-    #             documentation[k.PATHS][url][verb][k.PARAMETERS].append({
-    #                 k.NAME : attributeName,
-    #                 k.TYPE : v.STRING,
-    #                 k.IN : v.QUERY,
-    #                 k.REQUIRED: False,
-    #                 k.DESCRIPTION : None
-    #             })
-    #     elif 1 == len(requestParamClass) :
-    #         if requestParamClass[0] and ObjectHelper.isNotList(requestParamClass[0]) :
-    #             addQueryParamListToUrlVerb(verb, url, endPointUrl, requestParamClass[0], documentation) ###-, where=where
-    #         elif 1 == len(requestParamClass[0]) :
-    #             if dtoClass[0][0] and ObjectHelper.isNotList(dtoClass[0][0]) :
-    #                 # addQueryParamListToUrlVerb(verb, url, endPointUrl, requestParamClass[0][0], documentation) ###-, where=where
-    #                 log.warning(addQueryParamListToUrlVerb, f'Query param as list not implemented yet. requestParamClass: {requestParamClass}')
-    #     log.warning(addQueryParamListToUrlVerb, f'Unexpected queryParam: {requestParamClass}')
-    ...
+    if ObjectHelper.isList(requestHeaderClass) and 0 == len(requestHeaderClass):
+        log.warning(addHeadersListToUrlVerb, f'Invalid request header class. requestHeaderClass: {requestHeaderClass}')
+    if ObjectHelper.isNotNone(requestHeaderClass):
+        log.log(addHeadersListToUrlVerb, f'verb: {verb}, url: {url}, requestHeaderClass: {requestHeaderClass}')
+        if ObjectHelper.isNotList(requestHeaderClass):
+            for attributeName in ReflectionHelper.getAttributeOrMethodNameList(requestHeaderClass):
+                documentation[k.PATHS][url][verb][k.PARAMETERS].append({
+                    k.NAME : attributeName,
+                    k.IN : v.HEADER,
+                    k.TYPE : v.STRING,
+                    k.REQUIRED: True,
+                    k.DESCRIPTION : None
+                })
+        elif 1 == len(requestHeaderClass) :
+            if ObjectHelper.isNotNone(requestHeaderClass[0]):
+                if ObjectHelper.isNotList(requestHeaderClass[0]):
+                    addHeadersListToUrlVerb(verb, url, endPointUrl, requestHeaderClass[0], documentation) ###-, where=where
+                elif ObjectHelper.isList(requestHeaderClass[0]) and 1 == len(requestHeaderClass[0]):
+                    if ObjectHelper.isNotNone(requestHeaderClass[0][0]) and ObjectHelper.isNotList(requestHeaderClass[0][0]) :
+                        # addHeadersListToUrlVerb(verb, url, endPointUrl, requestHeaderClass[0][0], documentation) ###-, where=where
+                        log.warning(addHeadersListToUrlVerb, f'Request header class as list not implemented yet. requestHeaderClass: {requestHeaderClass}')
+        log.warning(addHeadersListToUrlVerb, f'Unexpected request header class. requestHeaderClass: {requestHeaderClass}')
 
 def getAttributeType(typeUrlParam):
     if c.TYPE_INTEGER == typeUrlParam :

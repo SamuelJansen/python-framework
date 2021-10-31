@@ -323,9 +323,8 @@ class SqlAlchemyProxy:
 
     @Method
     def findAllByQueryAndCommit(self, query, modelClass):
-        objectList = []
-        if query :
-            objectList = self.session.query(modelClass).filter_by(**query).all()
+        if ObjectHelper.isNotNone(query) :
+            objectList = self.session.query(modelClass).filter_by(**{k: v for k, v in query.items() if ObjectHelper.isNotNone(v)}).all()
         self.session.commit()
         return objectList
 
