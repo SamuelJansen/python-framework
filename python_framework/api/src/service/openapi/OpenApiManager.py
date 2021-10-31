@@ -133,7 +133,7 @@ def addEndPointDocumentation(endPointUrl, controllerMethod, controller, apiInsta
             addTagToUrlVerb(verb, url, controller.tag, apiInstance.documentation)
             addConsumesAndProducesToUrlVerb(verb, url, controllerMethod.consumes, controllerMethod.produces, apiInstance.documentation)
             addSecurity(verb, url, controllerMethod.roleRequired, apiInstance.documentation)
-            addUrlParamListToUrlVerb(verb, url, endPointUrl, apiInstance.documentation)
+            addUrlParamListToUrlVerb(verb, url, endPointUrl, controllerMethod.requestParamClass, apiInstance.documentation)
             addRequestToUrlVerb(verb, url, controllerMethod.requestClass, apiInstance.documentation)
             addResponseToUrlVerb(verb, url, controllerMethod.responseClass, apiInstance.documentation)
     except Exception as exception :
@@ -197,7 +197,7 @@ def addConsumesAndProducesToUrlVerb(verb, url, consumes, produces, documentation
     if not produces in documentation[k.PATHS][url][verb][k.PRODUCES] :
         documentation[k.PATHS][url][verb][k.PRODUCES].append(produces)
 
-def addUrlParamListToUrlVerb(verb, url, endPointUrl, documentation):
+def addUrlParamListToUrlVerb(verb, url, endPointUrl, requestParamClass, documentation):
     # if c.LESSER in url :
     #     attributeList = url.split(c.LESSER)
     #     for attributeUrl in attributeList :
@@ -224,10 +224,21 @@ def addUrlParamListToUrlVerb(verb, url, endPointUrl, documentation):
                     k.REQUIRED: True,
                     k.DESCRIPTION : None
                 })
+    if ObjectHelper.isNotNone(requestParamClass):
+        for attributeName in ReflectionHelper.getAttributeOrMethodNameList(requestParamClass):
+            documentation[k.PATHS][url][verb][k.PARAMETERS].append({
+                k.NAME : attributeName,
+                k.TYPE : v.STRING,
+                k.IN : v.QUERY,
+                k.REQUIRED: False,
+                k.DESCRIPTION : None
+            })
 
 def getAttributeType(typeUrlParam):
     if c.TYPE_INTEGER == typeUrlParam :
         return v.INTEGER
+    if c.TYPE_STRING == typeUrlParam:
+        return v.STRING
     return typeUrlParam
 
 def getUrl(endPointUrl, baseUrl):

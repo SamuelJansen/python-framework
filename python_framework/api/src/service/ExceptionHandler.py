@@ -108,9 +108,13 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
             apiInstance = FlaskManager.getApi()
         else:
             apiInstance = api
+            try:
+                apiInstance.repository.commit()
+            except Exception as preCommitException:
+                log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
         apiInstance.repository.saveAndCommit(httpErrorLog)
     except Exception as errorLogException :
-        log.warning(resourceInstance.__class__, f'Failed to persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
+        log.warning(handleLogErrorException, f'Failed to persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
     return exception
 
 def safellyGetUrl() :
