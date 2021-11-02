@@ -29,7 +29,7 @@ def getJti(*arg,**kwargs) :
     return getRawJwt(*arg,**kwargs)[JwtConstant.KW_JTI]
 
 @EncapsulateItWithGlobalException(message=JwtConstant.FORBIDDEN_MESSAGE, status=HttpStatus.FORBIDDEN)
-def getRole(*arg,**kwargs) :
+def getGroup(*arg,**kwargs) :
     return getRawJwt(*arg,**kwargs)[JwtConstant.KW_USER_CLAIMS]
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)

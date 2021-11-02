@@ -7,11 +7,13 @@ from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service import ExceptionHandler
 from python_framework.api.src.service.ExceptionHandler import GlobalException
+from python_framework.api.src.service import SessionManager
 from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service.openapi import OpenApiManager
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
 from python_framework.api.src.constant import ConfigurationKeyConstant
+from python_framework.api.src.constant import JwtConstant
 import globals
 import json
 
@@ -206,7 +208,7 @@ def validateBodyAsJson(requestBodyAsJson, requestClass) :
         if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)) :
             raise GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
 
-@EncapsulateItWithGlobalException(message=SecurityManager.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 @SecurityManager.jwtRequired
 def securedControllerMethod(
     args,
@@ -222,10 +224,11 @@ def securedControllerMethod(
     logRequest
 ) :
     if ObjectHelper.isNotEmptyCollection(roleRequired):
-        if not SecurityManager.getRole() in roleRequired :
+        role = SessionManager.getGroup()
+        if not role in roleRequired :
             raise GlobalException(
                 message = 'Role not allowed',
-                logMessage = f'''Role {SecurityManager.getRole()} trying to access denied resourse''',
+                logMessage = f'''Role {role} trying to access denied resourse. Allowed roles: {sessionRequired}''',
                 status = HttpStatus.FORBIDDEN
             )
     return sessionControllerMethod(
@@ -241,7 +244,7 @@ def securedControllerMethod(
         logRequest
     )
 
-@EncapsulateItWithGlobalException(message=SessionManager.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 @SessionManager.jwtRequired
 def sessionControllerMethod(
     args,
@@ -256,10 +259,11 @@ def sessionControllerMethod(
     logRequest
 ) :
     if ObjectHelper.isNotEmptyCollection(sessionRequired):
-        if not SessionManager.getRole() in sessionRequired :
+        group = SessionManager.getGroup()
+        if not session in sessionRequired :
             raise GlobalException(
                 message = 'Session not allowed',
-                logMessage = f'''Session {SecurityManager.getRole()} trying to access denied resourse''',
+                logMessage = f'''Session {group} trying to access denied resourse. Allowed groups: {sessionRequired}''',
                 status = HttpStatus.FORBIDDEN
             )
     return publicControllerMethod(
