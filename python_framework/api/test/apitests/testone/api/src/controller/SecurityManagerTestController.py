@@ -17,7 +17,7 @@ class SecurityManagerTestController:
         logResponse = True,
         roleRequired=['TEST_ROLE']
     )
-    def get(self, dto):
+    def get(self):
         return {
             'secured': 'information',
             'currentUser': SecurityManager.getCurrentUser()

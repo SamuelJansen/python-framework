@@ -465,10 +465,9 @@ def pythonRun_securityManager() :
 
     responseLogin = session.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
 
-    print(responseLogin.json())
-
-    headers['Authorization'] = authorization = responseLogin.json().get('accessToken')
-    responseGetConsume = session.get(BASE_URL + GET_CONSUME_URI, headers=headers)
+    authorization = responseLogin.json().get('accessToken')
+    headers['Authorization'] = 'Bearer ' + authorization
+    responseGetConsume = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
 
     # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
     # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
@@ -488,4 +487,5 @@ def pythonRun_securityManager() :
     )
     assert 200 == responseGetHealth.status_code
 
+    print('end of test')
     killProcesses(process)

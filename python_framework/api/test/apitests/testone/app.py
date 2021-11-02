@@ -7,6 +7,8 @@ globalsInstance = globals.newGlobalsInstance(__file__
     , loadLocalConfig = SettingHelper.activeEnvironmentIsDefault()
 
     , settingStatus = True
+    , statusStatus = True
+    , infoStatus = True
     , successStatus = True
     , errorStatus = True
 
