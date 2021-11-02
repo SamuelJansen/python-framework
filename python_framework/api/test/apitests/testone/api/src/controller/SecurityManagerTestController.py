@@ -1,5 +1,6 @@
 from python_helper import EnvironmentHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service.flask.FlaskManager import Controller, ControllerMethod
 
 
@@ -17,9 +18,9 @@ class SecurityManagerTestController:
         roleRequired=['TEST_ROLE']
     )
     def get(self, dto):
-        accessToken = Security.createAccessToken(model, deltaMinutes=VALID_TOKEN_MINUTES_DURATION)
         return {
-            'accessToken': accessToken
+            'secured': 'information',
+            'currentUser': SecurityManager.getCurrentUser()
         }, HttpStatus.OK
 
     @ControllerMethod(
@@ -32,7 +33,7 @@ class SecurityManagerTestController:
     def post(self, dto):
         dto['role'] = 'TEST_ROLE'
         return {
-            'accessToken': Security.createAccessToken(dto, deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=dto.get('headers'))
+            'accessToken': SecurityManager.createAccessToken(dto, deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=dto.get('headers'))
         }, HttpStatus.OK
 
     @ControllerMethod(
@@ -46,7 +47,7 @@ class SecurityManagerTestController:
     def patch(self, dto):
         dto['role'] = 'TEST_ROLE_REFRESH'
         return {
-            'accessToken': Security.refreshAccessToken(dto, deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=dto.get('headers'))
+            'accessToken': SecurityManager.refreshAccessToken(dto, deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=dto.get('headers'))
         }, HttpStatus.OK
 
     @ControllerMethod(

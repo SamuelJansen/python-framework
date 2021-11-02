@@ -67,7 +67,7 @@
                 }
             }
         },
-        "/test/actuator/health/999/{status}/{secondStatus}": {
+        "/test/actuator/health/1125/{status}/{secondStatus}": {
             "get": {
                 "parameters": [
                     {
@@ -169,7 +169,7 @@
                 }
             }
         },
-        "/test/actuator/health/999": {
+        "/test/actuator/health/1125": {
             "put": {
                 "parameters": [
                     {
@@ -416,7 +416,7 @@
                 }
             }
         },
-        "/test/999/security-manager/consume": {
+        "/test/1125/security-manager/consume": {
             "get": {
                 "parameters": [
                     {
@@ -446,7 +446,7 @@
                 }
             }
         },
-        "/test/999/security-manager/refresh": {
+        "/test/1125/security-manager/refresh": {
             "patch": {
                 "parameters": [
                     {
@@ -486,7 +486,7 @@
                 }
             }
         },
-        "/test/999/security-manager/login": {
+        "/test/1125/security-manager/login": {
             "post": {
                 "parameters": [
                     {
@@ -519,7 +519,7 @@
                 }
             }
         },
-        "/test/999/security-manager/logout": {
+        "/test/1125/security-manager/logout": {
             "put": {
                 "parameters": [
                     {

@@ -4,6 +4,8 @@ from flask_jwt_extended import (
     create_access_token, create_refresh_token,
     jwt_refresh_token_required, get_raw_jwt
 )
+from flask_jwt_extended.internal_utils import get_jwt_manager
+
 from python_helper import Constant as c
 from python_helper import log, Function
 import datetime
@@ -72,11 +74,12 @@ def createAccessToken(user, deltaMinutes=None, headers=None) :
     ###- datetime.datetime.utcnow()
     if deltaMinutes :
         deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
+    id, role = getIdAndRole(user)
     return create_access_token(
-        identity = user.id,
+        identity = id,
+        user_claims = role,
         fresh = False,
         expires_delta = deltaMinutes,
-        user_claims = user.role,
         headers = headers
     )
 
@@ -85,10 +88,35 @@ def refreshAccessToken(user, deltaMinutes=None, headers=None) :
     ###- datetime.datetime.utcnow()
     if ObjectHelper.isNotNone(deltaMinutes) :
         deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
+    id, role = getIdAndRole(user)
+    ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_refresh_token
+    # jwtManager = get_jwt_manager()
+    # jwtManager._encode_jwt_from_config(
+    #     identity=id,
+    #     claims=role,
+    #     expires_delta=expires_delta,
+    #     fresh=False,
+    #     headers=additional_headers,
+    #     token_type="refresh",
+    # )
     return create_refresh_token(
-        identity = user.id,
+        identity = id,
+        user_claims = role,
         fresh = False,
         expires_delta = deltaMinutes,
-        user_claims = user.role,
         headers = headers
     )
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getCurrentUser():
+    return get_current_user()
+
+def getIdAndRole(user):
+    id = role = None
+    if ObjectHelper.isDictionary(user):
+        id = user.get('id')
+        role = user.get('role')
+    else:
+        id = user.id
+        role = user.role
+    return id, role

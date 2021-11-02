@@ -5,7 +5,7 @@ EnvironmentHelper.update("URL_VARIANT", RandomHelper.integer(minimum=0, maximum=
 log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
 
 from python_helper import TestHelper
-TestHelper.run(__file__)
+# TestHelper.run(__file__)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
@@ -18,13 +18,13 @@ TestHelper.run(__file__)
 #         'GlobalExceptionAnnotationTest.encapsulateItWithGlobalException_withParameters_GlobalException'
 #     ]
 # )
-# TestHelper.run(
-#     __file__,
-#     runOnly = [
-#         'TestApiTest.pythonRun_securityManager'
-#         # 'TestApiTest.testing_Client'
-#     ]
-# )
+TestHelper.run(
+    __file__,
+    runOnly = [
+        'TestApiTest.pythonRun_securityManager'
+        # 'TestApiTest.testing_Client'
+    ]
+)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
