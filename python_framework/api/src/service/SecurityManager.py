@@ -2,7 +2,6 @@ from flask_jwt_extended import (
     JWTManager,
     get_raw_jwt,
     jwt_required,
-    get_jwt_manager,
     get_current_user,
     get_jwt_identity,
     create_access_token,
