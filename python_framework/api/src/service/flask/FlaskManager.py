@@ -4,9 +4,9 @@ from python_framework.api.src.service import WebBrowser
 from python_helper import Constant as c
 from python_helper import log, Function, ReflectionHelper, ObjectHelper, SettingHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service import ExceptionHandler
-from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.service import SessionManager
 from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service.openapi import OpenApiManager
@@ -222,7 +222,7 @@ def handleControllerMethodRequest(
     logRequest
 ) :
     if ObjectHelper.isNotEmptyCollection(roleRequired):
-        validateSecuredControllerMethod(
+        SecurityManager.validateSecuredControllerMethod(
             args,
             kwargs,
             contentType,
@@ -259,27 +259,27 @@ def handleControllerMethodRequest(
         logRequest
     )
 
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-@SecurityManager.jwtRequired
-def validateSecuredControllerMethod(
-    args,
-    kwargs,
-    contentType,
-    resourceInstance,
-    resourceInstanceMethod,
-    roleRequired,
-    requestHeaderClass,
-    requestParamClass,
-    requestClass,
-    logRequest
-) :
-    role = SessionManager.getGroup()
-    if not role in roleRequired :
-        raise GlobalException(
-            message = 'Role not allowed',
-            logMessage = f'''Role {role} trying to access denied resourse. Allowed roles: {roleRequired}''',
-            status = HttpStatus.FORBIDDEN
-        )
+# @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+# @SecurityManager.jwtRequired
+# def validateSecuredControllerMethod(
+#     args,
+#     kwargs,
+#     contentType,
+#     resourceInstance,
+#     resourceInstanceMethod,
+#     roleRequired,
+#     requestHeaderClass,
+#     requestParamClass,
+#     requestClass,
+#     logRequest
+# ) :
+#     role = SecurityManager.getRoleList()
+#     if not role in roleRequired :
+#         raise GlobalException(
+#             message = 'Role not allowed',
+#             logMessage = f'''Role {role} trying to access denied resourse. Allowed roles: {roleRequired}''',
+#             status = HttpStatus.FORBIDDEN
+#         )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 @SessionManager.jwtRequired

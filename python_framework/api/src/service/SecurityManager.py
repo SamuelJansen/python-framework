@@ -15,6 +15,7 @@ import datetime
 
 from python_framework.api.src.constant import JwtConstant
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
 
 
@@ -26,6 +27,14 @@ def getRawJwt(*arg,**kwargs) :
     return get_raw_jwt(*arg,**kwargs)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getContext(rawJwt):
+    return None if ObjectHelper.isNone(rawJwt) else awJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getData(rawJwt):
+    return None if ObjectHelper.isNone(rawJwt) else awJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def jwtRequired(*arg,**kwargs) :
     return jwt_required(*arg,**kwargs)
 
@@ -34,8 +43,8 @@ def getJti(*arg,**kwargs) :
     return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.FORBIDDEN_MESSAGE, status=HttpStatus.FORBIDDEN)
-def getRole(*arg,**kwargs) :
-    return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_CLAIMS)
+def getRoleList(*arg,**kwargs) :
+    return getContext(getRawJwt(*arg,**kwargs))
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(*arg,**kwargs) :
@@ -120,7 +129,7 @@ def getCurrentUser(*args, userClass=None, **kwargs):
             return {
                 'id': id,
                 'roles': roleList,
-                'data': rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
+                'data': getData(rawJwt)
             }
         else:
             currentUsert = userClass()
@@ -128,9 +137,10 @@ def getCurrentUser(*args, userClass=None, **kwargs):
                 'id': id,
                 'roles': roleList
             }
-            for attributeName in rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA):
+            data = getData(rawJwt)
+            for attributeName in data:
                 if ReflectionHelper.hasAttributeOrMethod(currentUsert, attributeName):
-                    ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(attributeName))
+                    ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
             return currentUsert
 
 def getIdAndRoleListFromUser(user):
@@ -145,5 +155,26 @@ def getIdAndRoleListFromUser(user):
 
 def getIdAndRoleListFromRawJwt(rawJwt):
     id = rawJwt.get(JwtConstant.KW_IDENTITY)
-    roleList = rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
+    roleList = getContext(rawJwt)
     return id, roleList
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@jwtRequired
+def validateSecuredControllerMethod(
+    args,
+    kwargs,
+    contentType,
+    resourceInstance,
+    resourceInstanceMethod,
+    roleRequired,
+    requestHeaderClass,
+    requestParamClass,
+    requestClass,
+    logRequest
+) :
+    if not any(role in set(getRoleList()) for role in roleRequired) :
+        raise GlobalException(
+            message = 'Role not allowed',
+            logMessage = f'''Role {role} trying to access denied resourse. Allowed roles: {roleRequired}''',
+            status = HttpStatus.FORBIDDEN
+        )
