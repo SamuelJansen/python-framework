@@ -28,11 +28,11 @@ def getRawJwt(*arg,**kwargs) :
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getContext(rawJwt):
-    return None if ObjectHelper.isNone(rawJwt) else awJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
+    return None if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getData(rawJwt):
-    return None if ObjectHelper.isNone(rawJwt) else awJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
+    return None if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def jwtRequired(*arg,**kwargs) :
