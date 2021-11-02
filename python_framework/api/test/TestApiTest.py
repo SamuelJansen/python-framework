@@ -315,6 +315,7 @@ def testing_Client() :
 def testing_Client() :
     #arrange
     muteLogs = False
+    ### - port on python-build config
     process = getProcess(
         f'python app.py',
         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
@@ -331,7 +332,7 @@ def testing_Client() :
 def pythonRun_worksProperly() :
     # arrange
     muteLogs = False
-    devServerPort = 5001
+    devServerPort = 5001 ### - on local config
     process = getProcess(
         f'python app.py',
         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
@@ -423,5 +424,68 @@ def pythonRun_worksProperly() :
         ignoreKeyList=['timestamp']
     )
     assert 400 == responsePostSendPayloadListBatch.status_code
+
+    killProcesses(process)
+
+
+@Test(environmentVariables={
+    SettingHelper.ACTIVE_ENVIRONMENT : 'security-manager'
+})
+def pythonRun_securityManager() :
+    # arrange
+    muteLogs = False
+    securityServerPort = 5011 ### - on security-manager config
+    process = getProcess(
+        f'python app.py',
+        f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
+        muteLogs = muteLogs
+    )
+    BASE_URL = f'http://localhost:{securityServerPort}/security-manager-api'
+    BASE_URI = f'{BASE_URL}/test/{EnvironmentHelper.get("URL_VARIANT")}/security-manager'
+    POST_LOGIN_URI = '/login'
+    GET_CONSUME_URI = '/consume'
+    PATCH_REFRESH_URI = '/refresh'
+    PUT_LOGOUT_URI = '/logout'
+    SECURITY_HEADERS = {'some': 'headers'}
+    time.sleep(10 * ESTIMATED_BUILD_TIME_IN_SECONDS)
+
+    # act
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
+        'Cache-Control': 'no-cache'
+    }
+    payload = {
+        'id': time.time(),
+        'headers': {**SECURITY_HEADERS}
+    }
+
+    session = requests.Session()
+
+    responseGetHealth = session.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER, headers=headers)
+
+    responseLogin = session.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
+
+    print(responseLogin.json())
+
+    headers['Authorization'] = authorization = responseLogin.json().get('accessToken')
+    responseGetConsume = session.get(BASE_URL + GET_CONSUME_URI, headers=headers)
+
+    # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
+    # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
+
+    # print(f'responseGetNone: {responseGetNone.json()}')
+    # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
+    #
+    # print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
+    # print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
+    # print(f'responsePostSendPayloadBatch: {responsePostSendPayloadBatch.json()}')
+    # print(f'responsePostSendPayloadListBatch: {responsePostSendPayloadListBatch.json()}')
+
+    # assert
+    assert ObjectHelper.equals(
+        {'status':'UP'},
+        responseGetHealth.json()
+    )
+    assert 200 == responseGetHealth.status_code
 
     killProcesses(process)

@@ -6,4 +6,6 @@ API_SERVER_HOST = 'api.server.host'
 API_SERVER_PORT = 'api.server.port'
 API_SERVER_BASE_URL = 'api.server.base-url'
 
+API_SESSION_SECRET = 'api.session.secret'
+
 API_SECURITY_SECRET = 'api.security.secret'

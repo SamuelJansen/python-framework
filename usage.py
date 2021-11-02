@@ -13,8 +13,8 @@ log.debug(Serializer, 'imported')
 from python_framework.api.src.service.ExceptionHandler import GlobalException
 log.debug(GlobalException, 'imported')
 
-from python_framework.api.src.service import Security
-log.debug(Security, 'imported')
+from python_framework.api.src.service import SecurityManager
+log.debug(SecurityManager, 'imported')
 
 from python_framework.api.src.service import SqlAlchemyProxy
 log.debug(SqlAlchemyProxy, 'imported')

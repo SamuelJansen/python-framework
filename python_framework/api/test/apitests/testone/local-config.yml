@@ -18,6 +18,9 @@ environment:
     active-environment:
         key: ACTIVE_ENVIRONMENT
         value: local
+    session:
+        key: SESSION_KEY
+        value: default-session-key
     security:
         key: SECURITY_KEY
-        value: not-secured-at-all
+        value: default-security-key

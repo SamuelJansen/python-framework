@@ -7,7 +7,7 @@ from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service import ExceptionHandler
 from python_framework.api.src.service.ExceptionHandler import GlobalException
-from python_framework.api.src.service import Security
+from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service.openapi import OpenApiManager
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
@@ -29,10 +29,13 @@ KW_RESOURCE = 'resource'
 
 PYTHON_FRAMEWORK_MODULE_NAME = 'python_framework'
 PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST = [
-    'python_framework',
+    PYTHON_FRAMEWORK_MODULE_NAME,
     'TestApi',
     'DevTestApi',
-    'LocalTestApi'
+    'LocalTestApi',
+    'SecurityManagerTestApi',
+    'SessionManagerTestApi',
+    'SecurityManagerAndSessionManagerTestApi'
 ]
 KW_CONTROLLER_RESOURCE = 'Controller'
 KW_SCHEDULER_RESOURCE = 'Scheduler'
@@ -203,26 +206,62 @@ def validateBodyAsJson(requestBodyAsJson, requestClass) :
         if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)) :
             raise GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
 
-@EncapsulateItWithGlobalException(message=Security.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-@Security.jwtRequired
+@EncapsulateItWithGlobalException(message=SecurityManager.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@SecurityManager.jwtRequired
 def securedControllerMethod(
     args,
     kwargs,
     contentType,
     resourceInstance,
     resourceInstanceMethod,
+    sessionRequired,
     roleRequired,
     requestHeaderClass,
     requestParamClass,
     requestClass,
     logRequest
 ) :
-    if not Security.getRole() in roleRequired :
-        raise GlobalException(
-            message = 'Role not allowed',
-            logMessage = f'''Role {Security.getRole()} trying to access denied resourse''',
-            status = HttpStatus.FORBIDDEN
-        )
+    if ObjectHelper.isNotEmptyCollection(roleRequired):
+        if not SecurityManager.getRole() in roleRequired :
+            raise GlobalException(
+                message = 'Role not allowed',
+                logMessage = f'''Role {SecurityManager.getRole()} trying to access denied resourse''',
+                status = HttpStatus.FORBIDDEN
+            )
+    return sessionControllerMethod(
+        args,
+        kwargs,
+        contentType,
+        resourceInstance,
+        resourceInstanceMethod,
+        sessionRequired,
+        requestHeaderClass,
+        requestParamClass,
+        requestClass,
+        logRequest
+    )
+
+@EncapsulateItWithGlobalException(message=SessionManager.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@SessionManager.jwtRequired
+def sessionControllerMethod(
+    args,
+    kwargs,
+    contentType,
+    resourceInstance,
+    resourceInstanceMethod,
+    sessionRequired,
+    requestHeaderClass,
+    requestParamClass,
+    requestClass,
+    logRequest
+) :
+    if ObjectHelper.isNotEmptyCollection(sessionRequired):
+        if not SessionManager.getRole() in sessionRequired :
+            raise GlobalException(
+                message = 'Session not allowed',
+                logMessage = f'''Session {SecurityManager.getRole()} trying to access denied resourse''',
+                status = HttpStatus.FORBIDDEN
+            )
     return publicControllerMethod(
         args,
         kwargs,
@@ -389,6 +428,7 @@ def ControllerMethod(
     requestParamClass = None,
     requestClass = None,
     responseClass = None,
+    sessionRequired = None,
     roleRequired = None,
     consumes = OpenApiManager.DEFAULT_CONTENT_TYPE,
     produces = OpenApiManager.DEFAULT_CONTENT_TYPE,
@@ -401,6 +441,7 @@ def ControllerMethod(
     controllerMethodRequestParamClass = requestParamClass
     controllerMethodRequestClass = requestClass
     controllerMethodResponseClass = responseClass
+    controllerMethodSessionRequired = sessionRequired
     controllerMethodRoleRequired = roleRequired
     controllerMethodProduces = produces
     controllerMethodConsumes = consumes
@@ -417,31 +458,19 @@ def ControllerMethod(
             resourceInstance = args[0]
             completeResponse = None
             try :
-                if ObjectHelper.isNotEmptyCollection(roleRequired) :
-                    completeResponse = securedControllerMethod(
-                        args,
-                        kwargs,
-                        consumes,
-                        resourceInstance,
-                        resourceInstanceMethod,
-                        roleRequired,
-                        requestHeaderClass,
-                        requestParamClass,
-                        requestClass,
-                        logRequest
-                    )
-                else :
-                    completeResponse = publicControllerMethod(
-                        args,
-                        kwargs,
-                        consumes,
-                        resourceInstance,
-                        resourceInstanceMethod,
-                        requestHeaderClass,
-                        requestParamClass,
-                        requestClass,
-                        logRequest
-                    )
+                completeResponse = securedControllerMethod(
+                    args,
+                    kwargs,
+                    consumes,
+                    resourceInstance,
+                    resourceInstanceMethod,
+                    sessionRequired,
+                    roleRequired,
+                    requestHeaderClass,
+                    requestParamClass,
+                    requestClass,
+                    logRequest
+                )
                 # print(f'completeResponse: {completeResponse}')
                 validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
@@ -482,6 +511,7 @@ def ControllerMethod(
         innerResourceInstanceMethod.requestParamClass = controllerMethodRequestParamClass
         innerResourceInstanceMethod.requestClass = controllerMethodRequestClass
         innerResourceInstanceMethod.responseClass = controllerMethodResponseClass
+        innerResourceInstanceMethod.sessionRequired = controllerMethodSessionRequired
         innerResourceInstanceMethod.roleRequired = controllerMethodRoleRequired
         innerResourceInstanceMethod.produces = controllerMethodProduces
         innerResourceInstanceMethod.consumes = controllerMethodConsumes

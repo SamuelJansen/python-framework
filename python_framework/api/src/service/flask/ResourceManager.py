@@ -7,12 +7,15 @@ import globals
 from python_framework.api.src.helper import Serializer
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import SqlAlchemyProxy
-from python_framework.api.src.service import Security
+from python_framework.api.src.service import SessionManager
+from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.service.openapi import OpenApiManager
 from python_framework.api.src.constant import ConfigurationKeyConstant
 
+
 DOT_PY = '.py'
+
 
 def getPythonFrameworkResourceByType(resourceType) :
     return FlaskManager.PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.get(resourceType, [])
@@ -124,21 +127,33 @@ def initialize(
         template_folder = viewsPackage
     )
     api = Api(app)
+    api.app = app
+    api.app.api = api
+
     api.cors = CORS(app)
+    api.cors.api = api
     addGlobalsTo(api)
     OpenApiManager.newDocumentation(api, app)
     SchedulerManager.addScheduler(api, app)
+
+    sessionKey = api.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_SECRET)
+    if SettingHelper.LOCAL_ENVIRONMENT == SettingHelper.getActiveEnvironment() :
+        log.setting(initialize, f'Session secret: {sessionKey}')
+    api.session = SessionManager.getJwtMannager(app, sessionKey)
+    api.session.api = api
+
     securityKey = api.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_SECRET)
     if SettingHelper.LOCAL_ENVIRONMENT == SettingHelper.getActiveEnvironment() :
         log.setting(initialize, f'JWT secret: {securityKey}')
-    api.jwt = Security.getJwtMannager(app, securityKey)
+    api.jwt = SecurityManager.getJwtMannager(app, securityKey)
+    api.jwt.api = api
 
-    args = [api, app, api.jwt]
+    args = [api, app, api.session, api.jwt]
     for resourceType in FlaskManager.KW_RESOURCE_LIST :
         args.append(getResourceList(api, resourceType))
     args.append(refferenceModel)
     addFlaskApiResources(*args)
-    api.app = app
+
     return api, api.app, api.jwt
 
 @Function
@@ -225,6 +240,7 @@ def addResourceAttibutes(apiInstance) :
 def addFlaskApiResources(
         apiInstance,
         appInstance,
+        sessionInstance,
         jwtInstance,
         controllerList,
         schedulerList,
@@ -248,5 +264,6 @@ def addFlaskApiResources(
     addHelperListTo(apiInstance, helperList)
     addConverterListTo(apiInstance, converterList)
     SchedulerManager.initialize(apiInstance, appInstance)
-    Security.addJwt(jwtInstance)
+    SessionManager.addJwt(sessionInstance)
+    SecurityManager.addJwt(jwtInstance)
     OpenApiManager.addSwagger(apiInstance, appInstance)

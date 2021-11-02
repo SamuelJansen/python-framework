@@ -12,8 +12,10 @@ api:
     static-package: AppData\Local\Programs\Python\Python38-32\statics
     list: []
 
+    session:
+        secret: ${SESSION_KEY:default-session-key}
     security:
-        secret: default
+        secret: ${SECURITY_KEY:default-security-key}
     server:
         scheme: http
         base-url: /test-api
