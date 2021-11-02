@@ -208,9 +208,7 @@ def validateBodyAsJson(requestBodyAsJson, requestClass) :
         if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)) :
             raise GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
 
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-@SecurityManager.jwtRequired
-def securedControllerMethod(
+def handleControllerMethodRequest(
     args,
     kwargs,
     contentType,
@@ -224,48 +222,31 @@ def securedControllerMethod(
     logRequest
 ) :
     if ObjectHelper.isNotEmptyCollection(roleRequired):
-        role = SessionManager.getGroup()
-        if not role in roleRequired :
-            raise GlobalException(
-                message = 'Role not allowed',
-                logMessage = f'''Role {role} trying to access denied resourse. Allowed roles: {sessionRequired}''',
-                status = HttpStatus.FORBIDDEN
-            )
-    return sessionControllerMethod(
-        args,
-        kwargs,
-        contentType,
-        resourceInstance,
-        resourceInstanceMethod,
-        sessionRequired,
-        requestHeaderClass,
-        requestParamClass,
-        requestClass,
-        logRequest
-    )
-
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-@SessionManager.jwtRequired
-def sessionControllerMethod(
-    args,
-    kwargs,
-    contentType,
-    resourceInstance,
-    resourceInstanceMethod,
-    sessionRequired,
-    requestHeaderClass,
-    requestParamClass,
-    requestClass,
-    logRequest
-) :
+        validateSecuredControllerMethod(
+            args,
+            kwargs,
+            contentType,
+            resourceInstance,
+            resourceInstanceMethod,
+            roleRequired,
+            requestHeaderClass,
+            requestParamClass,
+            requestClass,
+            logRequest
+        )
     if ObjectHelper.isNotEmptyCollection(sessionRequired):
-        group = SessionManager.getGroup()
-        if not session in sessionRequired :
-            raise GlobalException(
-                message = 'Session not allowed',
-                logMessage = f'''Session {group} trying to access denied resourse. Allowed groups: {sessionRequired}''',
-                status = HttpStatus.FORBIDDEN
-            )
+        validateSessionedControllerMethod(
+            args,
+            kwargs,
+            contentType,
+            resourceInstance,
+            resourceInstanceMethod,
+            sessionRequired,
+            requestHeaderClass,
+            requestParamClass,
+            requestClass,
+            logRequest
+        )
     return publicControllerMethod(
         args,
         kwargs,
@@ -277,6 +258,50 @@ def sessionControllerMethod(
         requestClass,
         logRequest
     )
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@SecurityManager.jwtRequired
+def validateSecuredControllerMethod(
+    args,
+    kwargs,
+    contentType,
+    resourceInstance,
+    resourceInstanceMethod,
+    roleRequired,
+    requestHeaderClass,
+    requestParamClass,
+    requestClass,
+    logRequest
+) :
+    role = SessionManager.getGroup()
+    if not role in roleRequired :
+        raise GlobalException(
+            message = 'Role not allowed',
+            logMessage = f'''Role {role} trying to access denied resourse. Allowed roles: {roleRequired}''',
+            status = HttpStatus.FORBIDDEN
+        )
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@SessionManager.jwtRequired
+def validateSessionedControllerMethod(
+    args,
+    kwargs,
+    contentType,
+    resourceInstance,
+    resourceInstanceMethod,
+    sessionRequired,
+    requestHeaderClass,
+    requestParamClass,
+    requestClass,
+    logRequest
+) :
+    group = SessionManager.getGroup()
+    if not session in sessionRequired :
+        raise GlobalException(
+            message = 'Session not allowed',
+            logMessage = f'''Session {group} trying to access denied resourse. Allowed groups: {sessionRequired}''',
+            status = HttpStatus.FORBIDDEN
+        )
 
 @Function
 def publicControllerMethod(
@@ -462,7 +487,7 @@ def ControllerMethod(
             resourceInstance = args[0]
             completeResponse = None
             try :
-                completeResponse = securedControllerMethod(
+                completeResponse = handleControllerMethodRequest(
                     args,
                     kwargs,
                     consumes,

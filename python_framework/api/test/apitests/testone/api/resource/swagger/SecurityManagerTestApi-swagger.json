@@ -67,7 +67,7 @@
                 }
             }
         },
-        "/test/actuator/health/4861/{status}/{secondStatus}": {
+        "/test/actuator/health/999/{status}/{secondStatus}": {
             "get": {
                 "parameters": [
                     {
@@ -169,7 +169,7 @@
                 }
             }
         },
-        "/test/actuator/health/4861": {
+        "/test/actuator/health/999": {
             "put": {
                 "parameters": [
                     {
@@ -416,7 +416,7 @@
                 }
             }
         },
-        "/test/4861/security-manager/consume": {
+        "/test/999/security-manager/consume": {
             "get": {
                 "parameters": [
                     {
@@ -446,7 +446,7 @@
                 }
             }
         },
-        "/test/4861/security-manager/refresh": {
+        "/test/999/security-manager/refresh": {
             "patch": {
                 "parameters": [
                     {
@@ -486,7 +486,7 @@
                 }
             }
         },
-        "/test/4861/security-manager/login": {
+        "/test/999/security-manager/login": {
             "post": {
                 "parameters": [
                     {
@@ -519,7 +519,7 @@
                 }
             }
         },
-        "/test/4861/security-manager/logout": {
+        "/test/999/security-manager/logout": {
             "put": {
                 "parameters": [
                     {
@@ -786,11 +786,11 @@
             "externalDocs": null
         }
     ],
-    "host": "localhost:5002",
+    "host": "localhost:5011",
     "schemes": [
         "http"
     ],
-    "basePath": "/dev-test-api",
+    "basePath": "/security-manager-api",
     "info": {
         "title": {},
         "description": "description",

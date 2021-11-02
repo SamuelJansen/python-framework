@@ -225,7 +225,7 @@ def appRun_whenEnvironmentIsLocalFromDevConfig_withSuccess() :
     assert ObjectHelper.equals(
         [{'status':'UP'}],
         responseGetHealth.json()
-    )
+    ), f"{[{'status':'UP'}]} == {responseGetHealth.json()}"
     assert 200 == responseGetHealth.status_code
 
     killProcesses(process)
@@ -447,7 +447,7 @@ def pythonRun_securityManager() :
     PATCH_REFRESH_URI = '/refresh'
     PUT_LOGOUT_URI = '/logout'
     SECURITY_HEADERS = {'some': 'headers'}
-    time.sleep(10 * ESTIMATED_BUILD_TIME_IN_SECONDS)
+    time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
 
     # act
     headers = {
