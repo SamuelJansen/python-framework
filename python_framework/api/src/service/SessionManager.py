@@ -30,7 +30,7 @@ def getJti(*arg,**kwargs) :
 
 @EncapsulateItWithGlobalException(message=JwtConstant.FORBIDDEN_MESSAGE, status=HttpStatus.FORBIDDEN)
 def getGroup(*arg,**kwargs) :
-    return getRawJwt(*arg,**kwargs)[JwtConstant.KW_USER_CLAIMS]
+    return getRawJwt(*arg,**kwargs)[JwtConstant.KW_CLAIMS]
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(*arg,**kwargs) :

@@ -10,7 +10,7 @@ from flask_jwt_extended import (
 )
 
 from python_helper import Constant as c
-from python_helper import log, Function, ObjectHelper
+from python_helper import log, Function, ObjectHelper, ReflectionHelper
 import datetime
 
 from python_framework.api.src.constant import JwtConstant
@@ -35,7 +35,7 @@ def getJti(*arg,**kwargs) :
 
 @EncapsulateItWithGlobalException(message=JwtConstant.FORBIDDEN_MESSAGE, status=HttpStatus.FORBIDDEN)
 def getRole(*arg,**kwargs) :
-    return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_USER_CLAIMS)
+    return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_CLAIMS)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(*arg,**kwargs) :
@@ -77,11 +77,14 @@ def createAccessToken(user, deltaMinutes=None, headers=None) :
     ###- datetime.datetime.utcnow()
     if deltaMinutes :
         deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
-    id, role = getIdAndRoleFromUser(user)
+    id, roleList = getIdAndRoleListFromUser(user)
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_access_token
     return create_access_token(
         identity = id,
-        user_claims = role,
+        user_claims = {
+            JwtConstant.KW_CONTEXT: roleList,
+            JwtConstant.KW_DATA: None
+        },
         fresh = False,
         expires_delta = deltaMinutes,
         headers = headers
@@ -92,29 +95,45 @@ def refreshAccessToken(user, deltaMinutes=None, headers=None) :
     ###- datetime.datetime.utcnow()
     if ObjectHelper.isNotNone(deltaMinutes) :
         deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
-    id, role = getIdAndRoleFromUser(user)
+    id, roleList = getIdAndRoleListFromUser(user)
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_refresh_token
     return create_refresh_token(
         identity = id,
-        user_claims = role,
+        user_claims = {
+            JwtConstant.KW_CONTEXT: roleList,
+            JwtConstant.KW_DATA: None
+        },
         fresh = False,
         expires_delta = deltaMinutes,
         headers = headers
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getCurrentUser(*args, **kwargs):
+def getCurrentUser(*args, userClass=None, **kwargs):
     currentUsert = get_current_user()
     if ObjectHelper.isNotNone(currentUsert):
         return currentUsert
     else:
-        id, role = getIdAndRoleFromRawJwt(getRawJwt(*args, **kwargs))
-    return {
-        'id': id,
-        'role': role
-    }
+        rawJwt = getRawJwt(*args, **kwargs)
+        id, roleList = getIdAndRoleListFromRawJwt(rawJwt)
+        if ObjectHelper.isNone(userClass):
+            return {
+                'id': id,
+                'roles': roleList,
+                'data': rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
+            }
+        else:
+            currentUsert = userClass()
+            currentUsert._authorizationInfo = {
+                'id': id,
+                'roles': roleList
+            }
+            for attributeName in rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA):
+                if ReflectionHelper.hasAttributeOrMethod(currentUsert, attributeName):
+                    ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(attributeName))
+            return currentUsert
 
-def getIdAndRoleFromUser(user):
+def getIdAndRoleListFromUser(user):
     id = role = None
     if ObjectHelper.isDictionary(user):
         id = user.get('id')
@@ -122,9 +141,9 @@ def getIdAndRoleFromUser(user):
     else:
         id = user.id
         role = user.role
-    return id, role
+    return id, [role]
 
-def getIdAndRoleFromRawJwt(rawJwt):
-    id = rawJwt.get(JwtConstant.KW_USER_CLAIMS)
-    role = rawJwt.get(JwtConstant.KW_IDENTITY)
-    return id, role
+def getIdAndRoleListFromRawJwt(rawJwt):
+    id = rawJwt.get(JwtConstant.KW_IDENTITY)
+    roleList = rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
+    return id, roleList

@@ -1,5 +1,5 @@
 KW_JTI = 'jti'
-KW_USER_CLAIMS = 'user_claims'
+KW_CLAIMS = 'user_claims'
 KW_IDENTITY = 'identity'
 KW_FRESH = 'fresh'
 KW_EXPIRATION = 'exp'
@@ -11,6 +11,9 @@ KW_JWT_BLACKLIST_ENABLED = 'JWT_BLACKLIST_ENABLED'
 
 UNAUTHORIZED_MESSAGE = 'Unauthorized'
 FORBIDDEN_MESSAGE = 'Frobidden'
+
+KW_CONTEXT = 'context'
+KW_DATA = 'data'
 
 JWT_HEADER_NAME = 'JWT_HEADER_NAME'
 JWT_HEADER_TYPE = 'JWT_HEADER_TYPE'
