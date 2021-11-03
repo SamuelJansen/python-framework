@@ -1,9 +1,8 @@
-import flask_jwt_extended
+from flask import _request_ctx_stack
 from flask_jwt_extended import (
     JWTManager,
     get_raw_jwt,
     jwt_required,
-    get_jwt_header,
     get_current_user,
     get_jwt_identity,
     create_access_token,
@@ -48,8 +47,8 @@ def getJti(*arg, rawJwt=None, **kwargs) :
         return rawJwt.get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtHeaders(*arg,**kwargs):
-    headers = get_jwt_header(*arg,**kwargs)
+def getJwtHeaders(*arg, **kwargs):
+    headers = getattr(_request_ctx_stack.top, "jwt_header", None)
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -128,12 +127,19 @@ def patchAccessToken(newContextList=None, **kwargs) :
     rawJwt = getRawJwt()
     # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
     expiresDelta = 1
+
+    userClaims = {
+        JwtConstant.KW_CONTEXT: list(set([
+            *getContext(rawJwt=rawJwt),
+            *[
+                element for element in list([] if ObjectHelper.isNone(newContextList) else newContextList)
+            ]
+        ])),
+        JwtConstant.KW_DATA: {**getData(rawJwt=rawJwt), **kwargs}
+    }
     return create_refresh_token(
         identity = getIdentity(rawJwt=rawJwt),
-        user_claims = {
-            JwtConstant.KW_CONTEXT: list(set([*getContext(rawJwt=rawJwt), *[element for element in [] if ObjectHelper.isNone(newContextList) else newContextList]])),
-            JwtConstant.KW_DATA: {**getData(rawJwt=rawJwt), **kwargs}
-        },
+        user_claims = userClaims,
         expires_delta = deltaMinutes,
         headers = headers
     )
