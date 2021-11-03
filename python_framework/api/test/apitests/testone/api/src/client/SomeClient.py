@@ -24,7 +24,7 @@ class SomeClient:
         # print(headers.__dict__)
         # print(params.__dict__)
         import requests
-        from python_framework.api.src.util import FlaskHelper
+        from python_framework.api.src.util import Serializer
         response = requests.put(
             f'{self.url}{self.getOnActuatorHealth.url}',
             data = Serializer.jsonifyIt(dto),

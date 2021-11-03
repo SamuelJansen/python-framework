@@ -2,7 +2,7 @@ from flask import send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
 from python_helper import Constant as c
 from python_helper import log, StringHelper, ReflectionHelper, ObjectHelper
-from python_framework.api.src.util import FlaskHelper
+from python_framework.api.src.util import Serializer
 from python_framework.api.src.service.openapi.OpenApiKey import Key as k
 from python_framework.api.src.service.openapi.OpenApiValue import Value as v
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile

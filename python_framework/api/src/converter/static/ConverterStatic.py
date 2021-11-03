@@ -1,5 +1,5 @@
 from python_helper import DateTimeHelper, ObjectHelper
-from python_framework.api.src.util import FlaskHelper
+from python_framework.api.src.util import Serializer
 
 def getValueOrDefault(value, default) :
     return value if ObjectHelper.isNotNone(value) else default

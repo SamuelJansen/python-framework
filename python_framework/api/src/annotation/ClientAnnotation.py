@@ -3,7 +3,7 @@ from python_helper import Constant as c
 from python_helper import ReflectionHelper, ObjectHelper, log, Function
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service.openapi import OpenApiManager
-from python_framework.api.src.util import FlaskHelper
+from python_framework.api.src.util import Serializer
 
 @Function
 def Client(url=c.SLASH) :

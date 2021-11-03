@@ -6,7 +6,7 @@ from python_helper import log, Function, ReflectionHelper, ObjectHelper, Setting
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.util import FlaskUtil
-from python_framework.api.src.util import FlaskHelper
+from python_framework.api.src.util import Serializer
 from python_framework.api.src.service import ExceptionHandler
 from python_framework.api.src.service import SessionManager
 from python_framework.api.src.service import SecurityManager
