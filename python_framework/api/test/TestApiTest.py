@@ -467,15 +467,19 @@ def pythonRun_securityManager() :
         # print(BASE_URI + POST_LOGIN_URI)
         responseLogin = session.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
         firstAuthorization = responseLogin.json().get('accessToken')
+        firstAuthorizationHeaders = responseLogin.headers
         headers['Authorization'] = 'Bearer ' + firstAuthorization
 
-        responseGetConsume = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
+        responseGetConsumeBeforeRefresh = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
 
         responseGetConsumeBeforeRefresh = session.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
 
         responsePatchRefresh = session.patch(BASE_URI + PATCH_REFRESH_URI, json=payload, headers=headers)
+        patchedAuthorizationHeaders = responseLogin.headers
         patchedAuthorization = responsePatchRefresh.json().get('accessToken')
         headers['Authorization'] = 'Bearer ' + patchedAuthorization
+
+        responseGetConsumeAfterRefresh = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
 
         # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
         # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
@@ -498,6 +502,7 @@ def pythonRun_securityManager() :
         assert ObjectHelper.isNotNone(firstAuthorization)
 
         assert ObjectHelper.isNotNone(id)
+        assert ObjectHelper.equals('headers', firstAuthorizationHeaders.get('some'))
         assert ObjectHelper.equals({
                 "secured": "information",
                 "currentUser": {
@@ -510,7 +515,7 @@ def pythonRun_securityManager() :
                     }
                 }
             },
-            responseGetConsume.json()
+            responseGetConsumeBeforeRefresh.json()
         )
 
         assert ObjectHelper.equals({
@@ -524,6 +529,24 @@ def pythonRun_securityManager() :
 
         assert ObjectHelper.isNotNone(responsePatchRefresh)
         assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
+
+        assert ObjectHelper.isNotNone(id)
+        assert ObjectHelper.equals('other headers', patchedAuthorizationHeaders.get('some'))
+        assert ObjectHelper.equals({
+                "secured": "information",
+                "currentUser": {
+                    "identity": id,
+                    "context": [
+                        "TEST_ROLE",
+                        "TEST_ROLE_REFRESH"
+                    ],
+                    "data": {
+                        "some": "other data"
+                    }
+                }
+            },
+            responseGetConsumeAfterRefresh.json()
+        )
 
     except Exception as testException:
         log.error(pythonRun_securityManager, 'Test failed', testException)

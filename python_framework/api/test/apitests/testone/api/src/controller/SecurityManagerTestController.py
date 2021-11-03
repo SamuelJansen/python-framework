@@ -46,6 +46,7 @@ class SecurityManagerTestController:
         roleRequired=['TEST_ROLE']
     )
     def patch(self, dto):
+        assert 'headers' == SecurityManager.getJwtHeaders().get('some')
         headers={'some': 'other headers'}
         data = {'some': 'other data'}
         return {

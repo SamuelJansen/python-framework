@@ -1,3 +1,4 @@
+import flask_jwt_extended
 from flask_jwt_extended import (
     JWTManager,
     get_raw_jwt,
@@ -46,6 +47,11 @@ def getJti(*arg, rawJwt=None, **kwargs) :
         return rawJwt.get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getJwtHeaders(*arg,**kwargs):
+    headers = get_jwt_header(*arg,**kwargs)
+    return headers if ObjectHelper.isNotNone(headers) else dict()
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(*arg, rawJwt=None, **kwargs) :
     if ObjectHelper.isNone(rawJwt):
         return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_IDENTITY)
@@ -64,7 +70,7 @@ def getJwtMannager(
     headerType=JwtConstant.DEFAULT_JWT_AUTHORIZATION_HEADER_TYPE
 ) :
     if not jwtSecret :
-        log.warning(JWTManager, f'Not possible to instanciate jwtManager{c.DOT_SPACE_CAUSE}Missing jwt secret')
+        log.warning(getJwtMannager, f'Not possible to instanciate jwtManager{c.DOT_SPACE_CAUSE}Missing jwt secret')
     else :
         jwtMannager = JWTManager(appInstance)
         appInstance.config[JwtConstant.KW_JWT_SECRET_KEY] = jwtSecret
