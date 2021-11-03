@@ -15,7 +15,7 @@ def safellyGetRequestBody() :
     return requestBody if ObjectHelper.isNotNone(requestBody) else dict()
 
 def safellyGetJson():
-    jsonBody
+    jsonBody = None
     try :
         jsonBody = request.get_json()
     except Exception as exception:
@@ -24,7 +24,7 @@ def safellyGetJson():
     return jsonBody
 
 def safellyGetData():
-    dataBody
+    dataBody = None
     try :
         dataBody = request.get_json()
     except Exception as exception:
