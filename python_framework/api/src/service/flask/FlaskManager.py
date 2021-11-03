@@ -275,11 +275,11 @@ def handleSecuredControllerMethod(
     requestClass,
     logRequest
 ) :
-    roleList = SecurityManager.getContext()
-    if not any(role in set(roleList) for role in roleRequired) :
+    contextList = SecurityManager.getContext()
+    if not any(role in set(contextList) for role in roleRequired):
         raise GlobalException(
             message = 'Role not allowed',
-            logMessage = f'''Roles {roleList} trying to access denied resourse. Allowed roles {roleRequired}''',
+            logMessage = f'''Roles {contextList} trying to access denied resourse. Allowed roles {roleRequired}''',
             status = HttpStatus.FORBIDDEN
         )
     elif ObjectHelper.isNotEmptyCollection(sessionRequired):
@@ -321,11 +321,11 @@ def handleSessionedControllerMethod(
     requestClass,
     logRequest
 ) :
-    group = SessionManager.getGroup()
-    if not session in sessionRequired :
+    contextList = SecurityManager.getContext()
+    if not any(sessionContext in set(contextList) for sessionContext in sessionRequired):
         raise GlobalException(
             message = 'Session not allowed',
-            logMessage = f'''Session {group} trying to access denied resourse. Allowed groups: {sessionRequired}''',
+            logMessage = f'''Sessions {contextList} trying to access denied resourse. Allowed contexts: {sessionRequired}''',
             status = HttpStatus.FORBIDDEN
         )
     else:

@@ -472,7 +472,7 @@ def pythonRun_securityManager() :
 
         responseGetConsumeBeforeRefresh = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
 
-        responseGetConsumeBeforeRefresh = session.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
+        responseGetConsumeAfterRefreshBeforeRefresh = session.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
 
         responsePatchRefresh = session.patch(BASE_URI + PATCH_REFRESH_URI, json=payload, headers=headers)
         patchedAuthorizationHeaders = responseLogin.headers
@@ -481,16 +481,9 @@ def pythonRun_securityManager() :
 
         responseGetConsumeAfterRefresh = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
 
-        # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
-        # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
+        responseLogout = session.put(BASE_URI + PUT_LOGOUT_URI, json=payload, headers=headers)
 
-        # print(f'responseGetNone: {responseGetNone.json()}')
-        # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
-        #
-        # print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
-        # print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
-        # print(f'responsePostSendPayloadBatch: {responsePostSendPayloadBatch.json()}')
-        # print(f'responsePostSendPayloadListBatch: {responsePostSendPayloadListBatch.json()}')
+        responseGetConsumeAfterLogout = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
 
         # assert
         assert ObjectHelper.equals(
@@ -518,22 +511,22 @@ def pythonRun_securityManager() :
         assert ObjectHelper.equals(
             expectedResponseGetConsumeBeforeRefresh,
             responseGetConsumeBeforeRefresh.json()
-        ), f'{expectedResponseGetConsumeBeforeRefresh} should be equals to {responseGetConsumeAfterRefresh.json()}'
+        ), f'{expectedResponseGetConsumeBeforeRefresh} should be equals to {responseGetConsumeBeforeRefresh.json()}'
 
         assert ObjectHelper.equals({
                 "message": "Role not allowed",
                 "timestamp": "2021-11-02 21:47:32.444629"
             },
-            responseGetConsumeBeforeRefresh.json(),
+            responseGetConsumeAfterRefreshBeforeRefresh.json(),
             ignoreKeyList=['timestamp']
         )
-        assert 403, responseGetConsumeBeforeRefresh.status_code
+        assert 403 == responseGetConsumeAfterRefreshBeforeRefresh.status_code
 
         assert ObjectHelper.isNotNone(responsePatchRefresh)
         assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
 
         assert ObjectHelper.isNotNone(id)
-        assert ObjectHelper.isNone(patchedAuthorization.get('some'))
+        assert ObjectHelper.isNone(patchedAuthorizationHeaders.get('some'))
         expectedResponseGetConsumeAfterRefresh = {
                 "secured": "information",
                 "currentUser": {
@@ -552,8 +545,167 @@ def pythonRun_securityManager() :
             responseGetConsumeAfterRefresh.json()
         ), f'{expectedResponseGetConsumeAfterRefresh} should be equals to {responseGetConsumeAfterRefresh.json()}'
 
+        assert ObjectHelper.isNotNone(responseLogout.json())
+        expectedResponseLogout = {'message': 'Logged out'}
+        assert ObjectHelper.equals(
+            expectedResponseLogout,
+            responseLogout.json()
+        ), f'{expectedResponseLogout} should be equals to {responseLogout.json()}'
+        assert 202 == responseLogout.status_code
+
+        assert ObjectHelper.isNotNone(responseGetConsumeAfterLogout.json())
+        expectedResponseGetConsumeAfterLogout = {'message': 'Unauthorized', 'timestamp': '2021-11-03 01:10:10.876113'}
+        assert ObjectHelper.equals(
+            expectedResponseGetConsumeAfterLogout,
+            responseGetConsumeAfterLogout.json(),
+            ignoreKeyList=['timestamp']
+        ), f'{expectedResponseGetConsumeAfterLogout} should be equals to {responseGetConsumeAfterLogout.json()}'
+        assert 401 == responseGetConsumeAfterLogout.status_code
+
     except Exception as testException:
         log.error(pythonRun_securityManager, 'Test failed', testException)
+        input('Verify the raised errors and press enter to continue')
+        raise testException
+
+    killProcesses(process)
+
+
+@Test(environmentVariables={
+    SettingHelper.ACTIVE_ENVIRONMENT : 'session-manager'
+})
+def pythonRun_sessionManager() :
+    # arrange
+    muteLogs = False
+    sessionServerPort = 5011 ### - on session-manager config
+    process = getProcess(
+        f'python app.py',
+        f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
+        muteLogs = muteLogs
+    )
+    BASE_URL = f'http://localhost:{sessionServerPort}/session-manager-api'
+    BASE_URI = f'{BASE_URL}/test/{EnvironmentHelper.get("URL_VARIANT")}/session-manager'
+    POST_LOGIN_URI = '/login'
+    GET_CONSUME_URI = '/consume'
+    GET_CONSUME_AFTER_REFRESH_URI = '/consume/only-after-refresh'
+    PATCH_REFRESH_URI = '/refresh'
+    PUT_LOGOUT_URI = '/logout'
+    time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
+
+    # act
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
+        'Cache-Control': 'no-cache'
+    }
+    id = time.time()
+    payload = {
+        'id': id
+    }
+
+    session = requests.Session()
+
+    responseGetHealth = session.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER, headers=headers)
+
+    try:
+        # print(BASE_URI + POST_LOGIN_URI)
+        responseLogin = session.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
+        firstAuthorization = responseLogin.json().get('accessToken')
+        firstAuthorizationHeaders = responseLogin.headers
+        headers['Authorization'] = 'Bearer ' + firstAuthorization
+
+        responseGetConsumeBeforeRefresh = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
+
+        responseGetConsumeAfterRefreshBeforeRefresh = session.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
+
+        responsePatchRefresh = session.patch(BASE_URI + PATCH_REFRESH_URI, json=payload, headers=headers)
+        patchedAuthorizationHeaders = responseLogin.headers
+        patchedAuthorization = responsePatchRefresh.json().get('accessToken')
+        headers['Authorization'] = 'Bearer ' + patchedAuthorization
+
+        responseGetConsumeAfterRefresh = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
+
+        responseLogout = session.put(BASE_URI + PUT_LOGOUT_URI, json=payload, headers=headers)
+
+        responseGetConsumeAfterLogout = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
+
+        # assert
+        assert ObjectHelper.equals(
+            {'status':'UP'},
+            responseGetHealth.json()
+        )
+        assert 200 == responseGetHealth.status_code
+
+        assert ObjectHelper.isNotNone(firstAuthorization)
+
+        assert ObjectHelper.isNotNone(id)
+        assert ObjectHelper.isNone(firstAuthorizationHeaders.get('some'))
+        expectedResponseGetConsumeBeforeRefresh = {
+                "secured": "information",
+                "currentUser": {
+                    "identity": id,
+                    "context": [
+                        "TEST_ROLE"
+                    ],
+                    "data": {
+                        "some": "data"
+                    }
+                }
+            }
+        assert ObjectHelper.equals(
+            expectedResponseGetConsumeBeforeRefresh,
+            responseGetConsumeBeforeRefresh.json()
+        ), f'{expectedResponseGetConsumeBeforeRefresh} should be equals to {responseGetConsumeBeforeRefresh.json()}'
+
+        assert ObjectHelper.equals({
+                "message": "Role not allowed",
+                "timestamp": "2021-11-02 21:47:32.444629"
+            },
+            responseGetConsumeAfterRefreshBeforeRefresh.json(),
+            ignoreKeyList=['timestamp']
+        )
+        assert 403 == responseGetConsumeAfterRefreshBeforeRefresh.status_code
+
+        assert ObjectHelper.isNotNone(responsePatchRefresh)
+        assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
+
+        assert ObjectHelper.isNotNone(id)
+        assert ObjectHelper.isNone(patchedAuthorizationHeaders.get('some'))
+        expectedResponseGetConsumeAfterRefresh = {
+                "secured": "information",
+                "currentUser": {
+                    "identity": id,
+                    "context": [
+                        "TEST_ROLE",
+                        "TEST_ROLE_REFRESH"
+                    ],
+                    "data": {
+                        "some": "other data"
+                    }
+                }
+            }
+        assert ObjectHelper.equals(
+            expectedResponseGetConsumeAfterRefresh,
+            responseGetConsumeAfterRefresh.json()
+        ), f'{expectedResponseGetConsumeAfterRefresh} should be equals to {responseGetConsumeAfterRefresh.json()}'
+
+        assert ObjectHelper.isNotNone(responseLogout.json())
+        expectedResponseLogout = {'message': 'Logged out'}
+        assert ObjectHelper.equals(
+            expectedResponseLogout,
+            responseLogout.json()
+        ), f'{expectedResponseLogout} should be equals to {responseLogout.json()}'
+        assert 202 == responseLogout.status_code
+
+        assert ObjectHelper.isNotNone(responseGetConsumeAfterLogout.json())
+        expectedResponseGetConsumeAfterLogout = {'message': 'Unauthorized', 'timestamp': '2021-11-03 01:10:10.876113'}
+        assert ObjectHelper.equals(
+            expectedResponseGetConsumeAfterLogout,
+            responseGetConsumeAfterLogout.json(),
+            ignoreKeyList=['timestamp']
+        ), f'{expectedResponseGetConsumeAfterLogout} should be equals to {responseGetConsumeAfterLogout.json()}'
+        assert 401 == responseGetConsumeAfterLogout.status_code
+
+    except Exception as testException:
+        log.error(pythonRun_sessionManager, 'Test failed', testException)
         input('Verify the raised errors and press enter to continue')
         raise testException
 
