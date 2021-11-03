@@ -3,6 +3,7 @@ from flask_jwt_extended import (
     JWTManager,
     get_raw_jwt,
     jwt_required,
+    get_jwt_header,
     get_current_user,
     get_jwt_identity,
     create_access_token,
@@ -123,6 +124,21 @@ def refreshAccessToken(identity, roleList, deltaMinutes=None, headers=None, data
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def patchAccessToken(newContextList=None, **kwargs) :
+    rawJwt = getRawJwt()
+    # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
+    expiresDelta = 1
+    return create_refresh_token(
+        identity = getIdentity(rawJwt=rawJwt),
+        user_claims = {
+            JwtConstant.KW_CONTEXT: list(set([*getContext(rawJwt=rawJwt), *[[] if ObjectHelper.isNone(newContextList) else newContextList][0])),
+            JwtConstant.KW_DATA: {**getData(rawJwt=rawJwt), **kwargs}
+        },
+        expires_delta = deltaMinutes,
+        headers = headers
+    )
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getCurrentUser(*args, userClass=None, **kwargs):
     currentUsert = get_current_user()
     if ObjectHelper.isNotNone(currentUsert):
@@ -148,6 +164,7 @@ def getCurrentUser(*args, userClass=None, **kwargs):
                     ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
             return currentUsert
 
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentityAndContextFromRawJwt(rawJwt):
     identity = rawJwt.get(JwtConstant.KW_IDENTITY)
     context = getContext(rawJwt)
