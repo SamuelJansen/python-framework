@@ -462,7 +462,12 @@ def pythonRun_securityManager() :
 
     responseGetHealth = session.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER, headers=headers)
 
+    print(BASE_URI + POST_LOGIN_URI)
+    input('press enter to proceeed the test')
     responseLogin = session.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
+
+    # print(responseLogin.text)
+    # print(responseLogin.json)
 
     firstAuthorization = responseLogin.json().get('accessToken')
     headers['Authorization'] = 'Bearer ' + firstAuthorization

@@ -124,7 +124,7 @@ def getCurrentUser(*args, userClass=None, **kwargs):
         return currentUsert
     else:
         rawJwt = getRawJwt(*args, **kwargs)
-        identity, context = getIdAndContextFromRawJwt(rawJwt)
+        identity, context = getIdentityAndContextFromRawJwt(rawJwt)
         if ObjectHelper.isNone(userClass):
             return {
                 JwtConstant.KW_IDENTITY: identity,
@@ -143,7 +143,7 @@ def getCurrentUser(*args, userClass=None, **kwargs):
                     ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
             return currentUsert
 
-def getIdAndContextFromRawJwt(rawJwt):
+def getIdentityAndContextFromRawJwt(rawJwt):
     identity = rawJwt.get(JwtConstant.KW_IDENTITY)
     context = getContext(rawJwt)
     return identity, context
@@ -162,7 +162,7 @@ def validateSecuredControllerMethod(
     requestClass,
     logRequest
 ) :
-    roleList = getContext()
+    roleList = getContext(getRawJwt())
     if not any(role in set(roleList) for role in roleRequired) :
         raise GlobalException(
             message = 'Role not allowed',
