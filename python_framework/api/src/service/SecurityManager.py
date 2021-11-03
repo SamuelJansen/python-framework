@@ -24,24 +24,24 @@ BLACK_LIST = set()
 
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtBody(*arg, **kwargs) :
-    return get_raw_jwt(*arg,**kwargs)
+def getJwtBody(rawJwt=None) :
+    if ObjectHelper.isNone(rawJwt):
+        return get_raw_jwt()
+    return rawJwt
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtHeaders(*arg, **kwargs):
+def getJwtHeaders():
     headers = get_raw_jwt_header()
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getContext(*arg, rawJwt=None, **kwargs):
-    if ObjectHelper.isNone(rawJwt):
-        rawJwt = getJwtBody(*arg, **kwargs)
+def getContext(rawJwt=None):
+    rawJwt = getJwtBody(rawJwt=rawJwt)
     return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getData(*arg, rawJwt=None, **kwargs):
-    if ObjectHelper.isNone(rawJwt):
-        rawJwt = getJwtBody(*arg, **kwargs)
+def getData(rawJwt=None):
+    rawJwt = getJwtBody(rawJwt=rawJwt)
     return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -49,17 +49,12 @@ def jwtRequired(*arg,**kwargs) :
     return jwt_required(*arg,**kwargs)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJti(*arg, rawJwt=None, **kwargs) :
-    if ObjectHelper.isNone(rawJwt):
-        return getJwtBody(*arg,**kwargs).get(JwtConstant.KW_JTI)
-    else:
-        return rawJwt.get(JwtConstant.KW_JTI)
+def getJti(rawJwt=None) :
+    return getJwtBody(rawJwt=rawJwt).get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getIdentity(*arg, rawJwt=None, **kwargs) :
-    if ObjectHelper.isNone(rawJwt):
-        rawJwt = getJwtBody(*arg,**kwargs)
-    return rawJwt.get(JwtConstant.KW_IDENTITY)
+def getIdentity(rawJwt=None) :
+    return getJwtBody(rawJwt=rawJwt).get(JwtConstant.KW_IDENTITY)
 
 @Function
 def addUserToBlackList() :
@@ -131,7 +126,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None) :
     # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
     import time
     print(time.time())
-    expiresDeltaInMinutes = datetime.timedelta(minutes=1)
+    deltaMinutes = datetime.timedelta(minutes=1)
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
             *getContext(rawJwt=rawJwt),
@@ -150,24 +145,24 @@ def patchAccessToken(newContextList=None, headers=None, data=None) :
         identity = getIdentity(rawJwt=rawJwt),
         user_claims = userClaims,
         fresh = False,
-        expires_delta = expiresDeltaInMinutes,
+        expires_delta = deltaMinutes,
         headers = headers
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getCurrentUser(*args, userClass=None, **kwargs):
+def getCurrentUser(userClass=None):
     currentUsert = get_current_user()
     if ObjectHelper.isNotNone(currentUsert):
         return currentUsert
     else:
-        rawJwt = getJwtBody(*args, **kwargs)
+        rawJwt = getJwtBody()
         identity = getIdentity(rawJwt=rawJwt)
         context = getContext(rawJwt=rawJwt)
         if ObjectHelper.isNone(userClass):
             return {
                 JwtConstant.KW_IDENTITY: identity,
                 JwtConstant.KW_CONTEXT: context,
-                JwtConstant.KW_DATA: getData(rawJwt)
+                JwtConstant.KW_DATA: getData(rawJwt=rawJwt)
             }
         else:
             currentUsert = userClass()
@@ -175,7 +170,7 @@ def getCurrentUser(*args, userClass=None, **kwargs):
                 JwtConstant.KW_IDENTITY: identity,
                 JwtConstant.KW_CONTEXT: context
             }
-            data = getData(rawJwt)
+            data = getData(rawJwt=rawJwt)
             for attributeName in data:
                 if ReflectionHelper.hasAttributeOrMethod(currentUsert, attributeName):
                     ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
