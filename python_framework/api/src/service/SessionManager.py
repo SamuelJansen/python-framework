@@ -1,14 +1,4 @@
-# from flask_jwt_extended import (
-#     JWTManager,
-#     get_raw_jwt,
-#     jwt_required,
-#     get_current_user,
-#     get_jwt_identity,
-#     get_raw_jwt_header,
-#     create_access_token,
-#     create_refresh_token,
-#     jwt_refresh_token_required
-# )
+import time
 import jwt
 
 from python_helper import Constant as c
@@ -98,10 +88,6 @@ def getData(rawJwt=None, apiInstance=None):
     rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
     return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
-# @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-# def jwtRequired(*arg,**kwargs) :
-#     return jwt_required(*arg,**kwargs)
-
 @Function
 def jwtRequired(function, *args, **kwargs) :
     def innerFunction(*args, **kwargs) :
@@ -188,7 +174,6 @@ def refreshAccessToken(identity, contextList, deltaMinutes=None, headers=None, d
 def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=None):
     rawJwt = getJwtBody()
     # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
-    import time
     print(time.time())
     deltaMinutes = datetime.timedelta(minutes=1)
     userClaims = {
