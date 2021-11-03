@@ -444,6 +444,7 @@ def pythonRun_securityManager() :
     BASE_URI = f'{BASE_URL}/test/{EnvironmentHelper.get("URL_VARIANT")}/security-manager'
     POST_LOGIN_URI = '/login'
     GET_CONSUME_URI = '/consume'
+    GET_CONSUME_AFTER_REFRESH_URI = '/consume/only-after-refresh'
     PATCH_REFRESH_URI = '/refresh'
     PUT_LOGOUT_URI = '/logout'
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
@@ -463,9 +464,15 @@ def pythonRun_securityManager() :
 
     responseLogin = session.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
 
-    authorization = responseLogin.json().get('accessToken')
-    headers['Authorization'] = 'Bearer ' + authorization
+    firstAuthorization = responseLogin.json().get('accessToken')
+    headers['Authorization'] = 'Bearer ' + firstAuthorization
     responseGetConsume = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
+
+    responseGetConsumeBeforeRefresh = None
+    try:
+        responseGetConsumeBeforeRefresh = session.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
+    except Exception as exception:
+        responseGetConsumeBeforeRefreshException = exception
 
     # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
     # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
@@ -484,5 +491,25 @@ def pythonRun_securityManager() :
         responseGetHealth.json()
     )
     assert 200 == responseGetHealth.status_code
+
+    assert ObjectHelper.isNotNone(firstAuthorization)
+
+    assert ObjectHelper.isNotNone(payload.get('id'))
+    assert ObjectHelper.equals({
+            "secured": "information",
+            "currentUser": {
+                "identity": payload.get('id'),
+                "context": [
+                    "TEST_ROLE"
+                ],
+                "data": {
+                    "some": "data"
+                }
+            }
+        },
+        responseGetConsume
+    )
+
+    assert ObjectHelper.isNone(responseGetConsumeBeforeRefresh)
 
     killProcesses(process)

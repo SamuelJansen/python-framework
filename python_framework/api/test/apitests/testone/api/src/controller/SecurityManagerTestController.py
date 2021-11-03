@@ -63,3 +63,21 @@ class SecurityManagerTestController:
     def put(self, dto):
         Security.addUserToBlackList()
         return {'message': 'Logged out'}, HttpStatus.OK
+
+
+@Controller(url=f'/test/{EnvironmentHelper.get("URL_VARIANT")}/security-manager', tag='SecurityManagerTest', description='Security Manager controller test')
+class SecurityManagerTestBatchController:
+
+    @ControllerMethod(
+        url = f'/consume/only-after-refresh',
+        responseClass = dict,
+        logRequest = True,
+        logResponse = True,
+        roleRequired=['TEST_ROLE_REFRESH']
+    )
+    def get(self):
+        return {
+            'secured': 'information',
+            'after': 'refresh',
+            'currentUser': SecurityManager.getCurrentUser()
+        }, HttpStatus.OK
