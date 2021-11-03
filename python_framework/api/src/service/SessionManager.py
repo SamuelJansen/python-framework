@@ -12,7 +12,7 @@
 import jwt
 
 from python_helper import Constant as c
-from python_helper import log, Function, ObjectHelper, ReflectionHelper
+from python_helper import log, Function, ObjectHelper, ReflectionHelper, DateTimeHelper
 import datetime
 
 from python_framework.api.src.util import FlaskUtil
@@ -143,11 +143,10 @@ def addJwt(jwtInstance) :
     ...
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def createAccessToken(identity, contextList, deltaMinutes=None, headers=None, data=None) :
-    ###- datetime.datetime.utcnow()
+def createAccessToken(identity, contextList, deltaMinutes=None, headers=None, data=None):
     if deltaMinutes :
         deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
-    timeNow = DateTimeHelper.now()
+    timeNow = DateTimeHelper.dateTimeNow()
     return retrieveApiInstance(arguments=args).session.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
@@ -165,11 +164,10 @@ def createAccessToken(identity, contextList, deltaMinutes=None, headers=None, da
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def refreshAccessToken(identity, contextList, deltaMinutes=None, headers=None, data=None) :
-    ###- datetime.datetime.utcnow()
+def refreshAccessToken(identity, contextList, deltaMinutes=None, headers=None, data=None):
     if ObjectHelper.isNotNone(deltaMinutes) :
         deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
-    ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_refresh_token
+    timeNow = DateTimeHelper.dateTimeNow()
     return retrieveApiInstance(arguments=args).session.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
@@ -187,7 +185,7 @@ def refreshAccessToken(identity, contextList, deltaMinutes=None, headers=None, d
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def patchAccessToken(newContextList=None, headers=None, data=None) :
+def patchAccessToken(newContextList=None, headers=None, data=None):
     rawJwt = getJwtBody()
     # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
     import time
