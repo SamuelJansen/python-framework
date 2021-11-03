@@ -208,7 +208,7 @@ def validateBodyAsJson(requestBodyAsJson, requestClass) :
         if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)) :
             raise GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
 
-def handleControllerMethodRequest(
+def handleAnyControllerMethodRequest(
     args,
     kwargs,
     contentType,
@@ -222,20 +222,21 @@ def handleControllerMethodRequest(
     logRequest
 ) :
     if ObjectHelper.isNotEmptyCollection(roleRequired):
-        SecurityManager.validateSecuredControllerMethod(
+        return handleSecuredControllerMethod(
             args,
             kwargs,
             contentType,
             resourceInstance,
             resourceInstanceMethod,
             roleRequired,
+            sessionRequired,
             requestHeaderClass,
             requestParamClass,
             requestClass,
             logRequest
         )
-    if ObjectHelper.isNotEmptyCollection(sessionRequired):
-        validateSessionedControllerMethod(
+    elif ObjectHelper.isNotEmptyCollection(sessionRequired):
+        return handleSessionedControllerMethod(
             args,
             kwargs,
             contentType,
@@ -247,7 +248,7 @@ def handleControllerMethodRequest(
             requestClass,
             logRequest
         )
-    return publicControllerMethod(
+    return handleControllerMethod(
         args,
         kwargs,
         contentType,
@@ -259,31 +260,56 @@ def handleControllerMethodRequest(
         logRequest
     )
 
-# @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-# @SecurityManager.jwtRequired
-# def validateSecuredControllerMethod(
-#     args,
-#     kwargs,
-#     contentType,
-#     resourceInstance,
-#     resourceInstanceMethod,
-#     roleRequired,
-#     requestHeaderClass,
-#     requestParamClass,
-#     requestClass,
-#     logRequest
-# ) :
-#     role = SecurityManager.getRoleList()
-#     if not role in roleRequired :
-#         raise GlobalException(
-#             message = 'Role not allowed',
-#             logMessage = f'''Role {role} trying to access denied resourse. Allowed roles: {roleRequired}''',
-#             status = HttpStatus.FORBIDDEN
-#         )
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@SecurityManager.jwtRequired
+def handleSecuredControllerMethod(
+    args,
+    kwargs,
+    contentType,
+    resourceInstance,
+    resourceInstanceMethod,
+    roleRequired,
+    sessionRequired,
+    requestHeaderClass,
+    requestParamClass,
+    requestClass,
+    logRequest
+) :
+    roleList = getContext(getRawJwt())
+    if not any(role in set(roleList) for role in roleRequired) :
+        raise GlobalException(
+            message = 'Role not allowed',
+            logMessage = f'''Roles {roleList} trying to access denied resourse. Allowed roles {roleRequired}''',
+            status = HttpStatus.FORBIDDEN
+        )
+    if ObjectHelper.isNotEmptyCollection(sessionRequired):
+        return handleSessionedControllerMethod(
+            args,
+            kwargs,
+            contentType,
+            resourceInstance,
+            resourceInstanceMethod,
+            sessionRequired,
+            requestHeaderClass,
+            requestParamClass,
+            requestClass,
+            logRequest
+        )
+    return handleControllerMethod(
+        args,
+        kwargs,
+        contentType,
+        resourceInstance,
+        resourceInstanceMethod,
+        requestHeaderClass,
+        requestParamClass,
+        requestClass,
+        logRequest
+    )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 @SessionManager.jwtRequired
-def validateSessionedControllerMethod(
+def handleSessionedControllerMethod(
     args,
     kwargs,
     contentType,
@@ -302,9 +328,20 @@ def validateSessionedControllerMethod(
             logMessage = f'''Session {group} trying to access denied resourse. Allowed groups: {sessionRequired}''',
             status = HttpStatus.FORBIDDEN
         )
+    return handleControllerMethod(
+        args,
+        kwargs,
+        contentType,
+        resourceInstance,
+        resourceInstanceMethod,
+        requestHeaderClass,
+        requestParamClass,
+        requestClass,
+        logRequest
+    )
 
 @Function
-def publicControllerMethod(
+def handleControllerMethod(
     args,
     kwargs,
     contentType,
@@ -487,7 +524,7 @@ def ControllerMethod(
             resourceInstance = args[0]
             completeResponse = None
             try :
-                completeResponse = handleControllerMethodRequest(
+                completeResponse = handleAnyControllerMethodRequest(
                     args,
                     kwargs,
                     consumes,

@@ -24,15 +24,19 @@ BLACK_LIST = set()
 
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getRawJwt(*arg,**kwargs) :
+def getRawJwt(*arg, **kwargs) :
     return get_raw_jwt(*arg,**kwargs)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getContext(rawJwt):
+def getContext(*arg, rawJwt=None, **kwargs):
+    if ObjectHelper.isNone(rawJwt):
+        rawJwt = getRawJwt(*arg, **kwargs)
     return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getData(rawJwt):
+def getData(*arg, rawJwt=None, **kwargs):
+    if ObjectHelper.isNone(rawJwt):
+        rawJwt = getRawJwt(*arg, **kwargs)
     return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -54,9 +58,8 @@ def getJwtHeaders(*arg, **kwargs):
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(*arg, rawJwt=None, **kwargs) :
     if ObjectHelper.isNone(rawJwt):
-        return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_IDENTITY)
-    else:
-        return rawJwt.get(JwtConstant.KW_IDENTITY)
+        rawJwt = getRawJwt(*arg,**kwargs)
+    return rawJwt.get(JwtConstant.KW_IDENTITY)
 
 @Function
 def addUserToBlackList() :
@@ -126,7 +129,7 @@ def refreshAccessToken(identity, roleList, deltaMinutes=None, headers=None, data
 def patchAccessToken(newContextList=None, **kwargs) :
     rawJwt = getRawJwt()
     # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
-    expiresDelta = 1
+    deltaMinutes = datetime.timedelta(minutes=1)
 
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
@@ -140,7 +143,7 @@ def patchAccessToken(newContextList=None, **kwargs) :
     return create_refresh_token(
         identity = getIdentity(rawJwt=rawJwt),
         user_claims = userClaims,
-        expires_delta = deltaMinutes,
+        expires_delta = expiresDelta,
         headers = headers
     )
 
@@ -151,7 +154,8 @@ def getCurrentUser(*args, userClass=None, **kwargs):
         return currentUsert
     else:
         rawJwt = getRawJwt(*args, **kwargs)
-        identity, context = getIdentityAndContextFromRawJwt(rawJwt)
+        identity = getIdentity(rawJwt=rawJwt)
+        context = getContext(rawJwt=rawJwt)
         if ObjectHelper.isNone(userClass):
             return {
                 JwtConstant.KW_IDENTITY: identity,
@@ -169,31 +173,3 @@ def getCurrentUser(*args, userClass=None, **kwargs):
                 if ReflectionHelper.hasAttributeOrMethod(currentUsert, attributeName):
                     ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
             return currentUsert
-
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getIdentityAndContextFromRawJwt(rawJwt):
-    identity = rawJwt.get(JwtConstant.KW_IDENTITY)
-    context = getContext(rawJwt)
-    return identity, context
-
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-@jwtRequired
-def validateSecuredControllerMethod(
-    args,
-    kwargs,
-    contentType,
-    resourceInstance,
-    resourceInstanceMethod,
-    roleRequired,
-    requestHeaderClass,
-    requestParamClass,
-    requestClass,
-    logRequest
-) :
-    roleList = getContext(getRawJwt())
-    if not any(role in set(roleList) for role in roleRequired) :
-        raise GlobalException(
-            message = 'Role not allowed',
-            logMessage = f'''Roles {roleList} trying to access denied resourse. Allowed roles {roleRequired}''',
-            status = HttpStatus.FORBIDDEN
-        )

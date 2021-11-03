@@ -12,19 +12,19 @@ from python_helper import TestHelper
 #         'EnumAnnotationTest.Enum_comparing'
 #     ]
 # )
-TestHelper.run(
-    __file__,
-    runOnly = [
-        'GlobalExceptionAnnotationTest.encapsulateItWithGlobalException_withParameters_GlobalException'
-    ]
-)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
-#         'TestApiTest.pythonRun_securityManager'
-#         # 'TestApiTest.testing_Client'
+#         'GlobalExceptionAnnotationTest.encapsulateItWithGlobalException_withParameters_GlobalException'
 #     ]
 # )
+TestHelper.run(
+    __file__,
+    runOnly = [
+        'TestApiTest.pythonRun_securityManager'
+        # 'TestApiTest.testing_Client'
+    ]
+)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
