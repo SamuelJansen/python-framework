@@ -275,7 +275,7 @@ def handleSecuredControllerMethod(
     requestClass,
     logRequest
 ) :
-    roleList = getContext(getRawJwt())
+    roleList = SecurityManager.getContext()
     if not any(role in set(roleList) for role in roleRequired) :
         raise GlobalException(
             message = 'Role not allowed',
