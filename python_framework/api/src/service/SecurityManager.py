@@ -140,7 +140,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None) :
         JwtConstant.KW_DATA: {
             **getData(rawJwt=rawJwt),
             **{
-                k: v for k,v in (data if ObjectHelper.isNotNone(data) else dict()))
+                k: v for k,v in (data if ObjectHelper.isNotNone(data) else dict())
             }
         }
     }
