@@ -5,6 +5,7 @@ from python_helper import Constant as c
 from python_helper import log, Function, ReflectionHelper, SettingHelper, ObjectHelper, StringHelper
 import globals
 from python_framework.api.src.util import Serializer
+from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import SqlAlchemyProxy
 from python_framework.api.src.service import SessionManager
@@ -104,8 +105,8 @@ def getResourceList(apiInstance, resourceType) :
 
 @Function
 def addGlobalsTo(apiInstance) :
-    FlaskManager.validateFlaskApi(apiInstance)
-    apiInstance.globals = FlaskManager.getGlobals()
+    FlaskUtil.validateFlaskApi(apiInstance)
+    apiInstance.globals = FlaskUtil.getGlobals()
     apiInstance.globals.api = apiInstance
     apiInstance.bindResource = FlaskManager.bindResource
     apiInstance.scheme = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_SCHEME)
