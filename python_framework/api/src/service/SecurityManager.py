@@ -131,7 +131,7 @@ def patchAccessToken(newContextList=None, **kwargs) :
     return create_refresh_token(
         identity = getIdentity(rawJwt=rawJwt),
         user_claims = {
-            JwtConstant.KW_CONTEXT: list(set([*getContext(rawJwt=rawJwt), *[[] if ObjectHelper.isNone(newContextList) else newContextList][0])),
+            JwtConstant.KW_CONTEXT: list(set([*getContext(rawJwt=rawJwt), *[element for element in [] if ObjectHelper.isNone(newContextList) else newContextList]])),
             JwtConstant.KW_DATA: {**getData(rawJwt=rawJwt), **kwargs}
         },
         expires_delta = deltaMinutes,
