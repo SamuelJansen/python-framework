@@ -15,7 +15,7 @@ class SessionManagerTestController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        sessionRequired=['TEST_ROLE']
+        sessionRequired=['TEST_SESSION']
     )
     def get(self):
         return {
@@ -34,7 +34,7 @@ class SessionManagerTestController:
         headers={'some': 'headers'}
         data = {'some': 'data'}
         return {
-            'accessToken': SessionManager.createAccessToken(dto['id'], ['TEST_ROLE'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
+            'accessToken': SessionManager.createAccessToken(dto['id'], ['TEST_SESSION'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
         }, HttpStatus.OK
 
     @ControllerMethod(
@@ -43,15 +43,15 @@ class SessionManagerTestController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        sessionRequired=['TEST_ROLE']
+        sessionRequired=['TEST_SESSION']
     )
     def patch(self, dto):
         assert 'headers' == SessionManager.getJwtHeaders().get('some'), f"headers == {SessionManager.getJwtHeaders().get('some')} should be equals. Headers: {SessionManager.getJwtHeaders()}"
         headers={'some': 'other headers'}
         data = {'some': 'other data'}
         return {
-            # 'accessToken': SessionManager.patchAccessToken(dto['id'], ['TEST_ROLE', 'TEST_ROLE_REFRESH'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
-            'accessToken': SessionManager.patchAccessToken(newContextList=['TEST_ROLE', 'TEST_ROLE_REFRESH'], headers=headers, data=data)
+            # 'accessToken': SessionManager.patchAccessToken(dto['id'], ['TEST_SESSION', 'TEST_SESSION_REFRESH'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
+            'accessToken': SessionManager.patchAccessToken(newContextList=['TEST_SESSION', 'TEST_SESSION_REFRESH'], headers=headers, data=data)
         }, HttpStatus.OK
 
     @ControllerMethod(
@@ -60,7 +60,7 @@ class SessionManagerTestController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        sessionRequired=['TEST_ROLE', 'TEST_ROLE_REFRESH']
+        sessionRequired=['TEST_SESSION', 'TEST_SESSION_REFRESH']
     )
     def put(self, dto):
         SessionManager.addUserToBlackList()
@@ -75,7 +75,7 @@ class SessionManagerTestBatchController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        sessionRequired=['TEST_ROLE_REFRESH']
+        sessionRequired=['TEST_SESSION_REFRESH']
     )
     def get(self):
         assert 'other headers' == SessionManager.getJwtHeaders().get('some'), f"other headers == {SessionManager.getJwtHeaders().get('some')} should be equals. Headers: {SessionManager.getJwtHeaders()}"

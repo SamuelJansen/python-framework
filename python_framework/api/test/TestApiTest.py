@@ -643,7 +643,7 @@ def pythonRun_sessionManager() :
                 "currentUser": {
                     "identity": id,
                     "context": [
-                        "TEST_ROLE"
+                        "TEST_SESSION"
                     ],
                     "data": {
                         "some": "data"
@@ -674,8 +674,8 @@ def pythonRun_sessionManager() :
                 "currentUser": {
                     "identity": id,
                     "context": [
-                        "TEST_ROLE",
-                        "TEST_ROLE_REFRESH"
+                        "TEST_SESSION",
+                        "TEST_SESSION_REFRESH"
                     ],
                     "data": {
                         "some": "other data"
