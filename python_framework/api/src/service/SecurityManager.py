@@ -112,7 +112,6 @@ def refreshAccessToken(identity, roleList, deltaMinutes=None, headers=None, data
             JwtConstant.KW_CONTEXT: roleList,
             JwtConstant.KW_DATA: data
         },
-        fresh = False,
         expires_delta = deltaMinutes,
         headers = headers
     )

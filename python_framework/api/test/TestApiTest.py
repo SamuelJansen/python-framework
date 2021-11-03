@@ -454,67 +454,80 @@ def pythonRun_securityManager() :
         "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
         'Cache-Control': 'no-cache'
     }
+    id = time.time()
     payload = {
-        'id': time.time()
+        'id': id
     }
 
     session = requests.Session()
 
     responseGetHealth = session.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER, headers=headers)
 
-    print(BASE_URI + POST_LOGIN_URI)
-    input('press enter to proceeed the test')
-    responseLogin = session.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
-
-    # print(responseLogin.text)
-    # print(responseLogin.json)
-
-    firstAuthorization = responseLogin.json().get('accessToken')
-    headers['Authorization'] = 'Bearer ' + firstAuthorization
-    responseGetConsume = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
-
-    responseGetConsumeBeforeRefresh = None
     try:
+        # print(BASE_URI + POST_LOGIN_URI)
+        responseLogin = session.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
+        firstAuthorization = responseLogin.json().get('accessToken')
+        headers['Authorization'] = 'Bearer ' + firstAuthorization
+
+        responseGetConsume = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
+
         responseGetConsumeBeforeRefresh = session.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
-    except Exception as exception:
-        responseGetConsumeBeforeRefreshException = exception
 
-    # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
-    # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
+        responsePatchRefresh = session.patch(BASE_URI + PATCH_REFRESH_URI, json=payload, headers=headers)
+        patchedAuthorization = responsePatchRefresh.json().get('accessToken')
+        headers['Authorization'] = 'Bearer ' + patchedAuthorization
 
-    # print(f'responseGetNone: {responseGetNone.json()}')
-    # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
-    #
-    # print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
-    # print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
-    # print(f'responsePostSendPayloadBatch: {responsePostSendPayloadBatch.json()}')
-    # print(f'responsePostSendPayloadListBatch: {responsePostSendPayloadListBatch.json()}')
+        # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
+        # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
 
-    # assert
-    assert ObjectHelper.equals(
-        {'status':'UP'},
-        responseGetHealth.json()
-    )
-    assert 200 == responseGetHealth.status_code
+        # print(f'responseGetNone: {responseGetNone.json()}')
+        # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
+        #
+        # print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
+        # print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
+        # print(f'responsePostSendPayloadBatch: {responsePostSendPayloadBatch.json()}')
+        # print(f'responsePostSendPayloadListBatch: {responsePostSendPayloadListBatch.json()}')
 
-    assert ObjectHelper.isNotNone(firstAuthorization)
+        # assert
+        assert ObjectHelper.equals(
+            {'status':'UP'},
+            responseGetHealth.json()
+        )
+        assert 200 == responseGetHealth.status_code
 
-    assert ObjectHelper.isNotNone(payload.get('id'))
-    assert ObjectHelper.equals({
-            "secured": "information",
-            "currentUser": {
-                "identity": payload.get('id'),
-                "context": [
-                    "TEST_ROLE"
-                ],
-                "data": {
-                    "some": "data"
+        assert ObjectHelper.isNotNone(firstAuthorization)
+
+        assert ObjectHelper.isNotNone(id)
+        assert ObjectHelper.equals({
+                "secured": "information",
+                "currentUser": {
+                    "identity": id,
+                    "context": [
+                        "TEST_ROLE"
+                    ],
+                    "data": {
+                        "some": "data"
+                    }
                 }
-            }
-        },
-        responseGetConsume
-    )
+            },
+            responseGetConsume.json()
+        )
 
-    assert ObjectHelper.isNone(responseGetConsumeBeforeRefresh)
+        assert ObjectHelper.equals({
+                "message": "Role not allowed",
+                "timestamp": "2021-11-02 21:47:32.444629"
+            },
+            responseGetConsumeBeforeRefresh.json(),
+            ignoreKeyList=['timestamp']
+        )
+        assert 403, responseGetConsumeBeforeRefresh.status_code
+
+        assert ObjectHelper.isNotNone(responsePatchRefresh)
+        assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
+
+    except Exception as testException:
+        log.error(pythonRun_securityManager, 'Test failed', testException)
+        input('Verify the raised errors and press enter to continue')
+        raise testException
 
     killProcesses(process)
