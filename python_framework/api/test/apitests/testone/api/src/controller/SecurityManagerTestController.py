@@ -50,7 +50,8 @@ class SecurityManagerTestController:
         headers={'some': 'other headers'}
         data = {'some': 'other data'}
         return {
-            'accessToken': SecurityManager.refreshAccessToken(dto['id'], ['TEST_ROLE', 'TEST_ROLE_REFRESH'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
+            # 'accessToken': SecurityManager.patchAccessToken(dto['id'], ['TEST_ROLE', 'TEST_ROLE_REFRESH'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
+            'accessToken': SecurityManager.patchAccessToken(newContextList=['TEST_ROLE', 'TEST_ROLE_REFRESH'], headers=headers, data=data)
         }, HttpStatus.OK
 
     @ControllerMethod(
@@ -77,6 +78,7 @@ class SecurityManagerTestBatchController:
         roleRequired=['TEST_ROLE_REFRESH']
     )
     def get(self):
+        assert 'other headers' == SecurityManager.getJwtHeaders().get('some'), f"other headers == {SecurityManager.getJwtHeaders().get('some')} should be equals. Headers: {SecurityManager.getJwtHeaders()}"
         return {
             'secured': 'information',
             'after': 'refresh',

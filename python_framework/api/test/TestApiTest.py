@@ -502,8 +502,8 @@ def pythonRun_securityManager() :
         assert ObjectHelper.isNotNone(firstAuthorization)
 
         assert ObjectHelper.isNotNone(id)
-        assert ObjectHelper.equals('headers', firstAuthorizationHeaders.get('some'))
-        assert ObjectHelper.equals({
+        assert ObjectHelper.isNone(firstAuthorizationHeaders.get('some'))
+        expectedResponseGetConsumeBeforeRefresh = {
                 "secured": "information",
                 "currentUser": {
                     "identity": id,
@@ -514,9 +514,11 @@ def pythonRun_securityManager() :
                         "some": "data"
                     }
                 }
-            },
+            }
+        assert ObjectHelper.equals(
+            expectedResponseGetConsumeBeforeRefresh,
             responseGetConsumeBeforeRefresh.json()
-        )
+        ), f'{expectedResponseGetConsumeBeforeRefresh} should be equals to {responseGetConsumeAfterRefresh.json()}'
 
         assert ObjectHelper.equals({
                 "message": "Role not allowed",
@@ -531,8 +533,8 @@ def pythonRun_securityManager() :
         assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
 
         assert ObjectHelper.isNotNone(id)
-        assert ObjectHelper.equals('other headers', patchedAuthorizationHeaders.get('some'))
-        assert ObjectHelper.equals({
+        assert ObjectHelper.isNone(patchedAuthorization.get('some'))
+        expectedResponseGetConsumeAfterRefresh = {
                 "secured": "information",
                 "currentUser": {
                     "identity": id,
@@ -544,9 +546,11 @@ def pythonRun_securityManager() :
                         "some": "other data"
                     }
                 }
-            },
+            }
+        assert ObjectHelper.equals(
+            expectedResponseGetConsumeAfterRefresh,
             responseGetConsumeAfterRefresh.json()
-        )
+        ), f'{expectedResponseGetConsumeAfterRefresh} should be equals to {responseGetConsumeAfterRefresh.json()}'
 
     except Exception as testException:
         log.error(pythonRun_securityManager, 'Test failed', testException)

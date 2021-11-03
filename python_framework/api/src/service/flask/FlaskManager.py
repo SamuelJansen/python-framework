@@ -282,7 +282,7 @@ def handleSecuredControllerMethod(
             logMessage = f'''Roles {roleList} trying to access denied resourse. Allowed roles {roleRequired}''',
             status = HttpStatus.FORBIDDEN
         )
-    if ObjectHelper.isNotEmptyCollection(sessionRequired):
+    elif ObjectHelper.isNotEmptyCollection(sessionRequired):
         return handleSessionedControllerMethod(
             args,
             kwargs,
@@ -328,17 +328,18 @@ def handleSessionedControllerMethod(
             logMessage = f'''Session {group} trying to access denied resourse. Allowed groups: {sessionRequired}''',
             status = HttpStatus.FORBIDDEN
         )
-    return handleControllerMethod(
-        args,
-        kwargs,
-        contentType,
-        resourceInstance,
-        resourceInstanceMethod,
-        requestHeaderClass,
-        requestParamClass,
-        requestClass,
-        logRequest
-    )
+    else:
+        return handleControllerMethod(
+            args,
+            kwargs,
+            contentType,
+            resourceInstance,
+            resourceInstanceMethod,
+            requestHeaderClass,
+            requestParamClass,
+            requestClass,
+            logRequest
+        )
 
 @Function
 def handleControllerMethod(

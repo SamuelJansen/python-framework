@@ -126,11 +126,10 @@ def refreshAccessToken(identity, roleList, deltaMinutes=None, headers=None, data
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def patchAccessToken(newContextList=None, **kwargs) :
+def patchAccessToken(newContextList=None, headers=None, data=None) :
     rawJwt = getJwtBody()
     # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
-    deltaMinutes = datetime.timedelta(minutes=1)
-
+    expiresDelta = datetime.timedelta(minutes=1)
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
             *getContext(rawJwt=rawJwt),
@@ -138,13 +137,18 @@ def patchAccessToken(newContextList=None, **kwargs) :
                 element for element in list([] if ObjectHelper.isNone(newContextList) else newContextList)
             ]
         ])),
-        JwtConstant.KW_DATA: {**getData(rawJwt=rawJwt), **kwargs}
+        JwtConstant.KW_DATA: {
+            **getData(rawJwt=rawJwt),
+            **{
+                k: v for k,v in (data if ObjectHelper.isNotNone(data) else dict()))
+            }
+        }
     }
     return create_refresh_token(
         identity = getIdentity(rawJwt=rawJwt),
         user_claims = userClaims,
         expires_delta = expiresDelta,
-        headers = headers
+        headers = headers if ObjectHelper.isNotNone(headers) else dict()
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
