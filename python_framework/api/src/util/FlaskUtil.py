@@ -1,27 +1,43 @@
-from flask import request
+from flask import Response, request
+import flask_restful
 from python_helper import Constant as c
 from python_helper import ObjectHelper, log, Function
 import globals
 
-def safellyGetRequestBody(self) :
-    try :
-        requestBody = request.get_json()
-    except Exception as firstException:
-        log.log(safellyGetVerb, 'Not possible to get body on first attempt. Going for a second attempt', exception=firstException)
-        try :
-            requestBody = request.get_data()
-        except Exception as secondException:
-            requestBody = {}
-            log.log(safellyGetVerb, f'Not possible to get body on second attempt either. Returning {requestBody} by default', exception=secondException)
+Response = Response
+request = request
+Resource = flask_restful.Resource
+
+def safellyGetRequestBody() :
+    requestBody = safellyGetJson()
+    if ObjectHelper.isNone(requestBody):
+        requestBody = safellyGetData()
     return requestBody if ObjectHelper.isNotNone(requestBody) else dict()
 
+def safellyGetJson():
+    jsonBody
+    try :
+        jsonBody = request.get_json()
+    except Exception as exception:
+        jsonBody = {}
+        log.log(safellyGetJson, f'Not possible to get body. Returning {jsonBody} by default', exception=exception)
+    return jsonBody
+
+def safellyGetData():
+    dataBody
+    try :
+        dataBody = request.get_json()
+    except Exception as exception:
+        dataBody = {}
+        log.log(safellyGetJson, f'Not possible to get data. Returning {dataBody} by default', exception=exception)
+    return dataBody
 
 def safellyGetUrl() :
     url = None
     try :
         url = request.url
     except Exception as exception :
-        log.log(safellyGetVerb, 'Not possible to get url', exception=exception)
+        log.log(safellyGetUrl, 'Not possible to get url', exception=exception)
     return url
 
 def safellyGetVerb() :
@@ -37,8 +53,18 @@ def safellyGetHeaders():
     try:
         headers= request.headers
     except Exception as exception :
-        log.log(safellyGetVerb, 'Not possible to get headers', exception=exception)
+        headers = {}
+        log.log(safellyGetHeaders, 'Not possible to get headers. Returning {headers} by default', exception=exception)
     return headers if ObjectHelper.isNotNone(headers) else dict()
+
+def safellyGetArgs():
+    args = None
+    try:
+        args = request.args
+    except Exception as exception :
+        args = {}
+        log.log(safellyGetHeaders, f'Not possible to get args. Returning {args} by default', exception=exception)
+    return args if ObjectHelper.isNotNone(args) else dict()
 
 @Function
 def getGlobals() :

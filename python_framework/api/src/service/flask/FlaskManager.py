@@ -1,5 +1,3 @@
-from flask import Response, request
-import flask_restful
 from python_framework.api.src.service import WebBrowser
 from python_helper import Constant as c
 from python_helper import log, Function, ReflectionHelper, ObjectHelper, SettingHelper
@@ -191,9 +189,9 @@ def muteLogs(api) :
 def getRequestBodyAsJson(contentType, requestClass) :
     try :
         if OpenApiManager.DEFAULT_CONTENT_TYPE == contentType :
-            requestBodyAsJson = request.get_json()
+            requestBodyAsJson = FlaskUtil.safellyGetJson()
         elif OpenApiManager.MULTIPART_X_MIXED_REPLACE in contentType :
-            requestBodyAsJson = request.get_data()
+            requestBodyAsJson = FlaskUtil.safellyGetData()
         else :
             raise Exception(f'Content type "{contentType}" not implemented')
     except Exception as exception :
@@ -367,8 +365,8 @@ def handleControllerMethod(
         if Serializer.requestBodyIsPresent(requestBodyAsJson) :
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(args, serializerReturn)
-    addToKwargs(KW_HEADERS, requestHeaderClass, request.headers, kwargs)
-    addToKwargs(KW_PARAMETERS, requestParamClass, request.args, kwargs)
+    addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
+    addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
     response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
     if response and Serializer.isSerializerCollection(response) and 2 == len(response) :
         return response
@@ -381,7 +379,7 @@ def addToKwargs(key, givenClass, valuesAsDictionary, kwargs) :
 
 @Function
 def jsonifyResponse(response, contentType, status) :
-    return Response(Serializer.jsonifyIt(response),  mimetype=contentType, status=HttpStatus.map(status).enumValue)
+    return FlaskUtil.Response(Serializer.jsonifyIt(response),  mimetype=contentType, status=HttpStatus.map(status).enumValue)
 
 @Function
 def getArgsWithSerializerReturnAppended(args, argument) :
@@ -474,7 +472,7 @@ def Controller(
     controllerDescription = description
     def Wrapper(OuterClass,*args,**kwargs):
         log.debug(Controller, f'''wrapping {OuterClass.__name__}''', None)
-        class InnerClass(OuterClass, flask_restful.Resource):
+        class InnerClass(OuterClass, FlaskUtil.Resource):
             url = controllerUrl
             tag = controllerTag
             description = controllerDescription
@@ -482,7 +480,7 @@ def Controller(
                 log.debug(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})', None)
                 apiInstance = FlaskHelper.getApi()
                 OuterClass.__init__(self)
-                flask_restful.Resource.__init__(self,*args,**kwargs)
+                FlaskUtil.Resource.__init__(self,*args,**kwargs)
                 self.service = apiInstance.resource.service
                 self.globals = apiInstance.globals
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
