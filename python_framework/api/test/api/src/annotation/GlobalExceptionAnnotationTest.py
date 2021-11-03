@@ -152,9 +152,9 @@ def encapsulateItWithGlobalException_withParameters_GlobalException() :
 
     #act
     internalFailure = TestHelper.getRaisedException(internalFuncionDoesThrowsException)
-    print(internalFailure)
-    print(internalFailure.logResource)
-    print(internalFailure.logResourceMethod)
+    # print(internalFailure)
+    # print(internalFailure.logResource)
+    # print(internalFailure.logResourceMethod)
 
     #assert
     assert not RAISED_EXCEPTION == internalFailure, f'not {RAISED_EXCEPTION} == {internalFailure}: {not RAISED_EXCEPTION == internalFailure}'
