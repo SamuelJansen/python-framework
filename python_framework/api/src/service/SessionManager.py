@@ -143,11 +143,11 @@ def addJwt(jwtInstance) :
     ...
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def createAccessToken(identity, contextList, deltaMinutes=None, headers=None, data=None):
+def createAccessToken(identity, contextList, deltaMinutes=None, headers=None, data=None, apiInstance=None):
     if deltaMinutes :
         deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
     timeNow = DateTimeHelper.dateTimeNow()
-    return retrieveApiInstance(arguments=args).session.encode({
+    return retrieveApiInstance(apiInstance=apiInstance).session.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: f"{int(f'{time.time()}'.replace('.', ''))+int(f'{time.time()}'.replace('.', ''))}",
@@ -164,11 +164,11 @@ def createAccessToken(identity, contextList, deltaMinutes=None, headers=None, da
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def refreshAccessToken(identity, contextList, deltaMinutes=None, headers=None, data=None):
+def refreshAccessToken(identity, contextList, deltaMinutes=None, headers=None, data=None, apiInstance=None):
     if ObjectHelper.isNotNone(deltaMinutes) :
         deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
     timeNow = DateTimeHelper.dateTimeNow()
-    return retrieveApiInstance(arguments=args).session.encode({
+    return retrieveApiInstance(apiInstance=apiInstance).session.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: f"{int(f'{time.time()}'.replace('.', ''))+int(f'{time.time()}'.replace('.', ''))}",
@@ -185,7 +185,7 @@ def refreshAccessToken(identity, contextList, deltaMinutes=None, headers=None, d
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def patchAccessToken(newContextList=None, headers=None, data=None):
+def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=None):
     rawJwt = getJwtBody()
     # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
     import time
@@ -205,7 +205,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None):
             }
         }
     }
-    apiInstance = retrieveApiInstance(arguments=args)
+    apiInstance = retrieveApiInstance(apiInstance=apiInstance)
     return apiInstance.session.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
@@ -220,8 +220,8 @@ def patchAccessToken(newContextList=None, headers=None, data=None):
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getCurrentSession(sessionClass=None):
-    apiInstance = retrieveApiInstance()
+def getCurrentSession(sessionClass=None, apiInstance=None):
+    apiInstance = retrieveApiInstance(apiInstance=apiInstance)
     rawJwt = getJwtBody(apiInstance=apiInstance)
     identity = getIdentity(rawJwt=rawJwt, apiInstance=apiInstance)
     context = getContext(rawJwt=rawJwt, apiInstance=apiInstance)
