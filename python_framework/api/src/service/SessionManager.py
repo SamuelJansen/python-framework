@@ -74,7 +74,7 @@ class JwtManager:
         return self.decode(self.captureEncodedToken(), options=options)
 
     def captureEncodedToken(self):
-        return FlaskHelper.safellyGetHeaders().get(self.headerName)
+        return FlaskUtil.safellyGetHeaders().get(self.headerName)
 
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -252,9 +252,9 @@ def retrieveApiInstance(apiInstance=None, arguments=None):
             apiInstance = arguments[0]
         except Exception as exception:
             log.warning(jwtRequired, f'''Not possible to retrieve api instance by arguments. Going for another approach''')
-    if ObjectHelper.isNone(apiInstance) or not FlaskHelper.isApiInstance(apiInstance):
+    if ObjectHelper.isNone(apiInstance) or not FlaskUtil.isApiInstance(apiInstance):
         log.warning(jwtRequired, f'''Not possible to retrieve api instance. Going for a slower approach''')
-        apiInstance = FlaskHelper.getApi()
+        apiInstance = FlaskUtil.getApi()
     return apiInstance if ObjectHelper.isNotNone(apiInstance) else raiseUnretrievedApiInstance()
 
 def raiseUnretrievedApiInstance():

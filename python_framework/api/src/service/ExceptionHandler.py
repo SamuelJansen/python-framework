@@ -50,13 +50,13 @@ class GlobalException(Exception):
         return f'''{GlobalException.__name__} thrown at {self.timeStamp}. Status: {self.status}, message: {self.message}, verb: {self.verb}, url: {self.url}{', logMessage: ' if self.logMessage else c.NOTHING}{self.logMessage}'''
 
     def getRequestBody(self) :
-        return FlaskHelper.safellyGetRequestBody()
+        return FlaskUtil.safellyGetRequestBody()
 
     def getRequestVerb(self) :
-        return FlaskHelper.safellyGetVerb()
+        return FlaskUtil.safellyGetVerb()
 
     def getRequestUrl(self) :
-        return FlaskHelper.safellyGetUrl()
+        return FlaskUtil.safellyGetUrl()
 
 
 @Function

@@ -148,7 +148,7 @@ def initialize(
 
 def runApi(*args, api=None, **kwargs) :
     if ObjectHelper.isNone(api) :
-        api = FlaskHelper.getApi()
+        api = FlaskUtil.getApi()
     muteLogs(api)
     if 'host' not in kwargs and api.host :
         kwargs['host'] = api.host if not 'localhost' == api.host else '0.0.0.0'
@@ -426,8 +426,8 @@ def setResource(apiInstance, resourceInstance, resourceName=None) :
 
 @Function
 def bindResource(apiInstance,resourceInstance) :
-    FlaskHelper.validateFlaskApi(apiInstance)
-    FlaskHelper.validateResourceInstance(resourceInstance)
+    FlaskUtil.validateFlaskApi(apiInstance)
+    FlaskUtil.validateResourceInstance(resourceInstance)
     setResource(ReflectionHelper.getAttributeOrMethod(apiInstance.resource, getResourceType(resourceInstance).lower()), resourceInstance)
 
 @Function
@@ -478,7 +478,7 @@ def Controller(
             description = controllerDescription
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})', None)
-                apiInstance = FlaskHelper.getApi()
+                apiInstance = FlaskUtil.getApi()
                 OuterClass.__init__(self)
                 FlaskUtil.Resource.__init__(self,*args,**kwargs)
                 self.service = apiInstance.resource.service
@@ -595,7 +595,7 @@ def SimpleClient() :
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
-                self.globals = FlaskHelper.getApi().globals
+                self.globals = FlaskUtil.getApi().globals
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -626,7 +626,7 @@ def getGlobalException(
         exception,
         resourceInstance,
         resourceInstanceMethod,
-        apiInstance = apiInstance if ObjectHelper.isNotNone(apiInstance) else FlaskHelper.getNullableApi()
+        apiInstance = apiInstance if ObjectHelper.isNotNone(apiInstance) else FlaskUtil.getNullableApi()
     )
 
 def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod) :
@@ -684,10 +684,10 @@ def raiseBadResponseImplementation(cause):
 
 @Function
 def getGlobals() :
-    return FlaskHelper.getGlobals()
+    return FlaskUtil.getGlobals()
 
 def getApi() :
-    return FlaskHelper.getApi()
+    return FlaskUtil.getApi()
 
 def getNullableApi() :
-    return FlaskHelper.getNullableApi()
+    return FlaskUtil.getNullableApi()
