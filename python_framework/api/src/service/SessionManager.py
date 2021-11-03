@@ -33,7 +33,7 @@ class JwtManager:
             self.raiseInvalidAccess('JWT session token cannot be None')
         if not encoded_payload.startswith(f'{self.headerType} '):
             self.raiseInvalidAccess(f'JWT session token must starts with {self.headerType}')
-        return jwt.decode(encoded_payload.encode(), self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
+        return jwt.decode(encoded_payload.replace(f'{self.headerType} ', c.BLANK).encode(), self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
 
     @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def verifyAuthorizaionAccess(self, decriptedToken) :
