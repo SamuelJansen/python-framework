@@ -17,7 +17,7 @@ BLACK_LIST = set()
 
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getRawJwt(*arg,**kwargs) :
+def getJwtBody(*arg,**kwargs) :
     return get_raw_jwt(*arg,**kwargs)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -26,15 +26,15 @@ def jwtRequired(*arg,**kwargs) :
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJti(*arg,**kwargs) :
-    return getRawJwt(*arg,**kwargs)[JwtConstant.KW_JTI]
+    return getJwtBody(*arg,**kwargs)[JwtConstant.KW_JTI]
 
 @EncapsulateItWithGlobalException(message=JwtConstant.FORBIDDEN_MESSAGE, status=HttpStatus.FORBIDDEN)
 def getGroup(*arg,**kwargs) :
-    return getRawJwt(*arg,**kwargs)[JwtConstant.KW_CLAIMS]
+    return getJwtBody(*arg,**kwargs)[JwtConstant.KW_CLAIMS]
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(*arg,**kwargs) :
-    return getRawJwt(*arg,**kwargs)[JwtConstant.KW_IDENTITY]
+    return getJwtBody(*arg,**kwargs)[JwtConstant.KW_IDENTITY]
 
 @Function
 def addUserToBlackList() :

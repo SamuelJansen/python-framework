@@ -1,10 +1,10 @@
-from flask import _request_ctx_stack
 from flask_jwt_extended import (
     JWTManager,
     get_raw_jwt,
     jwt_required,
     get_current_user,
     get_jwt_identity,
+    get_raw_jwt_header,
     create_access_token,
     create_refresh_token,
     jwt_refresh_token_required
@@ -24,19 +24,24 @@ BLACK_LIST = set()
 
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getRawJwt(*arg, **kwargs) :
+def getJwtBody(*arg, **kwargs) :
     return get_raw_jwt(*arg,**kwargs)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getJwtHeaders(*arg, **kwargs):
+    headers = get_raw_jwt_header()
+    return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getContext(*arg, rawJwt=None, **kwargs):
     if ObjectHelper.isNone(rawJwt):
-        rawJwt = getRawJwt(*arg, **kwargs)
+        rawJwt = getJwtBody(*arg, **kwargs)
     return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getData(*arg, rawJwt=None, **kwargs):
     if ObjectHelper.isNone(rawJwt):
-        rawJwt = getRawJwt(*arg, **kwargs)
+        rawJwt = getJwtBody(*arg, **kwargs)
     return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -46,19 +51,14 @@ def jwtRequired(*arg,**kwargs) :
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJti(*arg, rawJwt=None, **kwargs) :
     if ObjectHelper.isNone(rawJwt):
-        return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_JTI)
+        return getJwtBody(*arg,**kwargs).get(JwtConstant.KW_JTI)
     else:
         return rawJwt.get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtHeaders(*arg, **kwargs):
-    headers = getattr(_request_ctx_stack.top, "jwt_header", None)
-    return headers if ObjectHelper.isNotNone(headers) else dict()
-
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(*arg, rawJwt=None, **kwargs) :
     if ObjectHelper.isNone(rawJwt):
-        rawJwt = getRawJwt(*arg,**kwargs)
+        rawJwt = getJwtBody(*arg,**kwargs)
     return rawJwt.get(JwtConstant.KW_IDENTITY)
 
 @Function
@@ -127,7 +127,7 @@ def refreshAccessToken(identity, roleList, deltaMinutes=None, headers=None, data
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def patchAccessToken(newContextList=None, **kwargs) :
-    rawJwt = getRawJwt()
+    rawJwt = getJwtBody()
     # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
     deltaMinutes = datetime.timedelta(minutes=1)
 
@@ -153,7 +153,7 @@ def getCurrentUser(*args, userClass=None, **kwargs):
     if ObjectHelper.isNotNone(currentUsert):
         return currentUsert
     else:
-        rawJwt = getRawJwt(*args, **kwargs)
+        rawJwt = getJwtBody(*args, **kwargs)
         identity = getIdentity(rawJwt=rawJwt)
         context = getContext(rawJwt=rawJwt)
         if ObjectHelper.isNone(userClass):
