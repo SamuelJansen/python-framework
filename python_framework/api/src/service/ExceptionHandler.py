@@ -1,9 +1,9 @@
 import datetime
-from flask import request
 from flask_jwt_extended.exceptions import NoAuthorizationError, RevokedTokenError
 from jwt import ExpiredSignatureError, InvalidSignatureError
 from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper, StringHelper
+from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.model import ErrorLog
 
@@ -39,8 +39,8 @@ class GlobalException(Exception):
         self.timeStamp = datetime.datetime.now()
         self.status = HttpStatus.map(DEFAULT_STATUS if ObjectHelper.isNone(status) else status).enumValue
         self.message = message if ObjectHelper.isNotEmpty(message) and StringHelper.isNotBlank(message) else DEFAULT_MESSAGE if 500 <= self.status else self.status.enumName
-        self.verb = safellyGetVerb()
-        self.url = safellyGetUrl()
+        self.verb = self.getRequestVerb()
+        self.url = self.getRequestUrl()
         self.logMessage = DEFAULT_LOG_MESSAGE if ObjectHelper.isNone(logMessage) or StringHelper.isBlank(logMessage) else logMessage
         self.logResource = DEFAULT_LOG_RESOURCE if ObjectHelper.isNone(logResource) else logResource
         self.logResourceMethod = DEFAULT_LOG_RESOURCE_METHOD if ObjectHelper.isNone(logResourceMethod) else logResourceMethod
@@ -50,14 +50,14 @@ class GlobalException(Exception):
         return f'''{GlobalException.__name__} thrown at {self.timeStamp}. Status: {self.status}, message: {self.message}, verb: {self.verb}, url: {self.url}{', logMessage: ' if self.logMessage else c.NOTHING}{self.logMessage}'''
 
     def getRequestBody(self) :
-        try :
-            requestBody = request.get_json()
-        except :
-            try :
-                requestBody = request.get_data()
-            except :
-                requestBody = {}
-        return requestBody
+        return FlaskHelper.safellyGetRequestBody()
+
+    def getRequestVerb(self) :
+        return FlaskHelper.safellyGetVerb()
+
+    def getRequestUrl(self) :
+        return FlaskHelper.safellyGetUrl()
+
 
 @Function
 def validateArgs(self, method, objectRequest, expecteObjectClass):
@@ -73,7 +73,7 @@ def validateArgs(self, method, objectRequest, expecteObjectClass):
         raise GlobalException(logMessage = f'Failed to validate args of {method.__name__} method{DOT_SPACE_CAUSE}{str(exception)}')
 
 @Function
-def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, api = None) :
+def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, apiInstance = None) :
     if not (isinstance(exception.__class__, GlobalException) or GlobalException.__name__ == exception.__class__.__name__) :
         log.debug(handleLogErrorException, f'Failed to excecute {resourceInstanceMethod.__name__} method due to {exception.__class__.__name__} exception', exception=exception)
         message = None
@@ -103,11 +103,11 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
             exception.logResourceMethod = resourceInstanceMethod
         httpErrorLog = ErrorLog.ErrorLog()
         httpErrorLog.override(exception)
-        if ObjectHelper.isNone(api):
+        if ObjectHelper.isNone(apiInstance):
             from python_framework import FlaskManager
             apiInstance = FlaskManager.getApi()
         else:
-            apiInstance = api
+            apiInstance = apiInstance
             try:
                 apiInstance.repository.commit()
             except Exception as preCommitException:
@@ -116,19 +116,3 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
     except Exception as errorLogException :
         log.warning(handleLogErrorException, f'Failed to persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
     return exception
-
-def safellyGetUrl() :
-    url = None
-    try :
-        url = request.url
-    except Exception as exception :
-        ...
-    return url
-
-def safellyGetVerb() :
-    verb = None
-    try :
-        verb = request.method
-    except Exception as exception :
-        ...
-    return verb

@@ -1,7 +1,7 @@
 print-status: False
 
 api:
-    name: SecurityManagerTestApi
+    name: SessionManagerTestApi
     server:
         base-url: /session-manager-api
         scheme: http

@@ -5,7 +5,8 @@ from python_helper import Constant as c
 from python_helper import log, Function, ReflectionHelper, ObjectHelper, SettingHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.ExceptionHandler import GlobalException
-from python_framework.api.src.helper import Serializer
+from python_framework.api.src.util import FlaskUtil
+from python_framework.api.src.util import FlaskHelper
 from python_framework.api.src.service import ExceptionHandler
 from python_framework.api.src.service import SessionManager
 from python_framework.api.src.service import SecurityManager
@@ -149,7 +150,7 @@ def initialize(
 
 def runApi(*args, api=None, **kwargs) :
     if ObjectHelper.isNone(api) :
-        api = getApi()
+        api = FlaskHelper.getApi()
     muteLogs(api)
     if 'host' not in kwargs and api.host :
         kwargs['host'] = api.host if not 'localhost' == api.host else '0.0.0.0'
@@ -427,8 +428,8 @@ def setResource(apiInstance, resourceInstance, resourceName=None) :
 
 @Function
 def bindResource(apiInstance,resourceInstance) :
-    validateFlaskApi(apiInstance)
-    validateResourceInstance(resourceInstance)
+    FlaskHelper.validateFlaskApi(apiInstance)
+    FlaskHelper.validateResourceInstance(resourceInstance)
     setResource(ReflectionHelper.getAttributeOrMethod(apiInstance.resource, getResourceType(resourceInstance).lower()), resourceInstance)
 
 @Function
@@ -479,7 +480,7 @@ def Controller(
             description = controllerDescription
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})', None)
-                apiInstance = getApi()
+                apiInstance = FlaskHelper.getApi()
                 OuterClass.__init__(self)
                 flask_restful.Resource.__init__(self,*args,**kwargs)
                 self.service = apiInstance.resource.service
@@ -596,7 +597,7 @@ def SimpleClient() :
             def __init__(self,*args,**kwargs):
                 log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
-                self.globals = getApi().globals
+                self.globals = FlaskHelper.getApi().globals
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -621,13 +622,13 @@ def getGlobalException(
     exception,
     resourceInstance,
     resourceInstanceMethod,
-    api: flask_restful.Api = None
+    apiInstance = None
 ):
     return ExceptionHandler.handleLogErrorException(
         exception,
         resourceInstance,
         resourceInstanceMethod,
-        api = api if ObjectHelper.isNotNone(api) else getNullableApi()
+        apiInstance = apiInstance if ObjectHelper.isNotNone(apiInstance) else FlaskHelper.getNullableApi()
     )
 
 def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod) :
@@ -674,15 +675,6 @@ def validateResponseClass(responseClass, controllerResponse) :
     else :
         log.log(validateResponseClass,f'"responseClass" was not defined')
 
-def getClassName(instance) :
-    return instance.__class__.__name__
-
-def getModuleName(instance) :
-    return instance.__class__.__module__
-
-def getQualitativeName(instance) :
-    return instance.__class__.__qualname__
-
 def isPythonFrameworkHttpsResponse(controllerResponse) :
     return (ObjectHelper.isTuple(controllerResponse) or ObjectHelper.isList(controllerResponse)) and 2 == len(controllerResponse)
 
@@ -694,30 +686,10 @@ def raiseBadResponseImplementation(cause):
 
 @Function
 def getGlobals() :
-    return globals.getGlobalsInstance()
+    return FlaskHelper.getGlobals()
 
 def getApi() :
-    api = None
-    try:
-        api = getGlobals().api
-    except Exception as exception :
-        raise Exception(f'Failed to return api from "globals" instance. Cause: {str(exception)}')
-    return api
+    return FlaskHelper.getApi()
 
 def getNullableApi() :
-    api = None
-    try :
-        api = getApi()
-    except Exception as exception :
-        log.warning(getNullableApi, 'Not possible to get api', exception=exception)
-    return api
-
-def validateFlaskApi(instance) :
-    apiClassName = flask_restful.Api.__name__
-    moduleName = flask_restful.__name__
-    if not apiClassName == getClassName(instance) and apiClassName == getQualitativeName(instance) and moduleName == getModuleName(instance) :
-        raise Exception(f'Invalid "flask_restful.Api" instance. {apiInstance} is not an Api instance')
-
-def validateResourceInstance(resourceInstance) :
-    if ObjectHelper.isNone(resourceInstance) :
-        raise Exception(f'Resource cannot be None')
+    return FlaskHelper.getNullableApi()

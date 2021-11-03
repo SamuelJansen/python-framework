@@ -15,7 +15,7 @@ class SessionManagerTestController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        roleRequired=['TEST_ROLE']
+        sessionRequired=['TEST_ROLE']
     )
     def get(self):
         return {
@@ -43,7 +43,7 @@ class SessionManagerTestController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        roleRequired=['TEST_ROLE']
+        sessionRequired=['TEST_ROLE']
     )
     def patch(self, dto):
         assert 'headers' == SessionManager.getJwtHeaders().get('some'), f"headers == {SessionManager.getJwtHeaders().get('some')} should be equals. Headers: {SessionManager.getJwtHeaders()}"
@@ -60,7 +60,7 @@ class SessionManagerTestController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        roleRequired=['TEST_ROLE', 'TEST_ROLE_REFRESH']
+        sessionRequired=['TEST_ROLE', 'TEST_ROLE_REFRESH']
     )
     def put(self, dto):
         SessionManager.addUserToBlackList()
@@ -75,7 +75,7 @@ class SessionManagerTestBatchController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        roleRequired=['TEST_ROLE_REFRESH']
+        sessionRequired=['TEST_ROLE_REFRESH']
     )
     def get(self):
         assert 'other headers' == SessionManager.getJwtHeaders().get('some'), f"other headers == {SessionManager.getJwtHeaders().get('some')} should be equals. Headers: {SessionManager.getJwtHeaders()}"

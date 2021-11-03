@@ -7,7 +7,7 @@ log.debug(HttpStatus, 'imported')
 from python_framework.api.src.model import ErrorLog
 log.debug(ErrorLog, 'imported')
 
-from python_framework.api.src.helper import Serializer
+from python_framework.api.src.util import FlaskHelper
 log.debug(Serializer, 'imported')
 
 from python_framework.api.src.service.ExceptionHandler import GlobalException

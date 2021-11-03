@@ -4,7 +4,7 @@ from flask_cors import CORS
 from python_helper import Constant as c
 from python_helper import log, Function, ReflectionHelper, SettingHelper, ObjectHelper, StringHelper
 import globals
-from python_framework.api.src.helper import Serializer
+from python_framework.api.src.util import FlaskHelper
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import SqlAlchemyProxy
 from python_framework.api.src.service import SessionManager
