@@ -31,9 +31,10 @@ class SecurityManagerTestController:
         logResponse = True
     )
     def post(self, dto):
-        dto['role'] = 'TEST_ROLE'
+        headers={'some': 'headers'}
+        data = {'some': 'data'}
         return {
-            'accessToken': SecurityManager.createAccessToken(dto, deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=dto.get('headers'))
+            'accessToken': SecurityManager.createAccessToken(dto['id'], ['TEST_ROLE'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
         }, HttpStatus.OK
 
     @ControllerMethod(
@@ -45,9 +46,10 @@ class SecurityManagerTestController:
         roleRequired=['TEST_ROLE']
     )
     def patch(self, dto):
-        dto['role'] = 'TEST_ROLE_REFRESH'
+        headers={'some': 'other headers'}
+        data = {'some': 'other data'}
         return {
-            'accessToken': SecurityManager.refreshAccessToken(dto, deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=dto.get('headers'))
+            'accessToken': SecurityManager.refreshAccessToken(dto['id'], ['TEST_ROLE', 'TEST_ROLE_REFRESH'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
         }, HttpStatus.OK
 
     @ControllerMethod(

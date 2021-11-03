@@ -446,7 +446,6 @@ def pythonRun_securityManager() :
     GET_CONSUME_URI = '/consume'
     PATCH_REFRESH_URI = '/refresh'
     PUT_LOGOUT_URI = '/logout'
-    SECURITY_HEADERS = {'some': 'headers'}
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
 
     # act
@@ -455,8 +454,7 @@ def pythonRun_securityManager() :
         'Cache-Control': 'no-cache'
     }
     payload = {
-        'id': time.time(),
-        'headers': {**SECURITY_HEADERS}
+        'id': time.time()
     }
 
     session = requests.Session()
@@ -487,5 +485,4 @@ def pythonRun_securityManager() :
     )
     assert 200 == responseGetHealth.status_code
 
-    print('end of test')
     killProcesses(process)

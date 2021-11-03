@@ -39,16 +39,22 @@ def jwtRequired(*arg,**kwargs) :
     return jwt_required(*arg,**kwargs)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJti(*arg,**kwargs) :
-    return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_JTI)
+def getJti(*arg, rawJwt=None, **kwargs) :
+    if ObjectHelper.isNone(rawJwt):
+        return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_JTI)
+    else:
+        return rawJwt.get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.FORBIDDEN_MESSAGE, status=HttpStatus.FORBIDDEN)
-def getRoleList(*arg,**kwargs) :
-    return getContext(getRawJwt(*arg,**kwargs))
+def getRoleList(*arg, rawJwt=None, **kwargs) :
+    return getContext(rawJwt if ObjectHelper.isNotNone(rawJwt) else getRawJwt(*arg,**kwargs))
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getIdentity(*arg,**kwargs) :
-    return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_IDENTITY)
+def getIdentity(*arg, rawJwt=None, **kwargs) :
+    if ObjectHelper.isNone(rawJwt):
+        return getRawJwt(*arg,**kwargs).get(JwtConstant.KW_IDENTITY)
+    else:
+        return rawJwt.get(JwtConstant.KW_IDENTITY)
 
 @Function
 def addUserToBlackList() :
@@ -82,17 +88,16 @@ def addJwt(jwtInstance) :
         return {'message': 'Access denied'}, HttpStatus.UNAUTHORIZED
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def createAccessToken(user, deltaMinutes=None, headers=None) :
+def createAccessToken(identity, roleList, deltaMinutes=None, headers=None, data=None) :
     ###- datetime.datetime.utcnow()
     if deltaMinutes :
         deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
-    id, roleList = getIdAndRoleListFromUser(user)
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_access_token
     return create_access_token(
-        identity = id,
+        identity = identity,
         user_claims = {
             JwtConstant.KW_CONTEXT: roleList,
-            JwtConstant.KW_DATA: None
+            JwtConstant.KW_DATA: data
         },
         fresh = False,
         expires_delta = deltaMinutes,
@@ -100,17 +105,16 @@ def createAccessToken(user, deltaMinutes=None, headers=None) :
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def refreshAccessToken(user, deltaMinutes=None, headers=None) :
+def refreshAccessToken(identity, roleList, deltaMinutes=None, headers=None, data=None) :
     ###- datetime.datetime.utcnow()
     if ObjectHelper.isNotNone(deltaMinutes) :
         deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
-    id, roleList = getIdAndRoleListFromUser(user)
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_refresh_token
     return create_refresh_token(
-        identity = id,
+        identity = identity,
         user_claims = {
             JwtConstant.KW_CONTEXT: roleList,
-            JwtConstant.KW_DATA: None
+            JwtConstant.KW_DATA: data
         },
         fresh = False,
         expires_delta = deltaMinutes,
@@ -124,18 +128,18 @@ def getCurrentUser(*args, userClass=None, **kwargs):
         return currentUsert
     else:
         rawJwt = getRawJwt(*args, **kwargs)
-        id, roleList = getIdAndRoleListFromRawJwt(rawJwt)
+        identity, context = getIdAndContextFromRawJwt(rawJwt)
         if ObjectHelper.isNone(userClass):
             return {
-                'id': id,
-                'roles': roleList,
-                'data': getData(rawJwt)
+                JwtConstant.KW_IDENTITY: identity,
+                JwtConstant.KW_CONTEXT: context,
+                JwtConstant.KW_DATA: getData(rawJwt)
             }
         else:
             currentUsert = userClass()
             currentUsert._authorizationInfo = {
-                'id': id,
-                'roles': roleList
+                JwtConstant.KW_IDENTITY: identity,
+                JwtConstant.KW_CONTEXT: context
             }
             data = getData(rawJwt)
             for attributeName in data:
@@ -153,10 +157,10 @@ def getIdAndRoleListFromUser(user):
         role = user.role
     return id, [role]
 
-def getIdAndRoleListFromRawJwt(rawJwt):
-    id = rawJwt.get(JwtConstant.KW_IDENTITY)
-    roleList = getContext(rawJwt)
-    return id, roleList
+def getIdAndContextFromRawJwt(rawJwt):
+    identity = rawJwt.get(JwtConstant.KW_IDENTITY)
+    context = getContext(rawJwt)
+    return identity, context
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 @jwtRequired
