@@ -59,37 +59,16 @@ class JwtManager:
         return self.decode(self.getEncodedTokenWithoutType(), options=options)
 
     def getEncodedTokenWithoutType(self):
-        encoded_payload = self.captureEncodedToken()
+        encoded_payload = self.captureTokenFromRequestHeader()
         if ObjectHelper.isNone(encoded_payload):
             self.raiseInvalidAccess('JWT session token cannot be None')
         if not encoded_payload.startswith(f'{self.headerType} '):
             self.raiseInvalidAccess(f'JWT session token must starts with {self.headerType}')
         return encoded_payload[len(f'{self.headerType} '):].encode()
 
-    def captureEncodedToken(self):
+    def captureTokenFromRequestHeader(self):
         return FlaskUtil.safellyGetHeaders().get(self.headerName)
 
-
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtBody(rawJwt=None, apiInstance=None) :
-    if ObjectHelper.isNone(rawJwt):
-        return retrieveApiInstance(apiInstance=apiInstance).session.getBody(rawJwt=rawJwt)
-    return rawJwt
-
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtHeaders(apiInstance=None):
-    headers = retrieveApiInstance(apiInstance=apiInstance).session.getUnverifiedHeaders()
-    return headers if ObjectHelper.isNotNone(headers) else dict()
-
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getContext(rawJwt=None, apiInstance=None):
-    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
-    return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
-
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getData(rawJwt=None, apiInstance=None):
-    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
-    return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @Function
 def jwtRequired(function, *args, **kwargs) :
@@ -100,13 +79,39 @@ def jwtRequired(function, *args, **kwargs) :
     ReflectionHelper.overrideSignatures(innerFunction, function)
     return innerFunction
 
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getJwtBody(rawJwt=None, apiInstance=None) :
+    print(f'{getJwtBody}: apiInstance:{apiInstance}')
+    if ObjectHelper.isNone(rawJwt):
+        return retrieveApiInstance(apiInstance=apiInstance).session.getBody(rawJwt=rawJwt)
+    return rawJwt
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getJwtHeaders(apiInstance=None):
+    print(f'{getJwtHeaders}: apiInstance:{apiInstance}')
+    headers = retrieveApiInstance(apiInstance=apiInstance).session.getUnverifiedHeaders()
+    return headers if ObjectHelper.isNotNone(headers) else dict()
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getContext(rawJwt=None, apiInstance=None):
+    print(f'{getContext}: apiInstance:{apiInstance}')
+    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
+    return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getData(rawJwt=None, apiInstance=None):
+    print(f'{getData}: apiInstance:{apiInstance}')
+    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
+    return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJti(rawJwt=None, apiInstance=None) :
+    print(f'{getJti}: apiInstance:{apiInstance}')
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(rawJwt=None, apiInstance=None) :
+    print(f'{getIdentity}: apiInstance:{apiInstance}')
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IDENTITY)
 
 @Function
@@ -178,6 +183,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=N
     rawJwt = getJwtBody()
     # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
     print(time.time())
+    timeNow = DateTimeHelper.dateTimeNow()
     deltaMinutes = datetime.timedelta(minutes=1)
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
@@ -239,6 +245,7 @@ def retrieveApiInstance(apiInstance=None, arguments=None):
         try:
             apiInstance = arguments[0].globals.api
         except Exception as exception:
+            log.log(retrieveApiInstance, f'''Not possible to retrieve api instance''', exception=exception, muteStackTrace=True)
             log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance by arguments. Going for another approach''')
     if not FlaskUtil.isApiInstance(apiInstance):
         log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance. Going for a slower approach''')
