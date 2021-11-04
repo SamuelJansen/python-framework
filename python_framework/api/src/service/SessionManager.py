@@ -51,17 +51,20 @@ class JwtManager:
         return self.getDecodedToken(rawJwt=rawJwt, options={"verify_signature": False})
 
     def getUnverifiedHeaders(self):
-        return jwt.get_unverified_header(self.captureEncodedToken())
+        return jwt.get_unverified_header(self.getEncodedTokenWithoutType())
 
     def getDecodedToken(self, rawJwt=None, options=None):
         if ObjectHelper.isNotNone(rawJwt):
             return rawJwt
+        return self.decode(self.getEncodedTokenWithoutType(), options=options)
+
+    def getEncodedTokenWithoutType(self):
         encoded_payload = self.captureEncodedToken()
         if ObjectHelper.isNone(encoded_payload):
             self.raiseInvalidAccess('JWT session token cannot be None')
         if not encoded_payload.startswith(f'{self.headerType} '):
             self.raiseInvalidAccess(f'JWT session token must starts with {self.headerType}')
-        return self.decode(encoded_payload[len(f'{self.headerType} '):].encode(), options=options)
+        return encoded_payload[len(f'{self.headerType} '):].encode()
 
     def captureEncodedToken(self):
         return FlaskUtil.safellyGetHeaders().get(self.headerName)
