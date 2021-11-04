@@ -33,7 +33,8 @@ class JwtManager:
 
     @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def verifyAuthorizaionAccess(self, decodedSessionToken) :
-        return decodedSessionToken[JwtConstant.KW_JTI] in BLACK_LIST
+        if ObjectHelper.isEmpty(decodedSessionToken) or decodedSessionToken[JwtConstant.KW_JTI] in BLACK_LIST:
+            raise Exception('Session already closed')
 
     @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def raiseInvalidAccess(self, logMessage) :
@@ -74,7 +75,7 @@ class JwtManager:
 @Function
 def jwtRequired(function, *args, **kwargs) :
     def innerFunction(*args, **kwargs) :
-        retrieveApiInstance(arguments=args).session.validateSession()
+        retrieveApiInstance(arguments=*args).session.validateSession()
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
