@@ -166,7 +166,7 @@ def getCurrentUser(userClass=None):
             }
         else:
             currentUsert = userClass()
-            currentUsert._authorizationInfo = {
+            currentUsert._contextInfo = {
                 JwtConstant.KW_IDENTITY: identity,
                 JwtConstant.KW_CONTEXT: context
             }

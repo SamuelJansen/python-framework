@@ -20,7 +20,7 @@ class SessionManagerTestController:
     def get(self):
         return {
             'secured': 'information',
-            'currentUser': SessionManager.getCurrentUser()
+            'currentUser': SessionManager.getCurrentSession()
         }, HttpStatus.OK
 
     @ControllerMethod(
@@ -82,5 +82,5 @@ class SessionManagerTestBatchController:
         return {
             'secured': 'information',
             'after': 'refresh',
-            'currentUser': SessionManager.getCurrentUser()
+            'currentUser': SessionManager.getCurrentSession()
         }, HttpStatus.OK

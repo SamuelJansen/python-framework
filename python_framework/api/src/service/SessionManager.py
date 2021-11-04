@@ -29,11 +29,7 @@ class JwtManager:
 
     @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def decode(self, encoded_payload, options=None) :
-        if ObjectHelper.isNone(encoded_payload):
-            self.raiseInvalidAccess('JWT session token cannot be None')
-        if not encoded_payload.startswith(f'{self.headerType} '):
-            self.raiseInvalidAccess(f'JWT session token must starts with {self.headerType}')
-        return jwt.decode(encoded_payload.replace(f'{self.headerType} ', c.BLANK).encode(), self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
+        return jwt.decode(encoded_payload, self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
 
     @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def verifyAuthorizaionAccess(self, decriptedToken) :
@@ -61,7 +57,12 @@ class JwtManager:
     def getDecodedToken(self, rawJwt=None, options=None):
         if ObjectHelper.isNotNone(rawJwt):
             return rawJwt
-        return self.decode(self.captureEncodedToken(), options=options)
+        encoded_payload = self.captureEncodedToken()
+        if ObjectHelper.isNone(encoded_payload):
+            self.raiseInvalidAccess('JWT session token cannot be None')
+        if not encoded_payload.startswith(f'{self.headerType} '):
+            self.raiseInvalidAccess(f'JWT session token must starts with {self.headerType}')
+        return self.decode(encoded_payload[len(f'{self.headerType} '):].encode(), options=options)
 
     def captureEncodedToken(self):
         return FlaskUtil.safellyGetHeaders().get(self.headerName)
@@ -217,22 +218,22 @@ def getCurrentSession(sessionClass=None, apiInstance=None):
             JwtConstant.KW_DATA: getData(rawJwt=rawJwt, apiInstance=apiInstance)
         }
     else:
-        currentUsert = sessionClass()
-        currentUsert._authorizationInfo = {
+        currentSession = sessionClass()
+        currentSession._contextInfo = {
             JwtConstant.KW_IDENTITY: identity,
             JwtConstant.KW_CONTEXT: context
         }
         data = getData(rawJwt=rawJwt, apiInstance=apiInstance)
         for attributeName in data:
-            if ReflectionHelper.hasAttributeOrMethod(currentUsert, attributeName):
-                ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
-        return currentUsert
+            if ReflectionHelper.hasAttributeOrMethod(currentSession, attributeName):
+                ReflectionHelper.setAttributeOrMethod(currentSession, attributeName, data.get(attributeName))
+        return currentSession
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     if ObjectHelper.isNone(apiInstance) and ObjectHelper.isNotNone(arguments):
         apiInstance = None
         try:
-            apiInstance = arguments[0]
+            apiInstance = arguments[0].globals.api
         except Exception as exception:
             log.warning(jwtRequired, f'''Not possible to retrieve api instance by arguments. Going for another approach''')
     if ObjectHelper.isNone(apiInstance) or not FlaskUtil.isApiInstance(apiInstance):
