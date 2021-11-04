@@ -12,6 +12,10 @@ from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
 
 
+KEY_API_INSTANCE = 'apiInstance'
+API_INSTANCE_HOLDER = {
+    KEY_API_INSTANCE: None
+}
 BLACK_LIST = set()
 
 
@@ -42,7 +46,7 @@ class JwtManager:
 
     @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def validateSession(self):
-        decodedSessionToken = self.getDecodedToken()
+        decodedSessionToken = self.getDecodedToken(apiInstance=apiInstance)
         self.verifyAuthorizaionAccess(decodedSessionToken)
 
     def getBody(self, rawJwt=None):
@@ -76,7 +80,7 @@ class JwtManager:
 def jwtRequired(function, *args, **kwargs) :
     def innerFunction(*args, **kwargs) :
         ###- arguments=args[0] --> python weardnes in it's glory
-        retrieveApiInstance(arguments=args[0]).session.validateSession()
+        retrieveApiInstance(arguments=args[0]).session.validateSession(apiInstance=apiInstance)
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -243,8 +247,9 @@ def getCurrentSession(sessionClass=None, apiInstance=None):
 def retrieveApiInstance(apiInstance=None, arguments=None):
     if FlaskUtil.isApiInstance(apiInstance):
         return apiInstance
+    if FlaskUtil.isApiInstance(API_INSTANCE_HOLDER.get(KEY_API_INSTANCE)):
+        return API_INSTANCE_HOLDER.get(KEY_API_INSTANCE)
     if ObjectHelper.isNone(apiInstance) and ObjectHelper.isNotNone(arguments):
-        apiInstance = None
         try:
             apiInstance = arguments[0].globals.api
         except Exception as exception:
@@ -253,7 +258,10 @@ def retrieveApiInstance(apiInstance=None, arguments=None):
     if not FlaskUtil.isApiInstance(apiInstance):
         log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance. Going for a slower approach''')
         apiInstance = FlaskUtil.getApi()
-    return apiInstance if ObjectHelper.isNotNone(apiInstance) else raiseUnretrievedApiInstance()
+    if ObjectHelper.isNone(apiInstance):
+        raiseUnretrievedApiInstance()
+    API_INSTANCE_HOLDER[KEY_API_INSTANCE] = apiInstance
+    return apiInstance
 
 def raiseUnretrievedApiInstance():
     raise Exception('Not possible to retrieve api instance')
