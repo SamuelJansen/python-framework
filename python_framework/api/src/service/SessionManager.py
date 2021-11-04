@@ -32,8 +32,8 @@ class JwtManager:
         return jwt.decode(encoded_payload, self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
 
     @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def verifyAuthorizaionAccess(self, decriptedToken) :
-        return decriptedToken[JwtConstant.KW_JTI] in BLACK_LIST
+    def verifyAuthorizaionAccess(self, decodedSessionToken) :
+        return decodedSessionToken[JwtConstant.KW_JTI] in BLACK_LIST
 
     @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def raiseInvalidAccess(self, logMessage) :
@@ -42,6 +42,7 @@ class JwtManager:
     @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def validateSession(self):
         decodedSessionToken = self.getDecodedToken()
+        self.verifyAuthorizaionAccess(decodedSessionToken)
 
     def getBody(self, rawJwt=None):
         decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt)
