@@ -213,7 +213,7 @@ def handleAnyControllerMethodRequest(
     contentType,
     resourceInstance,
     resourceInstanceMethod,
-    sessionRequired,
+    contextRequired,
     roleRequired,
     requestHeaderClass,
     requestParamClass,
@@ -228,20 +228,20 @@ def handleAnyControllerMethodRequest(
             resourceInstance,
             resourceInstanceMethod,
             roleRequired,
-            sessionRequired,
+            contextRequired,
             requestHeaderClass,
             requestParamClass,
             requestClass,
             logRequest
         )
-    elif ObjectHelper.isNotEmptyCollection(sessionRequired):
+    elif ObjectHelper.isNotEmptyCollection(contextRequired):
         return handleSessionedControllerMethod(
             args,
             kwargs,
             contentType,
             resourceInstance,
             resourceInstanceMethod,
-            sessionRequired,
+            contextRequired,
             requestHeaderClass,
             requestParamClass,
             requestClass,
@@ -268,7 +268,7 @@ def handleSecuredControllerMethod(
     resourceInstance,
     resourceInstanceMethod,
     roleRequired,
-    sessionRequired,
+    contextRequired,
     requestHeaderClass,
     requestParamClass,
     requestClass,
@@ -281,14 +281,14 @@ def handleSecuredControllerMethod(
             logMessage = f'''Roles {contextList} trying to access denied resourse. Allowed roles {roleRequired}''',
             status = HttpStatus.FORBIDDEN
         )
-    elif ObjectHelper.isNotEmptyCollection(sessionRequired):
+    elif ObjectHelper.isNotEmptyCollection(contextRequired):
         return handleSessionedControllerMethod(
             args,
             kwargs,
             contentType,
             resourceInstance,
             resourceInstanceMethod,
-            sessionRequired,
+            contextRequired,
             requestHeaderClass,
             requestParamClass,
             requestClass,
@@ -314,17 +314,17 @@ def handleSessionedControllerMethod(
     contentType,
     resourceInstance,
     resourceInstanceMethod,
-    sessionRequired,
+    contextRequired,
     requestHeaderClass,
     requestParamClass,
     requestClass,
     logRequest
 ) :
-    contextList = SecurityManager.getContext()
-    if not any(sessionContext in set(contextList) for sessionContext in sessionRequired):
+    contextList = SessionManager.getContext()
+    if not any(context in set(contextList) for context in contextRequired):
         raise GlobalException(
             message = 'Session not allowed',
-            logMessage = f'''Sessions {contextList} trying to access denied resourse. Allowed contexts: {sessionRequired}''',
+            logMessage = f'''Sessions {contextList} trying to access denied resourse. Allowed contexts: {contextRequired}''',
             status = HttpStatus.FORBIDDEN
         )
     else:
@@ -494,7 +494,7 @@ def ControllerMethod(
     requestParamClass = None,
     requestClass = None,
     responseClass = None,
-    sessionRequired = None,
+    contextRequired = None,
     roleRequired = None,
     consumes = OpenApiManager.DEFAULT_CONTENT_TYPE,
     produces = OpenApiManager.DEFAULT_CONTENT_TYPE,
@@ -507,7 +507,7 @@ def ControllerMethod(
     controllerMethodRequestParamClass = requestParamClass
     controllerMethodRequestClass = requestClass
     controllerMethodResponseClass = responseClass
-    controllerMethodSessionRequired = sessionRequired
+    controllerMethodSessionRequired = contextRequired
     controllerMethodRoleRequired = roleRequired
     controllerMethodProduces = produces
     controllerMethodConsumes = consumes
@@ -530,7 +530,7 @@ def ControllerMethod(
                     consumes,
                     resourceInstance,
                     resourceInstanceMethod,
-                    sessionRequired,
+                    contextRequired,
                     roleRequired,
                     requestHeaderClass,
                     requestParamClass,
@@ -577,7 +577,7 @@ def ControllerMethod(
         innerResourceInstanceMethod.requestParamClass = controllerMethodRequestParamClass
         innerResourceInstanceMethod.requestClass = controllerMethodRequestClass
         innerResourceInstanceMethod.responseClass = controllerMethodResponseClass
-        innerResourceInstanceMethod.sessionRequired = controllerMethodSessionRequired
+        innerResourceInstanceMethod.contextRequired = controllerMethodSessionRequired
         innerResourceInstanceMethod.roleRequired = controllerMethodRoleRequired
         innerResourceInstanceMethod.produces = controllerMethodProduces
         innerResourceInstanceMethod.consumes = controllerMethodConsumes
