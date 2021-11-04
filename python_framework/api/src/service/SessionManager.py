@@ -51,7 +51,7 @@ class JwtManager:
         return self.getDecodedToken(rawJwt=rawJwt, options={"verify_signature": False})
 
     def getUnverifiedHeaders(self):
-        return jwt.get_unverified_header(self.captureEncodedToken(self))
+        return jwt.get_unverified_header(self.captureEncodedToken())
 
     def getDecodedToken(self, rawJwt=None, options=None):
         if ObjectHelper.isNotNone(rawJwt):
