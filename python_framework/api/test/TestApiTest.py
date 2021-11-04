@@ -655,13 +655,15 @@ def pythonRun_sessionManager() :
             responseGetConsumeBeforeRefresh.json()
         ), f'{expectedResponseGetConsumeBeforeRefresh} should be equals to {responseGetConsumeBeforeRefresh.json()}'
 
-        assert ObjectHelper.equals({
-                "message": "Role not allowed",
-                "timestamp": "2021-11-02 21:47:32.444629"
-            },
+        expectedResponseGetConsumeAfterRefreshBeforeRefresh = {
+            "message": "Session not allowed",
+            "timestamp": "2021-11-02 21:47:32.444629"
+        }
+        assert ObjectHelper.equals(
+            expectedResponseGetConsumeAfterRefreshBeforeRefresh,
             responseGetConsumeAfterRefreshBeforeRefresh.json(),
             ignoreKeyList=['timestamp']
-        )
+        ), f'{expectedResponseGetConsumeAfterRefreshBeforeRefresh} should be equals to {responseGetConsumeAfterRefreshBeforeRefresh.json()}'
         assert 403 == responseGetConsumeAfterRefreshBeforeRefresh.status_code
 
         assert ObjectHelper.isNotNone(responsePatchRefresh)
@@ -688,7 +690,7 @@ def pythonRun_sessionManager() :
         ), f'{expectedResponseGetConsumeAfterRefresh} should be equals to {responseGetConsumeAfterRefresh.json()}'
 
         assert ObjectHelper.isNotNone(responseLogout.json())
-        expectedResponseLogout = {'message': 'Logged out'}
+        expectedResponseLogout = {'message': 'Session closed'}
         assert ObjectHelper.equals(
             expectedResponseLogout,
             responseLogout.json()

@@ -64,7 +64,7 @@ class SessionManagerTestController:
     )
     def put(self, dto):
         SessionManager.addUserToBlackList()
-        return {'message': 'Logged out'}, HttpStatus.ACCEPTED
+        return {'message': 'Session closed'}, HttpStatus.ACCEPTED
 
 
 @Controller(url=f'/test/{EnvironmentHelper.get("URL_VARIANT")}/session-manager', tag='SessionManagerTest', description='Session Manager controller test')

@@ -245,7 +245,7 @@ def retrieveApiInstance(apiInstance=None, arguments=None):
         try:
             apiInstance = arguments[0].globals.api
         except Exception as exception:
-            log.log(retrieveApiInstance, f'''Not possible to retrieve api instance''', exception=exception, muteStackTrace=True)
+            log.log(retrieveApiInstance, f'''Not possible to retrieve api instance. args: {arguments}''', exception=exception, muteStackTrace=True)
             log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance by arguments. Going for another approach''')
     if not FlaskUtil.isApiInstance(apiInstance):
         log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance. Going for a slower approach''')
