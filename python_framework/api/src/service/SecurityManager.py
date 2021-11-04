@@ -9,6 +9,7 @@ from flask_jwt_extended import (
     create_refresh_token,
     jwt_refresh_token_required
 )
+from python_framework.api.src.constant import ConfigurationKeyConstant
 
 from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper, ReflectionHelper
@@ -68,7 +69,7 @@ def getJwtMannager(
     headerType=JwtConstant.DEFAULT_JWT_AUTHORIZATION_HEADER_TYPE
 ) :
     if not jwtSecret :
-        log.warning(getJwtMannager, f'Not possible to instanciate jwtManager{c.DOT_SPACE_CAUSE}Missing jwt secret')
+        log.warning(getJwtMannager, f'Not possible to instanciate securityManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SECURITY_SECRET}')
     else :
         jwtMannager = JWTManager(appInstance)
         appInstance.config[JwtConstant.KW_JWT_SECRET_KEY] = jwtSecret

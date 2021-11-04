@@ -5,6 +5,7 @@ from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper, ReflectionHelper, DateTimeHelper
 import datetime
 
+from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.constant import JwtConstant
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
@@ -138,7 +139,7 @@ def getJwtMannager(
     headerType = JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE
 ) :
     if not jwtSecret :
-        log.warning(getJwtMannager, f'Not possible to instanciate jwtManager{c.DOT_SPACE_CAUSE}Missing jwt secret')
+        log.warning(getJwtMannager, f'Not possible to instanciate sessionManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SESSION_SECRET}')
     else :
         jwtMannager = JwtManager(jwtSecret, algorithm, headerName, headerType)
         return jwtMannager
