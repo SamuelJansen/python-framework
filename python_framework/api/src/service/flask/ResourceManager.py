@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 from python_helper import Constant as c
-from python_helper import log, Function, ReflectionHelper, SettingHelper, ObjectHelper, StringHelper
+from python_helper import log, Function, ReflectionHelper, ObjectHelper, StringHelper
 import globals
 from python_framework.api.src.util import Serializer
 from python_framework.api.src.util import FlaskUtil
@@ -136,19 +136,8 @@ def initialize(
     addGlobalsTo(api)
     OpenApiManager.newDocumentation(api, app)
     SchedulerManager.addScheduler(api, app)
-
-    sessionKey = api.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_SECRET)
-    if SettingHelper.LOCAL_ENVIRONMENT == SettingHelper.getActiveEnvironment() :
-        log.setting(initialize, f'Session secret: {sessionKey}')
-    api.session = SessionManager.getJwtMannager(app, sessionKey)
-    api.session.api = api
-
-    securityKey = api.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_SECRET)
-    if SettingHelper.LOCAL_ENVIRONMENT == SettingHelper.getActiveEnvironment() :
-        log.setting(initialize, f'JWT secret: {securityKey}')
-    api.jwt = SecurityManager.getJwtMannager(app, securityKey)
-    api.jwt.api = api
-
+    SessionManager.addSession(api, app)
+    SecurityManager.addSecurity(api, app)
     args = [api, app, api.session, api.jwt]
     for resourceType in FlaskManager.KW_RESOURCE_LIST :
         args.append(getResourceList(api, resourceType))

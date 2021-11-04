@@ -9,12 +9,12 @@ from flask_jwt_extended import (
     create_refresh_token,
     jwt_refresh_token_required
 )
-from python_framework.api.src.constant import ConfigurationKeyConstant
 
 from python_helper import Constant as c
-from python_helper import log, Function, ObjectHelper, ReflectionHelper
+from python_helper import log, Function, ObjectHelper, ReflectionHelper, SettingHelper
 import datetime
 
+from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.constant import JwtConstant
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.ExceptionHandler import GlobalException
@@ -176,3 +176,13 @@ def getCurrentUser(userClass=None):
                 if ReflectionHelper.hasAttributeOrMethod(currentUsert, attributeName):
                     ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
             return currentUsert
+
+def addSecurity(api, app):
+    securityKey = api.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_SECRET)
+    if SettingHelper.activeEnvironmentIsLocal():
+        log.setting(addSecurity, f'JWT secret: {securityKey}')
+    api.jwt = getJwtMannager(app, securityKey)
+    try:
+        api.jwt.api = api
+    except Exception as exception:
+        log.warning(addSecurity, 'Not possible to add Security Manager', exception=exception)

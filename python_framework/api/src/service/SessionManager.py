@@ -2,7 +2,7 @@ import time
 import jwt
 
 from python_helper import Constant as c
-from python_helper import log, Function, ObjectHelper, ReflectionHelper, DateTimeHelper
+from python_helper import log, Function, ObjectHelper, ReflectionHelper, DateTimeHelper, SettingHelper
 import datetime
 
 from python_framework.api.src.constant import ConfigurationKeyConstant
@@ -18,10 +18,6 @@ API_INSTANCE_HOLDER = {
     KEY_API_INSTANCE: None
 }
 BLACK_LIST = set()
-
-
-def generateKey(apiInstance):
-    return f'{apiInstance.apiName}-{apiInstance.port}-{apiInstance.globals}'
 
 
 class JwtManager:
@@ -248,6 +244,16 @@ def getCurrentSession(sessionClass=None, apiInstance=None):
             if ReflectionHelper.hasAttributeOrMethod(currentSession, attributeName):
                 ReflectionHelper.setAttributeOrMethod(currentSession, attributeName, data.get(attributeName))
         return currentSession
+
+def addSession(api, app):
+    sessionKey = api.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_SECRET)
+    if SettingHelper.activeEnvironmentIsLocal():
+        log.setting(addSession, f'JWT secret: {sessionKey}')
+    api.session = getJwtMannager(app, sessionKey)
+    try:
+        api.session.api = api
+    except Exception as exception:
+        log.warning(addSession, 'Not possible to add Session Manager', exception=exception)
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     if FlaskUtil.isApiInstance(apiInstance):
