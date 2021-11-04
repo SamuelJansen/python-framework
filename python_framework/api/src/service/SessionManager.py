@@ -45,14 +45,13 @@ class JwtManager:
 
     def getBody(self, rawJwt=None):
         decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt)
-        print(decodedSessionToken)
         return decodedSessionToken
 
     def getUnverifiedBody(self, rawJwt=None):
         return self.getDecodedToken(rawJwt=rawJwt, options={"verify_signature": False})
 
     def getUnverifiedHeaders(self):
-        return jwt.get_unverified_header(captureEncodedToken(self))
+        return jwt.get_unverified_header(self.captureEncodedToken(self))
 
     def getDecodedToken(self, rawJwt=None, options=None):
         if ObjectHelper.isNotNone(rawJwt):

@@ -610,7 +610,7 @@ def pythonRun_sessionManager() :
         responseLogin = session.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
         firstAuthorization = responseLogin.json().get('accessToken')
         firstAuthorizationHeaders = responseLogin.headers
-        headers['Session-Context'] = 'Bearer ' + firstAuthorization
+        headers['Context'] = 'Bearer ' + firstAuthorization
 
         responseGetConsumeBeforeRefresh = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
 
@@ -619,7 +619,7 @@ def pythonRun_sessionManager() :
         responsePatchRefresh = session.patch(BASE_URI + PATCH_REFRESH_URI, json=payload, headers=headers)
         patchedAuthorizationHeaders = responseLogin.headers
         patchedAuthorization = responsePatchRefresh.json().get('accessToken')
-        headers['Session-Context'] = 'Bearer ' + patchedAuthorization
+        headers['Context'] = 'Bearer ' + patchedAuthorization
 
         responseGetConsumeAfterRefresh = session.get(BASE_URI + GET_CONSUME_URI, headers=headers)
 
