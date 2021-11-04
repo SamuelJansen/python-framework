@@ -96,6 +96,8 @@ def getQualitativeName(instance) :
     return instance.__class__.__qualname__
 
 def isApiInstance(apiInstance):
+    if ObjectHelper.isNone(apiInstance):
+        return False
     apiClassName = flask_restful.Api.__name__
     moduleName = flask_restful.__name__
     return apiClassName == getClassName(apiInstance) and apiClassName == getQualitativeName(apiInstance) and moduleName == getModuleName(apiInstance)

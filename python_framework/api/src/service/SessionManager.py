@@ -232,14 +232,16 @@ def getCurrentSession(sessionClass=None, apiInstance=None):
         return currentSession
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
+    if FlaskUtil.isApiInstance(apiInstance):
+        return apiInstance
     if ObjectHelper.isNone(apiInstance) and ObjectHelper.isNotNone(arguments):
         apiInstance = None
         try:
             apiInstance = arguments[0].globals.api
         except Exception as exception:
-            log.warning(jwtRequired, f'''Not possible to retrieve api instance by arguments. Going for another approach''')
-    if ObjectHelper.isNone(apiInstance) or not FlaskUtil.isApiInstance(apiInstance):
-        log.warning(jwtRequired, f'''Not possible to retrieve api instance. Going for a slower approach''')
+            log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance by arguments. Going for another approach''')
+    if not FlaskUtil.isApiInstance(apiInstance):
+        log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance. Going for a slower approach''')
         apiInstance = FlaskUtil.getApi()
     return apiInstance if ObjectHelper.isNotNone(apiInstance) else raiseUnretrievedApiInstance()
 
