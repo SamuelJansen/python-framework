@@ -75,7 +75,8 @@ class JwtManager:
 @Function
 def jwtRequired(function, *args, **kwargs) :
     def innerFunction(*args, **kwargs) :
-        retrieveApiInstance(arguments=*args).session.validateSession()
+        ###- arguments=args[0] --> python weardnes in it's glory
+        retrieveApiInstance(arguments=args[0]).session.validateSession()
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
