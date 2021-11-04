@@ -45,12 +45,12 @@ class JwtManager:
         raise Exception(logMessage)
 
     @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def validateSession(self):
-        decodedSessionToken = self.getDecodedToken(apiInstance=apiInstance)
+    def validateSession(self, rawJwt=None, options=None):
+        decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt, options=options)
         self.verifyAuthorizaionAccess(decodedSessionToken)
 
-    def getBody(self, rawJwt=None):
-        decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt)
+    def getBody(self, rawJwt=None, options=None):
+        decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt, options=options)
         return decodedSessionToken
 
     def getUnverifiedBody(self, rawJwt=None):
