@@ -613,6 +613,7 @@ def ControllerMethod(
                     resourceInstance,
                     resourceInstanceMethod,
                     contextRequired,
+                    apiKeyRequired,
                     roleRequired,
                     requestHeaderClass,
                     requestParamClass,
