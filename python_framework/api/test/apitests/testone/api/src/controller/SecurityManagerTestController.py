@@ -2,6 +2,7 @@ from python_helper import EnvironmentHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service.flask.FlaskManager import Controller, ControllerMethod
+from python_framework.api.src.helper import UtcDateTimeHelper
 
 
 VALID_TOKEN_MINUTES_DURATION = 30
@@ -49,9 +50,11 @@ class SecurityManagerTestController:
         assert 'headers' == SecurityManager.getJwtHeaders().get('some'), f"headers == {SecurityManager.getJwtHeaders().get('some')} should be equals. Headers: {SecurityManager.getJwtHeaders()}"
         headers={'some': 'other headers'}
         data = {'some': 'other data'}
+        accessToken = SecurityManager.patchAccessToken(newContextList=['TEST_ROLE', 'TEST_ROLE_REFRESH'], headers=headers, data=data)
+        print(UtcDateTimeHelper.ofTimestamp(SecurityManager.getExpiration()))
         return {
             # 'accessToken': SecurityManager.patchAccessToken(dto['id'], ['TEST_ROLE', 'TEST_ROLE_REFRESH'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
-            'accessToken': SecurityManager.patchAccessToken(newContextList=['TEST_ROLE', 'TEST_ROLE_REFRESH'], headers=headers, data=data)
+            'accessToken': accessToken
         }, HttpStatus.OK
 
     @ControllerMethod(

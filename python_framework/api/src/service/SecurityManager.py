@@ -13,7 +13,7 @@ from flask_jwt_extended import (
 from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper, ReflectionHelper, SettingHelper, DateTimeHelper
 
-from python_framework.api.src.util import UtcDateTimeUtil
+from python_framework.api.src.util import UtcDateTimeHelper
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.constant import JwtConstant
@@ -129,7 +129,7 @@ def refreshAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=No
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def patchAccessToken(newContextList=None, headers=None, data=None):
     rawJwt = getJwtBody()
-    deltaMinutes = UtcDateTimeUtil.ofTimestamp(getExpiration(rawJwt=rawJwt)) - UtcDateTimeUtil.now()
+    deltaMinutes = UtcDateTimeHelper.ofTimestamp(getExpiration(rawJwt=rawJwt)) - UtcDateTimeHelper.now()
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
             *getContext(rawJwt=rawJwt),

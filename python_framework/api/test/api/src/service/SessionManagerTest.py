@@ -61,18 +61,11 @@ def sessionManager_worksProperly() :
 
     # act
     totalRuns = 10000
-    lines = 4
+    lines = 3
     initTime = time.time()
     for i in range(totalRuns):
-        # print(DateTimeHelper.timestampNow())
-        # print(time.time())
-        # print(DateTimeHelper.timestampOf(DateTimeHelper.now()))
-        # print(DateTimeHelper.ofTimestamp(DateTimeHelper.timestampOf(DateTimeHelper.now())))
-        # print(DateTimeHelper.timestampOf(DateTimeHelper.ofTimestamp(DateTimeHelper.timestampOf(DateTimeHelper.now()))))
-        # print(payload)
         encodedPayload = sessionManager.encode(payload)
         decodedPayload = sessionManager.decode(encodedPayload)
-        # print(decodedPayload)
         accessException = TestHelper.getRaisedException(sessionManager.validateAccessSession, rawJwt=decodedPayload)
         if accessException:
             input(accessException)
