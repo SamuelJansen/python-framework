@@ -2,8 +2,9 @@ import time
 import jwt
 
 from python_helper import Constant as c
-from python_helper import log, Function, ObjectHelper, ReflectionHelper, DateTimeHelper, SettingHelper
+from python_helper import log, Function, ObjectHelper, ReflectionHelper, SettingHelper
 
+from python_framework.api.src.util import UtcDateTimeUtil
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.util import FlaskUtil
@@ -31,30 +32,44 @@ class JwtManager:
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def encode(self, payload, headers=None) :
-        return jwt.encode(payload, self.secret, algorithm=self.algorithm, headers=headers if ObjectHelper.isNotNone else dict()).decode()
+        return jwt.encode(payload, self.secret, algorithm=self.algorithm, headers=ConverterStatic.getValueOrDefault(headers, dict())).decode()
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def decode(self, encodedPayload, options=None) :
-        decoded = jwt.decode(encodedPayload, self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
-        print(decoded)
-        return decoded
+        return jwt.decode(encodedPayload, self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def validateAccessSession(self, rawJwt=None, options=None):
-        decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=rawJwt, options=options)
-        assert decodedSessionToken.get(JwtConstant.KW_TYPE) == JwtConstant.ACCESS_VALUE_TYPE, f'Access session should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {decodedSessionToken.get(JwtConstant.KW_TYPE)}'
+        decodedSessionToken = rawJwt
+        try:
+            decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=rawJwt, options=options)
+            assert decodedSessionToken.get(JwtConstant.KW_TYPE) == JwtConstant.ACCESS_VALUE_TYPE, f'Access session should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {decodedSessionToken.get(JwtConstant.KW_TYPE)}'
+        except Exception as exception:
+            addUserToBlackList(rawJwt=decodedSessionToken)
+            raise exception
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def validateRefreshSession(self, rawJwt=None, options=None):
-        decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=rawJwt, options=options)
-        assert decodedSessionToken.get(JwtConstant.KW_TYPE) == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh session should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {decodedSessionToken.get(JwtConstant.KW_TYPE)}'
+        decodedSessionToken = rawJwt
+        try:
+            decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=rawJwt, options=options)
+            assert decodedSessionToken.get(JwtConstant.KW_TYPE) == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh session should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {decodedSessionToken.get(JwtConstant.KW_TYPE)}'
+        except Exception as exception:
+            addUserToBlackList(rawJwt=decodedSessionToken)
+            raise exception
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def validateGeneralSessionAndReturnItDecoded(self, rawJwt=None, options=None):
-        decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt, options=options)
-        assert ObjectHelper.isDictionary(decodedSessionToken), f'Invalid session type. It should be a dictionary, bu it is {type(decodedSessionToken)}'
-        assert ObjectHelper.isNotEmpty(decodedSessionToken), 'Session cannot be empty'
-        assert not decodedSessionToken[JwtConstant.KW_JTI] in BLACK_LIST, f'Session {decodedSessionToken[JwtConstant.KW_JTI]} already closed'
+        decodedSessionToken = rawJwt
+        try:
+            decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt, options=options)
+            assert ObjectHelper.isDictionary(decodedSessionToken), f'Invalid session type. It should be a dictionary, bu it is {type(decodedSessionToken)}'
+            assert ObjectHelper.isNotEmpty(decodedSessionToken), 'Session cannot be empty'
+            assert not decodedSessionToken[JwtConstant.KW_JTI] in BLACK_LIST, f'Session {decodedSessionToken[JwtConstant.KW_JTI]} already closed'
+            assert UtcDateTimeUtil.now() < UtcDateTimeUtil.ofTimestamp(rawJwt.get(JwtConstant.KW_EXPIRATION)), f'JWT token expired at {UtcDateTimeUtil.ofTimestamp(rawJwt.get(JwtConstant.KW_EXPIRATION))}. Time now: {UtcDateTimeUtil.now()}, rawJwt: {rawJwt}'
+        except Exception as exception:
+            addUserToBlackList(rawJwt=decodedSessionToken)
+            raise exception
         return decodedSessionToken
 
     def getBody(self, rawJwt=None, options=None):
@@ -103,42 +118,48 @@ def jwtRefreshRequired(function, *args, **kwargs) :
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtBody(rawJwt=None, apiInstance=None) :
-    # print(f'{getJwtBody}: apiInstance:{apiInstance}')
     if ObjectHelper.isNone(rawJwt):
         return retrieveApiInstance(apiInstance=apiInstance).sessionManager.getBody(rawJwt=rawJwt)
     return rawJwt
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtHeaders(apiInstance=None):
-    # print(f'{getJwtHeaders}: apiInstance:{apiInstance}')
     headers = retrieveApiInstance(apiInstance=apiInstance).sessionManager.getUnverifiedHeaders()
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getContext(rawJwt=None, apiInstance=None):
-    # print(f'{getContext}: apiInstance:{apiInstance}')
     rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
     return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getData(rawJwt=None, apiInstance=None):
-    # print(f'{getData}: apiInstance:{apiInstance}')
     rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
     return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJti(rawJwt=None, apiInstance=None) :
-    # print(f'{getJti}: apiInstance:{apiInstance}')
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getIat(rawJwt=None, apiInstance=None) :
+    return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IAT)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getNfb(rawJwt=None, apiInstance=None) :
+    return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_NFB)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getExpiration(rawJwt=None, apiInstance=None) :
+    return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_EXPIRATION)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(rawJwt=None, apiInstance=None) :
-    # print(f'{getIdentity}: apiInstance:{apiInstance}')
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IDENTITY)
 
 @Function
-def addUserToBlackList() :
-    BLACK_LIST.add(getJti())
+def addUserToBlackList(rawJwt=None, apiInstance=None) :
+    BLACK_LIST.add(getJti(rawJwt=rawJwt, apiInstance=apiInstance))
 
 @Function
 def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, headerType=None):
@@ -159,15 +180,13 @@ def addJwt(jwtInstance) :
     ...
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def createAccessToken(identity, contextList, deltaMinutes=None, headers=None, data=None, apiInstance=None):
-    if deltaMinutes :
-        deltaMinutes = DateTimeHelper.timeDelta(minutes=deltaMinutes)
-    timeNow = DateTimeHelper.dateTimeNow()
+def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
+    timeNow = UtcDateTimeUtil.now()
     return retrieveApiInstance(apiInstance=apiInstance).sessionManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
-            JwtConstant.KW_JTI: f"{int(f'{time.time()}'.replace('.', ''))+int(f'{time.time()}'.replace('.', ''))}",
-            JwtConstant.KW_EXPIRATION: timeNow + deltaMinutes,
+            JwtConstant.KW_JTI: getNewJti(),
+            JwtConstant.KW_EXPIRATION: UtcDateTimeUtil.plusMinutes(timeNow, minutes=deltaMinutes),
             JwtConstant.KW_IDENTITY: identity,
             JwtConstant.KW_FRESH: False,
             JwtConstant.KW_TYPE: JwtConstant.ACCESS_VALUE_TYPE,
@@ -176,19 +195,17 @@ def createAccessToken(identity, contextList, deltaMinutes=None, headers=None, da
                 JwtConstant.KW_DATA: data if ObjectHelper.isNotNone(data) else {}
             }
         },
-        headers = headers
+        headers = ConverterStatic.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def refreshAccessToken(identity, contextList, deltaMinutes=None, headers=None, data=None, apiInstance=None):
-    if ObjectHelper.isNotNone(deltaMinutes) :
-        deltaMinutes = DateTimeHelper.timeDelta(minutes=deltaMinutes)
-    timeNow = DateTimeHelper.dateTimeNow()
+def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
+    timeNow = UtcDateTimeUtil.now()
     return retrieveApiInstance(apiInstance=apiInstance).sessionManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
-            JwtConstant.KW_JTI: f"{int(f'{time.time()}'.replace('.', ''))+int(f'{time.time()}'.replace('.', ''))}",
-            JwtConstant.KW_EXPIRATION: timeNow + deltaMinutes,
+            JwtConstant.KW_JTI: getJti(apiInstance=apiInstance),
+            JwtConstant.KW_EXPIRATION: UtcDateTimeUtil.plusMinutes(timeNow, minutes=deltaMinutes),
             JwtConstant.KW_IDENTITY: identity,
             JwtConstant.KW_FRESH: False,
             JwtConstant.KW_TYPE: JwtConstant.REFRESH_VALUE_TYPE,
@@ -197,16 +214,14 @@ def refreshAccessToken(identity, contextList, deltaMinutes=None, headers=None, d
                 JwtConstant.KW_DATA: data if ObjectHelper.isNotNone(data) else {}
             }
         },
-        headers = headers
+        headers = ConverterStatic.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=None):
-    rawJwt = getJwtBody()
-    # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
-    print(time.time())
-    timeNow = DateTimeHelper.dateTimeNow()
-    deltaMinutes = DateTimeHelper.timeDelta(minutes=1)
+    rawJwt = getJwtBody(apiInstance=apiInstance)
+    expiresAt = getExpiration(rawJwt=rawJwt, apiInstance=apiInstance)
+    UtcDateTimeUtil.now()
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
             *getContext(rawJwt=rawJwt),
@@ -223,16 +238,16 @@ def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=N
     }
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
     return apiInstance.sessionManager.encode({
-            JwtConstant.KW_IAT: timeNow,
-            JwtConstant.KW_NFB: timeNow,
-            JwtConstant.KW_JTI: f"{int(f'{time.time()}'.replace('.', ''))+int(f'{time.time()}'.replace('.', ''))}",
-            JwtConstant.KW_EXPIRATION: timeNow + deltaMinutes,
+            JwtConstant.KW_IAT: getIat(rawJwt=rawJwt, apiInstance=apiInstance),
+            JwtConstant.KW_NFB: getNfb(rawJwt=rawJwt, apiInstance=apiInstance),
+            JwtConstant.KW_JTI: getJti(rawJwt=rawJwt, apiInstance=apiInstance),
+            JwtConstant.KW_EXPIRATION: expiresAt,
             JwtConstant.KW_IDENTITY: getIdentity(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_FRESH: False,
             JwtConstant.KW_TYPE: JwtConstant.ACCESS_VALUE_TYPE,
             JwtConstant.KW_CLAIMS: userClaims
         },
-        headers = headers
+        headers = ConverterStatic.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -299,3 +314,6 @@ def raiseSessionContextCannotBeNone():
 
 def raiseUnretrievedApiInstance():
     raise Exception('Not possible to retrieve api instance')
+
+def getNewJti():
+    return f"{int(f'{time.time()}'.replace('.', '')) + int(f'{time.time()}'.replace('.', ''))}"

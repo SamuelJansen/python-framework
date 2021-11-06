@@ -13,6 +13,7 @@ from flask_jwt_extended import (
 from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper, ReflectionHelper, SettingHelper, DateTimeHelper
 
+from python_framework.api.src.util import UtcDateTimeUtil
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.constant import JwtConstant
@@ -25,7 +26,7 @@ BLACK_LIST = set()
 
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtBody(rawJwt=None) :
+def getJwtBody(rawJwt=None):
     if ObjectHelper.isNone(rawJwt):
         return get_raw_jwt()
     return rawJwt
@@ -46,20 +47,32 @@ def getData(rawJwt=None):
     return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def jwtAccessRequired(*arg,**kwargs) :
-    return jwt_required(*arg,**kwargs)
-
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJti(rawJwt=None) :
+def getJti(rawJwt=None):
     return getJwtBody(rawJwt=rawJwt).get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getIdentity(rawJwt=None) :
+def getIat(rawJwt=None):
+    return getJwtBody(rawJwt=rawJwt).get(JwtConstant.KW_IAT)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getNfb(rawJwt=None):
+    return getJwtBody(rawJwt=rawJwt).get(JwtConstant.KW_NFB)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getExpiration(rawJwt=None):
+    return getJwtBody(rawJwt=rawJwt).get(JwtConstant.KW_EXPIRATION)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getIdentity(rawJwt=None):
     return getJwtBody(rawJwt=rawJwt).get(JwtConstant.KW_IDENTITY)
 
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def jwtAccessRequired(*arg,**kwargs):
+    return jwt_required(*arg,**kwargs)
+
 @Function
-def addUserToBlackList() :
-    BLACK_LIST.add(getJti())
+def addUserToBlackList(rawJwt=None):
+    BLACK_LIST.add(getJti(rawJwt=rawJwt))
 
 @Function
 def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, headerType=None):
@@ -77,35 +90,31 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
         return jwtMannager
 
 @Function
-def addJwt(jwtInstance) :
+def addJwt(jwtInstance):
     @jwtInstance.token_in_blacklist_loader
-    def verifyAuthorizaionAccess(decriptedToken) :
+    def verifyAuthorizaionAccess(decriptedToken):
         return decriptedToken[JwtConstant.KW_JTI] in BLACK_LIST
 
     @jwtInstance.revoked_token_loader
-    def invalidAccess() :
+    def invalidAccess():
         return {'message': 'Access denied'}, HttpStatus.UNAUTHORIZED
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def createAccessToken(identity, roleList, deltaMinutes=None, headers=None, data=None):
-    if deltaMinutes :
-        deltaMinutes = DateTimeHelper.timeDelta(minutes=deltaMinutes)
+def createAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=None):
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_access_token
     return create_access_token(
         identity = identity,
         user_claims = {
-            JwtConstant.KW_CONTEXT: roleList,
-            JwtConstant.KW_DATA: data
+            JwtConstant.KW_CONTEXT: ConverterStatic.getValueOrDefault(roleList, list()),
+            JwtConstant.KW_DATA: ConverterStatic.getValueOrDefault(data, dict())
         },
         fresh = False,
-        expires_delta = deltaMinutes,
-        headers = headers
+        expires_delta = DateTimeHelper.timeDelta(minutes=deltaMinutes),
+        headers = ConverterStatic.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def refreshAccessToken(identity, roleList, deltaMinutes=None, headers=None, data=None) :
-    if ObjectHelper.isNotNone(deltaMinutes) :
-        deltaMinutes = DateTimeHelper.timeDelta(minutes=deltaMinutes)
+def refreshAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=None):
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_refresh_token
     return create_refresh_token(
         identity = identity,
@@ -113,17 +122,14 @@ def refreshAccessToken(identity, roleList, deltaMinutes=None, headers=None, data
             JwtConstant.KW_CONTEXT: roleList,
             JwtConstant.KW_DATA: data
         },
-        expires_delta = deltaMinutes,
-        headers = headers
+        expires_delta = DateTimeHelper.timeDelta(minutes=deltaMinutes),
+        headers = ConverterStatic.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def patchAccessToken(newContextList=None, headers=None, data=None) :
+def patchAccessToken(newContextList=None, headers=None, data=None):
     rawJwt = getJwtBody()
-    # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
-    import time
-    print(time.time())
-    deltaMinutes = DateTimeHelper.timeDelta(minutes=1)
+    deltaMinutes = getExpiration(rawJwt=rawJwt) - UtcDateTimeUtil.now()
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
             *getContext(rawJwt=rawJwt),
@@ -143,7 +149,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None) :
         user_claims = userClaims,
         fresh = False,
         expires_delta = deltaMinutes,
-        headers = headers
+        headers = ConverterStatic.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)

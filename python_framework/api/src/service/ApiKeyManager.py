@@ -47,6 +47,7 @@ class JwtManager:
         decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=rawJwt, options=options)
         assert decodedSessionToken.get(JwtConstant.KW_TYPE) == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh session should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {decodedSessionToken.get(JwtConstant.KW_TYPE)}'
 
+    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def validateGeneralSessionAndReturnItDecoded(self, rawJwt=None, options=None):
         decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt, options=options)
         assert ObjectHelper.isDictionary(decodedSessionToken), f'Invalid session type. It should be a dictionary, bu it is {type(decodedSessionToken)}'
