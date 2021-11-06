@@ -220,8 +220,6 @@ def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=None):
     rawJwt = getJwtBody(apiInstance=apiInstance)
-    expiresAt = getExpiration(rawJwt=rawJwt, apiInstance=apiInstance)
-    UtcDateTimeUtil.now()
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
             *getContext(rawJwt=rawJwt),
@@ -241,7 +239,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=N
             JwtConstant.KW_IAT: getIat(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_NFB: getNfb(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_JTI: getJti(rawJwt=rawJwt, apiInstance=apiInstance),
-            JwtConstant.KW_EXPIRATION: expiresAt,
+            JwtConstant.KW_EXPIRATION: getExpiration(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_IDENTITY: getIdentity(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_FRESH: False,
             JwtConstant.KW_TYPE: JwtConstant.ACCESS_VALUE_TYPE,
