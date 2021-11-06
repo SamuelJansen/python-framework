@@ -140,7 +140,7 @@ def initialize(
     SessionManager.addSessionManager(api, app)
     ApiKeyManager.addApiKeyManager(api, app)
     SecurityManager.addSecurityManager(api, app)
-    args = [api, app, api.sessionManager, api.apiKeyManage, api.jwtManager]
+    args = [api, app, api.sessionManager, api.apiKeyManager, api.securityManager]
     for resourceType in FlaskManager.KW_RESOURCE_LIST :
         args.append(getResourceList(api, resourceType))
     args.append(refferenceModel)

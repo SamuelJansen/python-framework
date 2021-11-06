@@ -174,15 +174,15 @@ def getCurrentUser(userClass=None):
             return currentUsert
 
 def addSecurityManager(apiInstance, appInstance):
-    apiInstance.jwtManager = None
+    apiInstance.securityManager = None
     try:
-        apiInstance.jwtManager = getJwtMannager(
+        apiInstance.securityManager = getJwtMannager(
             appInstance,
             apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_SECRET),
             algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_ALGORITHM),
             headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_HEADER),
             headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_TYPE)
         )
-        apiInstance.jwtManager.api = apiInstance
+        apiInstance.securityManager.api = apiInstance
     except Exception as exception:
         log.warning(addSecurityManager, 'Not possible to add Security Manager', exception=exception)
