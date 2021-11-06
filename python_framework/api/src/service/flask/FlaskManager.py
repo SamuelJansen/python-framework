@@ -447,7 +447,7 @@ def handleControllerMethod(
     logRequest,
     muteStacktraceOnBusinessRuleException
 ):
-    response = None
+    completeResponse = None
     try :
         if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
             requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
@@ -464,8 +464,8 @@ def handleControllerMethod(
                 args = getArgsWithSerializerReturnAppended(args, serializerReturn)
         addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
         addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
-        response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
-        if not (response and Serializer.isSerializerCollection(response) and 2 == len(response)):
+        completeResponse = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
+        if not (completeResponse and Serializer.isSerializerCollection(completeResponse) and 2 == len(completeResponse)):
             raise GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
     except Exception as exception:
         completeResponse = getCompleteResponseByException(
@@ -474,7 +474,7 @@ def handleControllerMethod(
             resourceInstanceMethod,
             muteStacktraceOnBusinessRuleException
         )
-    return response
+    return completeResponse
 
 def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
     if ObjectHelper.isNotEmpty(givenClass):
