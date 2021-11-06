@@ -19,7 +19,7 @@ class SessionManagerTestController:
         contextRequired=['TEST_SESSION']
     )
     def get(self):
-        input(FlaskUtil.safellyGetHeaders())
+        # input(FlaskUtil.safellyGetHeaders())
         return {
             'secured': 'information',
             'currentUser': SessionManager.getCurrentSession()
@@ -35,10 +35,10 @@ class SessionManagerTestController:
     def post(self, dto):
         headers={'some': 'headers'}
         data = {'some': 'data'}
-        input(self.globals.api.sessionManager.secret)
-        input(self.globals.api.sessionManager.algorithm)
-        input(self.globals.api.sessionManager.headerName)
-        input(self.globals.api.sessionManager.headerType)
+        # input(self.globals.api.sessionManager.secret)
+        # input(self.globals.api.sessionManager.algorithm)
+        # input(self.globals.api.sessionManager.headerName)
+        # input(self.globals.api.sessionManager.headerType)
         return {
             'accessToken': SessionManager.createAccessToken(dto['id'], ['TEST_SESSION'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
         }, HttpStatus.OK

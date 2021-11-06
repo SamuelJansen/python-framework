@@ -339,7 +339,7 @@ def handleSecuredControllerMethod(
         logRequest
     )
 
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 @ApiKeyManager.jwtAccessRequired
 def handleLockedByApiKeyControllerMethod(
     args,
@@ -357,7 +357,7 @@ def handleLockedByApiKeyControllerMethod(
     contextList = ApiKeyManager.getContext()
     if not any(apiKey in set(contextList) for apiKey in apiKeyRequired):
         raise GlobalException(
-            message = 'Api not allowed',
+            message = 'ApiKey not allowed',
             logMessage = f'''ApiKey {contextList} trying to access denied resourse. Allowed apiKeys {apiKeyRequired}''',
             status = HttpStatus.FORBIDDEN
         )
@@ -386,7 +386,7 @@ def handleLockedByApiKeyControllerMethod(
         logRequest
     )
 
-@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 @SessionManager.jwtAccessRequired
 def handleSessionedControllerMethod(
     args,

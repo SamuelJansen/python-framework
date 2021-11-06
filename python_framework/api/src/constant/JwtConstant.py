@@ -15,6 +15,8 @@ KW_JWT_HEADER_TYPE = 'JWT_HEADER_TYPE'
 
 UNAUTHORIZED_MESSAGE = 'Unauthorized'
 FORBIDDEN_MESSAGE = 'Frobidden'
+INVALID_SESSION_MESSAGE = 'Invalid session'
+INVALID_API_KEY_MESSAGE = 'Invalid apiKey'
 
 KW_CONTEXT = 'context'
 KW_DATA = 'data'

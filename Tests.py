@@ -15,7 +15,7 @@ from python_helper import TestHelper
 TestHelper.run(
     __file__,
     runOnly = [
-        # 'TestApiTest.pythonRun_securityManager',
+        'TestApiTest.pythonRun_securityManager',
         'TestApiTest.pythonRun_sessionManager'
         # 'TestApiTest.testing_Client'
     ]
