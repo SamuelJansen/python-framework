@@ -82,7 +82,7 @@ class JwtManager:
 def jwtAccessRequired(function, *args, **kwargs) :
     def innerFunction(*args, **kwargs) :
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).sessionManager.validateAccessSession()
+        retrieveApiInstance(arguments=args[0]).apiKeyManager.validateAccessSession()
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -92,7 +92,7 @@ def jwtAccessRequired(function, *args, **kwargs) :
 def jwtRefreshRequired(function, *args, **kwargs) :
     def innerFunction(*args, **kwargs) :
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).sessionManager.validateRefreshSession()
+        retrieveApiInstance(arguments=args[0]).apiKeyManager.validateRefreshSession()
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -102,13 +102,13 @@ def jwtRefreshRequired(function, *args, **kwargs) :
 def getJwtBody(rawJwt=None, apiInstance=None) :
     # print(f'{getJwtBody}: apiInstance:{apiInstance}')
     if ObjectHelper.isNone(rawJwt):
-        return retrieveApiInstance(apiInstance=apiInstance).sessionManager.getBody(rawJwt=rawJwt)
+        return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getBody(rawJwt=rawJwt)
     return rawJwt
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtHeaders(apiInstance=None):
     # print(f'{getJwtHeaders}: apiInstance:{apiInstance}')
-    headers = retrieveApiInstance(apiInstance=apiInstance).sessionManager.getUnverifiedHeaders()
+    headers = retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getUnverifiedHeaders()
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -142,7 +142,7 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
     if SettingHelper.activeEnvironmentIsLocal():
         log.setting(getJwtMannager, f'JWT secret: {jwtSecret}')
     if not jwtSecret:
-        log.warning(getJwtMannager, f'Not possible to instanciate sessionManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SESSION_SECRET}')
+        log.warning(getJwtMannager, f'Not possible to instanciate apiKeyManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SESSION_SECRET}')
     else:
         jwtMannager = JwtManager(
             jwtSecret,
@@ -161,7 +161,7 @@ def createAccessToken(identity, contextList, deltaMinutes=None, headers=None, da
     if deltaMinutes :
         deltaMinutes = DateTimeHelper.timeDelta(minutes=deltaMinutes)
     timeNow = DateTimeHelper.dateTimeNow()
-    return retrieveApiInstance(apiInstance=apiInstance).sessionManager.encode({
+    return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: f"{int(f'{time.time()}'.replace('.', ''))+int(f'{time.time()}'.replace('.', ''))}",
@@ -182,7 +182,7 @@ def refreshAccessToken(identity, contextList, deltaMinutes=None, headers=None, d
     if ObjectHelper.isNotNone(deltaMinutes) :
         deltaMinutes = DateTimeHelper.timeDelta(minutes=deltaMinutes)
     timeNow = DateTimeHelper.dateTimeNow()
-    return retrieveApiInstance(apiInstance=apiInstance).sessionManager.encode({
+    return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: f"{int(f'{time.time()}'.replace('.', ''))+int(f'{time.time()}'.replace('.', ''))}",
@@ -220,7 +220,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=N
         }
     }
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
-    return apiInstance.sessionManager.encode({
+    return apiInstance.apiKeyManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: f"{int(f'{time.time()}'.replace('.', ''))+int(f'{time.time()}'.replace('.', ''))}",
@@ -258,15 +258,16 @@ def getCurrentSession(sessionClass=None, apiInstance=None):
         return currentSession
 
 def addApiKeyManager(apiInstance, appInstance):
+    apiInstance.apiKeyManager = None
     try:
-        apiInstance.sessionManager = getJwtMannager(
+        apiInstance.apiKeyManager = getJwtMannager(
             appInstance,
             apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_SECRET),
             algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_ALGORITHM),
             headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_HEADER),
             headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_TYPE)
         )
-        apiInstance.sessionManager.api = apiInstance
+        apiInstance.apiKeyManager.api = apiInstance
     except Exception as exception:
         log.warning(addApiKeyManager, 'Not possible to add Session Manager', exception=exception)
 
@@ -286,7 +287,7 @@ def retrieveApiInstance(apiInstance=None, arguments=None):
         apiInstance = FlaskUtil.getApi()
     if ObjectHelper.isNone(apiInstance):
         raiseUnretrievedApiInstance()
-    if ObjectHelper.isNone(apiInstance.sessionManager):
+    if ObjectHelper.isNone(apiInstance.apiKeyManager):
         raise Exception('There is no session manager')
     API_INSTANCE_HOLDER[KEY_API_INSTANCE] = apiInstance
     return apiInstance

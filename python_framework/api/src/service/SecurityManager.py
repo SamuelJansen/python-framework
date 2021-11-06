@@ -174,6 +174,7 @@ def getCurrentUser(userClass=None):
             return currentUsert
 
 def addSecurityManager(apiInstance, appInstance):
+    apiInstance.jwtManager = None
     try:
         apiInstance.jwtManager = getJwtMannager(
             appInstance,

@@ -258,6 +258,7 @@ def getCurrentSession(sessionClass=None, apiInstance=None):
         return currentSession
 
 def addSessionManager(apiInstance, appInstance):
+    apiInstance.sessionManager = None
     try:
         apiInstance.sessionManager = getJwtMannager(
             appInstance,
