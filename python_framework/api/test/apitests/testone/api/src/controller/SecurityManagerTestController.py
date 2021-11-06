@@ -51,9 +51,9 @@ class SecurityManagerTestController:
         headers={'some': 'other headers'}
         data = {'some': 'other data'}
         accessToken = SecurityManager.patchAccessToken(newContextList=['TEST_ROLE', 'TEST_ROLE_REFRESH'], headers=headers, data=data)
-        print(UtcDateTimeUtil.ofUtcTimestamp(SecurityManager.getExpiration()))
-        print(UtcDateTimeUtil.ofUtcTimestamp(SecurityManager.getIat()))
-        print(UtcDateTimeUtil.ofUtcTimestamp(SecurityManager.getNfb()))
+        print(UtcDateTimeUtil.ofTimestamp(SecurityManager.getExpiration()))
+        print(UtcDateTimeUtil.ofTimestamp(SecurityManager.getIat()))
+        print(UtcDateTimeUtil.ofTimestamp(SecurityManager.getNfb()))
         print(UtcDateTimeUtil.ofTimestamp(SecurityManager.getExpiration()))
         print(UtcDateTimeUtil.ofTimestamp(SecurityManager.getIat()))
         print(UtcDateTimeUtil.ofTimestamp(SecurityManager.getNfb()))

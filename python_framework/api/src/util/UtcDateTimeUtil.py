@@ -8,10 +8,10 @@ def timestamp():
     return datetime.datetime.timestamp()
 
 def ofTimestamp(t):
-    return datetime.datetime.fromtimestamp(t)
-
-def ofUtcTimestamp(t):
     return datetime.datetime.utcfromtimestamp(t)
+
+def ofPlainTimestamp(t):
+    return datetime.datetime.fromtimestamp(t)
 
 def plusMinutes(givenDateTime, minutes=None, deltaInMinutes=None) :
     if ObjectHelper.isNotNone(minutes) :

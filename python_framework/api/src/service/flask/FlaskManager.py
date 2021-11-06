@@ -87,7 +87,7 @@ def runGlobals(
     , errorStatus = False
     , testStatus = False
     , logStatus = False
-) :
+):
     return globals.newGlobalsInstance(
         filePath
         , successStatus = successStatus
@@ -116,8 +116,8 @@ def initialize(
     , errorStatus = False
     , testStatus = False
     , logStatus = False
-) :
-    if ObjectHelper.isNone(apiInstance) :
+):
+    if ObjectHelper.isNone(apiInstance):
         globalsInstance = runGlobals(
             filePath
             , successStatus = successStatus
@@ -133,13 +133,13 @@ def initialize(
     innerDefaultUrl = getApiUrl(apiInstance)
     if defaultUrl :
         innerDefaultUrl = f'{innerDefaultUrl}{defaultUrl}'
-    def inBetweenFunction(function,*argument,**keywordArgument) :
+    def inBetweenFunction(function,*argument,**keywordArgument):
         log.debug(initialize,f'''{function.__name__} method''')
-        if (openInBrowser) :
+        if (openInBrowser):
             log.debug(initialize,f'''Openning "{innerDefaultUrl}" url in rowser''')
             # WebBrowser.openUrlInChrome(innerDefaultUrl)
             WebBrowser.openUrl(innerDefaultUrl)
-        def innerFunction(*args,**kwargs) :
+        def innerFunction(*args,**kwargs):
             try :
                 functionReturn = function(*args,**kwargs)
             except Exception as exception :
@@ -148,8 +148,8 @@ def initialize(
         return innerFunction
     return inBetweenFunction
 
-def runApi(*args, api=None, **kwargs) :
-    if ObjectHelper.isNone(api) :
+def runApi(*args, api=None, **kwargs):
+    if ObjectHelper.isNone(api):
         api = FlaskUtil.getApi()
     muteLogs(api)
     if 'host' not in kwargs and api.host :
@@ -163,7 +163,7 @@ def runApi(*args, api=None, **kwargs) :
     SchedulerManager.shutdown(api, api.app)
 
 @Function
-def getApiUrl(api) :
+def getApiUrl(api):
     apiUrl = None
     try :
         apiUrl = f'{api.scheme}://{api.host}{c.BLANK if ObjectHelper.isEmpty(api.port) else f"{c.COLON}{api.port}"}{api.baseUrl}'
@@ -172,7 +172,7 @@ def getApiUrl(api) :
     return apiUrl
 
 @Function
-def muteLogs(api) :
+def muteLogs(api):
     import logging
     from werkzeug.serving import WSGIRequestHandler
     werkzeug_logger = logging.getLogger('werkzeug')
@@ -188,7 +188,7 @@ def muteLogs(api) :
     WSGIRequestHandler.log = lambda self, type, message, *args: None ###- getattr(werkzeug_logger, type)('%s %s' % (self.address_string(), message % args))
 
 @Function
-def getRequestBodyAsJson(contentType, requestClass) :
+def getRequestBodyAsJson(contentType, requestClass):
     try :
         if OpenApiManager.DEFAULT_CONTENT_TYPE == contentType :
             requestBodyAsJson = FlaskUtil.safellyGetJson()
@@ -203,10 +203,10 @@ def getRequestBodyAsJson(contentType, requestClass) :
 
 @Function
 def validateBodyAsJson(requestBodyAsJson, requestClass):
-    if ObjectHelper.isNotNone(requestClass) :
+    if ObjectHelper.isNotNone(requestClass):
         requestBodyAsJsonIsList = ObjectHelper.isList(requestBodyAsJson)
         requestClassIsList = ObjectHelper.isList(requestClass) and ObjectHelper.isList(requestClass[0])
-        if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)) :
+        if not ((requestBodyAsJsonIsList and requestClassIsList) or (not requestBodyAsJsonIsList and not requestClassIsList)):
             raise GlobalException(message='Bad request', logMessage='Bad request', status=HttpStatus.BAD_REQUEST)
 
 def handleAnyControllerMethodRequest(
@@ -399,7 +399,7 @@ def handleSessionedControllerMethod(
     requestParamClass,
     requestClass,
     logRequest
-) :
+):
     contextList = SessionManager.getContext()
     if not any(context in set(contextList) for context in contextRequired):
         raise GlobalException(
@@ -431,49 +431,58 @@ def handleControllerMethod(
     requestParamClass,
     requestClass,
     logRequest
-) :
-    if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
-        requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
-        if logRequest :
-            log.prettyJson(
-                resourceInstanceMethod,
-                'bodyRequest',
-                requestBodyAsJson,
-                condition = logRequest,
-                logLevel = log.INFO
-            )
-        if Serializer.requestBodyIsPresent(requestBodyAsJson) :
-            serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
-            args = getArgsWithSerializerReturnAppended(args, serializerReturn)
-    addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
-    addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
-    response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
-    if response and Serializer.isSerializerCollection(response) and 2 == len(response) :
-        return response
-    raise GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
+):
+    response = None
+    try :
+        if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
+            requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
+            if logRequest :
+                log.prettyJson(
+                    resourceInstanceMethod,
+                    'bodyRequest',
+                    requestBodyAsJson,
+                    condition = logRequest,
+                    logLevel = log.INFO
+                )
+            if Serializer.requestBodyIsPresent(requestBodyAsJson):
+                serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
+                args = getArgsWithSerializerReturnAppended(args, serializerReturn)
+        addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
+        addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
+        response = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
+        if not (response and Serializer.isSerializerCollection(response) and 2 == len(response)):
+            raise GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
+    except Exception as exception:
+        completeResponse = getCompleteResponseByException(
+            exception,
+            resourceInstance,
+            resourceInstanceMethod,
+            controllerMethodMuteStacktraceOnBusinessRuleException
+        )
+    return response
 
-def addToKwargs(key, givenClass, valuesAsDictionary, kwargs) :
-    if ObjectHelper.isNotEmpty(givenClass) :
+def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
+    if ObjectHelper.isNotEmpty(givenClass):
         toClass = givenClass if ObjectHelper.isNotList(givenClass) else givenClass[0]
         kwargs[key] = Serializer.convertFromJsonToObject({k:v for k,v in valuesAsDictionary.items()}, toClass)
 
 @Function
-def jsonifyResponse(response, contentType, status) :
+def jsonifyResponse(response, contentType, status):
     return FlaskUtil.Response(Serializer.jsonifyIt(response),  mimetype=contentType, status=HttpStatus.map(status).enumValue)
 
 @Function
-def getArgsWithSerializerReturnAppended(args, argument) :
+def getArgsWithSerializerReturnAppended(args, argument):
     args = [arg for arg in args]
     args.append(argument)
     # return [arg for arg in args]
     return args
 
 @Function
-def getArgumentInFrontOfArgs(args, argument) :
+def getArgumentInFrontOfArgs(args, argument):
     return [argument, *args]
 
 @Function
-def getArgsWithResponseClassInstanceAppended(args, responseClass) :
+def getArgsWithResponseClassInstanceAppended(args, responseClass):
     if responseClass :
         resourceInstance = args[0]
         objectRequest = args[1]
@@ -482,17 +491,17 @@ def getArgsWithResponseClassInstanceAppended(args, responseClass) :
     return args
 
 @Function
-def getResourceFinalName(resourceInstance, resourceName=None) :
+def getResourceFinalName(resourceInstance, resourceName=None):
     if not resourceName :
         resourceName = resourceInstance.__class__.__name__
     for resourceType in KW_RESOURCE_LIST :
-        if resourceName.endswith(resourceType) :
+        if resourceName.endswith(resourceType):
             resourceName = resourceName[:-len(resourceType)]
             break
     return f'{resourceName[0].lower()}{resourceName[1:]}'
 
 @Function
-def getResourceType(resourceInstance, resourceName = None) :
+def getResourceType(resourceInstance, resourceName = None):
     if not resourceName :
         resourceName = resourceInstance.__class__.__name__
     for resourceType in KW_RESOURCE_LIST :
@@ -500,23 +509,23 @@ def getResourceType(resourceInstance, resourceName = None) :
             return resourceType
 
 @Function
-def setResource(apiInstance, resourceInstance, resourceName=None) :
+def setResource(apiInstance, resourceInstance, resourceName=None):
     resourceName = getResourceFinalName(resourceInstance, resourceName=resourceName)
     ReflectionHelper.setAttributeOrMethod(apiInstance,resourceName,resourceInstance)
 
 @Function
-def bindResource(apiInstance,resourceInstance) :
+def bindResource(apiInstance,resourceInstance):
     FlaskUtil.validateFlaskApi(apiInstance)
     FlaskUtil.validateResourceInstance(resourceInstance)
     setResource(ReflectionHelper.getAttributeOrMethod(apiInstance.resource, getResourceType(resourceInstance).lower()), resourceInstance)
 
 @Function
-def validateArgs(args, requestClass, method) :
-    if ObjectHelper.isNotNone(requestClass) :
+def validateArgs(args, requestClass, method):
+    if ObjectHelper.isNotNone(requestClass):
         resourceInstance = args[0]
-        if Serializer.isSerializerList(requestClass) :
-            if 0 < len(requestClass) :
-                for index in range(len(requestClass)) :
+        if Serializer.isSerializerList(requestClass):
+            if 0 < len(requestClass):
+                for index in range(len(requestClass)):
                     if Serializer.isSerializerList(args[index + 1]) and len(args[index + 1]) > 0 :
                         expecteObjectClass = requestClass[index][0]
                         for objectInstance in args[index + 1] :
@@ -530,13 +539,13 @@ def validateArgs(args, requestClass, method) :
             expecteObjectClass = requestClass
             ExceptionHandler.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
 
-def validateKwargs(kwargs, resourceInstance, innerResourceInstanceMethod, requestHeaderClass=None, requestParamClass=None) :
+def validateKwargs(kwargs, resourceInstance, innerResourceInstanceMethod, requestHeaderClass=None, requestParamClass=None):
     classListToValidate = []
     instanceListToValidate = []
-    if ObjectHelper.isNotEmpty(requestHeaderClass) :
+    if ObjectHelper.isNotEmpty(requestHeaderClass):
         classListToValidate.append(requestHeaderClass if ObjectHelper.isNotList(requestHeaderClass) else requestHeaderClass[0])
         instanceListToValidate.append(kwargs.get(KW_HEADERS, {}))
-    if ObjectHelper.isNotEmpty(requestParamClass) :
+    if ObjectHelper.isNotEmpty(requestParamClass):
         classListToValidate.append(requestParamClass if ObjectHelper.isNotList(requestParamClass) else requestParamClass[0])
         instanceListToValidate.append(kwargs.get(KW_PARAMETERS, {}))
     validateArgs([resourceInstance, *instanceListToValidate], classListToValidate, innerResourceInstanceMethod)
@@ -546,7 +555,7 @@ def Controller(
     url = c.SLASH,
     tag = 'Tag not defined',
     description = 'Controller not descripted'
-) :
+):
     controllerUrl = url
     controllerTag = tag
     controllerDescription = description
@@ -596,9 +605,9 @@ def ControllerMethod(
     controllerMethodLogRequest = logRequest
     controllerMethodLogResponse = logResponse
     controllerMethodMuteStacktraceOnBusinessRuleException = muteStacktraceOnBusinessRuleException
-    def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
+    def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs):
         log.debug(ControllerMethod, f'''wrapping {resourceInstanceMethod.__name__}''', None)
-        def innerResourceInstanceMethod(*args,**kwargs) :
+        def innerResourceInstanceMethod(*args,**kwargs):
             # r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             # r.headers["Pragma"] = "no-cache"
             # r.headers["Expires"] = "0"
@@ -672,7 +681,7 @@ def ControllerMethod(
     return innerMethodWrapper
 
 @Function
-def SimpleClient() :
+def SimpleClient():
     def Wrapper(OuterClass, *args, **kwargs):
         log.debug(SimpleClient,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
@@ -686,9 +695,9 @@ def SimpleClient() :
 
 @Function
 def SimpleClientMethod(requestClass=None):
-    def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
+    def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs):
         log.debug(SimpleClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
-        def innerResourceInstanceMethod(*args,**kwargs) :
+        def innerResourceInstanceMethod(*args,**kwargs):
             resourceInstance = args[0]
             try :
                 validateArgs(args,requestClass,innerResourceInstanceMethod)
@@ -713,7 +722,7 @@ def getGlobalException(
         apiInstance = apiInstance if ObjectHelper.isNotNone(apiInstance) else FlaskUtil.getNullableApi()
     )
 
-def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod) :
+def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod):
     raise getGlobalException(exception, resourceInstance, resourceInstanceMethod)
 
 def getCompleteResponseByException(
@@ -721,12 +730,12 @@ def getCompleteResponseByException(
     resourceInstance,
     resourceInstanceMethod,
     muteStacktraceOnBusinessRuleException
-) :
+):
     exception = getGlobalException(exception, resourceInstance, resourceInstanceMethod)
     completeResponse = [{'message':exception.message, 'timestamp':str(exception.timeStamp)}, exception.status]
     try :
         logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request'
-        if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status) :
+        if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):
             log.error(resourceInstance.__class__, logErrorMessage, exception)
         else :
             log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=muteStacktraceOnBusinessRuleException)
@@ -735,43 +744,43 @@ def getCompleteResponseByException(
         log.error(log.error, 'Error processing request', exception)
     return completeResponse
 
-def validateResponseClass(responseClass, controllerResponse) :
-    if isNotPythonFrameworkHttpsResponse(controllerResponse) :
+def validateResponseClass(responseClass, controllerResponse):
+    if isNotPythonFrameworkHttpsResponse(controllerResponse):
         raiseBadResponseImplementation(f'Python Framework response cannot be null. It should be a list like this: [{"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HTTPS_CODE]')
-    if ObjectHelper.isNotNone(responseClass) :
-        if Serializer.isSerializerList(responseClass) :
-            if 0 == len(responseClass) :
+    if ObjectHelper.isNotNone(responseClass):
+        if Serializer.isSerializerList(responseClass):
+            if 0 == len(responseClass):
                 log.log(validateResponseClass,f'"responseClass" was not defined')
-            elif 1 == len(responseClass) :
+            elif 1 == len(responseClass):
                 if ObjectHelper.isNotList(responseClass[0])  :
-                    if not isinstance(controllerResponse[0], responseClass[0]) :
+                    if not isinstance(controllerResponse[0], responseClass[0]):
                         raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass[0].__name__}", response "{controllerResponse[0].__class__.__name__}"')
-                elif ObjectHelper.isNotList(responseClass[0][0]) :
-                    if ObjectHelper.isNotList(controllerResponse[0]) :
+                elif ObjectHelper.isNotList(responseClass[0][0]):
+                    if ObjectHelper.isNotList(controllerResponse[0]):
                         raiseBadResponseImplementation(f'Response is not a list. Expected "{responseClass[0].__class__.__name__}", but found "{controllerResponse[0].__class__.__name__}"')
-                    elif Serializer.isSerializerList(controllerResponse[0]) and 0 < len(controllerResponse[0]) and not isinstance(controllerResponse[0][0], responseClass[0][0]) :
+                    elif Serializer.isSerializerList(controllerResponse[0]) and 0 < len(controllerResponse[0]) and not isinstance(controllerResponse[0][0], responseClass[0][0]):
                         raiseBadResponseImplementation(f'Response element class does not match expected element class. Expected "{responseClass[0][0].__name__}", response "{controllerResponse[0][0].__class__.__name__}"')
         else :
-            if not isinstance(controllerResponse[0], responseClass) :
+            if not isinstance(controllerResponse[0], responseClass):
                 raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass.__name__}", response "{controllerResponse[0].__class__.__name__}"')
     else :
         log.log(validateResponseClass,f'"responseClass" was not defined')
 
-def isPythonFrameworkHttpsResponse(controllerResponse) :
+def isPythonFrameworkHttpsResponse(controllerResponse):
     return (ObjectHelper.isTuple(controllerResponse) or ObjectHelper.isList(controllerResponse)) and 2 == len(controllerResponse)
 
-def isNotPythonFrameworkHttpsResponse(controllerResponse) :
+def isNotPythonFrameworkHttpsResponse(controllerResponse):
     return not isPythonFrameworkHttpsResponse(controllerResponse)
 
 def raiseBadResponseImplementation(cause):
     raise Exception(f'Bad response implementation. {cause}')
 
 @Function
-def getGlobals() :
+def getGlobals():
     return FlaskUtil.getGlobals()
 
-def getApi() :
+def getApi():
     return FlaskUtil.getApi()
 
-def getNullableApi() :
+def getNullableApi():
     return FlaskUtil.getNullableApi()
