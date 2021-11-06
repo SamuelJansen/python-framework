@@ -84,6 +84,7 @@ class SessionManagerTestBatchController:
         contextRequired=['TEST_SESSION_REFRESH']
     )
     def get(self):
+        print(SessionManager.getCurrentSession())
         assert 'other headers' == SessionManager.getJwtHeaders().get('some'), f"other headers == {SessionManager.getJwtHeaders().get('some')} should be equals. Headers: {SessionManager.getJwtHeaders()}"
         return {
             'secured': 'information',
