@@ -268,7 +268,7 @@ def addApiKeyManager(apiInstance, appInstance):
         )
         apiInstance.sessionManager.api = apiInstance
     except Exception as exception:
-        log.warning(addSession, 'Not possible to add Session Manager', exception=exception)
+        log.warning(addApiKeyManager, 'Not possible to add Session Manager', exception=exception)
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     if FlaskUtil.isApiInstance(apiInstance):

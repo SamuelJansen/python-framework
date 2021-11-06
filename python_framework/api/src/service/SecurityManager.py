@@ -184,4 +184,4 @@ def addSecurityManager(apiInstance, appInstance):
         )
         apiInstance.jwtManager.api = apiInstance
     except Exception as exception:
-        log.warning(addSecurity, 'Not possible to add Security Manager', exception=exception)
+        log.warning(addSecurityManager, 'Not possible to add Security Manager', exception=exception)
