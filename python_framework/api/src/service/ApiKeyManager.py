@@ -144,13 +144,12 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
     if not jwtSecret:
         log.warning(getJwtMannager, f'Not possible to instanciate apiKeyManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SESSION_SECRET}')
     else:
-        jwtMannager = JwtManager(
+        return JwtManager(
             jwtSecret,
             ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SESSION_ALGORITHM),
             ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_SESSION_HEADER_NAME),
             ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE)
         )
-        return jwtMannager
 
 @Function
 def addJwt(jwtInstance) :

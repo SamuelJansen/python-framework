@@ -21,9 +21,9 @@ def Scheduler(*schedulerArgs, disable=False, muteLogs=DEFAUTL_MUTE_LOGS, **sched
                 OuterClass.__init__(self,*args,**kwargs)
                 self.globals = apiInstance.globals
                 self.service = apiInstance.resource.service
-                self.enabled = self.globals.getApiSetting(ConfigurationKeyConstant.SCHEDULER_ENABLE_KEY)
+                self.enabled = self.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE)
                 self.disabled = disable
-                self.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.SCHEDULER_MUTE_LOGS_KEY), DEFAUTL_MUTE_LOGS)
+                self.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS)
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -42,7 +42,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=DEFAUTL_DISABLE, mut
         weekDays = methodKwargs.pop('weekDays', None)
         resourceMethod.disabled = disable
         resourceMethod.shedulerId = methodKwargs['id']
-        resourceMethod.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.SCHEDULER_MUTE_LOGS_KEY), DEFAUTL_MUTE_LOGS)
+        resourceMethod.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS)
         if ObjectHelper.isNotEmpty(methodArgs) and SchedulerType.CRON == methodArgs[0] and ObjectHelper.isNotNone(weekDays) and StringHelper.isNotBlank(weekDays) :
             methodKwargs['day_of_week'] = weekDays
         if ObjectHelper.isNotNone(instancesUpTo) :

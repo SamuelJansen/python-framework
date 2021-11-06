@@ -1,5 +1,5 @@
-SCHEDULER_ENABLE_KEY = 'api.scheduler.enable'
-SCHEDULER_MUTE_LOGS_KEY = 'api.scheduler.mute-logs'
+API_SCHEDULER_ENABLE = 'api.scheduler.enable'
+API_SCHEDULER_MUTE_LOGS = 'api.scheduler.mute-logs'
 
 API_SERVER_SCHEME = 'api.server.scheme'
 API_SERVER_HOST = 'api.server.host'

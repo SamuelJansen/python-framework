@@ -7,8 +7,8 @@ def addSchedulerManager(api, app) :
     # initialize scheduler
     scheduler = APScheduler()
     # if you don't wanna use a config, you can set options here:
-    enabled = api.globals.getApiSetting(ConfigurationKeyConstant.SCHEDULER_ENABLE_KEY)
-    scheduler.api_enabled = api.globals.getApiSetting(ConfigurationKeyConstant.SCHEDULER_ENABLE_KEY) is True
+    enabled = api.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE)
+    scheduler.api_enabled = api.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE) is True
     api.scheduler = scheduler
     return scheduler
 

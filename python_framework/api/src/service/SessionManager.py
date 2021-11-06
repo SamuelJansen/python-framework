@@ -50,7 +50,7 @@ class JwtManager:
     def validateGeneralSessionAndReturnItDecoded(self, rawJwt=None, options=None):
         decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt, options=options)
         assert ObjectHelper.isDictionary(decodedSessionToken), f'Invalid session type. It should be a dictionary, bu it is {type(decodedSessionToken)}'
-        assert not ObjectHelper.isEmpty(decodedSessionToken), 'Session cannot be empty'
+        assert ObjectHelper.isNotEmpty(decodedSessionToken), 'Session cannot be empty'
         assert not decodedSessionToken[JwtConstant.KW_JTI] in BLACK_LIST, f'Session {decodedSessionToken[JwtConstant.KW_JTI]} already closed'
         return decodedSessionToken
 
@@ -71,7 +71,7 @@ class JwtManager:
 
     def getEncodedTokenWithoutType(self):
         encodedPayload = self.captureTokenFromRequestHeader()
-        assert ObjectHelper.isNone(encodedPayload), 'JWT session token cannot be None'
+        assert ObjectHelper.isNotNone(encodedPayload), 'JWT session token cannot be None'
         assert encodedPayload.startswith(f'{self.headerType} '), f'JWT session token must starts with {self.headerType}'
         return encodedPayload[len(f'{self.headerType} '):].encode()
 
@@ -144,13 +144,12 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
     if not jwtSecret:
         log.warning(getJwtMannager, f'Not possible to instanciate sessionManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SESSION_SECRET}')
     else:
-        jwtMannager = JwtManager(
+        return JwtManager(
             jwtSecret,
             ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SESSION_ALGORITHM),
             ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_SESSION_HEADER_NAME),
             ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE)
         )
-        return jwtMannager
 
 @Function
 def addJwt(jwtInstance) :

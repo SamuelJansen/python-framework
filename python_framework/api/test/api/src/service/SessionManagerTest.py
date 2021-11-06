@@ -7,7 +7,7 @@ from python_framework.api.src.service.ExceptionHandler import GlobalException
 @Test(environmentVariables = {
     log.ENABLE_LOGS_WITH_COLORS: True
 })
-def patchSession_worksProperly() :
+def sessionManager_worksProperly() :
     # arrange
     SECRET = 'abcd'
     SESSION_DURATION = 10
