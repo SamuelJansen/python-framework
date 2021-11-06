@@ -21,6 +21,9 @@ environment:
     session:
         key: SESSION_KEY
         value: default-session-key
+    api-key:
+        key: API_KEY_KEY
+        value: default-api-key-key
     security:
         key: SECURITY_KEY
         value: default-security-key

@@ -14,6 +14,8 @@ api:
 
     session:
         secret: ${SESSION_KEY:default-session-key}
+    api-key:
+        secret: ${API_KEY_KEY:default-api-key-key}
     security:
         secret: ${SECURITY_KEY:default-security-key}
     server:

@@ -11,6 +11,11 @@ API_SESSION_ALGORITHM = 'api.session.algorithm'
 API_SESSION_HEADER = 'api.session.header'
 API_SESSION_TYPE = 'api.session.type'
 
+API_API_KEY_SECRET = 'api.api-key.secret'
+API_API_KEY_ALGORITHM = 'api.api-key.algorithm'
+API_API_KEY_HEADER = 'api.api-key.header'
+API_API_KEY_TYPE = 'api.api-key.type'
+
 API_SECURITY_SECRET = 'api.security.secret'
 API_SECURITY_ALGORITHM = 'api.security.algorithm'
 API_SECURITY_HEADER = 'api.security.header'

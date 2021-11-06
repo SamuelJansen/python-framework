@@ -30,15 +30,15 @@ class JwtManager:
         self.headerName = headerName
         self.headerType = headerType
 
-    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def encode(self, payload, headers=None) :
         return jwt.encode(payload, self.secret, algorithm=self.algorithm, headers=ConverterStatic.getValueOrDefault(headers, dict())).decode()
 
-    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def decode(self, encodedPayload, options=None) :
         return jwt.decode(encodedPayload, self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
 
-    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def validateAccessApiKey(self, rawJwt=None, options=None):
         decodedApiKeyToken = rawJwt
         try:
@@ -49,7 +49,7 @@ class JwtManager:
             addUserToBlackList(rawJwt=decodedApiKeyToken)
             raise exception
 
-    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def validateRefreshApiKey(self, rawJwt=None, options=None):
         decodedApiKeyToken = rawJwt
         try:
@@ -60,7 +60,7 @@ class JwtManager:
             addUserToBlackList(rawJwt=decodedApiKeyToken)
             raise exception
 
-    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+    @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def validateGeneralApiKeyAndReturnItDecoded(self, rawJwt=None, options=None):
         decodedApiKeyToken = rawJwt
         try:
@@ -122,56 +122,56 @@ def jwtRefreshRequired(function, *args, **kwargs) :
     ReflectionHelper.overrideSignatures(innerFunction, function)
     return innerFunction
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtBody(rawJwt=None, apiInstance=None) :
     if ObjectHelper.isNone(rawJwt):
         return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getBody(rawJwt=rawJwt)
     return rawJwt
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtHeaders(apiInstance=None):
     headers = retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getUnverifiedHeaders()
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getContext(rawJwt=None, apiInstance=None):
     rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
     return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getData(rawJwt=None, apiInstance=None):
     rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
     return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJti(rawJwt=None, apiInstance=None) :
     ###- unique identifier
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_JTI)
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIat(rawJwt=None, apiInstance=None) :
     ###- issued at
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IAT)
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getNfb(rawJwt=None, apiInstance=None) :
     ###- not valid before
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_NFB)
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getExpiration(rawJwt=None, apiInstance=None) :
     ###- expiration time
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_EXPIRATION)
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(rawJwt=None, apiInstance=None) :
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IDENTITY)
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getType(rawJwt=None, apiInstance=None) :
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_TYPE)
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIsFresh(rawJwt=None, apiInstance=None) :
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_FRESH)
 
@@ -184,20 +184,20 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
     if SettingHelper.activeEnvironmentIsLocal():
         log.setting(getJwtMannager, f'JWT apiKey secret: {jwtSecret}')
     if not jwtSecret:
-        log.warning(getJwtMannager, f'Not possible to instanciate apiKeyManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SESSION_SECRET}')
+        log.warning(getJwtMannager, f'Not possible to instanciate apiKeyManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_API_KEY_SECRET}')
     else:
         return JwtManager(
             jwtSecret,
-            ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SESSION_ALGORITHM),
-            ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_SESSION_HEADER_NAME),
-            ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE)
+            ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_API_KEY_ALGORITHM),
+            ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_API_KEY_HEADER_NAME),
+            ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)
         )
 
 @Function
 def addJwt(jwtInstance) :
     ...
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
     return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.encode({
@@ -216,7 +216,7 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
         headers = ConverterStatic.getValueOrDefault(headers, dict())
     )
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
     return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.encode({
@@ -235,7 +235,7 @@ def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data
         headers = ConverterStatic.getValueOrDefault(headers, dict())
     )
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=None):
     rawJwt = getJwtBody(apiInstance=apiInstance)
     userClaims = {
@@ -266,7 +266,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=N
         headers = ConverterStatic.getValueOrDefault(headers, dict())
     )
 
-@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getCurrentApiKey(apiKeyClass=None, apiInstance=None):
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
     rawJwt = getJwtBody(apiInstance=apiInstance)
@@ -295,10 +295,10 @@ def addApiKeyManager(apiInstance, appInstance):
     try:
         apiInstance.apiKeyManager = getJwtMannager(
             appInstance,
-            apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_SECRET),
-            algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_ALGORITHM),
-            headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_HEADER),
-            headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_TYPE)
+            apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_SECRET),
+            algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_ALGORITHM),
+            headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_HEADER),
+            headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_TYPE)
         )
         apiInstance.apiKeyManager.api = apiInstance
     except Exception as exception:
@@ -481,13 +481,13 @@ def getNewJti():
 #     if SettingHelper.activeEnvironmentIsLocal():
 #         log.setting(getJwtMannager, f'JWT secret: {jwtSecret}')
 #     if not jwtSecret:
-#         log.warning(getJwtMannager, f'Not possible to instanciate apiKeyManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SESSION_SECRET}')
+#         log.warning(getJwtMannager, f'Not possible to instanciate apiKeyManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_API_KEY_SECRET}')
 #     else:
 #         return JwtManager(
 #             jwtSecret,
-#             ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SESSION_ALGORITHM),
-#             ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_SESSION_HEADER_NAME),
-#             ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE)
+#             ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_API_KEY_ALGORITHM),
+#             ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_API_KEY_HEADER_NAME),
+#             ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)
 #         )
 #
 # @Function
@@ -600,10 +600,10 @@ def getNewJti():
 #     try:
 #         apiInstance.apiKeyManager = getJwtMannager(
 #             appInstance,
-#             apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_SECRET),
-#             algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_ALGORITHM),
-#             headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_HEADER),
-#             headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_TYPE)
+#             apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_SECRET),
+#             algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_ALGORITHM),
+#             headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_HEADER),
+#             headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_TYPE)
 #         )
 #         apiInstance.apiKeyManager.api = apiInstance
 #     except Exception as exception:
