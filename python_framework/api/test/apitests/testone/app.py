@@ -23,10 +23,8 @@ globalsInstance = globals.newGlobalsInstance(__file__
 from python_framework.api.src.service.flask import FlaskManager
 import TestApi
 app = TestApi.app
-api = TestApi.api
-jwt = TestApi.jwt
 
-@FlaskManager.initialize(api, defaultUrl = '/swagger', openInBrowser=False)
+@FlaskManager.initialize(app.api, defaultUrl = '/swagger', openInBrowser=False)
 def runFlaskApplication(app=None):
     FlaskManager.runApi(debug=False, use_reloader=False)
     # app.run(debug=False, use_reloader=False)

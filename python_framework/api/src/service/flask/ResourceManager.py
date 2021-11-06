@@ -9,6 +9,7 @@ from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import SqlAlchemyProxy
 from python_framework.api.src.service import SessionManager
+from python_framework.api.src.service import ApiKeyManager
 from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.service.openapi import OpenApiManager
@@ -137,14 +138,15 @@ def initialize(
     OpenApiManager.newDocumentation(api, app)
     SchedulerManager.addScheduler(api, app)
     SessionManager.addSession(api, app)
+    ApiKeyManager.addSecurity(api, app)
     SecurityManager.addSecurity(api, app)
-    args = [api, app, api.session, api.jwt]
+    args = [api, app, api.sessionManager, api.jwtManager]
     for resourceType in FlaskManager.KW_RESOURCE_LIST :
         args.append(getResourceList(api, resourceType))
     args.append(refferenceModel)
     addFlaskApiResources(*args)
 
-    return api, api.app, api.jwt
+    return app
 
 @Function
 def addControllerListTo(apiInstance, controllerList) :
@@ -255,5 +257,6 @@ def addFlaskApiResources(
     addConverterListTo(apiInstance, converterList)
     SchedulerManager.initialize(apiInstance, appInstance)
     SessionManager.addJwt(sessionInstance)
+    ApiKeyManager.addJwt(jwtInstance)
     SecurityManager.addJwt(jwtInstance)
     OpenApiManager.addSwagger(apiInstance, appInstance)

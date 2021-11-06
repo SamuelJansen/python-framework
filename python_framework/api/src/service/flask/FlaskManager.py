@@ -6,8 +6,9 @@ from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
 from python_framework.api.src.service import ExceptionHandler
-from python_framework.api.src.service import SessionManager
 from python_framework.api.src.service import SecurityManager
+from python_framework.api.src.service import ApiKeyManager
+from python_framework.api.src.service import SessionManager
 from python_framework.api.src.service.openapi import OpenApiManager
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
@@ -35,8 +36,9 @@ PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST = [
     'DevTestApi',
     'LocalTestApi',
     'SecurityManagerTestApi',
+    'ApiKeyManagerTestApi',
     'SessionManagerTestApi',
-    'SecurityManagerAndSessionManagerTestApi'
+    'SecurityManagerAndApiKeyManagerAndSessionManagerTestApi'
 ]
 KW_CONTROLLER_RESOURCE = 'Controller'
 KW_SCHEDULER_RESOURCE = 'Scheduler'
@@ -200,7 +202,7 @@ def getRequestBodyAsJson(contentType, requestClass) :
     return requestBodyAsJson
 
 @Function
-def validateBodyAsJson(requestBodyAsJson, requestClass) :
+def validateBodyAsJson(requestBodyAsJson, requestClass):
     if ObjectHelper.isNotNone(requestClass) :
         requestBodyAsJsonIsList = ObjectHelper.isList(requestBodyAsJson)
         requestClassIsList = ObjectHelper.isList(requestClass) and ObjectHelper.isList(requestClass[0])
@@ -213,13 +215,14 @@ def handleAnyControllerMethodRequest(
     contentType,
     resourceInstance,
     resourceInstanceMethod,
+    apiKeyRequired,
     contextRequired,
     roleRequired,
     requestHeaderClass,
     requestParamClass,
     requestClass,
     logRequest
-) :
+):
     if ObjectHelper.isNotEmptyCollection(roleRequired):
         return handleSecuredControllerMethod(
             args,
@@ -228,6 +231,21 @@ def handleAnyControllerMethodRequest(
             resourceInstance,
             resourceInstanceMethod,
             roleRequired,
+            apiKeyRequired,
+            contextRequired,
+            requestHeaderClass,
+            requestParamClass,
+            requestClass,
+            logRequest
+        )
+    elif ObjectHelper.isNotEmptyCollection(contextRequired):
+        return handleLockedByApiKeyControllerMethod(
+            args,
+            kwargs,
+            contentType,
+            resourceInstance,
+            resourceInstanceMethod,
+            apiKeyRequired,
             contextRequired,
             requestHeaderClass,
             requestParamClass,
@@ -260,7 +278,7 @@ def handleAnyControllerMethodRequest(
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-@SecurityManager.jwtRequired
+@SecurityManager.jwtAccessRequired
 def handleSecuredControllerMethod(
     args,
     kwargs,
@@ -268,17 +286,79 @@ def handleSecuredControllerMethod(
     resourceInstance,
     resourceInstanceMethod,
     roleRequired,
+    apiKeyRequired,
     contextRequired,
     requestHeaderClass,
     requestParamClass,
     requestClass,
     logRequest
-) :
+):
     contextList = SecurityManager.getContext()
     if not any(role in set(contextList) for role in roleRequired):
         raise GlobalException(
             message = 'Role not allowed',
             logMessage = f'''Roles {contextList} trying to access denied resourse. Allowed roles {roleRequired}''',
+            status = HttpStatus.FORBIDDEN
+        )
+    elif ObjectHelper.isNotEmptyCollection(contextRequired):
+        return handleLockedByApiKeyControllerMethod(
+            args,
+            kwargs,
+            contentType,
+            resourceInstance,
+            resourceInstanceMethod,
+            apiKeyRequired,
+            contextRequired,
+            requestHeaderClass,
+            requestParamClass,
+            requestClass,
+            logRequest
+        )
+    elif ObjectHelper.isNotEmptyCollection(contextRequired):
+        return handleSessionedControllerMethod(
+            args,
+            kwargs,
+            contentType,
+            resourceInstance,
+            resourceInstanceMethod,
+            contextRequired,
+            requestHeaderClass,
+            requestParamClass,
+            requestClass,
+            logRequest
+        )
+    return handleControllerMethod(
+        args,
+        kwargs,
+        contentType,
+        resourceInstance,
+        resourceInstanceMethod,
+        requestHeaderClass,
+        requestParamClass,
+        requestClass,
+        logRequest
+    )
+
+@EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+@ApiKeyManager.jwtAccessRequired
+def handleLockedByApiKeyControllerMethod(
+    args,
+    kwargs,
+    contentType,
+    resourceInstance,
+    resourceInstanceMethod,
+    apiKeyRequired,
+    contextRequired,
+    requestHeaderClass,
+    requestParamClass,
+    requestClass,
+    logRequest
+):
+    contextList = ApiKeyManager.getContext()
+    if not any(apiKey in set(contextList) for apiKey in apiKeyRequired):
+        raise GlobalException(
+            message = 'Api not allowed',
+            logMessage = f'''ApiKey {contextList} trying to access denied resourse. Allowed apiKeys {apiKeyRequired}''',
             status = HttpStatus.FORBIDDEN
         )
     elif ObjectHelper.isNotEmptyCollection(contextRequired):
@@ -307,7 +387,7 @@ def handleSecuredControllerMethod(
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-@SessionManager.jwtRequired
+@SessionManager.jwtAccessRequired
 def handleSessionedControllerMethod(
     args,
     kwargs,
@@ -494,8 +574,9 @@ def ControllerMethod(
     requestParamClass = None,
     requestClass = None,
     responseClass = None,
-    contextRequired = None,
     roleRequired = None,
+    apiKeyRequired = None,
+    contextRequired = None,
     consumes = OpenApiManager.DEFAULT_CONTENT_TYPE,
     produces = OpenApiManager.DEFAULT_CONTENT_TYPE,
     logRequest = False,
@@ -507,8 +588,9 @@ def ControllerMethod(
     controllerMethodRequestParamClass = requestParamClass
     controllerMethodRequestClass = requestClass
     controllerMethodResponseClass = responseClass
-    controllerMethodSessionRequired = contextRequired
     controllerMethodRoleRequired = roleRequired
+    controllerMethodApiKeyRequired = apiKeyRequired
+    controllerMethodSessionRequired = contextRequired
     controllerMethodProduces = produces
     controllerMethodConsumes = consumes
     controllerMethodLogRequest = logRequest
@@ -577,8 +659,9 @@ def ControllerMethod(
         innerResourceInstanceMethod.requestParamClass = controllerMethodRequestParamClass
         innerResourceInstanceMethod.requestClass = controllerMethodRequestClass
         innerResourceInstanceMethod.responseClass = controllerMethodResponseClass
-        innerResourceInstanceMethod.contextRequired = controllerMethodSessionRequired
         innerResourceInstanceMethod.roleRequired = controllerMethodRoleRequired
+        innerResourceInstanceMethod.apiKeyRequired = controllerMethodApiKeyRequired
+        innerResourceInstanceMethod.contextRequired = controllerMethodSessionRequired
         innerResourceInstanceMethod.produces = controllerMethodProduces
         innerResourceInstanceMethod.consumes = controllerMethodConsumes
         innerResourceInstanceMethod.logRequest = controllerMethodLogRequest

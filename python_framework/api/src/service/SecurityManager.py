@@ -11,9 +11,9 @@ from flask_jwt_extended import (
 )
 
 from python_helper import Constant as c
-from python_helper import log, Function, ObjectHelper, ReflectionHelper, SettingHelper
-import datetime
+from python_helper import log, Function, ObjectHelper, ReflectionHelper, SettingHelper, DateTimeHelper
 
+from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.constant import JwtConstant
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
@@ -46,7 +46,7 @@ def getData(rawJwt=None):
     return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def jwtRequired(*arg,**kwargs) :
+def jwtAccessRequired(*arg,**kwargs) :
     return jwt_required(*arg,**kwargs)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -62,20 +62,18 @@ def addUserToBlackList() :
     BLACK_LIST.add(getJti())
 
 @Function
-def getJwtMannager(
-    appInstance,
-    jwtSecret,
-    headerName=JwtConstant.DEFAULT_JWT_AUTHORIZATION_HEADER_NAME,
-    headerType=JwtConstant.DEFAULT_JWT_AUTHORIZATION_HEADER_TYPE
-) :
-    if not jwtSecret :
+def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, headerType=None):
+    if SettingHelper.activeEnvironmentIsLocal():
+        log.setting(getJwtMannager, f'JWT secret: {jwtSecret}')
+    if ObjectHelper.isNone(jwtSecret):
         log.warning(getJwtMannager, f'Not possible to instanciate securityManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SECURITY_SECRET}')
-    else :
+    else:
         jwtMannager = JWTManager(appInstance)
         appInstance.config[JwtConstant.KW_JWT_SECRET_KEY] = jwtSecret
         appInstance.config[JwtConstant.KW_JWT_BLACKLIST_ENABLED] = True
-        appInstance.config[JwtConstant.JWT_HEADER_NAME] = headerName
-        appInstance.config[JwtConstant.JWT_HEADER_TYPE] = headerType
+        appInstance.config[JwtConstant.JWT_ALGORITHM] = ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SECURITY_ALGORITHM)
+        appInstance.config[JwtConstant.JWT_HEADER_NAME] = ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_AUTHORIZATION_HEADER_NAME)
+        appInstance.config[JwtConstant.JWT_HEADER_TYPE] = ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_AUTHORIZATION_HEADER_TYPE)
         return jwtMannager
 
 @Function
@@ -89,10 +87,9 @@ def addJwt(jwtInstance) :
         return {'message': 'Access denied'}, HttpStatus.UNAUTHORIZED
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def createAccessToken(identity, roleList, deltaMinutes=None, headers=None, data=None) :
-    ###- datetime.datetime.utcnow()
+def createAccessToken(identity, roleList, deltaMinutes=None, headers=None, data=None):
     if deltaMinutes :
-        deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
+        deltaMinutes = DateTimeHelper.timeDelta(minutes=deltaMinutes)
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_access_token
     return create_access_token(
         identity = identity,
@@ -107,9 +104,8 @@ def createAccessToken(identity, roleList, deltaMinutes=None, headers=None, data=
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def refreshAccessToken(identity, roleList, deltaMinutes=None, headers=None, data=None) :
-    ###- datetime.datetime.utcnow()
     if ObjectHelper.isNotNone(deltaMinutes) :
-        deltaMinutes = datetime.timedelta(minutes=deltaMinutes)
+        deltaMinutes = DateTimeHelper.timeDelta(minutes=deltaMinutes)
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_refresh_token
     return create_refresh_token(
         identity = identity,
@@ -127,7 +123,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None) :
     # expiresDelta=rawJwt.get(JwtConstant.KW_EXPIRATION)
     import time
     print(time.time())
-    deltaMinutes = datetime.timedelta(minutes=1)
+    deltaMinutes = DateTimeHelper.timeDelta(minutes=1)
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
             *getContext(rawJwt=rawJwt),
@@ -177,12 +173,15 @@ def getCurrentUser(userClass=None):
                     ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
             return currentUsert
 
-def addSecurity(api, app):
-    securityKey = api.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_SECRET)
-    if SettingHelper.activeEnvironmentIsLocal():
-        log.setting(addSecurity, f'JWT secret: {securityKey}')
-    api.jwt = getJwtMannager(app, securityKey)
+def addSecurity(apiInstance, appInstance):
     try:
-        api.jwt.api = api
+        apiInstance.jwtManager = getJwtMannager(
+            appInstance,
+            apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_SECRET),
+            algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_ALGORITHM),
+            headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_HEADER),
+            headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_TYPE)
+        )
+        apiInstance.jwtManager.api = apiInstance
     except Exception as exception:
         log.warning(addSecurity, 'Not possible to add Security Manager', exception=exception)

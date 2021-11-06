@@ -9,6 +9,12 @@ TestHelper.run(__file__)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
+#         'SessionManagerTest.patchSession_worksProperly'
+#     ]
+# )
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
 #         'EnumAnnotationTest.Enum_comparing'
 #     ]
 # )

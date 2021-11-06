@@ -429,6 +429,7 @@ def pythonRun_worksProperly() :
 
 
 @Test(environmentVariables={
+    log.ENABLE_LOGS_WITH_COLORS: True,
     SettingHelper.ACTIVE_ENVIRONMENT : 'security-manager'
 })
 def pythonRun_securityManager() :
@@ -571,6 +572,7 @@ def pythonRun_securityManager() :
 
 
 @Test(environmentVariables={
+    log.ENABLE_LOGS_WITH_COLORS: True,
     SettingHelper.ACTIVE_ENVIRONMENT : 'session-manager'
 })
 def pythonRun_sessionManager() :

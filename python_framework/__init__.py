@@ -6,7 +6,9 @@ from python_framework.api.src.util import Serializer
 from python_framework.api.src.service import ExceptionHandler
 from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.service import SessionManager
+from python_framework.api.src.service import ApiKeyManager
 from python_framework.api.src.service import SecurityManager
+
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.service import SqlAlchemyProxy
 from python_framework.api.src.service import WebBrowser

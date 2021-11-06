@@ -1,8 +1,7 @@
-import datetime
 from flask_jwt_extended.exceptions import NoAuthorizationError, RevokedTokenError
 from jwt import ExpiredSignatureError, InvalidSignatureError
 from python_helper import Constant as c
-from python_helper import log, Function, ObjectHelper, StringHelper
+from python_helper import log, Function, ObjectHelper, StringHelper, DateTimeHelper
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.model import ErrorLog
@@ -36,7 +35,7 @@ class GlobalException(Exception):
         logResource = None,
         logResourceMethod = None
     ):
-        self.timeStamp = datetime.datetime.now()
+        self.timeStamp = DateTimeHelper.now()
         self.status = HttpStatus.map(DEFAULT_STATUS if ObjectHelper.isNone(status) else status).enumValue
         self.message = message if ObjectHelper.isNotEmpty(message) and StringHelper.isNotBlank(message) else DEFAULT_MESSAGE if 500 <= self.status else self.status.enumName
         self.verb = self.getRequestVerb()
