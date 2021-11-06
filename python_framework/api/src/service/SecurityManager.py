@@ -85,8 +85,8 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
         appInstance.config[JwtConstant.KW_JWT_SECRET_KEY] = jwtSecret
         appInstance.config[JwtConstant.KW_JWT_BLACKLIST_ENABLED] = True
         appInstance.config[JwtConstant.KW_JWT_ALGORITHM] = ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SECURITY_ALGORITHM)
-        appInstance.config[JwtConstant.KW_JWT_HEADER_NAME] = ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_AUTHORIZATION_HEADER_NAME)
-        appInstance.config[JwtConstant.KW_JWT_HEADER_TYPE] = ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_AUTHORIZATION_HEADER_TYPE)
+        appInstance.config[JwtConstant.KW_JWT_HEADER_NAME] = ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_SECURITY_HEADER_NAME)
+        appInstance.config[JwtConstant.KW_JWT_HEADER_TYPE] = ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_SECURITY_HEADER_TYPE)
         return jwtMannager
 
 @Function

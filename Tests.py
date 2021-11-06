@@ -5,21 +5,22 @@ EnvironmentHelper.update("URL_VARIANT", RandomHelper.integer(minimum=0, maximum=
 log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
 
 from python_helper import TestHelper
-TestHelper.run(__file__)
+# TestHelper.run(__file__)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
 #         'SessionManagerTest.sessionManager_worksProperly'
 #     ]
 # )
-# TestHelper.run(
-#     __file__,
-#     runOnly = [
-#         'TestApiTest.pythonRun_securityManager',
-#         'TestApiTest.pythonRun_sessionManager'
-#         # 'TestApiTest.testing_Client'
-#     ]
-# )
+TestHelper.run(
+    __file__,
+    runOnly = [
+        # 'TestApiTest.pythonRun_securityManager',
+        'TestApiTest.pythonRun_apiKeyManager',
+        # 'TestApiTest.pythonRun_sessionManager'
+        # 'TestApiTest.testing_Client'
+    ]
+)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [

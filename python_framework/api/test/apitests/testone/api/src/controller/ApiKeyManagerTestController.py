@@ -16,7 +16,7 @@ class ApiKeyManagerTestController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        contextRequired=['TEST_API_KEY']
+        apiKeyRequired=['TEST_API_KEY']
     )
     def get(self):
         return {
@@ -44,7 +44,7 @@ class ApiKeyManagerTestController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        contextRequired=['TEST_API_KEY']
+        apiKeyRequired=['TEST_API_KEY']
     )
     def patch(self, dto):
         assert 'headers' == ApiKeyManager.getJwtHeaders().get('some'), f"headers == {ApiKeyManager.getJwtHeaders().get('some')} should be equals. Headers: {ApiKeyManager.getJwtHeaders()}"
@@ -61,7 +61,7 @@ class ApiKeyManagerTestController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        contextRequired=['TEST_API_KEY', 'TEST_API_KEY_REFRESH']
+        apiKeyRequired=['TEST_API_KEY', 'TEST_API_KEY_REFRESH']
     )
     def put(self, dto):
         ApiKeyManager.addUserToBlackList()
@@ -76,7 +76,7 @@ class ApiKeyManagerTestBatchController:
         responseClass = dict,
         logRequest = True,
         logResponse = True,
-        contextRequired=['TEST_API_KEY_REFRESH']
+        apiKeyRequired=['TEST_API_KEY_REFRESH']
     )
     def get(self):
         # print(ApiKeyManager.getCurrentApiKey())

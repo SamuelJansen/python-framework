@@ -463,6 +463,7 @@ def pythonRun_securityManager() :
     responseLogin = requests.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
     firstAuthorization = responseLogin.json().get('accessToken')
     firstAuthorizationHeaders = responseLogin.headers
+    assert ObjectHelper.isNotNone(firstAuthorization)
     headers['Authorization'] = 'Bearer ' + firstAuthorization
     assert ObjectHelper.isNotNone(firstAuthorization)
     assert ObjectHelper.isNotNone(id)
@@ -499,6 +500,7 @@ def pythonRun_securityManager() :
     responsePatchRefresh = requests.patch(BASE_URI + PATCH_REFRESH_URI, json=payload, headers=headers)
     patchedAuthorizationHeaders = responseLogin.headers
     patchedAuthorization = responsePatchRefresh.json().get('accessToken')
+    assert ObjectHelper.isNotNone(patchedAuthorization)
     headers['Authorization'] = 'Bearer ' + patchedAuthorization
     assert ObjectHelper.isNotNone(responsePatchRefresh)
     assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
@@ -600,6 +602,7 @@ def pythonRun_sessionManager() :
     responseLogin = requests.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
     firstAuthorization = responseLogin.json().get('accessToken')
     firstAuthorizationHeaders = responseLogin.headers
+    assert ObjectHelper.isNotNone(firstAuthorization)
     headers['Context'] = 'Bearer ' + firstAuthorization
     assert ObjectHelper.isNotNone(firstAuthorization)
     assert ObjectHelper.isNotNone(id)
@@ -638,6 +641,7 @@ def pythonRun_sessionManager() :
     responsePatchRefresh = requests.patch(BASE_URI + PATCH_REFRESH_URI, json=payload, headers=headers)
     patchedAuthorizationHeaders = responseLogin.headers
     patchedAuthorization = responsePatchRefresh.json().get('accessToken')
+    assert ObjectHelper.isNotNone(patchedAuthorization)
     headers['Context'] = 'Bearer ' + patchedAuthorization
     assert ObjectHelper.isNotNone(responsePatchRefresh)
     assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
@@ -734,11 +738,12 @@ def pythonRun_apiKeyManager() :
         expectedResponseGetConsumeBeforeLogin,
         responseGetConsumeBeforeLogin.json(),
         ignoreKeyList=['timestamp']
-    )
+    ), f'{expectedResponseGetConsumeBeforeLogin} should be equals to {responseGetConsumeBeforeLogin.json()}'
 
     responseLogin = requests.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
     firstAuthorization = responseLogin.json().get('accessToken')
     firstAuthorizationHeaders = responseLogin.headers
+    assert ObjectHelper.isNotNone(firstAuthorization)
     headers['Context'] = 'Bearer ' + firstAuthorization
     assert ObjectHelper.isNotNone(firstAuthorization)
     assert ObjectHelper.isNotNone(id)
@@ -777,6 +782,7 @@ def pythonRun_apiKeyManager() :
     responsePatchRefresh = requests.patch(BASE_URI + PATCH_REFRESH_URI, json=payload, headers=headers)
     patchedAuthorizationHeaders = responseLogin.headers
     patchedAuthorization = responsePatchRefresh.json().get('accessToken')
+    assert ObjectHelper.isNotNone(patchedAuthorization)
     headers['Context'] = 'Bearer ' + patchedAuthorization
     assert ObjectHelper.isNotNone(responsePatchRefresh)
     assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
