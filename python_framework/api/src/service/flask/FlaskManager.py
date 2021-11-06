@@ -221,7 +221,8 @@ def handleAnyControllerMethodRequest(
     requestHeaderClass,
     requestParamClass,
     requestClass,
-    logRequest
+    logRequest,
+    muteStacktraceOnBusinessRuleException
 ):
     if ObjectHelper.isNotEmptyCollection(roleRequired):
         return handleSecuredControllerMethod(
@@ -236,7 +237,8 @@ def handleAnyControllerMethodRequest(
             requestHeaderClass,
             requestParamClass,
             requestClass,
-            logRequest
+            logRequest,
+            muteStacktraceOnBusinessRuleException
         )
     elif ObjectHelper.isNotEmptyCollection(apiKeyRequired):
         return handleLockedByApiKeyControllerMethod(
@@ -250,7 +252,8 @@ def handleAnyControllerMethodRequest(
             requestHeaderClass,
             requestParamClass,
             requestClass,
-            logRequest
+            logRequest,
+            muteStacktraceOnBusinessRuleException
         )
     elif ObjectHelper.isNotEmptyCollection(contextRequired):
         return handleSessionedControllerMethod(
@@ -263,7 +266,8 @@ def handleAnyControllerMethodRequest(
             requestHeaderClass,
             requestParamClass,
             requestClass,
-            logRequest
+            logRequest,
+            muteStacktraceOnBusinessRuleException
         )
     return handleControllerMethod(
         args,
@@ -274,7 +278,8 @@ def handleAnyControllerMethodRequest(
         requestHeaderClass,
         requestParamClass,
         requestClass,
-        logRequest
+        logRequest,
+        muteStacktraceOnBusinessRuleException
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -291,7 +296,8 @@ def handleSecuredControllerMethod(
     requestHeaderClass,
     requestParamClass,
     requestClass,
-    logRequest
+    logRequest,
+    muteStacktraceOnBusinessRuleException
 ):
     contextList = SecurityManager.getContext()
     if not any(role in set(contextList) for role in roleRequired):
@@ -312,7 +318,8 @@ def handleSecuredControllerMethod(
             requestHeaderClass,
             requestParamClass,
             requestClass,
-            logRequest
+            logRequest,
+            muteStacktraceOnBusinessRuleException
         )
     elif ObjectHelper.isNotEmptyCollection(contextRequired):
         return handleSessionedControllerMethod(
@@ -325,7 +332,8 @@ def handleSecuredControllerMethod(
             requestHeaderClass,
             requestParamClass,
             requestClass,
-            logRequest
+            logRequest,
+            muteStacktraceOnBusinessRuleException
         )
     return handleControllerMethod(
         args,
@@ -336,7 +344,8 @@ def handleSecuredControllerMethod(
         requestHeaderClass,
         requestParamClass,
         requestClass,
-        logRequest
+        logRequest,
+        muteStacktraceOnBusinessRuleException
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -352,7 +361,8 @@ def handleLockedByApiKeyControllerMethod(
     requestHeaderClass,
     requestParamClass,
     requestClass,
-    logRequest
+    logRequest,
+    muteStacktraceOnBusinessRuleException
 ):
     contextList = ApiKeyManager.getContext()
     if not any(apiKey in set(contextList) for apiKey in apiKeyRequired):
@@ -372,7 +382,8 @@ def handleLockedByApiKeyControllerMethod(
             requestHeaderClass,
             requestParamClass,
             requestClass,
-            logRequest
+            logRequest,
+            muteStacktraceOnBusinessRuleException
         )
     return handleControllerMethod(
         args,
@@ -383,7 +394,8 @@ def handleLockedByApiKeyControllerMethod(
         requestHeaderClass,
         requestParamClass,
         requestClass,
-        logRequest
+        logRequest,
+        muteStacktraceOnBusinessRuleException
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -398,7 +410,8 @@ def handleSessionedControllerMethod(
     requestHeaderClass,
     requestParamClass,
     requestClass,
-    logRequest
+    logRequest,
+    muteStacktraceOnBusinessRuleException
 ):
     contextList = SessionManager.getContext()
     if not any(context in set(contextList) for context in contextRequired):
@@ -417,7 +430,8 @@ def handleSessionedControllerMethod(
             requestHeaderClass,
             requestParamClass,
             requestClass,
-            logRequest
+            logRequest,
+            muteStacktraceOnBusinessRuleException
         )
 
 @Function
@@ -430,7 +444,8 @@ def handleControllerMethod(
     requestHeaderClass,
     requestParamClass,
     requestClass,
-    logRequest
+    logRequest,
+    muteStacktraceOnBusinessRuleException
 ):
     response = None
     try :
@@ -457,7 +472,7 @@ def handleControllerMethod(
             exception,
             resourceInstance,
             resourceInstanceMethod,
-            controllerMethodMuteStacktraceOnBusinessRuleException
+            muteStacktraceOnBusinessRuleException
         )
     return response
 
@@ -627,7 +642,8 @@ def ControllerMethod(
                     requestHeaderClass,
                     requestParamClass,
                     requestClass,
-                    logRequest
+                    logRequest,
+                    muteStacktraceOnBusinessRuleException
                 )
                 # print(f'completeResponse: {completeResponse}')
                 validateResponseClass(responseClass, completeResponse)
@@ -637,7 +653,7 @@ def ControllerMethod(
                     exception,
                     resourceInstance,
                     resourceInstanceMethod,
-                    controllerMethodMuteStacktraceOnBusinessRuleException
+                    muteStacktraceOnBusinessRuleException
                 )
                 ###- request.method:              GET
                 ###- request.url:                 http://127.0.0.1:5000/alert/dingding/test?x=y

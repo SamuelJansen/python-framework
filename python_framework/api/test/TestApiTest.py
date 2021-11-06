@@ -113,82 +113,61 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
     payload = {'me':'and you'}
     payloadList = [payload]
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
-
-    # act
     headers = {
         "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
         'Cache-Control': 'no-cache'
     }
 
-    session = requests.Session()
-
-    responseGetHealth = session.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER, headers=headers)
-
-    responseGetNone = session.get(BASE_URL + GET_NONE_ONE)
-    responseGetNoneBatch = session.post(BASE_URL + GET_NONE_ONE_BATCH, json=payload, headers=headers)
-
-    responsePostSendPayload = session.post(BASE_URL + POST_PAYLOAD_ONE, json=payload, headers=headers)
-    responsePostSendPayloadList = session.post(BASE_URL + POST_PAYLOAD_ONE, json=payloadList, headers=headers)
-    responsePostSendPayloadBatch = session.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload, headers=headers)
-    responsePostSendPayloadListBatch = session.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList, headers=headers)
-
-    # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
-    # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
-
-    print(f'responseGetHealth: {responseGetHealth.json()}')
-    print(f'responseGetNone: {responseGetNone.json()}')
-    print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
-    print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
-    print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
-    print(f'responsePostSendPayloadBatch: {responsePostSendPayloadBatch.json()}')
-    print(f'responsePostSendPayloadListBatch: {responsePostSendPayloadListBatch.json()}')
-
+    # act
     # assert
+    responseGetHealth = requests.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER, headers=headers)
     assert ObjectHelper.equals(
         {'status':'UP'},
         responseGetHealth.json()
     )
     assert 200 == responseGetHealth.status_code
 
-    {'message': 'OK'}
-    {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.299735'}
-    {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'}
-    {'me': 'and you'}
-    {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'}
-    {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'}
-    # print(f'responseGetNone: {responseGetNone.json()}')
+    responseGetNone = requests.get(BASE_URL + GET_NONE_ONE)
     assert ObjectHelper.equals(
         {'message': 'OK'},
         responseGetNone.json()
     )
     assert 200 == responseGetNone.status_code
-    # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
+
+    responseGetNoneBatch = requests.post(BASE_URL + GET_NONE_ONE_BATCH, json=payload, headers=headers)
     assert ObjectHelper.equals(
         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.299735'},
         responseGetNoneBatch.json(),
         ignoreKeyList=['timestamp']
     )
     assert 500 == responseGetNoneBatch.status_code
-    # print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
+
+    responsePostSendPayload = requests.post(BASE_URL + POST_PAYLOAD_ONE, json=payload, headers=headers)
+    expectedResponsePostSendPayload = {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'}
     assert ObjectHelper.equals(
         {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'},
         responsePostSendPayload.json(),
         ignoreKeyList=['timestamp']
-    )
+    ), f'{expectedResponsePostSendPayload} should be equals to {responsePostSendPayload.json()}'
     assert 400 == responsePostSendPayload.status_code
-    # print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
+
+    responsePostSendPayloadList = requests.post(BASE_URL + POST_PAYLOAD_ONE, json=payloadList, headers=headers)
     assert ObjectHelper.equals(
         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-19 08:36:20.925177'},
         responsePostSendPayloadList.json(),
         ignoreKeyList=['timestamp']
     )
     assert 500 == responsePostSendPayloadList.status_code
+
+    responsePostSendPayloadBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload, headers=headers)
     assert ObjectHelper.equals(
         {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'},
         responsePostSendPayloadBatch.json(),
         ignoreKeyList=['timestamp']
     )
     assert 500 == responsePostSendPayloadBatch.status_code
+
+    responsePostSendPayloadListBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList, headers=headers)
     assert ObjectHelper.equals(
         {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'},
         responsePostSendPayloadListBatch.json(),
