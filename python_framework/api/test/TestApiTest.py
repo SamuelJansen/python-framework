@@ -168,11 +168,12 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
     assert 500 == responsePostSendPayloadBatch.status_code
 
     responsePostSendPayloadListBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList, headers=headers)
+    expectedResponsePostSendPayloadListBatch = {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'}
     assert ObjectHelper.equals(
-        {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'},
+        expectedResponsePostSendPayloadListBatch,
         responsePostSendPayloadListBatch.json(),
         ignoreKeyList=['timestamp']
-    )
+    ), f'{expectedResponsePostSendPayloadListBatch} should be equals to {responsePostSendPayloadListBatch.json()}'
     assert 400 == responsePostSendPayloadListBatch.status_code
 
     killProcesses(process)

@@ -434,7 +434,7 @@ def handleSessionedControllerMethod(
             muteStacktraceOnBusinessRuleException
         )
 
-@Function
+@EncapsulateItWithGlobalException()
 def handleControllerMethod(
     args,
     kwargs,
@@ -448,32 +448,24 @@ def handleControllerMethod(
     muteStacktraceOnBusinessRuleException
 ):
     completeResponse = None
-    try :
-        if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
-            requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
-            if logRequest :
-                log.prettyJson(
-                    resourceInstanceMethod,
-                    'bodyRequest',
-                    requestBodyAsJson,
-                    condition = logRequest,
-                    logLevel = log.INFO
-                )
-            if Serializer.requestBodyIsPresent(requestBodyAsJson):
-                serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
-                args = getArgsWithSerializerReturnAppended(args, serializerReturn)
-        addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
-        addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
-        completeResponse = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
-        if not (completeResponse and Serializer.isSerializerCollection(completeResponse) and 2 == len(completeResponse)):
-            raise GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
-    except Exception as exception:
-        completeResponse = getCompleteResponseByException(
-            exception,
-            resourceInstance,
-            resourceInstanceMethod,
-            muteStacktraceOnBusinessRuleException
-        )
+    if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
+        requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
+        if logRequest :
+            log.prettyJson(
+                resourceInstanceMethod,
+                'bodyRequest',
+                requestBodyAsJson,
+                condition = logRequest,
+                logLevel = log.INFO
+            )
+        if Serializer.requestBodyIsPresent(requestBodyAsJson):
+            serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
+            args = getArgsWithSerializerReturnAppended(args, serializerReturn)
+    addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
+    addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
+    completeResponse = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
+    if not (ObjectHelper.isNotNone(completeResponse) and Serializer.isSerializerCollection(completeResponse) and 2 == len(completeResponse)):
+        raise GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
     return completeResponse
 
 def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
