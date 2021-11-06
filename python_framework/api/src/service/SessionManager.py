@@ -42,8 +42,9 @@ class JwtManager:
     def validateAccessSession(self, rawJwt=None, options=None):
         decodedSessionToken = rawJwt
         try:
-            decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=rawJwt, options=options)
-            assert decodedSessionToken.get(JwtConstant.KW_TYPE) == JwtConstant.ACCESS_VALUE_TYPE, f'Access session should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {decodedSessionToken.get(JwtConstant.KW_TYPE)}'
+            decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=decodedSessionToken, options=options)
+            jwtType = getType(rawJwt=decodedSessionToken)
+            assert jwtType == JwtConstant.ACCESS_VALUE_TYPE, f'Access session should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
             addUserToBlackList(rawJwt=decodedSessionToken)
             raise exception
@@ -52,8 +53,9 @@ class JwtManager:
     def validateRefreshSession(self, rawJwt=None, options=None):
         decodedSessionToken = rawJwt
         try:
-            decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=rawJwt, options=options)
-            assert decodedSessionToken.get(JwtConstant.KW_TYPE) == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh session should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {decodedSessionToken.get(JwtConstant.KW_TYPE)}'
+            decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=decodedSessionToken, options=options)
+            jwtType = getType(rawJwt=decodedSessionToken)
+            assert jwtType == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh session should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
             addUserToBlackList(rawJwt=decodedSessionToken)
             raise exception
@@ -62,11 +64,15 @@ class JwtManager:
     def validateGeneralSessionAndReturnItDecoded(self, rawJwt=None, options=None):
         decodedSessionToken = rawJwt
         try:
-            decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt, options=options)
-            assert ObjectHelper.isDictionary(decodedSessionToken), f'Invalid session type. It should be a dictionary, bu it is {type(decodedSessionToken)}'
+            decodedSessionToken = self.getDecodedToken(rawJwt=decodedSessionToken, options=options)
+            assert ObjectHelper.isDictionary(decodedSessionToken), f'Invalid session payload type. It should be a dictionary, bu it is {type(decodedSessionToken)}'
             assert ObjectHelper.isNotEmpty(decodedSessionToken), 'Session cannot be empty'
-            assert not decodedSessionToken[JwtConstant.KW_JTI] in BLACK_LIST, f'Session {decodedSessionToken[JwtConstant.KW_JTI]} already closed'
-            assert UtcDateTimeUtil.now() < UtcDateTimeUtil.ofTimestamp(rawJwt.get(JwtConstant.KW_EXPIRATION)), f'JWT token expired at {UtcDateTimeUtil.ofTimestamp(rawJwt.get(JwtConstant.KW_EXPIRATION))}. Time now: {UtcDateTimeUtil.now()}, rawJwt: {rawJwt}'
+            jti = getJti(rawJwt=decodedSessionToken)
+            assert not jti in BLACK_LIST, f'Session {jti} already closed'
+            nbf = getNfb(rawJwt=decodedSessionToken)
+            assert UtcDateTimeUtil.now() >= UtcDateTimeUtil.ofTimestamp(nbf), f'JWT token not valid before {UtcDateTimeUtil.ofTimestamp(nbf)}'
+            expiration = getExpiration(rawJwt=decodedSessionToken)
+            assert UtcDateTimeUtil.now() <= UtcDateTimeUtil.ofTimestamp(expiration), f'JWT token expired at {UtcDateTimeUtil.ofTimestamp(expiration)}'
         except Exception as exception:
             addUserToBlackList(rawJwt=decodedSessionToken)
             raise exception
@@ -139,23 +145,35 @@ def getData(rawJwt=None, apiInstance=None):
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJti(rawJwt=None, apiInstance=None) :
+    ###- unique identifier
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIat(rawJwt=None, apiInstance=None) :
+    ###- issued at
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IAT)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getNfb(rawJwt=None, apiInstance=None) :
+    ###- not valid before
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_NFB)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getExpiration(rawJwt=None, apiInstance=None) :
+    ###- expiration time
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_EXPIRATION)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getIdentity(rawJwt=None, apiInstance=None) :
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IDENTITY)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getType(rawJwt=None, apiInstance=None) :
+    return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_TYPE)
+
+@EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
+def getIsFresh(rawJwt=None, apiInstance=None) :
+    return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_FRESH)
 
 @Function
 def addUserToBlackList(rawJwt=None, apiInstance=None) :
