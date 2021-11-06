@@ -51,7 +51,7 @@ class SecurityManagerTestController:
         headers={'some': 'other headers'}
         data = {'some': 'other data'}
         accessToken = SecurityManager.patchAccessToken(newContextList=['TEST_ROLE', 'TEST_ROLE_REFRESH'], headers=headers, data=data)
-        print(UtcDateTimeHelper.ofTimestamp(SecurityManager.getExpiration()))
+        print(UtcDateTimeUtil.ofTimestamp(SecurityManager.getExpiration()))
         return {
             # 'accessToken': SecurityManager.patchAccessToken(dto['id'], ['TEST_ROLE', 'TEST_ROLE_REFRESH'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
             'accessToken': accessToken
