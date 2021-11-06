@@ -2,7 +2,7 @@ from python_helper import EnvironmentHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service.flask.FlaskManager import Controller, ControllerMethod
-from python_framework.api.src.helper import UtcDateTimeHelper
+from python_framework.api.src.util import UtcDateTimeUtil
 
 
 VALID_TOKEN_MINUTES_DURATION = 30
