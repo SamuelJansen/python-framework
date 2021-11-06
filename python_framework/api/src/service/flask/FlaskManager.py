@@ -238,7 +238,7 @@ def handleAnyControllerMethodRequest(
             requestClass,
             logRequest
         )
-    elif ObjectHelper.isNotEmptyCollection(contextRequired):
+    elif ObjectHelper.isNotEmptyCollection(apiKeyRequired):
         return handleLockedByApiKeyControllerMethod(
             args,
             kwargs,
@@ -300,7 +300,7 @@ def handleSecuredControllerMethod(
             logMessage = f'''Roles {contextList} trying to access denied resourse. Allowed roles {roleRequired}''',
             status = HttpStatus.FORBIDDEN
         )
-    elif ObjectHelper.isNotEmptyCollection(contextRequired):
+    elif ObjectHelper.isNotEmptyCollection(apiKeyRequired):
         return handleLockedByApiKeyControllerMethod(
             args,
             kwargs,
