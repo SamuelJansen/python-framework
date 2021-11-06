@@ -136,10 +136,10 @@ def initialize(
     api.cors.api = api
     addGlobalsTo(api)
     OpenApiManager.newDocumentation(api, app)
-    SchedulerManager.addScheduler(api, app)
-    SessionManager.addSession(api, app)
-    ApiKeyManager.addSecurity(api, app)
-    SecurityManager.addSecurity(api, app)
+    SchedulerManager.addSchedulerManager(api, app)
+    SessionManager.addSessionManager(api, app)
+    ApiKeyManager.addApiKeyManager(api, app)
+    SecurityManager.addSecurityManager(api, app)
     args = [api, app, api.sessionManager, api.jwtManager]
     for resourceType in FlaskManager.KW_RESOURCE_LIST :
         args.append(getResourceList(api, resourceType))

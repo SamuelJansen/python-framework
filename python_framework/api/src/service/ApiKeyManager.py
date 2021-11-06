@@ -257,7 +257,7 @@ def getCurrentSession(sessionClass=None, apiInstance=None):
                 ReflectionHelper.setAttributeOrMethod(currentSession, attributeName, data.get(attributeName))
         return currentSession
 
-def addSession(apiInstance, appInstance):
+def addApiKeyManager(apiInstance, appInstance):
     try:
         apiInstance.sessionManager = getJwtMannager(
             appInstance,

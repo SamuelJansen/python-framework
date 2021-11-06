@@ -173,7 +173,7 @@ def getCurrentUser(userClass=None):
                     ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
             return currentUsert
 
-def addSecurity(apiInstance, appInstance):
+def addSecurityManager(apiInstance, appInstance):
     try:
         apiInstance.jwtManager = getJwtMannager(
             appInstance,

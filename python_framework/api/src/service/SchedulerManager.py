@@ -3,7 +3,7 @@ from python_helper import EnvironmentHelper
 from flask_apscheduler import APScheduler
 from python_framework.api.src.constant import ConfigurationKeyConstant
 
-def addScheduler(api, app) :
+def addSchedulerManager(api, app) :
     # initialize scheduler
     scheduler = APScheduler()
     # if you don't wanna use a config, you can set options here:
