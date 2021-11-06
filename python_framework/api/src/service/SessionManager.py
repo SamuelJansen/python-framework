@@ -68,11 +68,11 @@ class JwtManager:
             assert ObjectHelper.isDictionary(decodedSessionToken), f'Invalid session payload type. It should be a dictionary, bu it is {type(decodedSessionToken)}'
             assert ObjectHelper.isNotEmpty(decodedSessionToken), 'Session cannot be empty'
             jti = getJti(rawJwt=decodedSessionToken)
-            assert not jti in BLACK_LIST, f'Session {jti} already closed'
+            assert not jti in BLACK_LIST, f'Session {jti} already revoked'
             nbf = getNfb(rawJwt=decodedSessionToken)
-            assert UtcDateTimeUtil.now() >= UtcDateTimeUtil.ofTimestamp(nbf), f'JWT token not valid before {UtcDateTimeUtil.ofTimestamp(nbf)}'
+            assert UtcDateTimeUtil.now() >= UtcDateTimeUtil.ofTimestamp(nbf), f'JWT session token not valid before {UtcDateTimeUtil.ofTimestamp(nbf)}'
             expiration = getExpiration(rawJwt=decodedSessionToken)
-            assert UtcDateTimeUtil.now() <= UtcDateTimeUtil.ofTimestamp(expiration), f'JWT token expired at {UtcDateTimeUtil.ofTimestamp(expiration)}'
+            assert UtcDateTimeUtil.now() <= UtcDateTimeUtil.ofTimestamp(expiration), f'JWT session token expired at {UtcDateTimeUtil.ofTimestamp(expiration)}'
         except Exception as exception:
             addUserToBlackList(rawJwt=decodedSessionToken)
             raise exception
@@ -182,7 +182,7 @@ def addUserToBlackList(rawJwt=None, apiInstance=None) :
 @Function
 def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, headerType=None):
     if SettingHelper.activeEnvironmentIsLocal():
-        log.setting(getJwtMannager, f'JWT secret: {jwtSecret}')
+        log.setting(getJwtMannager, f'JWT session secret: {jwtSecret}')
     if not jwtSecret:
         log.warning(getJwtMannager, f'Not possible to instanciate sessionManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SESSION_SECRET}')
     else:
@@ -302,7 +302,7 @@ def addSessionManager(apiInstance, appInstance):
         )
         apiInstance.sessionManager.api = apiInstance
     except Exception as exception:
-        log.warning(addSessionManager, 'Not possible to add Session Manager', exception=exception)
+        log.warning(addSessionManager, 'Not possible to add SessionManager', exception=exception)
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     if FlaskUtil.isApiInstance(apiInstance):

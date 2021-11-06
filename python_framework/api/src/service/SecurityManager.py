@@ -77,7 +77,7 @@ def addUserToBlackList(rawJwt=None):
 @Function
 def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, headerType=None):
     if SettingHelper.activeEnvironmentIsLocal():
-        log.setting(getJwtMannager, f'JWT secret: {jwtSecret}')
+        log.setting(getJwtMannager, f'JWT security secret: {jwtSecret}')
     if ObjectHelper.isNone(jwtSecret):
         log.warning(getJwtMannager, f'Not possible to instanciate securityManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SECURITY_SECRET}')
     else:
@@ -97,7 +97,8 @@ def addJwt(jwtInstance):
 
     @jwtInstance.revoked_token_loader
     def invalidAccess():
-        return {'message': 'Access denied'}, HttpStatus.UNAUTHORIZED
+        log.log(addJwt, 'Access revoked', exception=None)
+        return {'message': 'Unauthorized'}, HttpStatus.UNAUTHORIZED
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=None):
@@ -191,4 +192,4 @@ def addSecurityManager(apiInstance, appInstance):
         )
         apiInstance.securityManager.api = apiInstance
     except Exception as exception:
-        log.warning(addSecurityManager, 'Not possible to add Security Manager', exception=exception)
+        log.warning(addSecurityManager, 'Not possible to add SecurityManager', exception=exception)
