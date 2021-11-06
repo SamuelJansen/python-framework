@@ -140,7 +140,7 @@ def initialize(
     SessionManager.addSessionManager(api, app)
     ApiKeyManager.addApiKeyManager(api, app)
     SecurityManager.addSecurityManager(api, app)
-    args = [api, app, api.sessionManager, api.jwtManager]
+    args = [api, app, api.sessionManager, api.apiKeyManage, api.jwtManager]
     for resourceType in FlaskManager.KW_RESOURCE_LIST :
         args.append(getResourceList(api, resourceType))
     args.append(refferenceModel)
@@ -233,6 +233,7 @@ def addFlaskApiResources(
         apiInstance,
         appInstance,
         sessionInstance,
+        apiKeyManager,
         jwtInstance,
         controllerList,
         schedulerList,
@@ -257,6 +258,6 @@ def addFlaskApiResources(
     addConverterListTo(apiInstance, converterList)
     SchedulerManager.initialize(apiInstance, appInstance)
     SessionManager.addJwt(sessionInstance)
-    ApiKeyManager.addJwt(jwtInstance)
+    ApiKeyManager.addJwt(apiKeyManager)
     SecurityManager.addJwt(jwtInstance)
     OpenApiManager.addSwagger(apiInstance, appInstance)
