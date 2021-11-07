@@ -313,6 +313,9 @@ def addResource(apiInstance, appInstance):
 def initialize(apiInstance, appInstance):
     log.success(initialize, 'ApiKeyManager is running')
 
+def onHttpRequestClose(apiInstance, appInstance):
+    ...
+
 def onShutdown(apiInstance, appInstance):
     @appInstance.teardown_appcontext
     def closeApiKeyManager(error):

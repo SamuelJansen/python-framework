@@ -369,10 +369,12 @@ def initialize(apiInstance, appInstance) :
     apiInstance.repository.run()
     log.success(initialize, 'SqlAlchemyProxy database is running')
 
-def onShutdown(apiInstance, appInstance) :
+def onHttpRequestClose(apiInstance, appInstance):
     @appInstance.teardown_appcontext
-    def closeSqlAlchemyProxyConnections(error):
-        apiInstance.repository.close()
+    def closeSqlAlchemyProxyConnection(error):
+        apiInstance.repository.session.close()
         log.success(closeSqlAlchemyProxyConnections, 'SqlAlchemyProxy database connection successfully closed')
+
+def onShutdown(apiInstance, appInstance) :
     import atexit
     atexit.register(lambda: apiInstance.repository.close())
