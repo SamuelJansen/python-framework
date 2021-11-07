@@ -123,7 +123,7 @@ def initialize(
     if defaultUrl :
         innerDefaultUrl = f'{innerDefaultUrl}{defaultUrl}'
     def inBetweenFunction(function,*argument,**keywordArgument):
-        log.debug(initialize,f'''{function.__name__} method''')
+        log.wrapper(initialize,f'''{function.__name__} method''')
         if (openInBrowser):
             log.debug(initialize,f'''Openning "{innerDefaultUrl}" url in rowser''')
             # WebBrowser.openUrlInChrome(innerDefaultUrl)
@@ -559,13 +559,13 @@ def Controller(
     controllerTag = tag
     controllerDescription = description
     def Wrapper(OuterClass,*args,**kwargs):
-        log.debug(Controller, f'''wrapping {OuterClass.__name__}''', None)
+        log.wrapper(Controller, f'''wrapping {OuterClass.__name__}''', None)
         class InnerClass(OuterClass, FlaskUtil.Resource):
             url = controllerUrl
             tag = controllerTag
             description = controllerDescription
             def __init__(self,*args,**kwargs):
-                log.debug(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})', None)
+                log.wrapper(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})', None)
                 apiInstance = FlaskUtil.getApi()
                 OuterClass.__init__(self)
                 FlaskUtil.Resource.__init__(self,*args,**kwargs)
@@ -605,7 +605,7 @@ def ControllerMethod(
     controllerMethodLogResponse = logResponse
     controllerMethodMuteStacktraceOnBusinessRuleException = muteStacktraceOnBusinessRuleException
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs):
-        log.debug(ControllerMethod, f'''wrapping {resourceInstanceMethod.__name__}''', None)
+        log.wrapper(ControllerMethod, f'''wrapping {resourceInstanceMethod.__name__}''', None)
         def innerResourceInstanceMethod(*args,**kwargs):
             # r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             # r.headers["Pragma"] = "no-cache"
@@ -683,10 +683,10 @@ def ControllerMethod(
 @Function
 def SimpleClient():
     def Wrapper(OuterClass, *args, **kwargs):
-        log.debug(SimpleClient,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(SimpleClient,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
-                log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
+                log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
                 self.globals = FlaskUtil.getApi().globals
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
@@ -696,7 +696,7 @@ def SimpleClient():
 @Function
 def SimpleClientMethod(requestClass=None):
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs):
-        log.debug(SimpleClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        log.wrapper(SimpleClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs):
             resourceInstance = args[0]
             try :

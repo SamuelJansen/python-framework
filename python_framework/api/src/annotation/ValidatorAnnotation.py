@@ -5,10 +5,10 @@ from python_framework.api.src.service.flask import FlaskManager
 @Function
 def Validator() :
     def Wrapper(OuterClass, *args, **kwargs):
-        log.debug(Validator,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(Validator,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
-                log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
+                log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
                 apiInstance = FlaskManager.getApi()
                 self.service = apiInstance.resource.service
@@ -22,7 +22,7 @@ def Validator() :
 @Function
 def ValidatorMethod(requestClass=None, message=None, logMessage=None) :
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
-        log.debug(ValidatorMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        log.wrapper(ValidatorMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
             try :

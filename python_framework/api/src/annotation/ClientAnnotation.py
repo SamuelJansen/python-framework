@@ -9,11 +9,11 @@ from python_framework.api.src.util import Serializer
 def Client(url=c.SLASH) :
     clientUrl = url
     def Wrapper(OuterClass, *args, **kwargs):
-        log.debug(Client,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(Client,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             url = clientUrl
             def __init__(self,*args,**kwargs):
-                log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
+                log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 apiInstance = FlaskManager.getApi()
                 OuterClass.__init__(self,*args,**kwargs)
                 self.globals = apiInstance.globals
@@ -45,7 +45,7 @@ def ClientMethod(
     clientMethodLogRequest = logRequest
     clientMethodLogResponse = logResponse
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
-        log.debug(ClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        log.wrapper(ClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
             completeResponse = None

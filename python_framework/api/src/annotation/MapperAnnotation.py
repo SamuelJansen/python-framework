@@ -5,10 +5,10 @@ from python_framework.api.src.service.flask import FlaskManager
 @Function
 def Mapper() :
     def Wrapper(OuterClass, *args, **kwargs):
-        log.debug(Mapper,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(Mapper,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
-                log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
+                log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
                 apiInstance = FlaskManager.getApi()
                 self.service = apiInstance.resource.service
@@ -23,7 +23,7 @@ def Mapper() :
 @Function
 def MapperMethod(requestClass=None, responseClass=None) :
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
-        log.debug(MapperMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        log.wrapper(MapperMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
             try :

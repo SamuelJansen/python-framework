@@ -13,10 +13,10 @@ DEFAUTL_DISABLE = False
 @Function
 def Scheduler(*schedulerArgs, disable=False, muteLogs=DEFAUTL_MUTE_LOGS, **schedulerKwargs) :
     def Wrapper(OuterClass, *args, **kwargs):
-        log.debug(Scheduler,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(Scheduler,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
-                log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
+                log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 apiInstance = FlaskManager.getApi()
                 OuterClass.__init__(self,*args,**kwargs)
                 self.globals = apiInstance.globals
@@ -33,7 +33,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=DEFAUTL_DISABLE, mut
     resourceMethodDisable = disable
     resourceMethodMuteLogs = muteLogs
     def innerMethodWrapper(resourceMethod, *innerMethodArgs, **innerMethodKwargs) :
-        log.debug(SchedulerMethod,f'''wrapping {resourceMethod.__name__}''')
+        log.wrapper(SchedulerMethod,f'''wrapping {resourceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
         methodClassName = ReflectionHelper.getMethodClassName(resourceMethod)
         methodName = ReflectionHelper.getName(resourceMethod)

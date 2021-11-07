@@ -5,10 +5,10 @@ from python_framework.api.src.service.flask import FlaskManager
 @Function
 def Converter() :
     def Wrapper(OuterClass, *args, **kwargs):
-        log.debug(Converter,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(Converter,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
-                log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
+                log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
                 apiInstance = FlaskManager.getApi()
                 self.helper = apiInstance.resource.helper
@@ -20,7 +20,7 @@ def Converter() :
 @Function
 def ConverterMethod(requestClass=None, responseClass=None) :
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs) :
-        log.debug(ConverterMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        log.wrapper(ConverterMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs) :
             resourceInstance = args[0]
             try :

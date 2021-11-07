@@ -6,11 +6,11 @@ from python_framework.api.src.service.flask import FlaskManager
 def Repository(model = None) :
     repositoryModel = model
     def Wrapper(OuterClass, *args, **kwargs):
-        log.debug(Repository,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(Repository,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             model = repositoryModel
             def __init__(self,*args,**kwargs):
-                log.debug(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
+                log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
                 apiInstance = FlaskManager.getApi()
                 self.repository = apiInstance.repository
