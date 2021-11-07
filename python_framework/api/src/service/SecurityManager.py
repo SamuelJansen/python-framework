@@ -208,7 +208,7 @@ def initialize(apiInstance, appInstance):
         return {'message': 'Unauthorized'}, HttpStatus.UNAUTHORIZED
     log.success(initialize, 'SecurityManager is running')
 
-def onHttpRequestClose(apiInstance, appInstance):
+def afterHttpRequest(apiInstance, appInstance):
     ...
 
 def onShutdown(apiInstance, appInstance):

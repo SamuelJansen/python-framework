@@ -26,7 +26,7 @@ def initialize(apiInstance, appInstance) :
     apiInstance.schedulerManager.start()
     log.success(initialize, f'APScheduler schedulers initialized{"" if apiInstance.schedulerManager.api_enabled else ". But are disabled"}')
 
-def onHttpRequestClose(apiInstance, appInstance):
+def afterHttpRequest(apiInstance, appInstance):
     ...
 
 def onShutdown(apiInstance, appInstance) :

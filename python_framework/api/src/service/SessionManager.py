@@ -318,7 +318,7 @@ def addResource(apiInstance, appInstance):
 def initialize(apiInstance, appInstance) :
     log.success(initialize, 'SessionManager is running')
 
-def onHttpRequestClose(apiInstance, appInstance):
+def afterHttpRequest(apiInstance, appInstance):
     ...
 
 def onShutdown(apiInstance, appInstance) :

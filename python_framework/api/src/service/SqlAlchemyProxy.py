@@ -369,7 +369,7 @@ def initialize(apiInstance, appInstance) :
     apiInstance.repository.run()
     log.success(initialize, 'SqlAlchemyProxy database is running')
 
-def onHttpRequestClose(apiInstance, appInstance):
+def afterHttpRequest(apiInstance, appInstance):
     @appInstance.teardown_appcontext
     def closeSqlAlchemyProxyConnection(error):
         apiInstance.repository.session.close()
