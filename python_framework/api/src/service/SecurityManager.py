@@ -96,17 +96,6 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
             log.prettyJson(getJwtMannager, f'JWT security', info, logLevel=log.SETTING)
         return jwtMannager
 
-@Function
-def addJwt(jwtInstance):
-    @jwtInstance.token_in_blacklist_loader
-    def verifyAuthorizaionAccess(decriptedToken):
-        return decriptedToken[JwtConstant.KW_JTI] in BLACK_LIST
-
-    @jwtInstance.revoked_token_loader
-    def invalidAccess():
-        log.log(addJwt, 'Access revoked', exception=None)
-        return {'message': 'Unauthorized'}, HttpStatus.UNAUTHORIZED
-
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_access_token
@@ -204,3 +193,20 @@ def addResource(apiInstance, appInstance):
         apiInstance.securityManager.api = apiInstance
     except Exception as exception:
         log.warning(addResource, 'Not possible to add SecurityManager', exception=exception)
+    log.success(initialize, 'SecurityManager created')
+    return apiInstance.securityManager
+
+@Function
+def initialize(apiInstance, appInstance):
+    @apiInstance.securityManager.token_in_blacklist_loader
+    def verifyAuthorizaionAccess(decriptedToken):
+        return decriptedToken[JwtConstant.KW_JTI] in BLACK_LIST
+
+    @apiInstance.securityManager.revoked_token_loader
+    def invalidAccess():
+        log.log(initialize, 'Access revoked', exception=None)
+        return {'message': 'Unauthorized'}, HttpStatus.UNAUTHORIZED
+    log.success(initialize, 'SecurityManager is running')
+
+def shutdown(apiInstance, appInstance) :
+    log.success(shutdown, 'SecurityManager connection successfully closed')

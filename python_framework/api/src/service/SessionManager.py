@@ -201,10 +201,6 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
             log.prettyJson(getJwtMannager, f'JWT session', info, logLevel=log.SETTING)
         return jwtManager
 
-@Function
-def addJwt(jwtInstance) :
-    ...
-
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
@@ -316,6 +312,14 @@ def addResource(apiInstance, appInstance):
         apiInstance.sessionManager.api = apiInstance
     except Exception as exception:
         log.warning(addResource, 'Not possible to add SessionManager', exception=exception)
+    log.success(initialize, 'SessionManager created')
+    return apiInstance.sessionManager
+
+def initialize(apiInstance, appInstance) :
+    log.success(initialize, 'SessionManager is running')
+
+def shutdown(apiInstance, appInstance) :
+    log.success(shutdown, 'SessionManager connection successfully closed')
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)

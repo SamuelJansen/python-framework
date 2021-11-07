@@ -134,6 +134,7 @@ def initialize(
 
     api.cors = CORS(app)
     api.cors.api = api
+
     addGlobalsTo(api)
     OpenApiManager.newDocumentation(api, app)
     SqlAlchemyProxy.addResource(api, app, baseModel=refferenceModel, echo=False)
@@ -141,11 +142,14 @@ def initialize(
     SessionManager.addResource(api, app)
     ApiKeyManager.addResource(api, app)
     SecurityManager.addResource(api, app)
-    args = [api, app, api.sessionManager, api.apiKeyManager, api.securityManager]
-    for resourceType in FlaskManager.KW_RESOURCE_LIST :
-        args.append(getResourceList(api, resourceType))
-    addFlaskApiResources(*args)
 
+    addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
+
+    SessionManager.shutdown(api, api.app)
+    ApiKeyManager.shutdown(api, api.app)
+    SecurityManager.shutdown(api, api.app)
+    SchedulerManager.shutdown(api, api.app)
+    SqlAlchemyProxy.shutdown(api, api.app)
     return app
 
 @Function
@@ -227,9 +231,6 @@ def addResourceAttibutes(apiInstance) :
 def addFlaskApiResources(
         apiInstance,
         appInstance,
-        sessionInstance,
-        apiKeyManager,
-        jwtInstance,
         controllerList,
         schedulerList,
         serviceList,
@@ -252,7 +253,7 @@ def addFlaskApiResources(
     addConverterListTo(apiInstance, converterList)
     SqlAlchemyProxy.initialize(apiInstance, appInstance)
     SchedulerManager.initialize(apiInstance, appInstance)
-    SessionManager.addJwt(sessionInstance)
-    ApiKeyManager.addJwt(apiKeyManager)
-    SecurityManager.addJwt(jwtInstance)
+    SecurityManager.initialize(apiInstance, appInstance)
+    ApiKeyManager.initialize(apiInstance, appInstance)
+    SessionManager.initialize(apiInstance, appInstance)
     OpenApiManager.addSwagger(apiInstance, appInstance)

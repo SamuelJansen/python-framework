@@ -357,9 +357,7 @@ class SqlAlchemyProxy:
         self.session.commit()
 
 
-
-
-def addResource(apiInstance, appInstance, baseModel=model, echo=False) :
+def addResource(apiInstance, appInstance, baseModel=None, echo=False) :
     apiInstance.repository = SqlAlchemyProxy(baseModel, apiInstance.globals, echo=echo)
     log.success(addResource, 'SqlAlchemyProxy database connection created')
     return apiInstance.repository
