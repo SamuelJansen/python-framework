@@ -1,4 +1,4 @@
-import json, globals
+import json, globals, uuid
 from python_helper import Constant as c
 from python_helper import StringHelper, ObjectHelper, log, ReflectionHelper
 from python_helper import Function
@@ -60,6 +60,9 @@ DATE_TIME_RELATED = [
     'time',
     'timedelta'
 ]
+
+def newUuid():
+    return uuid.uuid4()
 
 def isSerializerList(instance) :
     return ObjectHelper.isList(instance) or type(instance) == InstrumentedList
@@ -246,9 +249,10 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
     isVisitedInstance = id(instance) in visitedIdInstances
     innerVisitedIdInstances = [*visitedIdInstances.copy()]
     if ObjectHelper.isDictionary(instance) and not isVisitedInstance :
-        for key,value in instance.items() :
-            instance[key] = getObjectAsDictionary(value, visitedIdInstances=innerVisitedIdInstances)
-        return instance
+        # for key,value in instance.items() :
+        #     instance[key] = getObjectAsDictionary(value, visitedIdInstances=innerVisitedIdInstances)
+        # return instance
+        return {key: getObjectAsDictionary(value, visitedIdInstances=innerVisitedIdInstances) for key, value in instance.items() }
     elif isSerializerCollection(instance) :
         objectValueList = []
         for innerObject in instance :

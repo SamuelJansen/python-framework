@@ -5,6 +5,7 @@ from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper, ReflectionHelper, SettingHelper
 
 from python_framework.api.src.util import UtcDateTimeUtil
+from python_framework.api.src.util import Serializer
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.util import FlaskUtil
@@ -200,6 +201,7 @@ def addJwt(jwtInstance) :
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
+    data = Serializer.getObjectAsDictionary(data)
     return retrieveApiInstance(apiInstance=apiInstance).sessionManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
@@ -219,6 +221,7 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
+    data = Serializer.getObjectAsDictionary(data)
     return retrieveApiInstance(apiInstance=apiInstance).sessionManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
@@ -236,8 +239,10 @@ def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=None):
-    rawJwt = getJwtBody(apiInstance=apiInstance)
+def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, apiInstance=None):
+    headers = headers if ObjectHelper.isNone(rawJwt) else {**getJwtHeaders(), **ConverterStatic.getValueOrDefault(headers, dict())}
+    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
+    data = Serializer.getObjectAsDictionary(data)
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
             *getContext(rawJwt=rawJwt),
@@ -253,9 +258,10 @@ def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=N
         }
     }
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
+    addUserToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
     return apiInstance.sessionManager.encode({
             JwtConstant.KW_IAT: getIat(rawJwt=rawJwt, apiInstance=apiInstance),
-            JwtConstant.KW_NFB: getNfb(rawJwt=rawJwt, apiInstance=apiInstance),
+            JwtConstant.KW_NFB: UtcDateTimeUtil.now(),
             JwtConstant.KW_JTI: getNewJti(),
             JwtConstant.KW_EXPIRATION: getExpiration(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_IDENTITY: getIdentity(rawJwt=rawJwt, apiInstance=apiInstance),
@@ -314,4 +320,4 @@ def raiseSessionContextCannotBeNone():
     raise Exception('Context cannot be None')
 
 def getNewJti():
-    return f"{int(f'{time.time()}'.replace('.', '')) + int(f'{time.time()}'.replace('.', ''))}"
+    return Serializer.newUuid()

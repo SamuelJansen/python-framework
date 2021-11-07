@@ -51,7 +51,6 @@ class ApiKeyManagerTestController:
         headers={'some': 'other headers'}
         data = {'some': 'other data'}
         return {
-            # 'accessToken': ApiKeyManager.patchAccessToken(dto['id'], ['TEST_API_KEY', 'TEST_API_KEY_REFRESH'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
             'accessToken': ApiKeyManager.patchAccessToken(newContextList=['TEST_API_KEY', 'TEST_API_KEY_REFRESH'], headers=headers, data=data)
         }, HttpStatus.OK
 

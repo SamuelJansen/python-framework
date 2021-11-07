@@ -6,21 +6,23 @@ log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
 
 from python_helper import TestHelper
 # TestHelper.run(__file__)
-# TestHelper.run(
-#     __file__,
-#     runOnly = [
-#         'SessionManagerTest.sessionManager_worksProperly'
-#     ]
-# )
 TestHelper.run(
     __file__,
     runOnly = [
-        # 'TestApiTest.pythonRun_securityManager',
-        'TestApiTest.pythonRun_apiKeyManager',
-        # 'TestApiTest.pythonRun_sessionManager'
-        # 'TestApiTest.testing_Client'
+        'SessionManagerTest.sessionManager_worksProperly',
+        'ApiKeyManagerTest.apiKeyManager_worksProperly'
     ]
 )
+# TestHelper.run(
+#     __file__,
+#     # times=10,
+#     runOnly = [
+#         'TestApiTest.pythonRun_securityManager',
+#         'TestApiTest.pythonRun_apiKeyManager',
+#         'TestApiTest.pythonRun_sessionManager',
+#         'TestApiTest.testing_Client'
+#     ]
+# )
 # TestHelper.run(
 #     __file__,
 #     runOnly = [

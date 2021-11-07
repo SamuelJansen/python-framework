@@ -5,6 +5,7 @@ from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper, ReflectionHelper, SettingHelper
 
 from python_framework.api.src.util import UtcDateTimeUtil
+from python_framework.api.src.util import Serializer
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.util import FlaskUtil
@@ -27,11 +28,11 @@ class JwtManager:
         self.headerType = headerType
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def encode(self, payload, headers=None) :
+    def encode(self, payload, headers=None):
         return jwt.encode(payload, self.secret, algorithm=self.algorithm, headers=ConverterStatic.getValueOrDefault(headers, dict())).decode()
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def decode(self, encodedPayload, options=None) :
+    def decode(self, encodedPayload, options=None):
         return jwt.decode(encodedPayload, self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -99,8 +100,8 @@ class JwtManager:
         return FlaskUtil.safellyGetHeaders().get(self.headerName)
 
 @Function
-def jwtAccessRequired(function, *args, **kwargs) :
-    def innerFunction(*args, **kwargs) :
+def jwtAccessRequired(function, *args, **kwargs):
+    def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
         retrieveApiInstance(arguments=args[0]).apiKeyManager.validateAccessApiKey()
         functionReturn = function(*args, **kwargs)
@@ -109,8 +110,8 @@ def jwtAccessRequired(function, *args, **kwargs) :
     return innerFunction
 
 @Function
-def jwtRefreshRequired(function, *args, **kwargs) :
-    def innerFunction(*args, **kwargs) :
+def jwtRefreshRequired(function, *args, **kwargs):
+    def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
         retrieveApiInstance(arguments=args[0]).apiKeyManager.validateRefreshApiKey()
         functionReturn = function(*args, **kwargs)
@@ -119,7 +120,7 @@ def jwtRefreshRequired(function, *args, **kwargs) :
     return innerFunction
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtBody(rawJwt=None, apiInstance=None) :
+def getJwtBody(rawJwt=None, apiInstance=None):
     if ObjectHelper.isNone(rawJwt):
         return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getBody(rawJwt=rawJwt)
     return rawJwt
@@ -140,39 +141,39 @@ def getData(rawJwt=None, apiInstance=None):
     return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJti(rawJwt=None, apiInstance=None) :
+def getJti(rawJwt=None, apiInstance=None):
     ###- unique identifier
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getIat(rawJwt=None, apiInstance=None) :
+def getIat(rawJwt=None, apiInstance=None):
     ###- issued at
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IAT)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getNfb(rawJwt=None, apiInstance=None) :
+def getNfb(rawJwt=None, apiInstance=None):
     ###- not valid before
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_NFB)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getExpiration(rawJwt=None, apiInstance=None) :
+def getExpiration(rawJwt=None, apiInstance=None):
     ###- expiration time
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_EXPIRATION)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getIdentity(rawJwt=None, apiInstance=None) :
+def getIdentity(rawJwt=None, apiInstance=None):
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IDENTITY)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getType(rawJwt=None, apiInstance=None) :
+def getType(rawJwt=None, apiInstance=None):
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_TYPE)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getIsFresh(rawJwt=None, apiInstance=None) :
+def getIsFresh(rawJwt=None, apiInstance=None):
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_FRESH)
 
 @Function
-def addUserToBlackList(rawJwt=None, apiInstance=None) :
+def addUserToBlackList(rawJwt=None, apiInstance=None):
     BLACK_LIST.add(getJti(rawJwt=rawJwt, apiInstance=apiInstance))
 
 @Function
@@ -190,7 +191,7 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
         )
 
 @Function
-def addJwt(jwtInstance) :
+def addJwt(jwtInstance):
     ...
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -215,6 +216,7 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
+    data = Serializer.getObjectAsDictionary(data)
     return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
@@ -232,8 +234,10 @@ def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=None):
-    rawJwt = getJwtBody(apiInstance=apiInstance)
+def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, apiInstance=None):
+    headers = headers if ObjectHelper.isNone(rawJwt) else {**getJwtHeaders(), **ConverterStatic.getValueOrDefault(headers, dict())}
+    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
+    data = Serializer.getObjectAsDictionary(data)
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
             *getContext(rawJwt=rawJwt),
@@ -249,9 +253,10 @@ def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=N
         }
     }
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
+    addUserToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
     return apiInstance.apiKeyManager.encode({
             JwtConstant.KW_IAT: getIat(rawJwt=rawJwt, apiInstance=apiInstance),
-            JwtConstant.KW_NFB: getNfb(rawJwt=rawJwt, apiInstance=apiInstance),
+            JwtConstant.KW_NFB: UtcDateTimeUtil.now(),
             JwtConstant.KW_JTI: getNewJti(),
             JwtConstant.KW_EXPIRATION: getExpiration(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_IDENTITY: getIdentity(rawJwt=rawJwt, apiInstance=apiInstance),
@@ -310,4 +315,4 @@ def raiseApiKeyContextCannotBeNone():
     raise Exception('Context cannot be None')
 
 def getNewJti():
-    return f"{int(f'{time.time()}'.replace('.', '')) + int(f'{time.time()}'.replace('.', ''))}"
+    return Serializer.newUuid()

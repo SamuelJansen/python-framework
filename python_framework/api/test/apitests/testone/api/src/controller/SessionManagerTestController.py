@@ -51,7 +51,6 @@ class SessionManagerTestController:
         headers={'some': 'other headers'}
         data = {'some': 'other data'}
         return {
-            # 'accessToken': SessionManager.patchAccessToken(dto['id'], ['TEST_SESSION', 'TEST_SESSION_REFRESH'], deltaMinutes=VALID_TOKEN_MINUTES_DURATION, headers=headers, data=data)
             'accessToken': SessionManager.patchAccessToken(newContextList=['TEST_SESSION', 'TEST_SESSION_REFRESH'], headers=headers, data=data)
         }, HttpStatus.OK
 
