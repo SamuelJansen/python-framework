@@ -9,6 +9,8 @@ from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 from sqlalchemy import Table, Column, Integer, String, Float, ForeignKey, UnicodeText, MetaData, Sequence, DateTime, Date, Time, Interval, Boolean
 from sqlalchemy import and_, or_
 from sqlalchemy.sql.expression import literal
+from sqlalchemy.orm import close_all_sessions
+
 
 from python_helper import log, Method, Function
 
@@ -100,6 +102,14 @@ def isNeitherNoneNorBlank(thing) :
 def isNoneOrBlank(thing) :
     return ObjectHelper.isNone(thing) or StringHelper.isBlank(str(thing))
 
+def initialize(apiInstance, appInstance) :
+    apiInstance.repository.run()
+
+def shutdown(apiInstance, appInstance) :
+    import atexit
+    atexit.register(lambda: apiInstance.repository.close())
+
+
 class SqlAlchemyProxy:
 
     DEFAULT_DRIVER = 'psycopg2'
@@ -141,7 +151,6 @@ class SqlAlchemyProxy:
             echo = False,
             connectArgs = None
         ):
-
         self.globals = globals
         self.sqlalchemy = sqlalchemy
         dialect = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_DIALECT}')
@@ -150,7 +159,6 @@ class SqlAlchemyProxy:
         self.model = model
         self.model.metadata.bind = self.engine
         # self.model.metadata.reflect()
-
         self.run()
 
     def getNewEngine(self, dialect, echo, connectArgs) :
@@ -162,7 +170,22 @@ class SqlAlchemyProxy:
         except Exception as exception :
             log.error(self.getNewEngine, 'Not possible to create engine', exception)
             raise exception
+        log.success(self.close, 'Database connection created')
         return engine
+
+    def close(self):
+        try:
+            close_all_sessions()
+            self.engine.dispose() # NOTE: close required before dispose!
+        except Exception as firstException:
+            log.error(self.close, 'not possible to close connections. Going for a second attempt', firstException)
+            try:
+                close_all_sessions()
+                self.engine.dispose() # NOTE: close required before dispose!
+            except Exception as secondException:
+                log.error(self.close, 'not possible to close connections at the second attempt either', secondException)
+                raise secondException
+        log.success(self.close, 'Database connection successfuly closed')
 
     def getUrl(self, dialect) :
         log.log(self.getUrl, 'Loading repository configuration')
@@ -237,6 +260,7 @@ class SqlAlchemyProxy:
             self.model.metadata.create_all(self.engine)
         except Exception as exception :
             log.error(self.run, 'Not possible to run', exception)
+        log.success(self.close, 'Database is running')
 
     @Method
     def commit(self):
