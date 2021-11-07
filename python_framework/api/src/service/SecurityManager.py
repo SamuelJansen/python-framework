@@ -14,6 +14,7 @@ from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper, ReflectionHelper, SettingHelper, DateTimeHelper
 
 from python_framework.api.src.util import UtcDateTimeUtil
+from python_framework.api.src.util import Serializer
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.constant import JwtConstant
