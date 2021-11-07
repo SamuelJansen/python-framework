@@ -73,7 +73,7 @@ def getControllerList(resourceName, resourceModuleName) :
     importedControllerList = []
     for controllerName in controllerNameList :
         resource = globals.importResource(controllerName, resourceModuleName=resourceModuleName)
-        if resource :
+        if ObjectHelper.isNotNone(resource) :
             importedControllerList.append(resource)
     if 0 == len(importedControllerList) :
         raise Exception(f'Not possible to import {resourceName} controller')
@@ -95,7 +95,7 @@ def getResourceList(apiInstance, resourceType) :
         if isControllerResourceName(resourceName) :
             resource = getControllerList(ajustedResourceName, ajustedResourceModuleName)
         else :
-            resource = globals.importResource(ajustedResourceName, resourceModuleName=ajustedResourceModuleName)
+            resource = globals.importResource(ajustedResourceName, resourceModuleName=ajustedResourceModuleName, required=True)
         if ObjectHelper.isEmpty(resource) :
             raise Exception(f'Error while importing {ajustedResourceName} resource from {ajustedResourceModuleName} module. Resource not found.')
         elif ObjectHelper.isList(resource) :

@@ -104,13 +104,16 @@ def newApp(
         , logStatus = logStatus
     )
     try:
-        app = globals.importResource(KW_APP, resourceModuleName=globalsInstance.apiName)
+        app = globals.importResource(KW_APP, resourceModuleName=globalsInstance.apiName, required=True)
     except Exception as exception:
         apiName = globals.AttributeKey.API_NAME
         apiPath = f'{c.DOT}{EnvironmentHelper.OS_SEPARATOR}{globals.BASE_API_PATH}{globals.AttributeKey.API_NAME}'
         errorMessage = f"Not possible to load app. Make shure it's name is properlly configured at '{apiName}' and it's instance is named 'app' at '{apiPath}'"
         log.error(newApp, errorMessage, exception)
         raise exception
+    if ObjectHelper.isNone(app):
+        app = globals.importResource(KW_APP, resourceModuleName=globalsInstance.apiName)
+        raise Exception('Not possible to load app. Check logs for more details')
     return app
 
 @Function
