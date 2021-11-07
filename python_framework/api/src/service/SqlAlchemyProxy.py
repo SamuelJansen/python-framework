@@ -362,7 +362,8 @@ class SqlAlchemyProxy:
 
 def addResource(apiInstance, appInstance, baseModel=None, echo=False) :
     apiInstance.repository = SqlAlchemyProxy(baseModel, apiInstance.globals, echo=echo)
-    log.success(addResource, 'SqlAlchemyProxy database connection created')
+    if ObjectHelper.isNotNone(apiInstance.repository):
+        log.success(addResource, 'SqlAlchemyProxy database connection created')
     return apiInstance.repository
 
 def initialize(apiInstance, appInstance) :

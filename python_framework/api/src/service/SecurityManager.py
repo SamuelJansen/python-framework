@@ -193,7 +193,8 @@ def addResource(apiInstance, appInstance):
         apiInstance.securityManager.api = apiInstance
     except Exception as exception:
         log.warning(addResource, 'Not possible to add SecurityManager', exception=exception)
-    log.success(initialize, 'SecurityManager created')
+    if ObjectHelper.isNotNone(apiInstance.securityManager):
+        log.success(initialize, 'SecurityManager created')
     return apiInstance.securityManager
 
 @Function
@@ -206,7 +207,8 @@ def initialize(apiInstance, appInstance):
     def invalidAccess():
         log.log(initialize, 'Access revoked', exception=None)
         return {'message': 'Unauthorized'}, HttpStatus.UNAUTHORIZED
-    log.success(initialize, 'SecurityManager is running')
+    if ObjectHelper.isNotNone(apiInstance.securityManager):
+        log.success(initialize, 'SecurityManager is running')
 
 def onShutdown(apiInstance, appInstance):
     @appInstance.teardown_appcontext

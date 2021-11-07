@@ -307,11 +307,13 @@ def addResource(apiInstance, appInstance):
         apiInstance.apiKeyManager.api = apiInstance
     except Exception as exception:
         log.warning(addResource, 'Not possible to add ApiKeyManager', exception=exception)
-    log.success(initialize, 'ApiKeyManager created')
+    if ObjectHelper.isNotNone(apiInstance.apiKeyManager):
+        log.success(initialize, 'ApiKeyManager created')
     return apiInstance.apiKeyManager
 
 def initialize(apiInstance, appInstance):
-    log.success(initialize, 'ApiKeyManager is running')
+    if ObjectHelper.isNotNone(apiInstance.apiKeyManager):
+        log.success(initialize, 'ApiKeyManager is running')
 
 def onShutdown(apiInstance, appInstance):
     @appInstance.teardown_appcontext

@@ -18,7 +18,8 @@ def addResource(apiInstance, appInstance) :
     appInstance.config[SchedulerConstant.KW_SCHEDULER_TIMEZONE] = scheduler.timezone
 
     apiInstance.schedulerManager = scheduler
-    log.success(addResource, f'APScheduler schedulers created{"" if apiInstance.schedulerManager.api_enabled else ". But are disabled"}')
+    if ObjectHelper.isNotNone(apiInstance.schedulerManager):
+        log.success(addResource, f'APScheduler schedulers created{"" if apiInstance.schedulerManager.api_enabled else ". But are disabled"}')
     return scheduler
 
 def initialize(apiInstance, appInstance) :
