@@ -30,13 +30,13 @@ def initialize(apiInstance, appInstance) :
 def onHttpRequestCompletion(apiInstance, appInstance) :
     ...
 
-def shutdown(apiInstance, apiInstance):
+def shutdown(apiInstance, appInstance):
     try:
         apiInstance.schedulerManager.shutdown(wait=False)
     except Exception as exception:
         log.failure(closeAPSchedulerSchedulers, 'Not possible to close APScheduler schedulers', exception)
     log.success(closeAPSchedulerSchedulers, 'APScheduler schedulers successfully closed')
 
-def onShutdown(apiInstance, apiInstance) :
+def onShutdown(apiInstance, appInstance) :
     import atexit
-    atexit.register(lambda: shutdown(apiInstance, apiInstance))
+    atexit.register(lambda: shutdown(apiInstance, appInstance))

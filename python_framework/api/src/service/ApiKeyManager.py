@@ -321,12 +321,12 @@ def onHttpRequestCompletion(apiInstance, appInstance):
     #       do something here
     ...
 
-def shutdown(apiInstance, apiInstance):
+def shutdown(apiInstance, appInstance):
     log.success(shutdown, 'ApiKeyManager successfully closed')
 
-def onShutdown(apiInstance, apiInstance):
+def onShutdown(apiInstance, appInstance):
     import atexit
-    atexit.register(lambda: shutdown(apiInstance, apiInstance))
+    atexit.register(lambda: shutdown(apiInstance, appInstance))
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)

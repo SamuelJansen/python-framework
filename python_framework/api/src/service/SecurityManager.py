@@ -216,9 +216,9 @@ def onHttpRequestCompletion(apiInstance, appInstance):
     #       do something here
     ...
 
-def shutdown(apiInstance, apiInstance):
+def shutdown(apiInstance, appInstance):
     log.success(shutdown, 'SecurityManager successfully closed')
 
-def onShutdown(apiInstance, apiInstance):
+def onShutdown(apiInstance, appInstance):
     import atexit
-    atexit.register(lambda: shutdown(apiInstance, apiInstance))
+    atexit.register(lambda: shutdown(apiInstance, appInstance))

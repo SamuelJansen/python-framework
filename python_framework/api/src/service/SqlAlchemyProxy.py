@@ -376,13 +376,13 @@ def onHttpRequestCompletion(apiInstance, appInstance):
     #       do something here
     ...
 
-def shutdown(apiInstance, apiInstance):
+def shutdown(apiInstance, appInstance):
     try:
         apiInstance.repository.close()
     except Exception as exception:
         log.failure(shutdown, 'Not possible to close SqlAlchemyProxy database connection', exception)
     log.success(shutdown, 'SqlAlchemyProxy database connection successfully closed')
 
-def onShutdown(apiInstance, apiInstance):
+def onShutdown(apiInstance, appInstance):
     import atexit
-    atexit.register(lambda: shutdown(apiInstance, apiInstance))
+    atexit.register(lambda: shutdown(apiInstance, appInstance))
