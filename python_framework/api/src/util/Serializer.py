@@ -65,6 +65,9 @@ DATE_TIME_RELATED = [
 def newUuid():
     return uuid4()
 
+def newUuidAsString():
+    return str(newUuid())
+
 def isSerializerList(instance) :
     return ObjectHelper.isList(instance) or type(instance) == InstrumentedList
 
