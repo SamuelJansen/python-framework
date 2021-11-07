@@ -1,5 +1,6 @@
 API_SCHEDULER_ENABLE = 'api.scheduler.enable'
 API_SCHEDULER_MUTE_LOGS = 'api.scheduler.mute-logs'
+API_SCHEDULER_TIMEZONE = 'api.scheduler.time-zone'
 
 API_SERVER_SCHEME = 'api.server.scheme'
 API_SERVER_HOST = 'api.server.host'

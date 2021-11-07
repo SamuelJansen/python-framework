@@ -49,7 +49,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=DEFAUTL_DISABLE, mut
             methodKwargs['max_instances'] = instancesUpTo
         shedulerArgs = [*methodArgs]
         shedulerKwargs = {**methodKwargs}
-        @apiInstance.scheduler.task(*shedulerArgs, **shedulerKwargs)
+        @apiInstance.schedulerManager.task(*shedulerArgs, **shedulerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
             resourceInstanceName = methodClassName[:-len(FlaskManager.KW_SCHEDULER_RESOURCE)]
             resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
