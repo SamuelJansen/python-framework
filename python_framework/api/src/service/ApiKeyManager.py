@@ -315,4 +315,4 @@ def raiseApiKeyContextCannotBeNone():
     raise Exception('Context cannot be None')
 
 def getNewJti():
-    return Serializer.newUuid()
+    return Serializer.newUuidAsString()
