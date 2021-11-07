@@ -380,7 +380,7 @@ def onShutdown(apiInstance, appInstance):
     @appInstance.teardown_appcontext
     def closeSqlAlchemyProxyConnection(error):
         try:
-            apiInstance.repository.session.close()
+            apiInstance.repository.close()
         except Exception as exception:
             log.failure(closeSqlAlchemyProxyConnections, 'Not possible to close SqlAlchemyProxy database connection', exception)
         log.success(closeSqlAlchemyProxyConnections, 'SqlAlchemyProxy database connection successfully closed')
