@@ -1,6 +1,6 @@
 from python_framework.api.src.service import WebBrowser
 from python_helper import Constant as c
-from python_helper import log, Function, ReflectionHelper, ObjectHelper, SettingHelper
+from python_helper import log, Function, ReflectionHelper, ObjectHelper, SettingHelper, EnvironmentHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.util import FlaskUtil
@@ -75,60 +75,51 @@ KW_RESOURCE_LIST = list(PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.keys())
 KW_PARAMETERS = 'params'
 KW_HEADERS = 'headers'
 
-def runGlobals(
+
+def newApp(
     filePath
-    , successStatus = False
-    , settingStatus = False
+    , successStatus = True
+    , failureStatus = True
+    , errorStatus = True
+    , settingStatus = True
+    , statusStatus = True
+    , infoStatus = True
     , debugStatus = False
     , warningStatus = False
     , wrapperStatus = False
-    , failureStatus = False
-    , errorStatus = False
     , testStatus = False
     , logStatus = False
 ):
-    return globals.newGlobalsInstance(
+    globalsInstance = globals.newGlobalsInstance(
         filePath
         , successStatus = successStatus
+        , errorStatus = errorStatus
+        , failureStatus = failureStatus
         , settingStatus = settingStatus
+        , statusStatus = statusStatus
+        , infoStatus = infoStatus
         , debugStatus = debugStatus
         , warningStatus = warningStatus
         , wrapperStatus = wrapperStatus
-        , failureStatus = failureStatus
-        , errorStatus = errorStatus
         , testStatus = testStatus
         , logStatus = logStatus
     )
+    try:
+        app = globals.importResource(KW_APP, resourceModuleName=globalsInstance.apiName)
+    except Exception as exception:
+        apiName = globals.AttributeKey.API_NAME
+        apiPath = f'{c.DOT}{EnvironmentHelper.OS_SEPARATOR}{globals.BASE_API_PATH}{globals.AttributeKey.API_NAME}'
+        errorMessage = f"Not possible to load app. Make shure it's name is properlly configured at '{apiName}' and it's instance is named 'app' at '{apiPath}'"
+        log.error(newApp, errorMessage, exception)
+        raise exception
+    return app
 
 @Function
 def initialize(
     apiInstance
     , defaultUrl = None
     , openInBrowser = False
-    , filePath = None
-    , successStatus = False
-    , settingStatus = False
-    , debugStatus = False
-    , warningStatus = False
-    , wrapperStatus = False
-    , failureStatus = False
-    , errorStatus = False
-    , testStatus = False
-    , logStatus = False
 ):
-    if ObjectHelper.isNone(apiInstance):
-        globalsInstance = runGlobals(
-            filePath
-            , successStatus = successStatus
-            , settingStatus = settingStatus
-            , debugStatus = debugStatus
-            , warningStatus = warningStatus
-            , wrapperStatus = wrapperStatus
-            , failureStatus = failureStatus
-            , errorStatus = errorStatus
-            , testStatus = testStatus
-            , logStatus = logStatus
-        )
     innerDefaultUrl = getApiUrl(apiInstance)
     if defaultUrl :
         innerDefaultUrl = f'{innerDefaultUrl}{defaultUrl}'
