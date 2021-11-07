@@ -208,5 +208,7 @@ def initialize(apiInstance, appInstance):
         return {'message': 'Unauthorized'}, HttpStatus.UNAUTHORIZED
     log.success(initialize, 'SecurityManager is running')
 
-def shutdown(apiInstance, appInstance) :
-    log.success(shutdown, 'SecurityManager connection successfully closed')
+def onShutdown(apiInstance, appInstance):
+    @appInstance.teardown_appcontext
+    def closeSecurityManager(error):
+        log.success(closeSecurityManager, 'SecurityManager successfully closed')

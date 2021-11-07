@@ -145,11 +145,11 @@ def initialize(
 
     addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
 
-    SessionManager.shutdown(api, api.app)
-    ApiKeyManager.shutdown(api, api.app)
-    SecurityManager.shutdown(api, api.app)
-    SchedulerManager.shutdown(api, api.app)
-    SqlAlchemyProxy.shutdown(api, api.app)
+    SessionManager.onShutdown(api, api.app)
+    ApiKeyManager.onShutdown(api, api.app)
+    SecurityManager.onShutdown(api, api.app)
+    SchedulerManager.onShutdown(api, api.app)
+    SqlAlchemyProxy.onShutdown(api, api.app)
     return app
 
 @Function

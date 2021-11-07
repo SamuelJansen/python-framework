@@ -153,6 +153,7 @@ class SqlAlchemyProxy:
         self.model.metadata.bind = self.engine
         # self.model.metadata.reflect()
         # self.run()
+        log.debug(self.__init__, 'Database initialized')
 
     def getNewEngine(self, dialect, echo, connectArgs) :
         url = self.getUrl(dialect)
@@ -177,6 +178,7 @@ class SqlAlchemyProxy:
             except Exception as secondException:
                 log.error(self.close, 'not possible to close connections at the second attempt either', secondException)
                 raise secondException
+        log.debug(self.close, 'Connections closed')
 
     def getUrl(self, dialect) :
         log.log(self.getUrl, 'Loading repository configuration')
@@ -251,6 +253,7 @@ class SqlAlchemyProxy:
             self.model.metadata.create_all(self.engine)
         except Exception as exception :
             log.error(self.run, 'Not possible to run', exception)
+        log.debug(self.run, 'Database tables created')
 
     @Method
     def commit(self):
@@ -366,7 +369,10 @@ def initialize(apiInstance, appInstance) :
     apiInstance.repository.run()
     log.success(initialize, 'SqlAlchemyProxy database is running')
 
-def shutdown(apiInstance, appInstance) :
+def onShutdown(apiInstance, appInstance) :
+    @appInstance.teardown_appcontext
+    def closeSqlAlchemyProxyConnections(error):
+        apiInstance.repository.close()
+        log.success(closeSqlAlchemyProxyConnections, 'SqlAlchemyProxy database connection successfully closed')
     import atexit
     atexit.register(lambda: apiInstance.repository.close())
-    log.success(shutdown, 'SqlAlchemyProxy database connection successfully closed')

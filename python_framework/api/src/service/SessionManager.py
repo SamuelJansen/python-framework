@@ -318,8 +318,10 @@ def addResource(apiInstance, appInstance):
 def initialize(apiInstance, appInstance) :
     log.success(initialize, 'SessionManager is running')
 
-def shutdown(apiInstance, appInstance) :
-    log.success(shutdown, 'SessionManager connection successfully closed')
+def onShutdown(apiInstance, appInstance) :
+    @appInstance.teardown_appcontext
+    def closeSessionManager(error):
+        log.success(closeSessionManager, 'SessionManager successfully closed')
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)

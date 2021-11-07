@@ -310,11 +310,13 @@ def addResource(apiInstance, appInstance):
     log.success(initialize, 'ApiKeyManager created')
     return apiInstance.apiKeyManager
 
-def initialize(apiInstance, appInstance) :
+def initialize(apiInstance, appInstance):
     log.success(initialize, 'ApiKeyManager is running')
 
-def shutdown(apiInstance, appInstance) :
-    log.success(shutdown, 'ApiKeyManager connection successfully closed')
+def onShutdown(apiInstance, appInstance):
+    @appInstance.teardown_appcontext
+    def closeApiKeyManager(error):
+        log.success(closeApiKeyManager, 'ApiKeyManager successfully closed')
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)
