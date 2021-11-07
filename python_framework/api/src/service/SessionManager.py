@@ -32,11 +32,11 @@ class JwtManager:
         self.headerType = headerType
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def encode(self, payload, headers=None) :
+    def encode(self, payload, headers=None):
         return jwt.encode(payload, self.secret, algorithm=self.algorithm, headers=ConverterStatic.getValueOrDefault(headers, dict())).decode()
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def decode(self, encodedPayload, options=None) :
+    def decode(self, encodedPayload, options=None):
         return jwt.decode(encodedPayload, self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -104,8 +104,8 @@ class JwtManager:
         return FlaskUtil.safellyGetHeaders().get(self.headerName)
 
 @Function
-def jwtAccessRequired(function, *args, **kwargs) :
-    def innerFunction(*args, **kwargs) :
+def jwtAccessRequired(function, *args, **kwargs):
+    def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
         retrieveApiInstance(arguments=args[0]).sessionManager.validateAccessSession()
         functionReturn = function(*args, **kwargs)
@@ -114,8 +114,8 @@ def jwtAccessRequired(function, *args, **kwargs) :
     return innerFunction
 
 @Function
-def jwtRefreshRequired(function, *args, **kwargs) :
-    def innerFunction(*args, **kwargs) :
+def jwtRefreshRequired(function, *args, **kwargs):
+    def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
         retrieveApiInstance(arguments=args[0]).sessionManager.validateRefreshSession()
         functionReturn = function(*args, **kwargs)
@@ -124,7 +124,7 @@ def jwtRefreshRequired(function, *args, **kwargs) :
     return innerFunction
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtBody(rawJwt=None, apiInstance=None) :
+def getJwtBody(rawJwt=None, apiInstance=None):
     if ObjectHelper.isNone(rawJwt):
         return retrieveApiInstance(apiInstance=apiInstance).sessionManager.getBody(rawJwt=rawJwt)
     return rawJwt
@@ -145,39 +145,39 @@ def getData(rawJwt=None, apiInstance=None):
     return dict() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_DATA)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJti(rawJwt=None, apiInstance=None) :
+def getJti(rawJwt=None, apiInstance=None):
     ###- unique identifier
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_JTI)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getIat(rawJwt=None, apiInstance=None) :
+def getIat(rawJwt=None, apiInstance=None):
     ###- issued at
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IAT)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getNfb(rawJwt=None, apiInstance=None) :
+def getNfb(rawJwt=None, apiInstance=None):
     ###- not valid before
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_NFB)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getExpiration(rawJwt=None, apiInstance=None) :
+def getExpiration(rawJwt=None, apiInstance=None):
     ###- expiration time
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_EXPIRATION)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getIdentity(rawJwt=None, apiInstance=None) :
+def getIdentity(rawJwt=None, apiInstance=None):
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_IDENTITY)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getType(rawJwt=None, apiInstance=None) :
+def getType(rawJwt=None, apiInstance=None):
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_TYPE)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getIsFresh(rawJwt=None, apiInstance=None) :
+def getIsFresh(rawJwt=None, apiInstance=None):
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_FRESH)
 
 @Function
-def addUserToBlackList(rawJwt=None, apiInstance=None) :
+def addUserToBlackList(rawJwt=None, apiInstance=None):
     BLACK_LIST.add(getJti(rawJwt=rawJwt, apiInstance=apiInstance))
 
 @Function
@@ -316,14 +316,22 @@ def addResource(apiInstance, appInstance):
         log.success(initialize, 'SessionManager created')
     return apiInstance.sessionManager
 
-def initialize(apiInstance, appInstance) :
+def initialize(apiInstance, appInstance):
     if ObjectHelper.isNotNone(apiInstance.sessionManager):
         log.success(initialize, 'SessionManager is running')
 
-def onShutdown(apiInstance, appInstance) :
-    @appInstance.teardown_appcontext
-    def closeSessionManager(error):
-        log.success(closeSessionManager, 'SessionManager successfully closed')
+def onHttpRequestCompletion(apiInstance, appInstance):
+    # @appInstance.teardown_appcontext
+    # def methodNameMustBeUnique(error):
+    #       do something here
+    ...
+
+def shutdown(apiInstance, apiInstance):
+    log.success(shutdown, 'SessionManager successfully closed')
+
+def onShutdown(apiInstance, apiInstance):
+    import atexit
+    atexit.register(lambda: shutdown(apiInstance, apiInstance))
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)

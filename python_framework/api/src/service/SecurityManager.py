@@ -210,7 +210,15 @@ def initialize(apiInstance, appInstance):
     if ObjectHelper.isNotNone(apiInstance.securityManager):
         log.success(initialize, 'SecurityManager is running')
 
-def onShutdown(apiInstance, appInstance):
-    @appInstance.teardown_appcontext
-    def closeSecurityManager(error):
-        log.success(closeSecurityManager, 'SecurityManager successfully closed')
+def onHttpRequestCompletion(apiInstance, appInstance):
+    # @appInstance.teardown_appcontext
+    # def methodNameMustBeUnique(error):
+    #       do something here
+    ...
+
+def shutdown(apiInstance, apiInstance):
+    log.success(shutdown, 'SecurityManager successfully closed')
+
+def onShutdown(apiInstance, apiInstance):
+    import atexit
+    atexit.register(lambda: shutdown(apiInstance, apiInstance))

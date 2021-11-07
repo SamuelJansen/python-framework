@@ -315,10 +315,18 @@ def initialize(apiInstance, appInstance):
     if ObjectHelper.isNotNone(apiInstance.apiKeyManager):
         log.success(initialize, 'ApiKeyManager is running')
 
-def onShutdown(apiInstance, appInstance):
-    @appInstance.teardown_appcontext
-    def closeApiKeyManager(error):
-        log.success(closeApiKeyManager, 'ApiKeyManager successfully closed')
+def onHttpRequestCompletion(apiInstance, appInstance):
+    # @appInstance.teardown_appcontext
+    # def methodNameMustBeUnique(error):
+    #       do something here
+    ...
+
+def shutdown(apiInstance, apiInstance):
+    log.success(shutdown, 'ApiKeyManager successfully closed')
+
+def onShutdown(apiInstance, apiInstance):
+    import atexit
+    atexit.register(lambda: shutdown(apiInstance, apiInstance))
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)

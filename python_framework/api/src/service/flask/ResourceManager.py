@@ -143,11 +143,11 @@ def initialize(
     ApiKeyManager.addResource(api, app)
     SecurityManager.addResource(api, app)
     addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
-    SessionManager.onShutdown(api, api.app)
-    ApiKeyManager.onShutdown(api, api.app)
-    SecurityManager.onShutdown(api, api.app)
-    SchedulerManager.onShutdown(api, api.app)
-    SqlAlchemyProxy.onShutdown(api, api.app)
+    SessionManager.onHttpRequestCompletion(api, app)
+    ApiKeyManager.onHttpRequestCompletion(api, app)
+    SecurityManager.onHttpRequestCompletion(api, app)
+    SchedulerManager.onHttpRequestCompletion(api, app)
+    SqlAlchemyProxy.onHttpRequestCompletion(api, app)
     return app
 
 @Function

@@ -27,13 +27,16 @@ def initialize(apiInstance, appInstance) :
     apiInstance.schedulerManager.start()
     log.success(initialize, f'APScheduler schedulers initialized{"" if apiInstance.schedulerManager.api_enabled else ". But are disabled"}')
 
-def onShutdown(apiInstance, appInstance) :
-    @appInstance.teardown_appcontext
-    def closeAPSchedulerSchedulers(error):
-        try:
-            apiInstance.schedulerManager.shutdown(wait=False)
-        except Exception as exception:
-            log.failure(closeAPSchedulerSchedulers, 'Not possible to close APScheduler schedulers', exception)
-        log.success(closeAPSchedulerSchedulers, 'APScheduler schedulers successfully closed')
+def onHttpRequestCompletion(apiInstance, appInstance) :
+    ...
+
+def shutdown(apiInstance, apiInstance):
+    try:
+        apiInstance.schedulerManager.shutdown(wait=False)
+    except Exception as exception:
+        log.failure(closeAPSchedulerSchedulers, 'Not possible to close APScheduler schedulers', exception)
+    log.success(closeAPSchedulerSchedulers, 'APScheduler schedulers successfully closed')
+
+def onShutdown(apiInstance, apiInstance) :
     import atexit
-    atexit.register(lambda: apiInstance.schedulerManager.shutdown(wait=False))
+    atexit.register(lambda: shutdown(apiInstance, apiInstance))

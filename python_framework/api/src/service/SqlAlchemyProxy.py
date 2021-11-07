@@ -53,15 +53,15 @@ LIST = '''List'''
 CASCADE_ONE_TO_MANY = '''all,delete'''
 
 @Function
-def getNewModel() :
+def getNewModel():
     return declarative_base()
 
 @Function
-def attributeIt(modelName) :
+def attributeIt(modelName):
     return f'{modelName[0].lower()}{modelName[1:]}'
 
 @Function
-def getManyToMany(sister, brother, refferenceModel) :
+def getManyToMany(sister, brother, refferenceModel):
     # featureList = relationship(FEATURE, secondary=featureToSampleAssociation, back_populates=attributeIt(f'{__tablename__}{LIST}'))
     # sampleList = relationship(SAMPLE, secondary=featureToSampleAssociation, back_populates=attributeIt(f'{__tablename__}{LIST}'))
     manySisterToManyBrother = Table(
@@ -76,30 +76,30 @@ def getManyToMany(sister, brother, refferenceModel) :
     return sisterList, brotherList, manySisterToManyBrother
 
 @Function
-def getOneToMany(owner, pet, refferenceModel) :
+def getOneToMany(owner, pet, refferenceModel):
     return relationship(pet, back_populates=attributeIt(f'{owner}'), cascade=CASCADE_ONE_TO_MANY)
 
 @Function
-def getManyToOne(pet, owner, refferenceModel) :
+def getManyToOne(pet, owner, refferenceModel):
     ownerId = Column(Integer(), ForeignKey(f'{owner}{c.DOT}{attributeIt(ID)}'))
     owner = relationship(owner, back_populates=attributeIt(f'{pet}{LIST}'))
     return owner, ownerId
 
 @Function
-def getOneToOneParent(parent, child, refferenceModel) :
+def getOneToOneParent(parent, child, refferenceModel):
     childAttribute = relationship(child, uselist=False, back_populates=attributeIt(parent))
     return childAttribute
 
 @Function
-def getOneToOneChild(child, parent, refferenceModel) :
+def getOneToOneChild(child, parent, refferenceModel):
     parentId = Column(Integer(), ForeignKey(f'{parent}{c.DOT}{attributeIt(ID)}'))
     parentAttribute = relationship(parent, back_populates=attributeIt(child))
     return parentAttribute, parentId
 
-def isNeitherNoneNorBlank(thing) :
+def isNeitherNoneNorBlank(thing):
     return ObjectHelper.isNotNone(thing) and StringHelper.isNotBlank(str(thing))
 
-def isNoneOrBlank(thing) :
+def isNoneOrBlank(thing):
     return ObjectHelper.isNone(thing) or StringHelper.isBlank(str(thing))
 
 
@@ -155,7 +155,7 @@ class SqlAlchemyProxy:
         # self.run()
         log.debug(self.__init__, 'Database initialized')
 
-    def getNewEngine(self, dialect, echo, connectArgs) :
+    def getNewEngine(self, dialect, echo, connectArgs):
         url = self.getUrl(dialect)
         connectArgs = self.getConnectArgs(connectArgs)
         engine = None
@@ -180,10 +180,10 @@ class SqlAlchemyProxy:
                 raise secondException
         log.debug(self.close, 'Connections closed')
 
-    def getUrl(self, dialect) :
+    def getUrl(self, dialect):
         log.log(self.getUrl, 'Loading repository configuration')
         url = EnvironmentHelper.get(self.ENV_DATABASE_URL)
-        if isNeitherNoneNorBlank(url) :
+        if isNeitherNoneNorBlank(url):
             dialect = None
             driver = None
             database = None
@@ -195,7 +195,7 @@ class SqlAlchemyProxy:
             log.log(self.getUrl, f'Prioritising repository url in {self.ENV_DATABASE_URL} environment variable')
         else :
             url = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_URL}')
-            if isNeitherNoneNorBlank(url) :
+            if isNeitherNoneNorBlank(url):
                 dialect = None
                 driver = None
                 database = None
@@ -214,19 +214,19 @@ class SqlAlchemyProxy:
                 host = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_HOST}')
                 port = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_PORT}')
                 schema = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_SCHEMA}')
-                if isNeitherNoneNorBlank(username) and isNeitherNoneNorBlank(password) :
+                if isNeitherNoneNorBlank(username) and isNeitherNoneNorBlank(password):
                     url += f'{username}{c.COLON}{password}'
-                if isNeitherNoneNorBlank(host) and isNeitherNoneNorBlank(port) :
+                if isNeitherNoneNorBlank(host) and isNeitherNoneNorBlank(port):
                     url += f'{c.ARROBA}{host}{c.COLON}{port}'
                 url += c.SLASH
                 database = f'{database}' if isNeitherNoneNorBlank(database) else f'{self.DEFAULT_LOCAL_STORAGE_NAME if ObjectHelper.isNone(self.globals.apiName) else self.globals.apiName}{c.DOT}{self.EXTENSION}'
-                if not isNeitherNoneNorBlank(dialect) :
+                if not isNeitherNoneNorBlank(dialect):
                     dialect = self.DEFAULT_DIALECT
                 plusDriverOrNothing = f'{c.PLUS}{driver}' if isNeitherNoneNorBlank(driver) else c.NOTHING
                 dialectAndDriver = f'''{dialect}{plusDriverOrNothing}'''
                 url = f'{dialectAndDriver}{c.COLON}{c.DOUBLE_SLASH}{url}{database}'
                 log.log(self.getUrl, 'Prioritising repository yamel configuration')
-        if SettingHelper.activeEnvironmentIsLocal() :
+        if SettingHelper.activeEnvironmentIsLocal():
             log.prettyJson(self.getUrl, 'Repository configuations', {**self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}'), **{
                 'dialect' : dialect,
                 'driver' : driver,
@@ -241,8 +241,8 @@ class SqlAlchemyProxy:
         # log.prettyPython(self.getUrl, 'url', url, logLevel=log.LOG)
         return url
 
-    def getConnectArgs(self, connectArgs) :
-        if ObjectHelper.isNone(connectArgs) :
+    def getConnectArgs(self, connectArgs):
+        if ObjectHelper.isNone(connectArgs):
             connectArgs = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_SETTINGS}')
             connectArgs = {} if ObjectHelper.isNotDictionary(connectArgs) else connectArgs
         return connectArgs
@@ -333,14 +333,14 @@ class SqlAlchemyProxy:
         return object
 
     @Method
-    def existsByQueryAndCommit(self, query, modelClass) :
+    def existsByQueryAndCommit(self, query, modelClass):
         exists = self.session.query(literal(True)).filter(self.session.query(modelClass).filter_by(**query).exists()).scalar()
         self.session.commit()
         return exists
 
     @Method
     def findAllByQueryAndCommit(self, query, modelClass):
-        if ObjectHelper.isNotNone(query) :
+        if ObjectHelper.isNotNone(query):
             objectList = self.session.query(modelClass).filter_by(**{k: v for k, v in query.items() if ObjectHelper.isNotNone(v)}).all()
         self.session.commit()
         return objectList
@@ -360,29 +360,29 @@ class SqlAlchemyProxy:
         self.session.commit()
 
 
-def addResource(apiInstance, appInstance, baseModel=None, echo=False) :
+def addResource(apiInstance, appInstance, baseModel=None, echo=False):
     apiInstance.repository = SqlAlchemyProxy(baseModel, apiInstance.globals, echo=echo)
     if ObjectHelper.isNotNone(apiInstance.repository):
         log.success(addResource, 'SqlAlchemyProxy database connection created')
     return apiInstance.repository
 
-def initialize(apiInstance, appInstance) :
+def initialize(apiInstance, appInstance):
     apiInstance.repository.run()
     log.success(initialize, 'SqlAlchemyProxy database is running')
 
-def afterHttpRequest(apiInstance, appInstance):
-    @appInstance.teardown_appcontext
-    def closeSqlAlchemyProxyConnection(error):
-        apiInstance.repository.session.close()
-        log.success(closeSqlAlchemyProxyConnections, 'SqlAlchemyProxy database connection successfully closed')
+def onHttpRequestCompletion(apiInstance, appInstance):
+    # @appInstance.teardown_appcontext
+    # def methodNameMustBeUnique(error):
+    #       do something here
+    ...
 
-def onShutdown(apiInstance, appInstance):
-    @appInstance.teardown_appcontext
-    def closeSqlAlchemyProxyConnection(error):
-        try:
-            apiInstance.repository.close()
-        except Exception as exception:
-            log.failure(closeSqlAlchemyProxyConnection, 'Not possible to close SqlAlchemyProxy database connection', exception)
-        log.success(closeSqlAlchemyProxyConnection, 'SqlAlchemyProxy database connection successfully closed')
+def shutdown(apiInstance, apiInstance):
+    try:
+        apiInstance.repository.close()
+    except Exception as exception:
+        log.failure(shutdown, 'Not possible to close SqlAlchemyProxy database connection', exception)
+    log.success(shutdown, 'SqlAlchemyProxy database connection successfully closed')
+
+def onShutdown(apiInstance, apiInstance):
     import atexit
-    atexit.register(lambda: apiInstance.repository.close())
+    atexit.register(lambda: shutdown(apiInstance, apiInstance))
