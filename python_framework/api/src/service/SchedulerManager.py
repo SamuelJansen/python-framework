@@ -34,8 +34,8 @@ def shutdown(apiInstance, appInstance):
     try:
         apiInstance.schedulerManager.shutdown(wait=False)
     except Exception as exception:
-        log.failure(closeAPSchedulerSchedulers, 'Not possible to close APScheduler schedulers', exception)
-    log.success(closeAPSchedulerSchedulers, 'APScheduler schedulers successfully closed')
+        log.failure(shutdown, 'Not possible to close APScheduler schedulers', exception)
+    log.success(shutdown, 'APScheduler schedulers successfully closed')
 
 def onShutdown(apiInstance, appInstance) :
     import atexit
