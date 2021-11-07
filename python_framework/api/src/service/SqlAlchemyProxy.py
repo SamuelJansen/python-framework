@@ -381,7 +381,7 @@ def onShutdown(apiInstance, appInstance):
         try:
             apiInstance.repository.session.close()
         except Exception as exception:
-            log.failure(onShutdown, 'Not possible to close SqlAlchemyProxy database connection')
+            log.failure(closeSqlAlchemyProxyConnections, 'Not possible to close SqlAlchemyProxy database connection', exception)
         log.success(closeSqlAlchemyProxyConnections, 'SqlAlchemyProxy database connection successfully closed')
     import atexit
     atexit.register(lambda: apiInstance.repository.close())
