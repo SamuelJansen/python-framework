@@ -136,14 +136,14 @@ def initialize(
     api.cors.api = api
     addGlobalsTo(api)
     OpenApiManager.newDocumentation(api, app)
-    SchedulerManager.addSchedulerManager(api, app)
-    SessionManager.addSessionManager(api, app)
-    ApiKeyManager.addApiKeyManager(api, app)
-    SecurityManager.addSecurityManager(api, app)
+    SqlAlchemyProxy.addResource(api, app, baseModel=refferenceModel, echo=False)
+    SchedulerManager.addResource(api, app)
+    SessionManager.addResource(api, app)
+    ApiKeyManager.addResource(api, app)
+    SecurityManager.addResource(api, app)
     args = [api, app, api.sessionManager, api.apiKeyManager, api.securityManager]
     for resourceType in FlaskManager.KW_RESOURCE_LIST :
         args.append(getResourceList(api, resourceType))
-    args.append(refferenceModel)
     addFlaskApiResources(*args)
 
     return app
@@ -191,12 +191,7 @@ def addClientListTo(apiInstance,clientList) :
         apiInstance.bindResource(apiInstance,client())
 
 @Function
-def addRepositoryTo(apiInstance, repositoryList, model) :
-    apiInstance.repository = SqlAlchemyProxy.SqlAlchemyProxy(
-        model,
-        apiInstance.globals,
-        echo = False
-    )
+def addRepositoryTo(apiInstance, repositoryList) :
     for repository in repositoryList :
         apiInstance.bindResource(apiInstance,repository())
 
@@ -243,11 +238,10 @@ def addFlaskApiResources(
         validatorList,
         mapperList,
         helperList,
-        converterList,
-        model
+        converterList
     ) :
     addResourceAttibutes(apiInstance)
-    addRepositoryTo(apiInstance, repositoryList, model)
+    addRepositoryTo(apiInstance, repositoryList)
     addSchedulerListTo(apiInstance, schedulerList)
     addClientListTo(apiInstance, clientList)
     addServiceListTo(apiInstance, serviceList)
@@ -256,6 +250,7 @@ def addFlaskApiResources(
     addMapperListTo(apiInstance, mapperList)
     addHelperListTo(apiInstance, helperList)
     addConverterListTo(apiInstance, converterList)
+    SqlAlchemyProxy.initialize(apiInstance, appInstance)
     SchedulerManager.initialize(apiInstance, appInstance)
     SessionManager.addJwt(sessionInstance)
     ApiKeyManager.addJwt(apiKeyManager)

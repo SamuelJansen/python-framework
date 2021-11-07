@@ -191,7 +191,7 @@ def getCurrentUser(userClass=None, apiInstance=None):
                     ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
             return currentUsert
 
-def addSecurityManager(apiInstance, appInstance):
+def addResource(apiInstance, appInstance):
     apiInstance.securityManager = None
     try:
         apiInstance.securityManager = getJwtMannager(
@@ -203,4 +203,4 @@ def addSecurityManager(apiInstance, appInstance):
         )
         apiInstance.securityManager.api = apiInstance
     except Exception as exception:
-        log.warning(addSecurityManager, 'Not possible to add SecurityManager', exception=exception)
+        log.warning(addResource, 'Not possible to add SecurityManager', exception=exception)

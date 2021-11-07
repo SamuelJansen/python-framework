@@ -298,7 +298,7 @@ def getCurrentApiKey(apiKeyClass=None, apiInstance=None):
                 ReflectionHelper.setAttributeOrMethod(currentApiKey, attributeName, data.get(attributeName))
         return currentApiKey
 
-def addApiKeyManager(apiInstance, appInstance):
+def addResource(apiInstance, appInstance):
     apiInstance.apiKeyManager = None
     try:
         apiInstance.apiKeyManager = getJwtMannager(
@@ -310,7 +310,7 @@ def addApiKeyManager(apiInstance, appInstance):
         )
         apiInstance.apiKeyManager.api = apiInstance
     except Exception as exception:
-        log.warning(addApiKeyManager, 'Not possible to add ApiKeyManager', exception=exception)
+        log.warning(addResource, 'Not possible to add ApiKeyManager', exception=exception)
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)

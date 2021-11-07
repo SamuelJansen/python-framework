@@ -303,7 +303,7 @@ def getCurrentSession(sessionClass=None, apiInstance=None):
                 ReflectionHelper.setAttributeOrMethod(currentSession, attributeName, data.get(attributeName))
         return currentSession
 
-def addSessionManager(apiInstance, appInstance):
+def addResource(apiInstance, appInstance):
     apiInstance.sessionManager = None
     try:
         apiInstance.sessionManager = getJwtMannager(
@@ -315,7 +315,7 @@ def addSessionManager(apiInstance, appInstance):
         )
         apiInstance.sessionManager.api = apiInstance
     except Exception as exception:
-        log.warning(addSessionManager, 'Not possible to add SessionManager', exception=exception)
+        log.warning(addResource, 'Not possible to add SessionManager', exception=exception)
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)

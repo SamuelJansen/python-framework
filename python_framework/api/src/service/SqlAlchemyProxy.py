@@ -102,13 +102,6 @@ def isNeitherNoneNorBlank(thing) :
 def isNoneOrBlank(thing) :
     return ObjectHelper.isNone(thing) or StringHelper.isBlank(str(thing))
 
-def initialize(apiInstance, appInstance) :
-    apiInstance.repository.run()
-
-def shutdown(apiInstance, appInstance) :
-    import atexit
-    atexit.register(lambda: apiInstance.repository.close())
-
 
 class SqlAlchemyProxy:
 
@@ -159,7 +152,7 @@ class SqlAlchemyProxy:
         self.model = model
         self.model.metadata.bind = self.engine
         # self.model.metadata.reflect()
-        self.run()
+        # self.run()
 
     def getNewEngine(self, dialect, echo, connectArgs) :
         url = self.getUrl(dialect)
@@ -170,7 +163,6 @@ class SqlAlchemyProxy:
         except Exception as exception :
             log.error(self.getNewEngine, 'Not possible to create engine', exception)
             raise exception
-        log.success(self.close, 'Database connection created')
         return engine
 
     def close(self):
@@ -178,14 +170,13 @@ class SqlAlchemyProxy:
             close_all_sessions()
             self.engine.dispose() # NOTE: close required before dispose!
         except Exception as firstException:
-            log.error(self.close, 'not possible to close connections. Going for a second attempt', firstException)
+            log.warning(self.close, 'not possible to close connections. Going for a second attempt', exception=firstException)
             try:
                 close_all_sessions()
                 self.engine.dispose() # NOTE: close required before dispose!
             except Exception as secondException:
                 log.error(self.close, 'not possible to close connections at the second attempt either', secondException)
                 raise secondException
-        log.success(self.close, 'Database connection successfuly closed')
 
     def getUrl(self, dialect) :
         log.log(self.getUrl, 'Loading repository configuration')
@@ -260,7 +251,6 @@ class SqlAlchemyProxy:
             self.model.metadata.create_all(self.engine)
         except Exception as exception :
             log.error(self.run, 'Not possible to run', exception)
-        log.success(self.close, 'Database is running')
 
     @Method
     def commit(self):
@@ -365,3 +355,20 @@ class SqlAlchemyProxy:
             object = self.session.query(modelClass).filter(modelClass.key == key).first()
             self.session.delete(object)
         self.session.commit()
+
+
+
+
+def addResource(apiInstance, appInstance, baseModel=model, echo=False) :
+    apiInstance.repository = SqlAlchemyProxy(baseModel, apiInstance.globals, echo=echo)
+    log.success(addResource, 'SqlAlchemyProxy database connection created')
+    return apiInstance.repository
+
+def initialize(apiInstance, appInstance) :
+    apiInstance.repository.run()
+    log.success(initialize, 'SqlAlchemyProxy database is running')
+
+def shutdown(apiInstance, appInstance) :
+    import atexit
+    atexit.register(lambda: apiInstance.repository.close())
+    log.success(shutdown, 'SqlAlchemyProxy database connection successfully closed')

@@ -1,13 +1,12 @@
 from python_helper import Constant as c
-from python_helper import EnvironmentHelper
+from python_helper import EnvironmentHelper, log
 from flask_apscheduler import APScheduler
 from python_framework.api.src.constant import ConfigurationKeyConstant, SchedulerConstant
 from python_framework.api.src.converter.static import ConverterStatic
 
 
-def addSchedulerManager(apiInstance, appInstance) :
+def addResource(apiInstance, appInstance) :
     scheduler = APScheduler()
-
     globals = apiInstance.globals
     scheduler.api_enabled = globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE) is True
     scheduler.timezone = ConverterStatic.getValueOrDefault(
@@ -19,12 +18,15 @@ def addSchedulerManager(apiInstance, appInstance) :
     appInstance.config[SchedulerConstant.KW_SCHEDULER_TIMEZONE] = scheduler.timezone
 
     apiInstance.schedulerManager = scheduler
+    log.success(addResource, f'APScheduler schedulers are created{"" if apiInstance.schedulerManager.api_enabled else ". But are disabled"}')
     return scheduler
 
 def initialize(apiInstance, appInstance) :
     apiInstance.schedulerManager.init_app(appInstance)
     apiInstance.schedulerManager.start()
+    log.success(initialize, f'APScheduler schedulers initialized{"" if apiInstance.schedulerManager.api_enabled else ". But are disabled"}')
 
 def shutdown(apiInstance, appInstance) :
     import atexit
     atexit.register(lambda: apiInstance.schedulerManager.shutdown(wait=False))
+    log.success(shutdown, 'APScheduler schedulers successfully closed')
