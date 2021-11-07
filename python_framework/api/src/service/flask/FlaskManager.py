@@ -454,7 +454,7 @@ def handleControllerMethod(
         resourceInstanceMethod,
         'request',
         {
-            'headers': headers,
+            'headers': dict(headers),
             # 'query': query, safellyGetUrl() returns query param
             'body': requestBodyAsJson
         },
@@ -667,7 +667,7 @@ def ControllerMethod(
                     resourceInstanceMethod,
                     'response',
                     {
-                        'headers': FlaskUtil.safellyGetResponseHeaders(response),
+                        'headers': dict(FlaskUtil.safellyGetResponseHeaders(response)),
                         'body': FlaskUtil.safellyGetResponseJson(response)
                     },
                     # json.loads(Serializer.jsonifyIt(controllerResponse)),
