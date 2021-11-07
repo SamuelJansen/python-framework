@@ -93,7 +93,7 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
                 'headerName': appInstance.config[JwtConstant.KW_JWT_HEADER_NAME],
                 'headerType': appInstance.config[JwtConstant.KW_JWT_HEADER_TYPE]
             }
-            log.setting(getJwtMannager, f'''JWT security: {info}''')
+            log.prettyJson(getJwtMannager, f'JWT security', info, logLevel=log.SETTING)
         return jwtMannager
 
 @Function

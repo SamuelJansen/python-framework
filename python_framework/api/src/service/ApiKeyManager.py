@@ -194,7 +194,7 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
                 'headerName': jwtManager.headerName,
                 'headerType': jwtManager.headerType
             }
-            log.setting(getJwtMannager, f'''JWT apiKey: {info}''')
+            log.prettyJson(getJwtMannager, f'JWT apiKey', info, logLevel=log.SETTING)
         return jwtManager
 
 @Function

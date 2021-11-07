@@ -211,7 +211,7 @@ class SqlAlchemyProxy:
                 url = f'{dialectAndDriver}{c.COLON}{c.DOUBLE_SLASH}{url}{database}'
                 log.log(self.getUrl, 'Prioritising repository yamel configuration')
         if SettingHelper.activeEnvironmentIsLocal() :
-            log.prettyPython(self.getUrl, 'Repository configuations', {**self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}'), **{
+            log.prettyJson(self.getUrl, 'Repository configuations', {**self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}'), **{
                 'dialect' : dialect,
                 'driver' : driver,
                 'database' : database,
