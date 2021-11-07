@@ -371,10 +371,10 @@ def initialize(apiInstance, appInstance):
     log.success(initialize, 'SqlAlchemyProxy database is running')
 
 def onHttpRequestCompletion(apiInstance, appInstance):
-    # @appInstance.teardown_appcontext
-    # def methodNameMustBeUnique(error):
-    #       do something here
-    ...
+    try:
+        apiInstance.repository.session.close()
+    except Exception as exception:
+        log.failure(onHttpRequestCompletion, 'Not possible to close SqlAlchemyProxy session', exception)
 
 def shutdown(apiInstance, appInstance):
     try:
