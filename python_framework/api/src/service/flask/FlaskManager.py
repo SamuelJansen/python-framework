@@ -105,9 +105,8 @@ def newApp(
     try:
         app = globals.importResource(KW_APP, resourceModuleName=globalsInstance.apiName, required=True)
     except Exception as exception:
-        apiName = globalsInstance.getApiSetting(lobals.AttributeKey.API_NAME)
         apiPath = f'{c.DOT}{EnvironmentHelper.OS_SEPARATOR}{globalsInstance.BASE_API_PATH}{globals.AttributeKey.API_NAME}.py'
-        errorMessage = f"Not possible to load app. Make shure it's name is properlly configured at '{apiName}' and it's instance is named 'app' at '{apiPath}'"
+        errorMessage = f"Not possible to load app. Make shure it's name is properlly configured at '{globalsInstance.apiName}' and it's instance is named 'app' at '{apiPath}'"
         log.error(newApp, errorMessage, exception)
         raise exception
     if ObjectHelper.isNone(app):
