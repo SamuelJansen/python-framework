@@ -162,11 +162,12 @@ def getCurrentUser(userClass=None):
         rawJwt = getJwtBody()
         identity = getIdentity(rawJwt=rawJwt)
         context = getContext(rawJwt=rawJwt)
+        data = getData(rawJwt=rawJwt)
         if ObjectHelper.isNone(userClass):
             return {
                 JwtConstant.KW_IDENTITY: identity,
                 JwtConstant.KW_CONTEXT: context,
-                JwtConstant.KW_DATA: getData(rawJwt=rawJwt)
+                JwtConstant.KW_DATA: data
             }
         else:
             currentUsert = userClass()
@@ -174,7 +175,6 @@ def getCurrentUser(userClass=None):
                 JwtConstant.KW_IDENTITY: identity,
                 JwtConstant.KW_CONTEXT: context
             }
-            data = getData(rawJwt=rawJwt)
             for attributeName in data:
                 if ReflectionHelper.hasAttributeOrMethod(currentUsert, attributeName):
                     ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))

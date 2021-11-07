@@ -769,7 +769,7 @@ def pythonRun_apiKeyManager() :
 
     responseGetConsumeAfterRefreshBeforeRefresh = requests.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
     expectedResponseGetConsumeAfterRefreshBeforeRefresh = {
-        "message": "Session not allowed",
+        "message": "ApiKey not allowed",
         "timestamp": "2021-11-02 21:47:32.444629"
     }
     assert ObjectHelper.equals(
@@ -810,7 +810,7 @@ def pythonRun_apiKeyManager() :
 
     responseLogout = requests.put(BASE_URI + PUT_LOGOUT_URI, json=payload, headers=headers)
     assert ObjectHelper.isNotNone(responseLogout.json())
-    expectedResponseLogout = {'message': 'Session closed'}
+    expectedResponseLogout = {'message': 'ApiKey closed'}
     assert ObjectHelper.equals(
         expectedResponseLogout,
         responseLogout.json()

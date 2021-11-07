@@ -4,6 +4,13 @@ from python_helper import Constant as c
 from python_helper import ObjectHelper, log, Function
 import globals
 
+
+KEY_API_INSTANCE = 'apiInstance'
+API_INSTANCE_HOLDER = {
+    KEY_API_INSTANCE: None
+}
+
+
 Response = Response
 request = request
 Resource = flask_restful.Resource
@@ -109,3 +116,21 @@ def validateFlaskApi(apiInstance) :
 def validateResourceInstance(resourceInstance) :
     if ObjectHelper.isNone(resourceInstance) :
         raise Exception(f'Resource cannot be None')
+
+def retrieveApiInstance(apiInstance=None, arguments=None):
+    if isApiInstance(apiInstance):
+        return apiInstance
+    if isApiInstance(API_INSTANCE_HOLDER.get(KEY_API_INSTANCE)):
+        return API_INSTANCE_HOLDER.get(KEY_API_INSTANCE)
+    if ObjectHelper.isNone(apiInstance) and ObjectHelper.isNotNone(arguments):
+        try:
+            apiInstance = arguments[0].globals.api
+        except Exception as exception:
+            log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance by {arguments}. Going for another approach''', exception=exception)
+    if not isApiInstance(apiInstance):
+        log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance. Going for a slower approach''')
+        apiInstance = getNullableApi()
+    if ObjectHelper.isNone(apiInstance):
+        raise Exception('Not possible to retrieve api instance')
+    API_INSTANCE_HOLDER[KEY_API_INSTANCE] = apiInstance
+    return apiInstance

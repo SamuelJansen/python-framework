@@ -36,31 +36,3 @@ def getParsedUrl(url, host='localhost') :
     if '0.0.0.0' in urlAsString :
         urlAsString = urlAsString.replace('0.0.0.0', host)
     return urlAsString
-
-# import time
-# import subprocess
-# import os
-# import sys
-
-# privateServerLink = 'https://www.roblox.com/games/2414851778/TIER-20-Dungeon-Quest?privateServerLinkCode=GXVlmYh0Z7gwLPBf7H5FWk3ClTVesorY'
-
-# browserName = input(str("Browser Type: chrome, opera, iexplore, firefox : "))
-# userSleepTime = int(input("How long do you want it to run?"))
-# if browserName == 'opera':
-#     userBrowserD = 'launcher.exe'
-# else:
-#     userBrowserD = browserName
-#
-# if browserName == "chrome":
-#     taskToKill = "chrome.exe"
-# else:
-#     taskToKill = "iexplore.exe"
-
-
-# while 1 == 1:
-#     subprocess.Popen('SynapseX.exe')
-#     time.sleep(7)
-#     webbrowser.get(browserPath).open_new_tab(privateServerLink)
-#     time.sleep(7)
-#     os.system('taskkill /f /im '+taskToKill)
-#     time.sleep(userSleepTime)

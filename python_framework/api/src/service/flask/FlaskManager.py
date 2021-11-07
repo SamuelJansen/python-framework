@@ -17,7 +17,6 @@ from python_framework.api.src.constant import JwtConstant
 import globals
 import json
 
-FRAMEWORK_GLOBALS_INSTANCE = None
 
 KW_URL = 'url'
 KW_DEFAULT_URL = 'defaultUrl'

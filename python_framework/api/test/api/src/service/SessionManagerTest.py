@@ -67,8 +67,6 @@ def sessionManager_worksProperly() :
         encodedPayload = sessionManager.encode(payload)
         decodedPayload = sessionManager.decode(encodedPayload)
         accessException = TestHelper.getRaisedException(sessionManager.validateAccessSession, rawJwt=decodedPayload)
-        if accessException:
-            input(accessException)
     refreshException = TestHelper.getRaisedException(sessionManager.validateRefreshSession, rawJwt=decodedPayload)
     endTime = time.time() - initTime
 

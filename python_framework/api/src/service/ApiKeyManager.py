@@ -15,10 +15,6 @@ from python_framework.api.src.annotation.GlobalExceptionAnnotation import Encaps
 
 
 OPTION_VERIFY_SIGNATURE = 'verify_signature'
-KEY_API_INSTANCE = 'apiInstance'
-API_INSTANCE_HOLDER = {
-    KEY_API_INSTANCE: None
-}
 BLACK_LIST = set()
 
 
@@ -222,7 +218,7 @@ def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data
     return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
-            JwtConstant.KW_JTI: getJti(apiInstance=apiInstance),
+            JwtConstant.KW_JTI: getNewJti(),
             JwtConstant.KW_EXPIRATION: UtcDateTimeUtil.plusMinutes(timeNow, minutes=deltaMinutes),
             JwtConstant.KW_IDENTITY: identity,
             JwtConstant.KW_FRESH: False,
@@ -256,7 +252,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, apiInstance=N
     return apiInstance.apiKeyManager.encode({
             JwtConstant.KW_IAT: getIat(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_NFB: getNfb(rawJwt=rawJwt, apiInstance=apiInstance),
-            JwtConstant.KW_JTI: getJti(rawJwt=rawJwt, apiInstance=apiInstance),
+            JwtConstant.KW_JTI: getNewJti(),
             JwtConstant.KW_EXPIRATION: getExpiration(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_IDENTITY: getIdentity(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_FRESH: False,
@@ -272,11 +268,12 @@ def getCurrentApiKey(apiKeyClass=None, apiInstance=None):
     rawJwt = getJwtBody(apiInstance=apiInstance)
     identity = getIdentity(rawJwt=rawJwt, apiInstance=apiInstance)
     context = getContext(rawJwt=rawJwt, apiInstance=apiInstance)
+    data = getData(rawJwt=rawJwt, apiInstance=apiInstance)
     if ObjectHelper.isNone(apiKeyClass):
         return {
             JwtConstant.KW_IDENTITY: identity,
             JwtConstant.KW_CONTEXT: context,
-            JwtConstant.KW_DATA: getData(rawJwt=rawJwt, apiInstance=apiInstance)
+            JwtConstant.KW_DATA: data
         }
     else:
         currentApiKey = apiKeyClass()
@@ -284,7 +281,6 @@ def getCurrentApiKey(apiKeyClass=None, apiInstance=None):
             JwtConstant.KW_IDENTITY: identity,
             JwtConstant.KW_CONTEXT: context
         }
-        data = getData(rawJwt=rawJwt, apiInstance=apiInstance)
         for attributeName in data:
             if ReflectionHelper.hasAttributeOrMethod(currentApiKey, attributeName):
                 ReflectionHelper.setAttributeOrMethod(currentApiKey, attributeName, data.get(attributeName))
@@ -305,31 +301,13 @@ def addApiKeyManager(apiInstance, appInstance):
         log.warning(addApiKeyManager, 'Not possible to add ApiKeyManager', exception=exception)
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
-    if FlaskUtil.isApiInstance(apiInstance):
-        return apiInstance
-    if FlaskUtil.isApiInstance(API_INSTANCE_HOLDER.get(KEY_API_INSTANCE)):
-        return API_INSTANCE_HOLDER.get(KEY_API_INSTANCE)
-    if ObjectHelper.isNone(apiInstance) and ObjectHelper.isNotNone(arguments):
-        try:
-            apiInstance = arguments[0].globals.api
-        except Exception as exception:
-            log.log(retrieveApiInstance, f'''Not possible to retrieve api instance. args: {arguments}''', exception=exception, muteStackTrace=True)
-            log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance by arguments. Going for another approach''')
-    if not FlaskUtil.isApiInstance(apiInstance):
-        log.warning(retrieveApiInstance, f'''Not possible to retrieve api instance. Going for a slower approach''')
-        apiInstance = FlaskUtil.getApi()
-    if ObjectHelper.isNone(apiInstance):
-        raiseUnretrievedApiInstance()
+    apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)
     if ObjectHelper.isNone(apiInstance.apiKeyManager):
-        raise Exception('There is no apiKey manager')
-    API_INSTANCE_HOLDER[KEY_API_INSTANCE] = apiInstance
+        raise Exception('There is no api key manager')
     return apiInstance
 
 def raiseApiKeyContextCannotBeNone():
     raise Exception('Context cannot be None')
-
-def raiseUnretrievedApiInstance():
-    raise Exception('Not possible to retrieve api instance')
 
 def getNewJti():
     return f"{int(f'{time.time()}'.replace('.', '')) + int(f'{time.time()}'.replace('.', ''))}"
