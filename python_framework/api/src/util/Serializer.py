@@ -1,4 +1,5 @@
-import json, globals, uuid
+import json, globals
+from uuid import uuid4, UUID
 from python_helper import Constant as c
 from python_helper import StringHelper, ObjectHelper, log, ReflectionHelper
 from python_helper import Function
@@ -62,7 +63,7 @@ DATE_TIME_RELATED = [
 ]
 
 def newUuid():
-    return uuid.uuid4()
+    return uuid4()
 
 def isSerializerList(instance) :
     return ObjectHelper.isList(instance) or type(instance) == InstrumentedList
@@ -127,6 +128,8 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
     # print(f'toClass: {toClass}')
     if ObjectHelper.isNativeClassInstance(fromJson) and toClass == fromJson.__class__ :
         return fromJson
+    if isinstance(fromJson, UUID):
+        return str(fromJson)
     attributeNameList = getAttributeNameList_andPleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass)
     classRole = getClassRole(toClass)
     # print(f'        classRole = {classRole}')
