@@ -147,7 +147,7 @@ def runApi(*args, api=None, **kwargs):
         kwargs['port'] = api.port
     apiUrl = getApiUrl(api)
     documentationUrl = OpenApiManager.getDocumentationUrl(api)
-    healthCheckUrl = f'{documentationUrl[:-len(DocumentationManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
+    healthCheckUrl = f'{documentationUrl[:-len(OpenApiManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
     log.success(runApi, f'Api will run at {apiUrl}')
     log.success(runApi, f'Health check will be available at {healthCheckUrl}')
     log.success(runApi, f'Documentation will be available at {documentationUrl}')
