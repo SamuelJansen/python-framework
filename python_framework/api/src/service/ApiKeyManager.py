@@ -178,17 +178,24 @@ def addUserToBlackList(rawJwt=None, apiInstance=None):
 
 @Function
 def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, headerType=None):
-    if SettingHelper.activeEnvironmentIsLocal():
-        log.setting(getJwtMannager, f'JWT apiKey secret: {jwtSecret}')
     if not jwtSecret:
         log.warning(getJwtMannager, f'Not possible to instanciate apiKeyManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_API_KEY_SECRET}')
     else:
-        return JwtManager(
+        jwtManager = JwtManager(
             jwtSecret,
             ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_API_KEY_ALGORITHM),
             ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_API_KEY_HEADER_NAME),
             ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)
         )
+        if SettingHelper.activeEnvironmentIsLocal():
+            info = {
+                'secret': jwtManager.secret,
+                'algorithm': jwtManager.algorithm,
+                'headerName': jwtManager.headerName,
+                'headerType': jwtManager.headerType
+            }
+            log.setting(getJwtMannager, f'''JWT apiKey: {info}''')
+        return jwtManager
 
 @Function
 def addJwt(jwtInstance):

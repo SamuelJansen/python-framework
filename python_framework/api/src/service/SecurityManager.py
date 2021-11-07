@@ -77,8 +77,6 @@ def addUserToBlackList(rawJwt=None, apiInstance=None):
 
 @Function
 def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, headerType=None):
-    if SettingHelper.activeEnvironmentIsLocal():
-        log.setting(getJwtMannager, f'JWT security secret: {jwtSecret}')
     if ObjectHelper.isNone(jwtSecret):
         log.warning(getJwtMannager, f'Not possible to instanciate securityManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SECURITY_SECRET}')
     else:
@@ -88,6 +86,14 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
         appInstance.config[JwtConstant.KW_JWT_ALGORITHM] = ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SECURITY_ALGORITHM)
         appInstance.config[JwtConstant.KW_JWT_HEADER_NAME] = ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_SECURITY_HEADER_NAME)
         appInstance.config[JwtConstant.KW_JWT_HEADER_TYPE] = ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_SECURITY_HEADER_TYPE)
+        if SettingHelper.activeEnvironmentIsLocal():
+            info = {
+                'secret': jwtSecret,
+                'algorithm': appInstance.config[JwtConstant.KW_JWT_ALGORITHM],
+                'headerName': appInstance.config[JwtConstant.KW_JWT_HEADER_NAME],
+                'headerType': appInstance.config[JwtConstant.KW_JWT_HEADER_TYPE]
+            }
+            log.setting(getJwtMannager, f'''JWT security: {info}''')
         return jwtMannager
 
 @Function
