@@ -6,8 +6,6 @@ from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
 from python_framework.api.src.service import ExceptionHandler
-from python_framework.api.src.service import SqlAlchemyProxy
-from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.service import SessionManager
 from python_framework.api.src.service import ApiKeyManager
 from python_framework.api.src.service import SecurityManager
@@ -156,11 +154,6 @@ def runApi(*args, api=None, **kwargs):
     log.success(runApi, f'Health check will be available at {healthCheckUrl}')
     log.success(runApi, f'Documentation will be available at {documentationUrl}')
     api.app.run(*args, **kwargs)
-    SessionManager.onShutdown(api, api.app)
-    ApiKeyManager.onShutdown(api, api.app)
-    SecurityManager.onShutdown(api, api.app)
-    SchedulerManager.onShutdown(api, api.app)
-    SqlAlchemyProxy.onShutdown(api, api.app)
 
 @Function
 def getApiUrl(api):
