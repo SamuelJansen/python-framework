@@ -15,7 +15,7 @@ LOG_HELPER_SETTINGS = {
     log.WRAPPER : True,
     log.FAILURE : True,
     log.ERROR : True,
-    log.TEST : True
+    log.TEST : False
 }
 
 @Test(environmentVariables = {

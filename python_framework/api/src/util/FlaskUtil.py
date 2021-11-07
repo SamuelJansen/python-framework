@@ -21,19 +21,28 @@ def safellyGetRequestBody() :
         requestBody = safellyGetData()
     return requestBody if ObjectHelper.isNotNone(requestBody) else dict()
 
-def safellyGetJson():
+def safellyGetJson(response=None):
     jsonBody = None
     try :
-        jsonBody = request.get_json()
+        jsonBody = request.get_json(force=True)
     except Exception as exception:
         jsonBody = {}
-        log.log(safellyGetJson, f'Not possible to get body. Returning {jsonBody} by default', exception=exception)
+        log.log(safellyGetJson, f'Not possible to get request body. Returning {jsonBody} by default', exception=exception)
+    return jsonBody
+
+def safellyGetResponseJson(response):
+    jsonBody = None
+    try :
+        jsonBody = response.get_json(force=True)
+    except Exception as exception:
+        jsonBody = {}
+        log.log(safellyGetJson, f'Not possible to get response body. Returning {jsonBody} by default', exception=exception)
     return jsonBody
 
 def safellyGetData():
     dataBody = None
     try :
-        dataBody = request.get_json()
+        dataBody = request.get_json(force=True)
     except Exception as exception:
         dataBody = {}
         log.log(safellyGetJson, f'Not possible to get data. Returning {dataBody} by default', exception=exception)
@@ -61,7 +70,16 @@ def safellyGetHeaders():
         headers= request.headers
     except Exception as exception :
         headers = {}
-        log.log(safellyGetHeaders, 'Not possible to get headers. Returning {headers} by default', exception=exception)
+        log.log(safellyGetHeaders, 'Not possible to get request headers. Returning {headers} by default', exception=exception)
+    return headers if ObjectHelper.isNotNone(headers) else dict()
+
+def safellyGetResponseHeaders(response):
+    headers = None
+    try:
+        headers= response.headers
+    except Exception as exception :
+        headers = {}
+        log.log(safellyGetHeaders, 'Not possible to get response headers. Returning {headers} by default', exception=exception)
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 def safellyGetArgs():

@@ -440,21 +440,27 @@ def handleControllerMethod(
     muteStacktraceOnBusinessRuleException
 ):
     completeResponse = None
+    requestBodyAsJson = {}
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
-        if logRequest :
-            log.prettyJson(
-                resourceInstanceMethod,
-                'bodyRequest',
-                requestBodyAsJson,
-                condition = logRequest,
-                logLevel = log.INFO
-            )
         if Serializer.requestBodyIsPresent(requestBodyAsJson):
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(args, serializerReturn)
-    addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
-    addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
+    headers = addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
+    query = addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
+    log.info(resourceInstanceMethod, f'{FlaskUtil.safellyGetVerb()} - {FlaskUtil.safellyGetUrl()}')
+    if logRequest :
+        log.prettyJson(
+        resourceInstanceMethod,
+        'request',
+        {
+            'headers': headers,
+            # 'query': query, safellyGetUrl() returns query param
+            'body': requestBodyAsJson
+        },
+        condition = logRequest,
+        logLevel = log.INFO
+        )
     completeResponse = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
     if not (ObjectHelper.isNotNone(completeResponse) and Serializer.isSerializerCollection(completeResponse) and 2 == len(completeResponse)):
         raise GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
@@ -464,6 +470,7 @@ def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
     if ObjectHelper.isNotEmpty(givenClass):
         toClass = givenClass if ObjectHelper.isNotList(givenClass) else givenClass[0]
         kwargs[key] = Serializer.convertFromJsonToObject({k:v for k,v in valuesAsDictionary.items()}, toClass)
+    return valuesAsDictionary
 
 @Function
 def jsonifyResponse(response, contentType, status):
@@ -654,15 +661,20 @@ def ControllerMethod(
                 ###- request.args.get('x'):       y
             controllerResponse = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : completeResponse[1].enumName}
             status = completeResponse[1]
+            response = jsonifyResponse(controllerResponse, produces, status)
             if logResponse :
                 log.prettyJson(
                     resourceInstanceMethod,
-                    'bodyResponse',
-                    json.loads(Serializer.jsonifyIt(controllerResponse)),
+                    'response',
+                    {
+                        'headers': FlaskUtil.safellyGetResponseHeaders(response),
+                        'body': FlaskUtil.safellyGetResponseJson(response)
+                    },
+                    # json.loads(Serializer.jsonifyIt(controllerResponse)),
                     condition = logResponse,
                     logLevel = log.INFO
                 )
-            return jsonifyResponse(controllerResponse, produces, status)
+            return response
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         innerResourceInstanceMethod.url = controllerMethodUrl
         innerResourceInstanceMethod.requestHeaderClass = controllerMethodRequestHeaderClass
