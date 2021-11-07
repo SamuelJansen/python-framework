@@ -1,12 +1,12 @@
 from python_helper import Constant as c
 from python_helper import EnvironmentHelper
 from flask_apscheduler import APScheduler
-from python_framework.apiInstance.src.constant import ConfigurationKeyConstant, SchedulerConstant
+from python_framework.api.src.constant import ConfigurationKeyConstant, SchedulerConstant
 
 
 def addSchedulerManager(apiInstance, appInstance) :
     scheduler = APScheduler()
-    
+
     globals = apiInstance.globals
     scheduler.api_enabled = globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE) is True
     scheduler.timezone = ConverterStatic.getValueOrDefault(

@@ -1,8 +1,9 @@
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.constant import HealthCheckConstant
 from python_framework.api.src.service.flask.FlaskManager import Controller, ControllerMethod
 from python_framework.api.src.dto import ActuatorHealthDto
 
-@Controller(url='/health', tag='HealthCheck', description='HealthCheck controller')
+@Controller(url=HealthCheckConstant.URI, tag='HealthCheck', description='HealthCheck controller')
 class ActuatorHealthController:
 
     @ControllerMethod(

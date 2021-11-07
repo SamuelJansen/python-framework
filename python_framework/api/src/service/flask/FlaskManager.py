@@ -12,8 +12,7 @@ from python_framework.api.src.service import SessionManager
 from python_framework.api.src.service.openapi import OpenApiManager
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
-from python_framework.api.src.constant import ConfigurationKeyConstant
-from python_framework.api.src.constant import JwtConstant
+from python_framework.api.src.constant import ConfigurationKeyConstant, JwtConstant, HealthCheckConstant
 import globals
 import json
 
@@ -147,8 +146,11 @@ def runApi(*args, api=None, **kwargs):
     if 'port' not in kwargs and api.port :
         kwargs['port'] = api.port
     apiUrl = getApiUrl(api)
+    documentationUrl = OpenApiManager.getDocumentationUrl(api)
+    healthCheckUrl = f'{documentationUrl[:-len(DocumentationManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
     log.success(runApi, f'Api will run at {apiUrl}')
-    log.success(runApi, f'Documentation will be available at {OpenApiManager.getDocumentationUrl(api)}')
+    log.success(runApi, f'Health check will be available at {healthCheckUrl}')
+    log.success(runApi, f'Documentation will be available at {documentationUrl}')
     api.app.run(*args, **kwargs)
     SchedulerManager.shutdown(api, api.app)
 

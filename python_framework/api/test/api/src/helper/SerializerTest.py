@@ -69,7 +69,7 @@ DEFAULT_TIME_PATTERN = '%H:%M:%S'
 DATETIME_FULL_PATTERN = '%Y-%m-%d %H:%M:%S.%f'
 TIME_FULL_PATTERN = '%H:%M:%S.%f'
 
-PATTERN_LIST = [
+PATTERNS = [
     DEFAULT_DATETIME_PATTERN,
     DEFAULT_DATE_PATTERN,
     DEFAULT_TIME_PATTERN,
@@ -77,16 +77,16 @@ PATTERN_LIST = [
     TIME_FULL_PATTERN
 ]
 
-DATETIME_PATTERN_LIST = [
+DATETIME_PATTERNS = [
     DEFAULT_DATETIME_PATTERN,
     DATETIME_FULL_PATTERN
 ]
 
-DATE_PATTERN_LIST = [
+DATE_PATTERNS = [
     DEFAULT_DATE_PATTERN
 ]
 
-TIME_PATTERN_LIST = [
+TIME_PATTERNS = [
     DEFAULT_TIME_PATTERN,
     TIME_FULL_PATTERN
 ]
@@ -102,7 +102,7 @@ def parseToString(given, pattern=DEFAULT_DATETIME_PATTERN) :
 
 def parseToDatetimeOrDateOrTimePattern(given, pattern=DEFAULT_DATETIME_PATTERN, timedelta=False) :
     parsed = datetime.datetime.strptime(given, pattern)
-    if timedelta and pattern in TIME_PATTERN_LIST :
+    if timedelta and pattern in TIME_PATTERNS :
         # try :
         #     a = datetime.timedelta(hours=parsed.hour, minutes=parsed.minute, seconds=parsed.second, milliseconds=0, microseconds=0)
         #     print(type(a))
@@ -110,16 +110,16 @@ def parseToDatetimeOrDateOrTimePattern(given, pattern=DEFAULT_DATETIME_PATTERN, 
         #     print(exception)
         #     pass
         return datetime.timedelta(hours=parsed.hour, minutes=parsed.minute, seconds=parsed.second, milliseconds=0, microseconds=0)
-    if pattern in DATETIME_PATTERN_LIST :
+    if pattern in DATETIME_PATTERNS :
         return parsed
-    elif pattern in DATE_PATTERN_LIST :
+    elif pattern in DATE_PATTERNS :
         return parsed.date()
-    elif pattern in TIME_PATTERN_LIST :
+    elif pattern in TIME_PATTERNS :
         return parsed.time()
 
 def forcedlyParse(given, pattern=DEFAULT_DATETIME_PATTERN, timedelta=False) :
     parsed = None
-    for pattern in [pattern] + PATTERN_LIST :
+    for pattern in [pattern] + PATTERNS :
         try :
             parsed = parseToDatetimeOrDateOrTimePattern(given, pattern=pattern, timedelta=timedelta)
         except Exception as exception :

@@ -41,6 +41,7 @@ from python_framework.api.src.service import DocumentationService
 from python_framework.api.src.repository import DocumentationRepository
 
 from python_framework.api.src.constant import ConfigurationKeyConstant
+from python_framework.api.src.constant import HealthCheckConstant
 from python_framework.api.src.constant import SchedulerConstant
 from python_framework.api.src.constant import JwtConstant
 
