@@ -8,7 +8,7 @@ api:
         port: 5002
         host: localhost
     security:
-        secret: ${SECURITY_KEY:dev-secret-key}
+        secret: ${SECURITY_SECRET:dev-secret-key}
     database:
         dialect: sqlite
         settings:

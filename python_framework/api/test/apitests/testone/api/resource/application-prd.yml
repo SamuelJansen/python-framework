@@ -6,7 +6,7 @@ api:
         host: localhost
         port: 5003
     security:
-        secret: ${SECURITY_KEY:prd-secret-key}
+        secret: ${SECURITY_SECRET:prd-secret-key}
     database:
         dialect: ${DATABASE_DIALECT:postgres}
         driver: ${DATABASE_DRIVER:psycopg2}

@@ -19,11 +19,11 @@ environment:
         key: ACTIVE_ENVIRONMENT
         value: local
     session:
-        key: SESSION_KEY
+        key: SESSION_SECRET
         value: default-session-key
     api-key:
-        key: API_KEY_KEY
+        key: API_KEY_SECRET
         value: default-api-key-key
     security:
-        key: SECURITY_KEY
+        key: SECURITY_SECRET
         value: default-security-key

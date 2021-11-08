@@ -13,11 +13,11 @@ api:
     list: []
 
     session:
-        secret: ${SESSION_KEY:default-session-key}
+        secret: ${SESSION_SECRET:default-session-key}
     api-key:
-        secret: ${API_KEY_KEY:default-api-key-key}
+        secret: ${API_KEY_SECRET:default-api-key-key}
     security:
-        secret: ${SECURITY_KEY:default-security-key}
+        secret: ${SECURITY_SECRET:default-security-key}
     server:
         scheme: http
         base-url: /test-api
