@@ -147,7 +147,8 @@ class SqlAlchemyProxy:
         self.sqlalchemy = sqlalchemy
         dialect = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_DIALECT}')
         self.engine = self.getNewEngine(dialect, echo, connectArgs)
-        self.session = scoped_session(sessionmaker(autocommit=True, autoflush=True, bind=self.engine)) ###- sessionmaker(bind=self.engine)()
+        self.session = scoped_session(sessionmaker(self.engine)) ###- sessionmaker(bind=self.engine)()
+        # self.session = scoped_session(sessionmaker(autocommit=True, autoflush=True, bind=self.engine)) ###- sessionmaker(bind=self.engine)()
         self.model = model
         self.model.metadata.bind = self.engine
         # self.model.metadata.reflect()
@@ -373,6 +374,10 @@ def onHttpRequestCompletion(apiInstance, appInstance):
     @appInstance.teardown_appcontext
     def closeSqlAlchemyProxySession(error):
         try:
+            try:
+                apiInstance.repository.session.commit()
+            except:
+                log.log(closeSqlAlchemyProxySession, 'Not possible to close SqlAlchemyProxy session', exception=exception)
             apiInstance.repository.session.close()
         except Exception as exception:
             log.failure(closeSqlAlchemyProxySession, 'Not possible to close SqlAlchemyProxy session', exception)
