@@ -9,5 +9,4 @@ class Value:
     INTEGER = 'integer'
     STRING = 'string'
     HEADER = 'header'
-    BEARER_TOKEN = 'Bearer <token>'
-    AUTHORIZATION = 'Authorization'
+    TOKEN_DESCRIPTION = '<token>'

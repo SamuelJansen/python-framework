@@ -252,7 +252,14 @@ class SqlAlchemyProxy:
         try :
             self.model.metadata.create_all(self.engine)
         except Exception as exception :
-            log.error(self.run, 'Not possible to run', exception)
+            waittingTime = 30
+            log.warning(self.run, f'Not possible to run. Going for a second attemp in {waittingTime} seconds', exception=exception)
+            time.sleep(waittingTime)
+            try :
+                self.model.metadata.create_all(self.engine)
+            except Exception as exception :
+                log.error(self.run, 'Not possible to run', exception)
+                raise exception
         log.debug(self.run, 'Database tables created')
 
     @Method
@@ -357,6 +364,11 @@ class SqlAlchemyProxy:
         if self.session.query(exists().where(modelClass.key == key)).one()[0] :
             object = self.session.query(modelClass).filter(modelClass.key == key).first()
             self.session.delete(object)
+        self.session.commit()
+
+    @Method
+    def deleteAndCommit(self, object):
+        self.session.delete(object)
         self.session.commit()
 
 

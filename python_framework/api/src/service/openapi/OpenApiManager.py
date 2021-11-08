@@ -1,4 +1,4 @@
-from flask import send_from_directory
+globalsInstancefrom flask import send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
 from python_helper import Constant as c
 from python_helper import log, StringHelper, ReflectionHelper, ObjectHelper
@@ -8,6 +8,7 @@ from python_framework.api.src.service.openapi.OpenApiValue import Value as v
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile
 from python_framework.api.src.service.openapi.OpenApiDocumentationFile import KW_OPEN_API, KW_UI
 from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.constant import JwtConstant, ConfigurationKeyConstant
 
 
 KW_GET = 'get'
@@ -80,10 +81,10 @@ def addSwagger(apiInstance, appInstance):
     OpenApiDocumentationFile.overrideDocumentation(apiInstance)
 
 def getStaticFolder(apiInstance, appInstance):
-    globals = apiInstance.globals
-    pythonFrameworkStaticFiles = f'{globals.OS_SEPARATOR}python_framework{globals.OS_SEPARATOR}api{globals.OS_SEPARATOR}resource'
-    swaggerStaticFiles = f'{globals.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globals.OS_SEPARATOR}'
-    apiInstance.documentationFolderPath = f'{globals.staticPackage}{pythonFrameworkStaticFiles}{swaggerStaticFiles}'
+    globalsInstance = apiInstance.globals
+    pythonFrameworkStaticFiles = f'{globalsInstance.OS_SEPARATOR}python_framework{globalsInstance.OS_SEPARATOR}api{globalsInstance.OS_SEPARATOR}resource'
+    swaggerStaticFiles = f'{globalsInstance.OS_SEPARATOR}{KW_OPEN_API}{KW_UI}{globalsInstance.OS_SEPARATOR}'
+    apiInstance.documentationFolderPath = f'{globalsInstance.staticPackage}{pythonFrameworkStaticFiles}{swaggerStaticFiles}'
     log.debug(getStaticFolder, f'apiInstance.documentationFolderPath at "{apiInstance.documentationFolderPath}"')
     return apiInstance.documentationFolderPath
 
@@ -101,20 +102,20 @@ def newDocumentation(apiInstance, appInstance):
     addInfo(apiInstance)
 
 def addInfo(apiInstance):
-    globals = apiInstance.globals
+    globalsInstance = apiInstance.globals
     apiInstance.documentation[k.INFO] = {
-        k.TITLE : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TITLE}'),
-        k.DESCRIPTION : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_DESCRIPTION}'),
-        k.VERSION : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_VERSION}'),
-        k.TERMS_OF_SERVICE : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TERMS_OF_SERVICE}')
+        k.TITLE : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TITLE}'),
+        k.DESCRIPTION : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_DESCRIPTION}'),
+        k.VERSION : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_VERSION}'),
+        k.TERMS_OF_SERVICE : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TERMS_OF_SERVICE}')
     }
-    addContact(globals, apiInstance.documentation)
-    addLisence(globals, apiInstance.documentation)
+    addContact(globalsInstance, apiInstance.documentation)
+    addLisence(globalsInstance, apiInstance.documentation)
 
 def addHostAndBasePath(apiInstance, appInstance):
-    globals = apiInstance.globals
-    apiInstance.documentation[k.HOST] = globals.getSetting(f'{KW_OPEN_API}.{KW_HOST}')
-    apiInstance.documentation[k.SCHEMES] = globals.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}')
+    globalsInstance = apiInstance.globals
+    apiInstance.documentation[k.HOST] = globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_HOST}')
+    apiInstance.documentation[k.SCHEMES] = globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}')
     apiInstance.documentation[k.BASE_PATH] = apiInstance.baseUrl
     # completeUrl = appInstance.test_request_context().request.host_url[:-1] ###- request.remote_addr
     # apiInstance.documentation[k.HOST] = completeUrl.split('://')[1]
@@ -132,7 +133,9 @@ def addEndPointDocumentation(endPointUrl, controllerMethod, controller, apiInsta
             addVerb(verb, url, apiInstance.documentation)
             addTagToUrlVerb(verb, url, controller.tag, apiInstance.documentation)
             addConsumesAndProducesToUrlVerb(verb, url, controllerMethod.consumes, controllerMethod.produces, apiInstance.documentation)
-            addSecurity(verb, url, controllerMethod.roleRequired, apiInstance.documentation)
+            addSession(verb, url, controllerMethod.roleRequired, apiInstance.documentation)
+            addApiKey(verb, url, controllerMethod.roleRequired, apiInstance.documentation, apiInstance.globals)
+            addSecurity(verb, url, controllerMethod.roleRequired, apiInstance.documentation, apiInstance.globals)
             addHeadersListToUrlVerb(verb, url, endPointUrl, controllerMethod.requestHeaderClass, apiInstance.documentation)
             addUrlParamListToUrlVerb(verb, url, endPointUrl, apiInstance.documentation)
             addQueryParamListToUrlVerb(verb, url, endPointUrl, controllerMethod.requestParamClass, apiInstance.documentation)
@@ -162,16 +165,16 @@ def getTagByTagName(tagName, documentation):
         if tagName == tag[k.NAME] :
             return tag
 
-def addContact(globals, documentation):
+def addContact(globalsInstance, documentation):
     documentation[k.INFO][k.CONTACT] = {
-        k.NAME : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_CONTACT}.{KW_NAME}'),
-        k.EMAIL : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_CONTACT}.{KW_EMAIL}')
+        k.NAME : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_CONTACT}.{KW_NAME}'),
+        k.EMAIL : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_CONTACT}.{KW_EMAIL}')
     }
 
-def addLisence(globals, documentation):
+def addLisence(globalsInstance, documentation):
     documentation[k.INFO][k.LICENSE] = {
-        k.NAME : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_LICENSE}.{KW_NAME}'),
-        k.URL : globals.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_LICENSE}.{KW_URL}')
+        k.NAME : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_LICENSE}.{KW_NAME}'),
+        k.URL : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_LICENSE}.{KW_URL}')
     }
 
 def addUrlIfNeeded(url, documentation):
@@ -287,10 +290,10 @@ def getApiUrl(apiInstance):
 
 def getDocumentationUrl(apiInstance):
     # return f'{getApiUrl(apiInstance)}{DOCUMENTATION_ENDPOINT}'
-    globals = apiInstance.globals
-    sheme = ConverterStatic.getValueOrDefault(ConverterStatic.getValueOrDefault(globals.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}'), [apiInstance.scheme]), [apiInstance.scheme])[0]
-    host = ConverterStatic.getValueOrDefault(globals.getSetting(f'{KW_OPEN_API}.{KW_HOST}'), apiInstance.host).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
-    colonPortIfAny = ConverterStatic.getValueOrDefault(f"{c.COLON}{globals.getSetting(f'{KW_OPEN_API}.{KW_PORT}')}", c.BLANK).replace(f'{c.COLON}None', c.BLANK)
+    globalsInstance = apiInstance.globals
+    sheme = ConverterStatic.getValueOrDefault(ConverterStatic.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}'), [apiInstance.scheme]), [apiInstance.scheme])[0]
+    host = ConverterStatic.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_HOST}'), apiInstance.host).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
+    colonPortIfAny = ConverterStatic.getValueOrDefault(f"{c.COLON}{globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_PORT}')}", c.BLANK).replace(f'{c.COLON}None', c.BLANK)
     documentationUrl = f'{sheme}{SCHEME_HOST_SEPARATOR}{host}{colonPortIfAny}{apiInstance.baseUrl}{DOCUMENTATION_ENDPOINT}'
     if documentationUrl.endswith(URL_ENDS_WITH_PORT_80):
         documentationUrl = documentationUrl[:-len(URL_ENDS_WITH_PORT_80)]
@@ -409,11 +412,31 @@ def getDtoSchema(attributeName, attributeType, dtoClass):
             }
         return {}
 
-def addSecurity(verb, url, roleRequired, documentation):
+def addSession(verb, url, roleRequired, documentation, globalsInstance):
+    if sessionRequired :
+        documentation[k.PATHS][url][verb][k.PARAMETERS].append({
+            k.NAME : ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SESSION_HEADER), JwtConstant.DEFAULT_JWT_SESSION_HEADER_NAME),
+            k.DESCRIPTION : f'{ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SESSION_TYPE), JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
+            k.IN : v.HEADER,
+            k.REQUIRED: True,
+            k.TYPE : v.STRING
+        })
+
+def addApiKey(verb, url, roleRequired, documentation, globalsInstance):
     if roleRequired :
         documentation[k.PATHS][url][verb][k.PARAMETERS].append({
-            k.NAME : v.AUTHORIZATION,
-            k.DESCRIPTION : v.BEARER_TOKEN,
+            k.NAME : ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_API_KEY_HEADER), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_NAME),
+            k.DESCRIPTION : f'{ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_API_KEY_TYPE), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
+            k.IN : v.HEADER,
+            k.REQUIRED: True,
+            k.TYPE : v.STRING
+        })
+
+def addSecurity(verb, url, roleRequired, documentation, globalsInstance):
+    if apiKeyRequired :
+        documentation[k.PATHS][url][verb][k.PARAMETERS].append({
+            k.NAME : ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SECURITY_HEADER), JwtConstant.DEFAULT_JWT_SECURITY_HEADER_NAME),
+            k.DESCRIPTION : f'{ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SECURITY_TYPE), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
             k.IN : v.HEADER,
             k.REQUIRED: True,
             k.TYPE : v.STRING
