@@ -3,13 +3,12 @@ from python_helper import Constant as c
 from python_helper import SettingHelper, EnvironmentHelper, ObjectHelper, StringHelper
 import sqlalchemy
 from sqlalchemy import create_engine, exists, select
-from sqlalchemy.orm import sessionmaker, scoped_session, relationship
+from sqlalchemy.orm import sessionmaker, scoped_session, relationship, close_all_sessions
 from sqlalchemy.orm.collections import InstrumentedList
 from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 from sqlalchemy import Table, Column, Integer, String, Float, ForeignKey, UnicodeText, MetaData, Sequence, DateTime, Date, Time, Interval, Boolean
 from sqlalchemy import and_, or_
 from sqlalchemy.sql.expression import literal
-from sqlalchemy.orm import close_all_sessions
 
 
 from python_helper import log, Method, Function
@@ -148,7 +147,7 @@ class SqlAlchemyProxy:
         self.sqlalchemy = sqlalchemy
         dialect = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_DIALECT}')
         self.engine = self.getNewEngine(dialect, echo, connectArgs)
-        self.session = scoped_session(sessionmaker(self.engine)) ###- sessionmaker(bind=self.engine)()
+        self.session = scoped_session(sessionmaker(autocommit=True, autoflush=True, bind=self.engine)) ###- sessionmaker(bind=self.engine)()
         self.model = model
         self.model.metadata.bind = self.engine
         # self.model.metadata.reflect()
@@ -371,10 +370,12 @@ def initialize(apiInstance, appInstance):
     log.success(initialize, 'SqlAlchemyProxy database is running')
 
 def onHttpRequestCompletion(apiInstance, appInstance):
-    try:
-        apiInstance.repository.session.close()
-    except Exception as exception:
-        log.failure(onHttpRequestCompletion, 'Not possible to close SqlAlchemyProxy session', exception)
+    @appInstance.teardown_appcontext
+    def closeSqlAlchemyProxySession(error):
+        try:
+            apiInstance.repository.session.close()
+        except Exception as exception:
+            log.failure(closeSqlAlchemyProxySession, 'Not possible to close SqlAlchemyProxy session', exception)
 
 def shutdown(apiInstance, appInstance):
     try:
