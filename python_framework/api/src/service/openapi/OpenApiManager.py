@@ -133,7 +133,7 @@ def addEndPointDocumentation(endPointUrl, controllerMethod, controller, apiInsta
             addVerb(verb, url, apiInstance.documentation)
             addTagToUrlVerb(verb, url, controller.tag, apiInstance.documentation)
             addConsumesAndProducesToUrlVerb(verb, url, controllerMethod.consumes, controllerMethod.produces, apiInstance.documentation)
-            addSession(verb, url, controllerMethod.roleRequired, apiInstance.documentation)
+            addSession(verb, url, controllerMethod.roleRequired, apiInstance.documentation, apiInstance.globals)
             addApiKey(verb, url, controllerMethod.roleRequired, apiInstance.documentation, apiInstance.globals)
             addSecurity(verb, url, controllerMethod.roleRequired, apiInstance.documentation, apiInstance.globals)
             addHeadersListToUrlVerb(verb, url, endPointUrl, controllerMethod.requestHeaderClass, apiInstance.documentation)
