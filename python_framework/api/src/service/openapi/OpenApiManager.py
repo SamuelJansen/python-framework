@@ -133,8 +133,8 @@ def addEndPointDocumentation(endPointUrl, controllerMethod, controller, apiInsta
             addVerb(verb, url, apiInstance.documentation)
             addTagToUrlVerb(verb, url, controller.tag, apiInstance.documentation)
             addConsumesAndProducesToUrlVerb(verb, url, controllerMethod.consumes, controllerMethod.produces, apiInstance.documentation)
-            addSession(verb, url, controllerMethod.roleRequired, apiInstance.documentation, apiInstance.globals)
-            addApiKey(verb, url, controllerMethod.roleRequired, apiInstance.documentation, apiInstance.globals)
+            addSession(verb, url, controllerMethod.contextRequired, apiInstance.documentation, apiInstance.globals)
+            addApiKey(verb, url, controllerMethod.apiKeyRequired, apiInstance.documentation, apiInstance.globals)
             addSecurity(verb, url, controllerMethod.roleRequired, apiInstance.documentation, apiInstance.globals)
             addHeadersListToUrlVerb(verb, url, endPointUrl, controllerMethod.requestHeaderClass, apiInstance.documentation)
             addUrlParamListToUrlVerb(verb, url, endPointUrl, apiInstance.documentation)
@@ -412,8 +412,8 @@ def getDtoSchema(attributeName, attributeType, dtoClass):
             }
         return {}
 
-def addSession(verb, url, roleRequired, documentation, globalsInstance):
-    if sessionRequired :
+def addSession(verb, url, contextRequired, documentation, globalsInstance):
+    if contextRequired :
         documentation[k.PATHS][url][verb][k.PARAMETERS].append({
             k.NAME : ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SESSION_HEADER), JwtConstant.DEFAULT_JWT_SESSION_HEADER_NAME),
             k.DESCRIPTION : f'{ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SESSION_TYPE), JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
@@ -422,8 +422,8 @@ def addSession(verb, url, roleRequired, documentation, globalsInstance):
             k.TYPE : v.STRING
         })
 
-def addApiKey(verb, url, roleRequired, documentation, globalsInstance):
-    if roleRequired :
+def addApiKey(verb, url, apiKeyRequired, documentation, globalsInstance):
+    if apiKeyRequired :
         documentation[k.PATHS][url][verb][k.PARAMETERS].append({
             k.NAME : ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_API_KEY_HEADER), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_NAME),
             k.DESCRIPTION : f'{ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_API_KEY_TYPE), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
