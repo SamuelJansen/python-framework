@@ -433,7 +433,7 @@ def addApiKey(verb, url, apiKeyRequired, documentation, globalsInstance):
         })
 
 def addSecurity(verb, url, roleRequired, documentation, globalsInstance):
-    if apiKeyRequired :
+    if roleRequired :
         documentation[k.PATHS][url][verb][k.PARAMETERS].append({
             k.NAME : ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SECURITY_HEADER), JwtConstant.DEFAULT_JWT_SECURITY_HEADER_NAME),
             k.DESCRIPTION : f'{ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SECURITY_TYPE), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
