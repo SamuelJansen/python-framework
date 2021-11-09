@@ -1,6 +1,8 @@
-import os
+import os, time
+
 from python_helper import Constant as c
-from python_helper import SettingHelper, EnvironmentHelper, ObjectHelper, StringHelper
+from python_helper import SettingHelper, EnvironmentHelper, ObjectHelper, StringHelper, log, Method, Function
+
 import sqlalchemy
 from sqlalchemy import create_engine, exists, select
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship, close_all_sessions
@@ -11,7 +13,6 @@ from sqlalchemy import and_, or_
 from sqlalchemy.sql.expression import literal
 
 
-from python_helper import log, Method, Function
 
 and_ = and_
 or_ = or_
@@ -251,15 +252,21 @@ class SqlAlchemyProxy:
     def run(self):
         try :
             self.model.metadata.create_all(self.engine)
-        except Exception as exception :
+        except Exception as firstException :
             waittingTime = 30
-            log.warning(self.run, f'Not possible to run. Going for a second attemp in {waittingTime} seconds', exception=exception)
+            log.warning(self.run, f'Not possible to run. Going for a second attemp in {waittingTime} seconds', exception=firstException)
             time.sleep(waittingTime)
             try :
                 self.model.metadata.create_all(self.engine)
-            except Exception as exception :
-                log.error(self.run, 'Not possible to run', exception)
-                raise exception
+            except Exception as secondException :
+                waittingTime = 30
+                log.warning(self.run, f'Not possible to run either. Going for a third and last attemp in {waittingTime} seconds', exception=secondException)
+                time.sleep(waittingTime)
+                try :
+                    self.model.metadata.create_all(self.engine)
+                except Exception as secondException :
+                    log.error(self.run, 'Not possible to run', exception)
+                    raise exception
         log.debug(self.run, 'Database tables created')
 
     @Method
