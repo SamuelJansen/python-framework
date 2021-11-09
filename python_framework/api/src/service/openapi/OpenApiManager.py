@@ -104,8 +104,8 @@ def newDocumentation(apiInstance, appInstance):
 def addInfo(apiInstance):
     globalsInstance = apiInstance.globals
     apiInstance.documentation[k.INFO] = {
-        k.TITLE : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TITLE}'),
-        k.DESCRIPTION : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_DESCRIPTION}'),
+        k.TITLE : ConverterStatic.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TITLE}'), StringHelper.toTitle(globalsInstance.apiName)),
+        k.DESCRIPTION : ConverterStatic.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_DESCRIPTION}'), f'This is a {StringHelper.toTitle(globalsInstance.apiName)} service'),
         k.VERSION : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_VERSION}'),
         k.TERMS_OF_SERVICE : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TERMS_OF_SERVICE}')
     }

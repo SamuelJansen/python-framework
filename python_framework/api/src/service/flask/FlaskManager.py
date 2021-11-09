@@ -1,3 +1,6 @@
+import globals
+import json
+
 from python_framework.api.src.service import WebBrowser
 from python_helper import Constant as c
 from python_helper import log, Function, ReflectionHelper, ObjectHelper, SettingHelper, EnvironmentHelper
@@ -14,8 +17,7 @@ from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service.openapi import OpenApiManager
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
 from python_framework.api.src.constant import ConfigurationKeyConstant, JwtConstant, HealthCheckConstant
-import globals
-import json
+from python_framework.api.src.converter.static import ConverterStatic
 
 
 KW_URL = 'url'
@@ -105,7 +107,14 @@ def newApp(
         , logStatus = logStatus
     )
     try:
-        app = globals.importResource(KW_APP, resourceModuleName=globalsInstance.apiName, required=True)
+        app = globals.importResource(
+            KW_APP,
+            resourceModuleName = ConverterStatic.getValueOrDefault(
+                globalsInstance.apiName,
+                StringHelper.join(EnvironmentHelper.listDirectoryContent(f'{globalsInstance.BASE_API_PATH}')[0].split(c.DOT)[:-1],character = c.DOT),
+                required = True
+            )
+        )
     except Exception as exception:
         apiPath = f'{c.DOT}{EnvironmentHelper.OS_SEPARATOR}{globalsInstance.BASE_API_PATH}{globalsInstance.apiName}.py'
         errorMessage = f"Not possible to load app. Make shure it's name is properlly configured at '{globalsInstance.settingFilePath}' and it's instance is named 'app' at '{apiPath}'"

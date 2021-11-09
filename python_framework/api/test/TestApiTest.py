@@ -774,7 +774,7 @@ def pythonRun_apiKeyManager() :
         firstAuthorization = responseLogin.json().get('accessToken')
         firstAuthorizationHeaders = responseLogin.headers
         assert ObjectHelper.isNotNone(firstAuthorization)
-        headers['Context'] = 'Bearer ' + firstAuthorization
+        headers['Api-key'] = 'Bearer ' + firstAuthorization
         assert ObjectHelper.isNotNone(firstAuthorization)
         assert ObjectHelper.isNotNone(id)
         assert ObjectHelper.isNone(firstAuthorizationHeaders.get('some'))
@@ -813,7 +813,7 @@ def pythonRun_apiKeyManager() :
         patchedAuthorizationHeaders = responseLogin.headers
         patchedAuthorization = responsePatchRefresh.json().get('accessToken')
         assert ObjectHelper.isNotNone(patchedAuthorization)
-        headers['Context'] = 'Bearer ' + patchedAuthorization
+        headers['Api-key'] = 'Bearer ' + patchedAuthorization
         assert ObjectHelper.isNotNone(responsePatchRefresh)
         assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
         assert ObjectHelper.isNotNone(id)
