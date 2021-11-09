@@ -128,6 +128,21 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
         )
         assert 200 == responseGetHealth.status_code
 
+        responseDocumentation = requests.get(BASE_URL + '/documentation', headers=headers)
+        assert ObjectHelper.equals(
+            'Local Test Api',
+            responseDocumentation.json().get('info', {}).get('title')
+        ), responseDocumentation.json().get('info', {})
+        assert ObjectHelper.equals(
+            'This is a Local Test Api service',
+            responseDocumentation.json().get('info', {}).get('description')
+        ), responseDocumentation.json().get('info', {})
+        assert ObjectHelper.equals(
+            '0.0.1',
+            responseDocumentation.json().get('info', {}).get('version')
+        ), responseDocumentation.json().get('info', {})
+        assert 200 == responseGetHealth.status_code
+
         responseGetNone = requests.get(BASE_URL + GET_NONE_ONE)
         assert ObjectHelper.equals(
             {'message': 'OK'},
