@@ -112,9 +112,9 @@ def newApp(
             KW_APP,
             resourceModuleName = ConverterStatic.getValueOrDefault(
                 globalsInstance.apiName,
-                StringHelper.join(EnvironmentHelper.listDirectoryContent(f'{globalsInstance.BASE_API_PATH}')[0].split(c.DOT)[:-1],character = c.DOT),
-                required = True
-            )
+                StringHelper.join(EnvironmentHelper.listDirectoryContent(f'{globalsInstance.BASE_API_PATH}')[0].split(c.DOT)[:-1],character = c.DOT)
+            ),
+            required = True
         )
     except Exception as exception:
         apiPath = f'{c.DOT}{EnvironmentHelper.OS_SEPARATOR}{globalsInstance.BASE_API_PATH}{globalsInstance.apiName}.py'
