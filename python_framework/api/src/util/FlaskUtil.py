@@ -3,6 +3,7 @@ import flask_restful
 from python_helper import Constant as c
 from python_helper import ObjectHelper, log, Function
 import globals
+from python_framework.api.src.util import Serializer
 
 
 KEY_API_INSTANCE = 'apiInstance'
