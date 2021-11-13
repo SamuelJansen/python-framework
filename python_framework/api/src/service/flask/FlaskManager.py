@@ -772,7 +772,7 @@ def getCompleteResponseByException(
     muteStacktraceOnBusinessRuleException
 ):
     exception = getGlobalException(exception, resourceInstance, resourceInstanceMethod)
-    completeResponse = [{'message':exception.message, 'timestamp':str(exception.timeStamp)}, exception.status]
+    completeResponse = ({'message':exception.message, 'timestamp':str(exception.timeStamp)}, {}, exception.status)
     try :
         logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request'
         if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):
@@ -782,22 +782,23 @@ def getCompleteResponseByException(
     except Exception as logErrorMessageException :
         log.debug(getCompleteResponseByException, 'Error logging exception at controller', exception=logErrorMessageException)
         log.error(log.error, 'Error processing request', exception)
-    return completeResponse
+    return handleAdditionalResponseHeadersIfNeeded(completeResponse)
 
 def handleAdditionalResponseHeadersIfNeeded(completeResponse):
-    if ObjectHelper.isTuple(completeResponse) and len(completeResponse) == 2:
-        if ObjectHelper.isTuple(completeResponse[0]) and len(completeResponse[0]) == 2:
-            return tuple(
-                completeResponse[0][0], ###- body
-                completeResponse[0][1], ###- header
-                completeResponse[1] ###- status
-            )
-        else:
-            return tuple(
-                completeResponse[0], ###- body
-                dict(), ###- header
-                completeResponse[1] ###- status
-            )
+    if ObjectHelper.isTuple(completeResponse):
+        if 3 == len(completeResponse):
+            return completeResponse
+        elif 2 == len(completeResponse):
+            if ObjectHelper.isTuple(completeResponse[0]) and 2 == len(completeResponse[0]):
+                ###- body, header, status
+                return completeResponse[0][0], completeResponse[0][1], completeResponse[1]
+            else:
+                ###- body, header, status
+                return completeResponse[0],  dict(),  completeResponse[1]
+    elif ObjectHelper.isList(completeResponse) and 2 == len(completeResponse):
+        ###- it can only be guessed at this point
+        return completeResponse[0],  dict(),  completeResponse[1]
+    ###- totally lost at this point
     return completeResponse
 
 def validateResponseClass(responseClass, responseBody):
