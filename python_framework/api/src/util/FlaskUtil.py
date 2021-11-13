@@ -91,7 +91,7 @@ def safellyGetArgs():
         log.log(safellyGetArgs, f'Not possible to get args. Returning {args} by default', exception=exception)
     return args if ObjectHelper.isNotNone(args) else dict()
 
-def buildHttpResponse(controllerResponseBody, contentType, status, additionalResponseHeaders):
+def buildHttpResponse(additionalResponseHeaders, controllerResponseBody, status, contentType):
     httpResponse = Response(Serializer.jsonifyIt(controllerResponseBody),  mimetype=contentType, status=status)
     for key, value in additionalResponseHeaders.items():
         httpResponse.headers[key] = value
