@@ -559,16 +559,19 @@ def validateKwargs(kwargs, resourceInstance, innerResourceInstanceMethod, reques
 @Function
 def Controller(
     url = c.SLASH,
+    responseHeaders = None,
     tag = 'Tag not defined',
     description = 'Controller not descripted'
 ):
     controllerUrl = url
     controllerTag = tag
     controllerDescription = description
+    controllerResponseHeaders = responseHeaders
     def Wrapper(OuterClass,*args,**kwargs):
         log.wrapper(Controller, f'''wrapping {OuterClass.__name__}''', None)
         class InnerClass(OuterClass, FlaskUtil.Resource):
             url = controllerUrl
+            responseHeaders = controllerResponseHeaders
             tag = controllerTag
             description = controllerDescription
             def __init__(self,*args,**kwargs):
@@ -685,7 +688,11 @@ def ControllerMethod(
                 ###- request.args:                ImmutableMultiDict([('x', 'y')])
                 ###- request.args.get('x'):       y
             status = completeResponse[-1]
-            additionalResponseHeaders = {**responseHeaders, **completeResponse[1]}
+            additionalResponseHeaders = completeResponse[1]
+            if ObjectHelper.isNotNone(resourceInstance.responseHeaders):
+                additionalResponseHeaders = {**resourceInstance.responseHeaders, **additionalResponseHeaders}
+            if ObjectHelper.isNotNone(responseHeaders):
+                additionalResponseHeaders = {**responseHeaders, **additionalResponseHeaders}
             responseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : status.enumName}
             httpResponse = FlaskUtil.buildHttpResponse(additionalResponseHeaders, responseBody, HttpStatus.map(status).enumValue, produces)
 
@@ -784,7 +791,7 @@ def getCompleteResponseByException(
             log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=muteStacktraceOnBusinessRuleException)
     except Exception as logErrorMessageException :
         log.debug(getCompleteResponseByException, 'Error logging exception at controller', exception=logErrorMessageException)
-        log.error(log.error, 'Error processing request', exception)
+        log.error(getCompleteResponseByException, 'Error processing request', exception)
     return handleAdditionalResponseHeadersIfNeeded(completeResponse)
 
 def handleAdditionalResponseHeadersIfNeeded(completeResponse):
