@@ -682,7 +682,7 @@ def ControllerMethod(
                 ###- request.full_path:           /alert/dingding/test?x=y
                 ###- request.args:                ImmutableMultiDict([('x', 'y')])
                 ###- request.args.get('x'):       y
-            responseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : completeResponse[1].enumName}
+            responseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : completeResponse[-1].enumName}
             status = completeResponse[1]
             additionalResponseHeaders = completeResponse[2]
             httpResponse = FlaskUtil.buildHttpResponse(responseBody, produces, HttpStatus.map(status).enumValue, additionalResponseHeaders)
