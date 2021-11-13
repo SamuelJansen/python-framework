@@ -683,8 +683,8 @@ def ControllerMethod(
                 ###- request.args:                ImmutableMultiDict([('x', 'y')])
                 ###- request.args.get('x'):       y
             status = completeResponse[-1]
+            additionalResponseHeaders = completeResponse[1]
             responseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : status.enumName}
-            additionalResponseHeaders = completeResponse[2]
             httpResponse = FlaskUtil.buildHttpResponse(additionalResponseHeaders, responseBody, HttpStatus.map(status).enumValue, produces)
 
             try:
