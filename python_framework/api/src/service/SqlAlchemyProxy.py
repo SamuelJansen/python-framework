@@ -395,8 +395,8 @@ def onHttpRequestCompletion(apiInstance, appInstance):
         try:
             try:
                 apiInstance.repository.session.commit()
-            except:
-                log.log(closeSqlAlchemyProxySession, 'Not possible to close SqlAlchemyProxy session', exception=exception)
+            except Exception as innerException:
+                log.log(closeSqlAlchemyProxySession, 'Not possible to close SqlAlchemyProxy session', exception=innerException)
             apiInstance.repository.session.close()
         except Exception as exception:
             log.failure(closeSqlAlchemyProxySession, 'Not possible to close SqlAlchemyProxy session', exception)

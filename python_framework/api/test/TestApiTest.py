@@ -240,9 +240,9 @@ def appRun_whenEnvironmentIsLocalFromDevConfig_withSuccess() :
         for k, v in expectedResponseHeaders.items():
             assert k in dict(responseGetHealth.headers), k
             assert ObjectHelper.equals(
-                v,
+                str(v),
                 dict(responseGetHealth.headers)[k]
-            ), (k, v, dict(responseGetHealth.headers)[k])
+            ), (k, str(v), dict(responseGetHealth.headers)[k])
 
         killProcesses(process)
     except Exception as exception:

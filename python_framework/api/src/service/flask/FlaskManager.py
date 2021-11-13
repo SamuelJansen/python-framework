@@ -589,6 +589,7 @@ def ControllerMethod(
     requestParamClass = None,
     requestClass = None,
     responseClass = None,
+    responseHeaders = None,
     roleRequired = None,
     apiKeyRequired = None,
     contextRequired = None,
@@ -603,6 +604,7 @@ def ControllerMethod(
     controllerMethodRequestParamClass = requestParamClass
     controllerMethodRequestClass = requestClass
     controllerMethodResponseClass = responseClass
+    controllerMethodResponseHeaders = responseHeaders
     controllerMethodRoleRequired = roleRequired
     controllerMethodApiKeyRequired = apiKeyRequired
     controllerMethodSessionRequired = contextRequired
@@ -632,7 +634,7 @@ def ControllerMethod(
                             log.log(innerResourceInstanceMethod, 'Not possible to capture requestBody for logs', exception=exception, muteStackTrace=True)
                     log.prettyJson(
                         resourceInstanceMethod,
-                        'request',
+                        'Request',
                         {
                             'headers': dict(addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)),
                             # 'query': dict(addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)), ###- safellyGetUrl() returns query param
@@ -683,7 +685,7 @@ def ControllerMethod(
                 ###- request.args:                ImmutableMultiDict([('x', 'y')])
                 ###- request.args.get('x'):       y
             status = completeResponse[-1]
-            additionalResponseHeaders = completeResponse[1]
+            additionalResponseHeaders = {**responseHeaders, **completeResponse[1]}
             responseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : status.enumName}
             httpResponse = FlaskUtil.buildHttpResponse(additionalResponseHeaders, responseBody, HttpStatus.map(status).enumValue, produces)
 
@@ -691,7 +693,7 @@ def ControllerMethod(
                 if logResponse :
                     log.prettyJson(
                         resourceInstanceMethod,
-                        'response',
+                        'Response',
                         {
                             'headers': dict(FlaskUtil.safellyGetResponseHeaders(httpResponse)),
                             'body': FlaskUtil.safellyGetResponseJson(httpResponse) ###- json.loads(Serializer.jsonifyIt(responseBody))
@@ -709,6 +711,7 @@ def ControllerMethod(
         innerResourceInstanceMethod.requestParamClass = controllerMethodRequestParamClass
         innerResourceInstanceMethod.requestClass = controllerMethodRequestClass
         innerResourceInstanceMethod.responseClass = controllerMethodResponseClass
+        innerResourceInstanceMethod.responseHeaders = controllerMethodResponseHeaders
         innerResourceInstanceMethod.roleRequired = controllerMethodRoleRequired
         innerResourceInstanceMethod.apiKeyRequired = controllerMethodApiKeyRequired
         innerResourceInstanceMethod.contextRequired = controllerMethodSessionRequired
