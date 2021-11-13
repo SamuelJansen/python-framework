@@ -44,6 +44,7 @@ class JwtManager:
             assert jwtType == JwtConstant.ACCESS_VALUE_TYPE, f'Access apiKey should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
             addUserToBlackList(rawJwt=decodedApiKeyToken)
+            log.log(self.validateAccessApiKey, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
             raise exception
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -55,6 +56,7 @@ class JwtManager:
             assert jwtType == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh apiKey should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
             addUserToBlackList(rawJwt=decodedApiKeyToken)
+            log.log(self.validateRefreshApiKey, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
             raise exception
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -65,13 +67,16 @@ class JwtManager:
             assert ObjectHelper.isDictionary(decodedApiKeyToken), f'Invalid apiKey payload type. It should be a dictionary, bu it is {type(decodedApiKeyToken)}'
             assert ObjectHelper.isNotEmpty(decodedApiKeyToken), 'ApiKey cannot be empty'
             jti = getJti(rawJwt=decodedApiKeyToken)
-            assert not jti in BLACK_LIST, f'ApiKey {jti} already revoked'
+            assert ObjectHelper.isNotNone(jti), f'JWT jti cannot be None'
+            assert jti not in BLACK_LIST, f'ApiKey {jti} already revoked'
             nbf = getNfb(rawJwt=decodedApiKeyToken)
+            assert ObjectHelper.isNotNone(nbf), f'JWT nbf cannot be None'
             assert UtcDateTimeUtil.now() >= UtcDateTimeUtil.ofTimestamp(nbf), f'JWT apiKey token not valid before {UtcDateTimeUtil.ofTimestamp(nbf)}'
             expiration = getExpiration(rawJwt=decodedApiKeyToken)
             assert UtcDateTimeUtil.now() <= UtcDateTimeUtil.ofTimestamp(expiration), f'JWT apiKey token expired at {UtcDateTimeUtil.ofTimestamp(expiration)}'
         except Exception as exception:
             addUserToBlackList(rawJwt=decodedApiKeyToken)
+            log.log(self.validateGeneralApiKeyAndReturnItDecoded, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
             raise exception
         return decodedApiKeyToken
 
@@ -293,6 +298,9 @@ def getCurrentApiKey(apiKeyClass=None, apiInstance=None):
             if ReflectionHelper.hasAttributeOrMethod(currentApiKey, attributeName):
                 ReflectionHelper.setAttributeOrMethod(currentApiKey, attributeName, data.get(attributeName))
         return currentApiKey
+
+def getContextData(dataClass=None, apiInstance=None):
+    return getCurrentApiKey(apiKeyClass=dataClass, apiInstance=apiInstance)
 
 def addResource(apiInstance, appInstance):
     apiInstance.apiKeyManager = None

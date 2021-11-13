@@ -48,6 +48,7 @@ class JwtManager:
             assert jwtType == JwtConstant.ACCESS_VALUE_TYPE, f'Access session should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
             addUserToBlackList(rawJwt=decodedSessionToken)
+            log.log(self.validateAccessSession, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
             raise exception
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -59,6 +60,7 @@ class JwtManager:
             assert jwtType == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh session should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
             addUserToBlackList(rawJwt=decodedSessionToken)
+            log.log(self.validateRefreshSession, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
             raise exception
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -69,13 +71,16 @@ class JwtManager:
             assert ObjectHelper.isDictionary(decodedSessionToken), f'Invalid session payload type. It should be a dictionary, bu it is {type(decodedSessionToken)}'
             assert ObjectHelper.isNotEmpty(decodedSessionToken), 'Session cannot be empty'
             jti = getJti(rawJwt=decodedSessionToken)
-            assert not jti in BLACK_LIST, f'Session {jti} already revoked'
+            assert ObjectHelper.isNotNone(jti), f'JWT jti cannot be None'
+            assert jti not in BLACK_LIST, f'Session {jti} already revoked'
             nbf = getNfb(rawJwt=decodedSessionToken)
+            assert ObjectHelper.isNotNone(nbf), f'JWT nbf cannot be None'
             assert UtcDateTimeUtil.now() >= UtcDateTimeUtil.ofTimestamp(nbf), f'JWT session token not valid before {UtcDateTimeUtil.ofTimestamp(nbf)}'
             expiration = getExpiration(rawJwt=decodedSessionToken)
             assert UtcDateTimeUtil.now() <= UtcDateTimeUtil.ofTimestamp(expiration), f'JWT session token expired at {UtcDateTimeUtil.ofTimestamp(expiration)}'
         except Exception as exception:
             addUserToBlackList(rawJwt=decodedSessionToken)
+            log.log(self.validateGeneralSessionAndReturnItDecoded, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
             raise exception
         return decodedSessionToken
 
@@ -298,6 +303,9 @@ def getCurrentSession(sessionClass=None, apiInstance=None):
             if ReflectionHelper.hasAttributeOrMethod(currentSession, attributeName):
                 ReflectionHelper.setAttributeOrMethod(currentSession, attributeName, data.get(attributeName))
         return currentSession
+
+def getContextData(dataClass=None, apiInstance=None):
+    return getCurrentSession(sessionClass=dataClass, apiInstance=apiInstance)
 
 def addResource(apiInstance, appInstance):
     apiInstance.sessionManager = None

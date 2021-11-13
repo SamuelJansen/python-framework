@@ -228,6 +228,22 @@ def appRun_whenEnvironmentIsLocalFromDevConfig_withSuccess() :
         ), f"{[{'status':'UP'}]} == {responseGetHealth.json()}"
         assert 200 == responseGetHealth.status_code
 
+        expectedResponseHeaders = {
+            'added': 'header'
+            'booleanFalse': False,
+            'booleanTrue': True,
+            'int': 1,
+            'otherInt': -34,
+            'float': 1.0,
+            'otherFloat': 2.3334
+        }
+        for k, v in expectedResponseHeaders.items():
+            assert k in dict(responseGetHealth.headers), k
+            assert ObjectHelper.equals(
+                v,
+                dict(responseGetHealth.headers)[k]
+            ), (k, v, dict(responseGetHealth.headers)[k])
+
         killProcesses(process)
     except Exception as exception:
         killProcesses(process)

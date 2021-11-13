@@ -110,7 +110,7 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
             try:
                 apiInstance.repository.commit()
             except Exception as preCommitException:
-                log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
+                log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}', exception=preCommitException)
         apiInstance.repository.saveAndCommit(httpErrorLog)
     except Exception as errorLogException :
         log.warning(handleLogErrorException, f'Failed to persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)

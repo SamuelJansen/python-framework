@@ -21,7 +21,7 @@ def safellyGetRequestBody() :
         requestBody = safellyGetData()
     return requestBody if ObjectHelper.isNotNone(requestBody) else dict()
 
-def safellyGetJson(response=None):
+def safellyGetJson():
     jsonBody = None
     try :
         jsonBody = request.get_json(force=True)
@@ -36,7 +36,7 @@ def safellyGetResponseJson(response):
         jsonBody = response.get_json(force=True)
     except Exception as exception:
         jsonBody = {}
-        log.log(safellyGetJson, f'Not possible to get response body. Returning {jsonBody} by default', exception=exception)
+        log.log(safellyGetResponseJson, f'Not possible to get response body. Returning {jsonBody} by default', exception=exception)
     return jsonBody
 
 def safellyGetData():
@@ -45,7 +45,7 @@ def safellyGetData():
         dataBody = request.get_json(force=True)
     except Exception as exception:
         dataBody = {}
-        log.log(safellyGetJson, f'Not possible to get data. Returning {dataBody} by default', exception=exception)
+        log.log(safellyGetData, f'Not possible to get data. Returning {dataBody} by default', exception=exception)
     return dataBody
 
 def safellyGetUrl() :
@@ -79,7 +79,7 @@ def safellyGetResponseHeaders(response):
         headers= response.headers
     except Exception as exception :
         headers = {}
-        log.log(safellyGetHeaders, 'Not possible to get response headers. Returning {headers} by default', exception=exception)
+        log.log(safellyGetResponseHeaders, 'Not possible to get response headers. Returning {headers} by default', exception=exception)
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 def safellyGetArgs():
@@ -88,8 +88,14 @@ def safellyGetArgs():
         args = request.args
     except Exception as exception :
         args = {}
-        log.log(safellyGetHeaders, f'Not possible to get args. Returning {args} by default', exception=exception)
+        log.log(safellyGetArgs, f'Not possible to get args. Returning {args} by default', exception=exception)
     return args if ObjectHelper.isNotNone(args) else dict()
+
+def buildHttpResponse(controllerResponseBody, contentType, status, additionalResponseHeaders):
+    httpResponse = Response(Serializer.jsonifyIt(controllerResponseBody),  mimetype=contentType, status=status)
+    for key, value in additionalResponseHeaders.items():
+        httpResponse.headers[key] = value
+    return httpResponse
 
 @Function
 def getGlobals() :

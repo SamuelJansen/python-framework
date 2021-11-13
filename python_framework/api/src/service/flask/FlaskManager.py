@@ -136,9 +136,9 @@ def initialize(
     if defaultUrl :
         innerDefaultUrl = f'{innerDefaultUrl}{defaultUrl}'
     def inBetweenFunction(function,*argument,**keywordArgument):
-        log.wrapper(initialize,f'''{function.__name__} method''')
+        log.wrapper(initialize, f'''{function.__name__} method''')
         if (openInBrowser):
-            log.debug(initialize,f'''Openning "{innerDefaultUrl}" url in rowser''')
+            log.debug(initialize, f'''Openning "{innerDefaultUrl}" url in rowser''')
             # WebBrowser.openUrlInChrome(innerDefaultUrl)
             WebBrowser.openUrl(innerDefaultUrl)
         def innerFunction(*args,**kwargs):
@@ -465,19 +465,6 @@ def handleControllerMethod(
             args = getArgsWithSerializerReturnAppended(args, serializerReturn)
     headers = addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
     query = addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
-    log.info(resourceInstanceMethod, f'{FlaskUtil.safellyGetVerb()} - {FlaskUtil.safellyGetUrl()}')
-    if logRequest :
-        log.prettyJson(
-        resourceInstanceMethod,
-        'request',
-        {
-            'headers': dict(headers),
-            # 'query': query, safellyGetUrl() returns query param
-            'body': requestBodyAsJson
-        },
-        condition = logRequest,
-        logLevel = log.INFO
-        )
     completeResponse = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
     if not (ObjectHelper.isNotNone(completeResponse) and Serializer.isSerializerCollection(completeResponse) and 2 == len(completeResponse)):
         raise GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
@@ -488,10 +475,6 @@ def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
         toClass = givenClass if ObjectHelper.isNotList(givenClass) else givenClass[0]
         kwargs[key] = Serializer.convertFromJsonToObject({k:v for k,v in valuesAsDictionary.items()}, toClass)
     return valuesAsDictionary
-
-@Function
-def jsonifyResponse(response, contentType, status):
-    return FlaskUtil.Response(Serializer.jsonifyIt(response),  mimetype=contentType, status=HttpStatus.map(status).enumValue)
 
 @Function
 def getArgsWithSerializerReturnAppended(args, argument):
@@ -637,6 +620,30 @@ def ControllerMethod(
             # r.headers['Cache-Control'] = 'public, max-age=0'
             resourceInstance = args[0]
             completeResponse = None
+
+            try:
+                log.info(resourceInstanceMethod, f'{FlaskUtil.safellyGetVerb()} - {FlaskUtil.safellyGetUrl()}')
+                if logRequest :
+                    requestBodyForLog = {}
+                    if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST:
+                        try:
+                            requestBodyForLog = getRequestBodyAsJson(consumes, requestClass)
+                        except Exception as exception:
+                            log.log(innerResourceInstanceMethod, 'Not possible to capture requestBody for logs', exception=exception, muteStackTrace=True)
+                    log.prettyJson(
+                        resourceInstanceMethod,
+                        'request',
+                        {
+                            'headers': dict(addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)),
+                            # 'query': dict(addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)), ###- safellyGetUrl() returns query param
+                            'body': requestBodyForLog
+                        },
+                        condition = logRequest,
+                        logLevel = log.INFO
+                    )
+            except Exception as exception:
+                log.failure(innerResourceInstanceMethod, 'Not possible to log request properly', exception)
+
             try :
                 completeResponse = handleAnyControllerMethodRequest(
                     args,
@@ -653,10 +660,10 @@ def ControllerMethod(
                     logRequest,
                     muteStacktraceOnBusinessRuleException
                 )
-                # print(f'completeResponse: {completeResponse}')
+                handleAdditionalResponseHeadersIfNeeded(completeResponse)
                 validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
-                # print(exception)
+                log.log(innerResourceInstanceMethod, 'Failure at resource method execution. Getting complete response as exception', exception=exception, muteStackTrace=True)
                 completeResponse = getCompleteResponseByException(
                     exception,
                     resourceInstance,
@@ -676,22 +683,27 @@ def ControllerMethod(
                 ###- request.full_path:           /alert/dingding/test?x=y
                 ###- request.args:                ImmutableMultiDict([('x', 'y')])
                 ###- request.args.get('x'):       y
-            controllerResponse = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : completeResponse[1].enumName}
+            responseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : completeResponse[1].enumName}
             status = completeResponse[1]
-            response = jsonifyResponse(controllerResponse, produces, status)
-            if logResponse :
-                log.prettyJson(
-                    resourceInstanceMethod,
-                    'response',
-                    {
-                        'headers': dict(FlaskUtil.safellyGetResponseHeaders(response)),
-                        'body': FlaskUtil.safellyGetResponseJson(response)
-                    },
-                    # json.loads(Serializer.jsonifyIt(controllerResponse)),
-                    condition = logResponse,
-                    logLevel = log.INFO
-                )
-            return response
+            additionalResponseHeaders = completeResponse[2]
+            httpResponse = FlaskUtil.buildHttpResponse(responseBody, produces, HttpStatus.map(status).enumValue, additionalResponseHeaders)
+
+            try:
+                if logResponse :
+                    log.prettyJson(
+                        resourceInstanceMethod,
+                        'response',
+                        {
+                            'headers': dict(FlaskUtil.safellyGetResponseHeaders(httpResponse)),
+                            'body': FlaskUtil.safellyGetResponseJson(httpResponse) ###- json.loads(Serializer.jsonifyIt(responseBody))
+                        },
+                        condition = logResponse,
+                        logLevel = log.INFO
+                    )
+            except Exception as exception:
+                log.failure(innerResourceInstanceMethod, 'Not possible to log response properly', exception)
+
+            return httpResponse
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         innerResourceInstanceMethod.url = controllerMethodUrl
         innerResourceInstanceMethod.requestHeaderClass = controllerMethodRequestHeaderClass
@@ -712,10 +724,10 @@ def ControllerMethod(
 @Function
 def SimpleClient():
     def Wrapper(OuterClass, *args, **kwargs):
-        log.wrapper(SimpleClient,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(SimpleClient, f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
-                log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
+                log.wrapper(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 OuterClass.__init__(self,*args,**kwargs)
                 self.globals = FlaskUtil.getApi().globals
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
@@ -725,7 +737,7 @@ def SimpleClient():
 @Function
 def SimpleClientMethod(requestClass=None):
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs):
-        log.wrapper(SimpleClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        log.wrapper(SimpleClientMethod, f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args,**kwargs):
             resourceInstance = args[0]
             try :
@@ -773,33 +785,51 @@ def getCompleteResponseByException(
         log.error(log.error, 'Error processing request', exception)
     return completeResponse
 
-def validateResponseClass(responseClass, controllerResponse):
-    if isNotPythonFrameworkHttpsResponse(controllerResponse):
+def handleAdditionalResponseHeadersIfNeeded(completeResponse):
+    if len(completeResponse) == 2:
+        if ObjectHelper.isTuple(completeResponse[0]):
+            status = completeResponse.pop()
+            bodyAndHeader = completeResponse.pop()
+            completeResponse.append(bodyAndHeader[0])
+            completeResponse.append(bodyAndHeader[1])
+            completeResponse.append(status)
+        else:
+            status = completeResponse.pop()
+            completeResponse.append(dict())
+            completeResponse.append(status)
+
+
+def validateResponseClass(responseClass, responseBody):
+    if isNotPythonFrameworkHttpsResponseBody(responseBody):
         raiseBadResponseImplementation(f'Python Framework response cannot be null. It should be a list like this: [{"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HTTPS_CODE]')
     if ObjectHelper.isNotNone(responseClass):
         if Serializer.isSerializerList(responseClass):
             if 0 == len(responseClass):
-                log.log(validateResponseClass,f'"responseClass" was not defined')
+                log.log(validateResponseClass, f'"responseClass" was not defined')
             elif 1 == len(responseClass):
                 if ObjectHelper.isNotList(responseClass[0])  :
-                    if not isinstance(controllerResponse[0], responseClass[0]):
-                        raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass[0].__name__}", response "{controllerResponse[0].__class__.__name__}"')
+                    if not isinstance(responseBody[0], responseClass[0]):
+                        raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass[0].__name__}", response "{responseBody[0].__class__.__name__}"')
                 elif ObjectHelper.isNotList(responseClass[0][0]):
-                    if ObjectHelper.isNotList(controllerResponse[0]):
-                        raiseBadResponseImplementation(f'Response is not a list. Expected "{responseClass[0].__class__.__name__}", but found "{controllerResponse[0].__class__.__name__}"')
-                    elif Serializer.isSerializerList(controllerResponse[0]) and 0 < len(controllerResponse[0]) and not isinstance(controllerResponse[0][0], responseClass[0][0]):
-                        raiseBadResponseImplementation(f'Response element class does not match expected element class. Expected "{responseClass[0][0].__name__}", response "{controllerResponse[0][0].__class__.__name__}"')
+                    if ObjectHelper.isNotList(responseBody[0]):
+                        raiseBadResponseImplementation(f'Response is not a list. Expected "{responseClass[0].__class__.__name__}", but found "{responseBody[0].__class__.__name__}"')
+                    elif Serializer.isSerializerList(responseBody[0]) and 0 < len(responseBody[0]) and not isinstance(responseBody[0][0], responseClass[0][0]):
+                        raiseBadResponseImplementation(f'Response element class does not match expected element class. Expected "{responseClass[0][0].__name__}", response "{responseBody[0][0].__class__.__name__}"')
         else :
-            if not isinstance(controllerResponse[0], responseClass):
-                raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass.__name__}", response "{controllerResponse[0].__class__.__name__}"')
+            if not isinstance(responseBody[0], responseClass):
+                raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass.__name__}", response "{responseBody[0].__class__.__name__}"')
     else :
-        log.log(validateResponseClass,f'"responseClass" was not defined')
+        log.log(validateResponseClass, f'"responseClass" was not defined')
 
-def isPythonFrameworkHttpsResponse(controllerResponse):
-    return (ObjectHelper.isTuple(controllerResponse) or ObjectHelper.isList(controllerResponse)) and 2 == len(controllerResponse)
+def isPythonFrameworkHttpsResponseBody(responseBody):
+    return (
+        ObjectHelper.isTuple(responseBody) or ObjectHelper.isList(responseBody)
+    ) and (
+        3 == len(responseBody)
+    )
 
-def isNotPythonFrameworkHttpsResponse(controllerResponse):
-    return not isPythonFrameworkHttpsResponse(controllerResponse)
+def isNotPythonFrameworkHttpsResponseBody(responseBody):
+    return not isPythonFrameworkHttpsResponseBody(responseBody)
 
 def raiseBadResponseImplementation(cause):
     raise Exception(f'Bad response implementation. {cause}')

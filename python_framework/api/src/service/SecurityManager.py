@@ -180,6 +180,9 @@ def getCurrentUser(userClass=None, apiInstance=None):
                     ReflectionHelper.setAttributeOrMethod(currentUsert, attributeName, data.get(attributeName))
             return currentUsert
 
+def getContextData(dataClass=None, apiInstance=None):
+    return getCurrentUser(userClass=dataClass, apiInstance=apiInstance)
+
 def addResource(apiInstance, appInstance):
     apiInstance.securityManager = None
     try:
