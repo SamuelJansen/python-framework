@@ -9,7 +9,7 @@ class StatusService :
     def findAllByStatus(self, dto):
         modelList = self.repository.actuatorHealthTest.findAllByStatus(dto.status)
         return self.converter.actuatorHealthTest.fromModelListToResponseDtoList(modelList), {
-            'added': 'header'
+            'added': 'header',
             'booleanFalse': False,
             'booleanTrue': True,
             'int': 1,

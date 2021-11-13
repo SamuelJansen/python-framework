@@ -229,7 +229,7 @@ def appRun_whenEnvironmentIsLocalFromDevConfig_withSuccess() :
         assert 200 == responseGetHealth.status_code
 
         expectedResponseHeaders = {
-            'added': 'header'
+            'added': 'header',
             'booleanFalse': False,
             'booleanTrue': True,
             'int': 1,

@@ -468,7 +468,7 @@ def handleControllerMethod(
     completeResponse = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
     if not (ObjectHelper.isNotNone(completeResponse) and Serializer.isSerializerCollection(completeResponse) and 2 == len(completeResponse)):
         raise GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
-    return completeResponse
+    return handleAdditionalResponseHeadersIfNeeded(completeResponse)
 
 def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
     if ObjectHelper.isNotEmpty(givenClass):
@@ -660,7 +660,6 @@ def ControllerMethod(
                     logRequest,
                     muteStacktraceOnBusinessRuleException
                 )
-                handleAdditionalResponseHeadersIfNeeded(completeResponse)
                 validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
                 log.log(innerResourceInstanceMethod, 'Failure at resource method execution. Getting complete response as exception', exception=exception, muteStackTrace=True)
@@ -786,18 +785,20 @@ def getCompleteResponseByException(
     return completeResponse
 
 def handleAdditionalResponseHeadersIfNeeded(completeResponse):
-    if len(completeResponse) == 2:
-        if ObjectHelper.isTuple(completeResponse[0]):
-            status = completeResponse.pop()
-            bodyAndHeader = completeResponse.pop()
-            completeResponse.append(bodyAndHeader[0])
-            completeResponse.append(bodyAndHeader[1])
-            completeResponse.append(status)
+    if ObjectHelper.isTuple(completeResponse) and len(completeResponse) == 2:
+        if ObjectHelper.isTuple(completeResponse[0]) and len(completeResponse[0]) == 2:
+            return tuple(
+                completeResponse[0][0], ###- body
+                completeResponse[0][1], ###- header
+                completeResponse[1] ###- status
+            )
         else:
-            status = completeResponse.pop()
-            completeResponse.append(dict())
-            completeResponse.append(status)
-
+            return tuple(
+                completeResponse[0], ###- body
+                dict(), ###- header
+                completeResponse[1] ###- status
+            )
+    return completeResponse
 
 def validateResponseClass(responseClass, responseBody):
     if isNotPythonFrameworkHttpsResponseBody(responseBody):
