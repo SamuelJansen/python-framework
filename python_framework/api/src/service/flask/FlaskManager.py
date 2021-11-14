@@ -688,7 +688,7 @@ def ControllerMethod(
                         'Response',
                         {
                             'headers': FlaskUtil.safellyGetResponseHeaders(httpResponse),
-                            'body': responseBody, ###- FlaskUtil.safellyGetResponseJson(httpResponse) ###- json.loads(Serializer.jsonifyIt(responseBody))
+                            'body': FlaskUtil.safellyGetResponseJson(httpResponse), ###- json.loads(Serializer.jsonifyIt(responseBody))
                             'status': status
                         },
                         condition = logResponse,

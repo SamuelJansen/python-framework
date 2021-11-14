@@ -25,7 +25,7 @@ class ClientTestController:
             f'{BASE_CONTROLLER_URL}/{urlParam}/{otherUrlParam}/get/all',
             headers = headers,
             params = params
-        ), {'get': 'headers'}, HttpStatus.OK
+        )[0], {'get': 'headers'}, HttpStatus.OK
 
 
 @Controller(url=f'{BASE_CONTROLLER_URL}', tag='ClientTestController', description='Client Controller test')
@@ -35,12 +35,14 @@ class ClientTestBatchController:
         url = f'/<string:urlParam>/<string:otherUrlParam>/get/all',
         requestHeaderClass = [ClientTestDto.ClientTestRequestHeaderDto],
         requestParamClass = [ClientTestDto.ClientTestRequestParamDto],
-        responseClass = ClientTestDto.ClientTestResponseDto,
+        responseClass = [[ClientTestDto.ClientTestResponseDto]],
         logRequest = True,
         logResponse = True
     )
     def get(self, urlParam=None, otherUrlParam=None, params=None, headers=None):
-        return ClientTestDto.ClientTestResponseDto(
-            someBody = urlParam + otherUrlParam,
-            someOtherBody = {**Serializer.getObjectAsDictionary(headers), **Serializer.getObjectAsDictionary(params)}
-        ), {'getAll': 'headers'}, HttpStatus.OK
+        return [
+            ClientTestDto.ClientTestResponseDto(
+                someBody = urlParam + otherUrlParam,
+                someOtherBody = {**Serializer.getObjectAsDictionary(headers), **Serializer.getObjectAsDictionary(params)}
+            )
+        ], {'getAll': 'headers'}, HttpStatus.OK

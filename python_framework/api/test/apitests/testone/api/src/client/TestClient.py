@@ -15,7 +15,7 @@ class TestClient:
         requestHeaderClass = [ClientTestDto.ClientTestRequestHeaderDto],
         requestParamClass = [ClientTestDto.ClientTestRequestParamDto],
         requestClass = [str],
-        responseClass = ClientTestDto.ClientTestResponseDto,
+        responseClass = [[ClientTestDto.ClientTestResponseDto]],
         logResponse = True,
         logRequest = True
     )
