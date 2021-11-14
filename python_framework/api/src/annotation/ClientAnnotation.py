@@ -1,6 +1,6 @@
 import json
 from python_helper import Constant as c
-from python_helper import ReflectionHelper, ObjectHelper, log, Function
+from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringHelper
 
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
@@ -245,7 +245,6 @@ def ClientMethod(
     clientMethodConsumes = consumes
     clientMethodLogRequest = logRequest
     clientMethodLogResponse = logResponse
-
     def innerMethodWrapper(resourceInstanceMethod,*args, **kwargs) :
         log.wrapper(ClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args, **kwargs):

@@ -364,6 +364,12 @@ def testing_Client() :
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
     log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
     try:
+        URL_PARAM = 'abcd'
+        OTHER_URL_PARAM = 'efgh'
+        BASE_URL = f'http://localhost:5022/client-test-api/test/{EnvironmentHelper.get("URL_VARIANT")}/{URL_PARAM}/{OTHER_URL_PARAM}'
+
+        getResponse = request.get(f'{BASE_URL}/get')
+        assert ObjectHelper.isNotNone(getResponse)
 
         killProcesses(process)
     except Exception as exception:
