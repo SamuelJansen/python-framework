@@ -800,7 +800,7 @@ def handleAdditionalResponseHeadersIfNeeded(completeResponse):
         if 3 == len(completeResponse):
             if ObjectHelper.isTuple(completeResponse[0]):
                 ###- ((serviceResponse, serviceHeader), controllerHeader, status)
-                return completeResponse[0][0], {**completeResponse[1][0], **completeResponse[0][1], completeResponse[1][1]}
+                return completeResponse[0][0], {**completeResponse[1][0], **completeResponse[0][1]}, completeResponse[1][1]
             return completeResponse
         elif 2 == len(completeResponse):
             if ObjectHelper.isTuple(completeResponse[0]) and 2 == len(completeResponse[0]):
