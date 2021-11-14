@@ -22,10 +22,10 @@ class ClientTestController:
     )
     def get(self, urlParam=None, otherUrlParam=None, params=None, headers=None):
         return self.globals.api.resource.client.test.getMethod(
-            f'{BASE_CONTROLLER_URL}/{urlParam}/{otherUrlParam}/get/all',
+            f'/{urlParam}/{otherUrlParam}/get/all',
             headers = headers,
             params = params
-        )[0], {'get': 'headers'}, HttpStatus.OK
+        )[0], {'get': 'headers-get'}, HttpStatus.OK
 
 
 @Controller(url=f'{BASE_CONTROLLER_URL}', tag='ClientTestController', description='Client Controller test')
@@ -45,4 +45,4 @@ class ClientTestBatchController:
                 someBody = urlParam + otherUrlParam,
                 someOtherBody = {**Serializer.getObjectAsDictionary(headers), **Serializer.getObjectAsDictionary(params)}
             )
-        ], {'getAll': 'headers'}, HttpStatus.OK
+        ], {'getAll': 'headers-get-all'}, HttpStatus.OK

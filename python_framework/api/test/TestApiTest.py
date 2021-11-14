@@ -367,9 +367,25 @@ def testing_Client() :
         URL_PARAM = 'abcd'
         OTHER_URL_PARAM = 'efgh'
         BASE_URL = f'http://localhost:5022/client-test-api/test/{EnvironmentHelper.get("URL_VARIANT")}/{URL_PARAM}/{OTHER_URL_PARAM}'
+        PARAMS = {
+            'someParam': 'given-someParam'
+        }
+        HEADERS = {
+            'someHeader': 'given-someHeader'
+        }
 
-        getResponse = requests.get(f'{BASE_URL}/get')
+        getResponse = requests.get(f'{BASE_URL}/get', params=PARAMS, headers=HEADERS, timeout=10)
         assert ObjectHelper.isNotNone(getResponse)
+        assert ObjectHelper.equals(200, getResponse.status_code)
+        assert ObjectHelper.equals('headers-get', dict(getResponse.headers).get('get'))
+        expectedGetResponse = {
+            "someBody": URL_PARAM + OTHER_URL_PARAM,
+            "someOtherBody": {
+                "someHeader": "given-someHeader",
+                "someParam": "given-someParam"
+            }
+        }
+        assert ObjectHelper.equals(expectedGetResponse, getResponse.json())
 
         killProcesses(process)
     except Exception as exception:

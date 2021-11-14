@@ -16,6 +16,10 @@ ERROR_AT_CLIENT_CALL_MESSAGE = 'Error at client call'
 DEFAULT_TIMEOUT = 30
 
 
+class HeaderKey:
+    CONTENT_TYPE = 'Content-Type'
+
+
 class Verb:
     GET = 'GET'
     POST = 'POST'
@@ -26,16 +30,18 @@ class Verb:
 
 
 @Function
-def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False) :
+def Client(url=c.SLASH, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=False, logResponse=False) :
     clientUrl = url
-    clientDefaultHeaders = ConverterStatic.getValueOrDefault(defaultHeaders, dict())
+    clientHeaders = ConverterStatic.getValueOrDefault(headers, dict())
+    clientTimeout = timeout
     clientLogRequest = logRequest
     clientLogResponse = logResponse
     def Wrapper(OuterClass, *args, **kwargs):
         log.wrapper(Client,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             url = clientUrl
-            defaultHeaders = clientDefaultHeaders
+            headers = clientHeaders
+            timeout = clientTimeout
             logRequest = clientLogRequest
             logResponse = clientLogResponse
             def __init__(self,*args, **kwargs):
@@ -46,55 +52,68 @@ def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False
 
             def options(self,
                 resourceInstanceMethod,
-                url,
-                headers = None,
+                aditionalUrl = None,
                 params = None,
+                headers = None,
                 timeout = None,
-                logRequest = logRequest,
+                logRequest = False,
                 **kwargs
             ):
                 verb = Verb.OPTIONS
-                params = ConverterStatic.getValueOrDefault(params, dict())
-                headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
-                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
-                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
-                response = requests.options(
+                body = dict()
+                url, params, headers, timeout, logRequest = parseParameters(
+                    self,
+                    resourceInstanceMethod,
+                    aditionalUrl,
+                    params,
+                    headers,
+                    timeout,
+                    logRequest
+                )
+                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest)
+                clientResponse = requests.options(
                     url,
                     params = params,
                     headers = headers,
                     timeout = timeout,
                     **kwargs
                 )
-                return response
+                return clientResponse
 
             def get(self,
                 resourceInstanceMethod,
-                url,
-                headers = None,
+                aditionalUrl = None,
                 params = None,
+                headers = None,
                 timeout = None,
                 logRequest = logRequest,
                 **kwargs
             ):
                 verb = Verb.GET
-                params = ConverterStatic.getValueOrDefault(params, dict())
-                headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
                 body = dict()
-                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
-                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
-                response = requests.get(
+                url, params, headers, timeout, logRequest = parseParameters(
+                    self,
+                    resourceInstanceMethod,
+                    aditionalUrl,
+                    params,
+                    headers,
+                    timeout,
+                    logRequest
+                )
+                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest)
+                clientResponse = requests.get(
                     url,
                     params = params,
                     headers = headers,
                     timeout = timeout,
                     **kwargs
                 )
-                return response
+                return clientResponse
 
             def post(self,
                 resourceInstanceMethod,
-                url,
                 body,
+                aditionalUrl = None,
                 headers = None,
                 params = None,
                 timeout = None,
@@ -102,12 +121,17 @@ def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False
                 **kwargs
             ):
                 verb = Verb.POST
-                params = ConverterStatic.getValueOrDefault(params, dict())
-                headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
-                body = ConverterStatic.getValueOrDefault(body, dict())
-                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
-                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
-                response = requests.post(
+                url, params, headers, timeout, logRequest = parseParameters(
+                    self,
+                    resourceInstanceMethod,
+                    aditionalUrl,
+                    params,
+                    headers,
+                    timeout,
+                    logRequest
+                )
+                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest)
+                clientResponse = requests.post(
                     url,
                     params = params,
                     headers = headers,
@@ -115,12 +139,12 @@ def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False
                     timeout = timeout,
                     **kwargs
                 )
-                return response
+                return clientResponse
 
             def put(self,
                 resourceInstanceMethod,
-                url,
                 body,
+                aditionalUrl = None,
                 headers = None,
                 params = None,
                 timeout = None,
@@ -128,12 +152,17 @@ def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False
                 **kwargs
             ):
                 verb = Verb.PUT
-                params = ConverterStatic.getValueOrDefault(params, dict())
-                headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
-                body = ConverterStatic.getValueOrDefault(body, dict())
-                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
-                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
-                response = requests.put(
+                url, params, headers, timeout, logRequest = parseParameters(
+                    self,
+                    resourceInstanceMethod,
+                    aditionalUrl,
+                    params,
+                    headers,
+                    timeout,
+                    logRequest
+                )
+                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest)
+                clientResponse = requests.put(
                     url,
                     params = params,
                     headers = headers,
@@ -141,12 +170,12 @@ def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False
                     timeout = timeout,
                     **kwargs
                 )
-                return response
+                return clientResponse
 
             def delete(self,
                 resourceInstanceMethod,
-                url,
                 body,
+                aditionalUrl = None,
                 headers = None,
                 params = None,
                 timeout = None,
@@ -154,12 +183,17 @@ def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False
                 **kwargs
             ):
                 verb = Verb.DELETE
-                params = ConverterStatic.getValueOrDefault(params, dict())
-                headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
-                body = ConverterStatic.getValueOrDefault(body, dict())
-                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
-                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
-                response = requests.delete(
+                url, params, headers, timeout, logRequest = parseParameters(
+                    self,
+                    resourceInstanceMethod,
+                    aditionalUrl,
+                    params,
+                    headers,
+                    timeout,
+                    logRequest
+                )
+                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest)
+                clientResponse = requests.delete(
                     url,
                     params = params,
                     headers = headers,
@@ -167,12 +201,12 @@ def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False
                     timeout = timeout,
                     **kwargs
                 )
-                return response
+                return clientResponse
 
             def patch(self,
                 resourceInstanceMethod,
-                url,
                 body,
+                aditionalUrl = None,
                 headers = None,
                 params = None,
                 timeout = None,
@@ -180,12 +214,17 @@ def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False
                 **kwargs
             ):
                 verb = Verb.PATCH
-                params = ConverterStatic.getValueOrDefault(params, dict())
-                headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
-                body = ConverterStatic.getValueOrDefault(body, dict())
-                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
-                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
-                response = requests.patch(
+                url, params, headers, timeout, logRequest = parseParameters(
+                    self,
+                    resourceInstanceMethod,
+                    aditionalUrl,
+                    params,
+                    headers,
+                    timeout,
+                    logRequest
+                )
+                self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest)
+                clientResponse = requests.patch(
                     url,
                     params = params,
                     headers = headers,
@@ -193,9 +232,9 @@ def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False
                     timeout = timeout,
                     **kwargs
                 )
-                return response
+                return clientResponse
 
-            def logRequest(self, resourceInstanceMethod, verb, url, body, params, headers, logRequest=False):
+            def logRequest(self, resourceInstanceMethod, verb, url, body, params, headers, logRequest):
                 log.info(resourceInstanceMethod, f'Client {verb} - {url}')
                 if logRequest:
                     log.prettyJson(
@@ -217,12 +256,13 @@ def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False
 @Function
 def ClientMethod(
     url = c.SLASH,
+    headers = None,
     requestHeaderClass = None,
     requestParamClass = None,
     requestClass = None,
     responseClass = None,
     returnOnlyBody = True,
-    timeout = 10,
+    timeout = None,
     propagateAuthorization = False,
     propagateApiKey = False,
     propagateSession = False,
@@ -232,6 +272,7 @@ def ClientMethod(
     logResponse = False
 ):
     clientMethodUrl = url
+    clientMethodHeaders = headers
     clientMethodRequestHeaderClass = requestHeaderClass
     clientMethodRequestParamClass = requestParamClass
     clientMethodRequestClass = requestClass
@@ -250,6 +291,7 @@ def ClientMethod(
         def innerResourceInstanceMethod(*args, **kwargs):
             f'''(*args, {FlaskUtil.KW_HEADERS}={{}}, {FlaskUtil.KW_PARAMETERS}={{}}, **kwargs)'''
             resourceInstance = args[0]
+            clientResponse = None
             completeResponse = None
             try :
                 FlaskManager.validateKwargs(
@@ -260,30 +302,30 @@ def ClientMethod(
                     requestParamClass
                 )
                 FlaskManager.validateArgs(args, requestClass, resourceInstanceMethod)
-                response = None
+                clientResponse = None
                 try :
-                    response = resourceInstanceMethod(*args, **kwargs)
+                    clientResponse = resourceInstanceMethod(*args, **kwargs)
                 except Exception as exception:
-                    raiseException(response, exception)
-                raiseExceptionIfNeeded(response)
-                completeResponse = getCompleteResponse(response, responseClass)
+                    raiseException(clientResponse, exception)
+                raiseExceptionIfNeeded(clientResponse)
+                completeResponse = getCompleteResponse(clientResponse, responseClass, resourceInstanceMethod)
                 FlaskManager.validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
-                log.debug(innerResourceInstanceMethod, 'Not posssible to complete request', exception=exception)
+                log.log(innerResourceInstanceMethod, 'Failure at client method execution', exception=exception, muteStackTrace=True)
                 raise exception
             clientResponseStatus = completeResponse[-1]
             clientResponseHeaders = completeResponse[1]
             clientResponseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : HttpStatus.map(clientResponseStatus).enumName}
-            if logResponse :
+            if self.logResponse or logResponse :
                 log.prettyJson(
                     resourceInstanceMethod,
                     'Response',
                     {
                         'headers': clientResponseHeaders,
-                        'body': Serializer.getObjectAsDictionary(clientResponseBody),
+                        'body': FlaskUtil.safellyGetResponseJson(clientResponse),
                         'status': clientResponseStatus
                     },
-                    condition = logResponse,
+                    condition = self.logResponse or logResponse,
                     logLevel = log.INFO
                 )
             if returnOnlyBody:
@@ -292,6 +334,7 @@ def ClientMethod(
                 return completeResponse
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         innerResourceInstanceMethod.url = clientMethodUrl
+        innerResourceInstanceMethod.headers = clientMethodHeaders
         innerResourceInstanceMethod.requestHeaderClass = clientMethodRequestHeaderClass
         innerResourceInstanceMethod.requestParamClass = clientMethodRequestParamClass
         innerResourceInstanceMethod.requestClass = clientMethodRequestClass
@@ -309,45 +352,93 @@ def ClientMethod(
     return innerMethodWrapper
 
 
-def raiseException(response, exception):
+@Function
+def getUrl(client, resourceInstanceMethod, aditionalUrl):
+return StringHelper.join([
+    ConverterStatic.getValueOrDefault(u, c.BLANK) for u in [
+            client.url,
+            resourceInstanceMethod.url,
+            aditionalUrl
+        ]
+    ],
+    character = c.BLANK
+)
+
+@Function
+def getHeaders(client, resourceInstanceMethod, headers):
+    return {
+        **ConverterStatic.getValueOrDefault(client.headers, dict()),
+        **{HeaderKey.CONTENT_TYPE: resourceInstanceMethod.consumes}
+        **ConverterStatic.getValueOrDefault(resourceInstanceMethod.headers, dict()),
+        **ConverterStatic.getValueOrDefault(headers, dict())
+    }
+
+@Function
+def getTimeout(client, resourceInstanceMethod, timeout):
+    return ConverterStatic.getValueOrDefault(timeout, ConverterStatic.getValueOrDefault(resourceInstanceMethod.timeout, client.timeout))
+
+@Function
+def getLogRequest(client, resourceInstanceMethod, logRequest):
+    return client.logRequest or resourceInstanceMethod.logRequest or logRequest
+
+@Function
+def parseParameters(client, resourceInstanceMethod, aditionalUrl, params, headers, timeout, logRequest):
+    url = getUrl(client, resourceInstanceMethod, aditionalUrl)
+    params = ConverterStatic.getValueOrDefault(params, dict())
+    headers = getHeaders(client, resourceInstanceMethod, headers)
+    timeout = getTimeout(client, resourceInstanceMethod, timeout)
+    logRequest = getLogRequest(client, resourceInstanceMethod, logRequest)
+    return url, params, headers, timeout, logRequest
+
+@Function
+def raiseException(clientResponse, exception):
         raise GlobalException(
-            logMessage = getErrorMessage(response, exception=exception)
+            logMessage = getErrorMessage(clientResponse, exception=exception)
         )
 
-def raiseExceptionIfNeeded(response):
-    if ObjectHelper.isNone(response) or ObjectHelper.isNone(response.status_code) or 500 <= response.status_code:
-        raise GlobalException(logMessage = getErrorMessage(response))
-    elif 400 <= response.status_code :
+
+@Function
+def raiseExceptionIfNeeded(clientResponse):
+    if ObjectHelper.isNone(clientResponse) or ObjectHelper.isNone(clientResponse.status_code) or 500 <= clientResponse.status_code:
+        raise GlobalException(logMessage = getErrorMessage(clientResponse))
+    elif 400 <= clientResponse.status_code :
         raise GlobalException(
-            message = getErrorMessage(response),
-            status = HttpStatus.map(response.status_code),
+            message = getErrorMessage(clientResponse),
+            status = HttpStatus.map(clientResponse.status_code),
             logMessage = ERROR_AT_CLIENT_CALL_MESSAGE
         )
 
-def getCompleteResponse(response, responseClass, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
+
+@Function
+def getCompleteResponse(clientResponse, responseClass, resourceInstanceMethod, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
     responseBody, responseHeaders, responseStatus = None, None, None
     try :
-        responseBody, responseHeaders, responseStatus = response.json(), FlaskUtil.safellyGetResponseHeaders(response), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(response.status_code) else response.status_code)
+        responseBody, responseHeaders, responseStatus = clientResponse.json(), FlaskUtil.safellyGetResponseHeaders(clientResponse), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
     except Exception as exception :
-        tempStatus = None
-        responseBody, responseStatus = None, HttpStatus.map(fallbackStatus)
-        log.failure(getCompleteResponse, 'Not possible to parse response as json', exception=exception, muteStackTrace=True)
+        responseBody, responseStatus = dict(), HttpStatus.map(fallbackStatus)
+        log.failure(getCompleteResponse, 'Not possible to parse client response as json', exception=exception, muteStackTrace=True)
+    responseHeaders = {
+        **{HeaderKey.CONTENT_TYPE: resourceInstanceMethod.produces},
+        **responseHeaders
+    }
     if ObjectHelper.isNone(responseClass):
         return responseBody, responseHeaders, responseStatus
     else:
         return Serializer.convertFromJsonToObject(responseBody, responseClass), responseHeaders, responseStatus
 
-def getErrorMessage(response, exception=None):
+
+@Function
+def getErrorMessage(clientResponse, exception=None):
     errorMessage = CLIENT_DID_NOT_SENT_ANY_MESSAGE
     possibleErrorMessage = None
     try :
-        if ObjectHelper.isNotNone(response):
-            possibleErrorMessage = response.json().get('message', response.json().get('error')).strip()
+        if ObjectHelper.isNotNone(clientResponse):
+            possibleErrorMessage = clientResponse.json().get('message', clientResponse.json().get('error')).strip()
         if ObjectHelper.isNotNone(possibleErrorMessage) and StringHelper.isNotBlank(possibleErrorMessage):
             errorMessage = f'{c.DOT_SPACE_CAUSE}{possibleErrorMessage}'
         else:
-            log.prettyPython(getErrorMessage, 'Client response', response.json(), logLevel=log.DEBUG)
+            log.debug(getErrorMessage, 'Client response', FlaskUtil.safellyGetResponseJson(clientResponse))
     except Exception as innerException :
-        log.warning(getErrorMessage, 'Not possible to get error message from response', exception=innerException)
+        log.warning(getErrorMessage, f'Not possible to get error message from client response: {FlaskUtil.safellyGetResponseJson(clientResponse)}', exception=innerException)
     exceptionPortion = ERROR_AT_CLIENT_CALL_MESSAGE if ObjectHelper.isNone(exception) or StringHelper.isBlank(exception) else str(exception)
     return f'{exceptionPortion}{c.DOT_SPACE}{errorMessage}'

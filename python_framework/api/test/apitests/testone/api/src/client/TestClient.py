@@ -7,11 +7,14 @@ from python_framework.api.src.dto import ActuatorHealthDto
 import ClientTestDto
 
 
+BASE_CONTROLLER_URL = f'/test/{EnvironmentHelper.get("URL_VARIANT")}'
+
+
 @Client(url='http://localhost:5022/client-test-api')
 class TestClient:
 
     @ClientMethod(
-        # url = f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}',
+        url = f'{BASE_CONTROLLER_URL}',
         requestHeaderClass = [ClientTestDto.ClientTestRequestHeaderDto],
         requestParamClass = [ClientTestDto.ClientTestRequestParamDto],
         requestClass = [str],
@@ -19,10 +22,10 @@ class TestClient:
         logResponse = True,
         logRequest = True
     )
-    def getMethod(self, url, headers=None, params=None):
+    def getMethod(self, uri, headers=None, params=None):
         return self.get(
             self.getMethod,
-            f'{self.url}{url}',
+            aditionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
-            headers = {'Content-Type': self.getMethod.consumes, **Serializer.getObjectAsDictionary(headers)}
+            headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
         )

@@ -652,7 +652,7 @@ def ControllerMethod(
                 )
                 validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
-                log.log(innerResourceInstanceMethod, 'Failure at resource method execution. Getting complete response as exception', exception=exception, muteStackTrace=True)
+                log.log(innerResourceInstanceMethod, 'Failure at controller method execution. Getting complete response as exception', exception=exception, muteStackTrace=True)
                 completeResponse = getCompleteResponseByException(
                     exception,
                     resourceInstance,
@@ -672,14 +672,14 @@ def ControllerMethod(
                 ###- request.full_path:           /alert/dingding/test?x=y
                 ###- request.args:                ImmutableMultiDict([('x', 'y')])
                 ###- request.args.get('x'):       y
-            status = completeResponse[-1]
+            status =  HttpStatus.map(completeResponse[-1])
             additionalResponseHeaders = completeResponse[1]
             if ObjectHelper.isNotNone(resourceInstance.responseHeaders):
                 additionalResponseHeaders = {**resourceInstance.responseHeaders, **additionalResponseHeaders}
             if ObjectHelper.isNotNone(responseHeaders):
                 additionalResponseHeaders = {**responseHeaders, **additionalResponseHeaders}
             responseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : status.enumName}
-            httpResponse = FlaskUtil.buildHttpResponse(additionalResponseHeaders, responseBody, HttpStatus.map(status).enumValue, produces)
+            httpResponse = FlaskUtil.buildHttpResponse(additionalResponseHeaders, responseBody, status.enumValue, produces)
 
             try:
                 if logResponse :
@@ -768,7 +768,15 @@ def getCompleteResponseByException(
     muteStacktraceOnBusinessRuleException
 ):
     exception = getGlobalException(exception, resourceInstance, resourceInstanceMethod)
-    completeResponse = ({'message':exception.message, 'timestamp':str(exception.timeStamp)}, {}, exception.status)
+    completeResponse = (
+        {
+            'message': exception.message,
+            'url': ,
+            'timestamp': str(exception.timeStamp)
+        },
+        {},
+        exception.status
+    )
     try :
         logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request'
         if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):
