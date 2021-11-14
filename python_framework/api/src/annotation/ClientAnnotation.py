@@ -13,6 +13,7 @@ from python_framework.api.src.service.ExceptionHandler import GlobalException
 
 CLIENT_DID_NOT_SENT_ANY_MESSAGE = 'Client did not sent any message'
 ERROR_AT_CLIENT_CALL_MESSAGE = 'Error at client call'
+DEFAULT_TIMEOUT = 30
 
 
 class Verb:
@@ -25,9 +26,8 @@ class Verb:
 
 
 @Function
-def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False, logResponse=False) :
+def Client(url=c.SLASH, defaultHeaders=None, logRequest=False, logResponse=False) :
     clientUrl = url
-    clientDefaultTimeout = defautlTimeout
     clientDefaultHeaders = ConverterStatic.getValueOrDefault(defaultHeaders, dict())
     clientLogRequest = logRequest
     clientLogResponse = logResponse
@@ -35,7 +35,6 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
         log.wrapper(Client,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             url = clientUrl
-            defautlTimeout = clientDefaultTimeout
             defaultHeaders = clientDefaultHeaders
             logRequest = clientLogRequest
             logResponse = clientLogResponse
@@ -50,14 +49,14 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
                 url,
                 headers = None,
                 params = None,
-                timeout = defautlTimeout,
+                timeout = None,
                 logRequest = logRequest,
                 **kwargs
             ):
                 verb = Verb.OPTIONS
                 params = ConverterStatic.getValueOrDefault(params, dict())
                 headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
-                timeout = ConverterStatic.getValueOrDefault(resourceInstanceMethod.timeout, timeout)
+                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
                 self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
                 response = requests.options(
                     url,
@@ -73,14 +72,15 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
                 url,
                 headers = None,
                 params = None,
-                timeout = defautlTimeout,
+                timeout = None,
                 logRequest = logRequest,
                 **kwargs
             ):
                 verb = Verb.GET
                 params = ConverterStatic.getValueOrDefault(params, dict())
                 headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
-                timeout = ConverterStatic.getValueOrDefault(resourceInstanceMethod.timeout, timeout)
+                body = dict()
+                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
                 self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
                 response = requests.get(
                     url,
@@ -97,7 +97,7 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
                 body,
                 headers = None,
                 params = None,
-                timeout = defautlTimeout,
+                timeout = None,
                 logRequest = logRequest,
                 **kwargs
             ):
@@ -105,7 +105,7 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
                 params = ConverterStatic.getValueOrDefault(params, dict())
                 headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
                 body = ConverterStatic.getValueOrDefault(body, dict())
-                timeout = ConverterStatic.getValueOrDefault(resourceInstanceMethod.timeout, timeout)
+                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
                 self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
                 response = requests.post(
                     url,
@@ -123,7 +123,7 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
                 body,
                 headers = None,
                 params = None,
-                timeout = defautlTimeout,
+                timeout = None,
                 logRequest = logRequest,
                 **kwargs
             ):
@@ -131,7 +131,7 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
                 params = ConverterStatic.getValueOrDefault(params, dict())
                 headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
                 body = ConverterStatic.getValueOrDefault(body, dict())
-                timeout = ConverterStatic.getValueOrDefault(resourceInstanceMethod.timeout, timeout)
+                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
                 self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
                 response = requests.put(
                     url,
@@ -149,7 +149,7 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
                 body,
                 headers = None,
                 params = None,
-                timeout = defautlTimeout,
+                timeout = None,
                 logRequest = logRequest,
                 **kwargs
             ):
@@ -157,7 +157,7 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
                 params = ConverterStatic.getValueOrDefault(params, dict())
                 headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
                 body = ConverterStatic.getValueOrDefault(body, dict())
-                timeout = ConverterStatic.getValueOrDefault(resourceInstanceMethod.timeout, timeout)
+                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
                 self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
                 response = requests.delete(
                     url,
@@ -175,7 +175,7 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
                 body,
                 headers = None,
                 params = None,
-                timeout = defautlTimeout,
+                timeout = None,
                 logRequest = logRequest,
                 **kwargs
             ):
@@ -183,7 +183,7 @@ def Client(url=c.SLASH, defaultHeaders=None, defautlTimeout=10, logRequest=False
                 params = ConverterStatic.getValueOrDefault(params, dict())
                 headers = {**self.defaultHeaders, **ConverterStatic.getValueOrDefault(headers, dict())}
                 body = ConverterStatic.getValueOrDefault(body, dict())
-                timeout = ConverterStatic.getValueOrDefault(resourceInstanceMethod.timeout, timeout)
+                timeout = ConverterStatic.getValueOrDefault(timeout, resourceInstanceMethod.timeout)
                 self.logRequest(resourceInstanceMethod, verb, url, body, params, headers, logRequest=logRequest or self.logRequest)
                 response = requests.patch(
                     url,

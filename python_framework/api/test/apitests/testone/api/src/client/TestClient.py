@@ -21,7 +21,8 @@ class TestClient:
     )
     def getMethod(self, url, headers=None, params=None):
         return self.get(
+            self.getMethod,
             f'{self.url}{url}',
             params = Serializer.getObjectAsDictionary(params),
-            headers = {'Content-Type': self.getOnActuatorHealth.consumes, **Serializer.getObjectAsDictionary(headers)}
+            headers = {'Content-Type': self.getMethod.consumes, **Serializer.getObjectAsDictionary(headers)}
         )
