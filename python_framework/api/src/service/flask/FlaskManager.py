@@ -703,7 +703,8 @@ def ControllerMethod(
                         'Response',
                         {
                             'headers': dict(FlaskUtil.safellyGetResponseHeaders(httpResponse)),
-                            'body': FlaskUtil.safellyGetResponseJson(httpResponse) ###- json.loads(Serializer.jsonifyIt(responseBody))
+                            'body': responseBody, ###- FlaskUtil.safellyGetResponseJson(httpResponse) ###- json.loads(Serializer.jsonifyIt(responseBody))
+                            'status': status
                         },
                         condition = logResponse,
                         logLevel = log.INFO
@@ -797,51 +798,58 @@ def getCompleteResponseByException(
 def handleAdditionalResponseHeadersIfNeeded(completeResponse):
     if ObjectHelper.isTuple(completeResponse):
         if 3 == len(completeResponse):
+            if ObjectHelper.isTuple(completeResponse[0]):
+                ###- ((serviceResponse, serviceHeader), controllerHeader, status)
+                return completeResponse[0][0], {**completeResponse[1][0], **completeResponse[0][1], completeResponse[1][1]}
             return completeResponse
         elif 2 == len(completeResponse):
             if ObjectHelper.isTuple(completeResponse[0]) and 2 == len(completeResponse[0]):
-                ###- body, header, status
+                ###- ((serviceResponse, serviceHeader), status)
                 return completeResponse[0][0], completeResponse[0][1], completeResponse[1]
+            elif ObjectHelper.isTuple(completeResponse[1]) and 2 == len(completeResponse[1]):
+                ###- (serviceResponse, (serviceHeader, status)) --> this case should never happens
+                return completeResponse[0], completeResponse[1][0], completeResponse[1][1]
             else:
-                ###- body, header, status
+                ###- (serviceResponse, status) --> missing header
                 return completeResponse[0],  dict(),  completeResponse[1]
     elif ObjectHelper.isList(completeResponse) and 2 == len(completeResponse):
         ###- it can only be guessed at this point
+        ###- (serviceResponse, status) --> missing header
         return completeResponse[0],  dict(),  completeResponse[1]
     ###- totally lost at this point
     return completeResponse
 
-def validateResponseClass(responseClass, responseBody):
-    if isNotPythonFrameworkHttpsResponseBody(responseBody):
-        raiseBadResponseImplementation(f'Python Framework response cannot be null. It should be a list like this: [{"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HTTPS_CODE]')
+def validateResponseClass(responseClass, completeResponse):
+    if isNotPythonFrameworkHttpsResponseBody(completeResponse):
+        raiseBadResponseImplementation(f'Invalid response. It should be a list like this: ({"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HEADERS, HTTPS_CODE). But it is: {completeResponse}')
     if ObjectHelper.isNotNone(responseClass):
         if Serializer.isSerializerList(responseClass):
             if 0 == len(responseClass):
                 log.log(validateResponseClass, f'"responseClass" was not defined')
             elif 1 == len(responseClass):
                 if ObjectHelper.isNotList(responseClass[0])  :
-                    if not isinstance(responseBody[0], responseClass[0]):
-                        raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass[0].__name__}", response "{responseBody[0].__class__.__name__}"')
+                    if not isinstance(completeResponse[0], responseClass[0]):
+                        raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass[0].__name__}", response "{completeResponse[0].__class__.__name__}"')
                 elif ObjectHelper.isNotList(responseClass[0][0]):
-                    if ObjectHelper.isNotList(responseBody[0]):
-                        raiseBadResponseImplementation(f'Response is not a list. Expected "{responseClass[0].__class__.__name__}", but found "{responseBody[0].__class__.__name__}"')
-                    elif Serializer.isSerializerList(responseBody[0]) and 0 < len(responseBody[0]) and not isinstance(responseBody[0][0], responseClass[0][0]):
-                        raiseBadResponseImplementation(f'Response element class does not match expected element class. Expected "{responseClass[0][0].__name__}", response "{responseBody[0][0].__class__.__name__}"')
+                    if ObjectHelper.isNotList(completeResponse[0]):
+                        raiseBadResponseImplementation(f'Response is not a list. Expected "{responseClass[0].__class__.__name__}", but found "{completeResponse[0].__class__.__name__}"')
+                    elif Serializer.isSerializerList(completeResponse[0]) and 0 < len(completeResponse[0]) and not isinstance(completeResponse[0][0], responseClass[0][0]):
+                        raiseBadResponseImplementation(f'Response element class does not match expected element class. Expected "{responseClass[0][0].__name__}", response "{completeResponse[0][0].__class__.__name__}"')
         else :
-            if not isinstance(responseBody[0], responseClass):
-                raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass.__name__}", response "{responseBody[0].__class__.__name__}"')
+            if not isinstance(completeResponse[0], responseClass):
+                raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass.__name__}", response "{completeResponse[0].__class__.__name__}"')
     else :
         log.log(validateResponseClass, f'"responseClass" was not defined')
 
-def isPythonFrameworkHttpsResponseBody(responseBody):
+def isPythonFrameworkHttpsResponseBody(completeResponse):
     return (
-        ObjectHelper.isTuple(responseBody) or ObjectHelper.isList(responseBody)
+        ObjectHelper.isTuple(completeResponse) or ObjectHelper.isList(completeResponse)
     ) and (
-        3 == len(responseBody)
+        3 == len(completeResponse)
     )
 
-def isNotPythonFrameworkHttpsResponseBody(responseBody):
-    return not isPythonFrameworkHttpsResponseBody(responseBody)
+def isNotPythonFrameworkHttpsResponseBody(completeResponse):
+    return not isPythonFrameworkHttpsResponseBody(completeResponse)
 
 def raiseBadResponseImplementation(cause):
     raise Exception(f'Bad response implementation. {cause}')
