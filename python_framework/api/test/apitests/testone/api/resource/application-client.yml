@@ -1,0 +1,13 @@
+print-status: False
+
+api:
+    name: ClientTestApi
+    server:
+        base-url: /client-test-api
+        scheme: http
+        port: 5022
+        host: localhost
+
+swagger:
+    schemes: [${api.server.scheme}]
+    host: ${api.server.host}:${api.server.port}

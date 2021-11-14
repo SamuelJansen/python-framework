@@ -28,6 +28,21 @@ def getProcess(command, path, timeout=20, muteLogs=False) :
     )
 
 
+LOG_HELPER_SETTINGS = {
+    log.LOG : True,
+    log.SUCCESS : True,
+    log.SETTING : True,
+    log.STATUS : True,
+    log.INFO : True,
+    log.DEBUG : True,
+    log.WARNING : True,
+    log.WRAPPER : True,
+    log.FAILURE : True,
+    log.ERROR : True,
+    log.TEST : False,
+    log.ENABLE_LOGS_WITH_COLORS: True
+}
+
 ### - Other possible solutions
 # https://stackoverflow.com/questions/4789837/how-to-terminate-a-python-subprocess-launched-with-shell-true
 
@@ -250,7 +265,7 @@ def appRun_whenEnvironmentIsLocalFromDevConfig_withSuccess() :
         raise exception
 
 @Test()
-def testing_Client() :
+def testing_headersAndParams() :
     #arrange
     muteLogs = False
     serverPort = 5010
@@ -334,7 +349,8 @@ def testing_Client() :
         raise exception
 
 @Test(environmentVariables={
-    SettingHelper.ACTIVE_ENVIRONMENT : 'python-build'
+    SettingHelper.ACTIVE_ENVIRONMENT : 'client',
+    **LOG_HELPER_SETTINGS
 })
 def testing_Client() :
     #arrange

@@ -239,7 +239,8 @@ def addQueryParamListToUrlVerb(verb, url, endPointUrl, requestParamClass, docume
                     if ObjectHelper.isNotNone(requestParamClass[0][0]) and ObjectHelper.isNotList(requestParamClass[0][0]) :
                         # addQueryParamListToUrlVerb(verb, url, endPointUrl, requestParamClass[0][0], documentation) ###-, where=where
                         log.warning(addQueryParamListToUrlVerb, f'Request param class as list not implemented yet. requestParamClass: {requestParamClass}')
-        log.warning(addQueryParamListToUrlVerb, f'Unexpected request param class. requestParamClass: {requestParamClass}')
+        else:
+            log.warning(addQueryParamListToUrlVerb, f'Unexpected request param class. requestParamClass: {requestParamClass}')
 
 def addHeadersListToUrlVerb(verb, url, endPointUrl, requestHeaderClass, documentation):
     if ObjectHelper.isList(requestHeaderClass) and 0 == len(requestHeaderClass):

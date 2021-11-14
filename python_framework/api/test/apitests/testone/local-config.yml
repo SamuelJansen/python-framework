@@ -9,6 +9,22 @@ database:
     database: ${DATABASE_NAME:d5h5kfi694bmst}
 
 environment:
+    # logs:
+    #     debug:
+    #         key: DEBUG
+    #         value: True
+    #     warning:
+    #         key: WARNING
+    #         value: True
+    #     wrapper:
+    #         key: WRAPPER
+    #         value: True
+    #     log:
+    #         key: LOG
+    #         value: True
+    #     info:
+    #         key: LOG
+    #         value: True
     # shema:
     #     key: DATABASE_SCHEMA
     #     value: ${database.schema}

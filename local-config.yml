@@ -1,6 +1,22 @@
 print-status: False
 
 environment:
+    # logs:
+    #     debug:
+    #         key: DEBUG
+    #         value: True
+    #     warning:
+    #         key: WARNING
+    #         value: True
+    #     wrapper:
+    #         key: WRAPPER
+    #         value: True
+    #     log:
+    #         key: LOG
+    #         value: True
+    #     info:
+    #         key: LOG
+    #         value: True
     active-environment:
         key: ACTIVE_ENVIRONMENT
         value: local

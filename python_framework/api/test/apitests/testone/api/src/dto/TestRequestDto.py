@@ -6,6 +6,7 @@ class TestRequestParamDto:
         self.first = first
         self.second = second
 
+
 class TestRequestHeaderDto:
     def __init__(self,
         firstHeader = None,

@@ -40,7 +40,8 @@ PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST = [
     'SecurityManagerTestApi',
     'ApiKeyManagerTestApi',
     'SessionManagerTestApi',
-    'SecurityManagerAndApiKeyManagerAndSessionManagerTestApi'
+    'SecurityManagerAndApiKeyManagerAndSessionManagerTestApi',
+    'ClientTestApi'
 ]
 KW_CONTROLLER_RESOURCE = 'Controller'
 KW_SCHEDULER_RESOURCE = 'Scheduler'
@@ -74,9 +75,6 @@ PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
     ]
 }
 KW_RESOURCE_LIST = list(PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.keys())
-
-KW_PARAMETERS = 'params'
-KW_HEADERS = 'headers'
 
 
 def newApp(
@@ -463,18 +461,12 @@ def handleControllerMethod(
         if Serializer.requestBodyIsPresent(requestBodyAsJson):
             serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(args, serializerReturn)
-    headers = addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
-    query = addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
+    headers = FlaskUtil.addToKwargs(FlaskUtil.KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
+    query = FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
     completeResponse = handleAdditionalResponseHeadersIfNeeded(resourceInstanceMethod(resourceInstance,*args[1:],**kwargs))
     if isNotPythonFrameworkHttpsResponseBody(completeResponse):
         raiseBadResponseImplementation(f'It should be a tuple like this: ({"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HEADERS, HTTPS_CODE). But it is: {completeResponse}')
     return completeResponse
-
-def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
-    if ObjectHelper.isNotEmpty(givenClass):
-        toClass = givenClass if ObjectHelper.isNotList(givenClass) else givenClass[0]
-        kwargs[key] = Serializer.convertFromJsonToObject({k:v for k,v in valuesAsDictionary.items()}, toClass)
-    return valuesAsDictionary
 
 @Function
 def getArgsWithSerializerReturnAppended(args, argument):
@@ -526,7 +518,7 @@ def bindResource(apiInstance,resourceInstance):
     setResource(ReflectionHelper.getAttributeOrMethod(apiInstance.resource, getResourceType(resourceInstance).lower()), resourceInstance)
 
 @Function
-def validateArgs(args, requestClass, method):
+def validateArgs(args, requestClass, resourceInstanceMethod):
     if ObjectHelper.isNotNone(requestClass):
         resourceInstance = args[0]
         if Serializer.isSerializerList(requestClass):
@@ -535,26 +527,26 @@ def validateArgs(args, requestClass, method):
                     if Serializer.isSerializerList(args[index + 1]) and len(args[index + 1]) > 0 :
                         expecteObjectClass = requestClass[index][0]
                         for objectInstance in args[index + 1] :
-                            ExceptionHandler.validateArgs(resourceInstance, method, objectInstance, expecteObjectClass)
+                            ExceptionHandler.validateArgs(resourceInstance, resourceInstanceMethod, objectInstance, expecteObjectClass)
                     else :
                         objectRequest = args[index + 1]
                         expecteObjectClass = requestClass[index]
-                        ExceptionHandler.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
+                        ExceptionHandler.validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass)
         else :
             objectRequest = args[1]
             expecteObjectClass = requestClass
-            ExceptionHandler.validateArgs(resourceInstance, method, objectRequest, expecteObjectClass)
+            ExceptionHandler.validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass)
 
-def validateKwargs(kwargs, resourceInstance, innerResourceInstanceMethod, requestHeaderClass=None, requestParamClass=None):
+def validateKwargs(kwargs, resourceInstance, resourceInstanceMethod, requestHeaderClass, requestParamClass):
     classListToValidate = []
     instanceListToValidate = []
     if ObjectHelper.isNotEmpty(requestHeaderClass):
         classListToValidate.append(requestHeaderClass if ObjectHelper.isNotList(requestHeaderClass) else requestHeaderClass[0])
-        instanceListToValidate.append(kwargs.get(KW_HEADERS, {}))
+        instanceListToValidate.append(kwargs.get(FlaskUtil.KW_HEADERS, {}))
     if ObjectHelper.isNotEmpty(requestParamClass):
         classListToValidate.append(requestParamClass if ObjectHelper.isNotList(requestParamClass) else requestParamClass[0])
-        instanceListToValidate.append(kwargs.get(KW_PARAMETERS, {}))
-    validateArgs([resourceInstance, *instanceListToValidate], classListToValidate, innerResourceInstanceMethod)
+        instanceListToValidate.append(kwargs.get(FlaskUtil.KW_PARAMETERS, {}))
+    validateArgs([resourceInstance, *instanceListToValidate], classListToValidate, resourceInstanceMethod)
 
 @Function
 def Controller(
@@ -619,6 +611,7 @@ def ControllerMethod(
     def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs):
         log.wrapper(ControllerMethod, f'''wrapping {resourceInstanceMethod.__name__}''', None)
         def innerResourceInstanceMethod(*args,**kwargs):
+            f'''(*args, {FlaskUtil.KW_HEADERS}={{}}, {FlaskUtil.KW_PARAMETERS}={{}}, **kwargs)'''
             # r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             # r.headers["Pragma"] = "no-cache"
             # r.headers["Expires"] = "0"
@@ -627,7 +620,7 @@ def ControllerMethod(
             completeResponse = None
 
             try:
-                log.info(resourceInstanceMethod, f'{FlaskUtil.safellyGetVerb()} - {FlaskUtil.safellyGetUrl()}')
+                log.info(resourceInstanceMethod, f'Controller {FlaskUtil.safellyGetVerb()} - {FlaskUtil.safellyGetUrl()}')
                 if logRequest :
                     requestBodyForLog = {}
                     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST:
@@ -639,8 +632,8 @@ def ControllerMethod(
                         resourceInstanceMethod,
                         'Request',
                         {
-                            'headers': dict(addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)),
-                            # 'query': dict(addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)), ###- safellyGetUrl() returns query param
+                            'headers': FlaskUtil.addToKwargs(FlaskUtil.KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs),
+                            # 'query': FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs), ###- safellyGetUrl() returns query param
                             'body': requestBodyForLog
                         },
                         condition = logRequest,
@@ -702,7 +695,7 @@ def ControllerMethod(
                         resourceInstanceMethod,
                         'Response',
                         {
-                            'headers': dict(FlaskUtil.safellyGetResponseHeaders(httpResponse)),
+                            'headers': FlaskUtil.safellyGetResponseHeaders(httpResponse),
                             'body': responseBody, ###- FlaskUtil.safellyGetResponseJson(httpResponse) ###- json.loads(Serializer.jsonifyIt(responseBody))
                             'status': status
                         },
@@ -751,7 +744,7 @@ def SimpleClientMethod(requestClass=None):
         def innerResourceInstanceMethod(*args,**kwargs):
             resourceInstance = args[0]
             try :
-                validateArgs(args,requestClass,innerResourceInstanceMethod)
+                validateArgs(args,requestClass,resourceInstanceMethod)
                 methodReturn = resourceInstanceMethod(*args,**kwargs)
             except Exception as exception :
                 raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
@@ -834,13 +827,13 @@ def validateResponseClass(responseClass, completeResponse):
                     elif Serializer.isSerializerList(completeResponse[0]) and 0 < len(completeResponse[0]) and not isinstance(completeResponse[0][0], responseClass[0][0]):
                         raiseBadResponseImplementation(f'Response element class does not match expected element class. Expected "{responseClass[0][0].__name__}", response "{completeResponse[0][0].__class__.__name__}"')
         else :
-            if not isinstance(completeResponse[0], responseClass):
+            if not isinstance(completeResponse, responseClass):
                 raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass.__name__}", response "{completeResponse[0].__class__.__name__}"')
     else :
         log.log(validateResponseClass, f'"responseClass" was not defined')
 
 def isPythonFrameworkHttpsResponseBody(completeResponse):
-    return ObjectHelper.isTuple(completeResponse) and  3 == len(completeResponse)
+    return ObjectHelper.isTuple(completeResponse) and 3 == len(completeResponse)
 
 def isNotPythonFrameworkHttpsResponseBody(completeResponse):
     return not isPythonFrameworkHttpsResponseBody(completeResponse)

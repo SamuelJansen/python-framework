@@ -43,7 +43,9 @@ class ActuatorHealthTestController:
         responseClass = [TestRequestDto.TestResponseDto],
         logResponse = True
     )
-    def get(self, status=None, secondStatus=None, headers=None, params=None) :
-        # from flask import request
-        # print(f'{self.__class__.__name__}.get -> request.headers: {request.headers}')
-        return self.globals.api.resource.client.some.getOnActuatorHealth(ActuatorHealthDto.ActuatorHealthResponseDto(status+secondStatus), headers=headers, params=params), HttpStatus.OK
+    def get(self, status=None, secondStatus=None, headers=None, params=None):
+        return self.globals.api.resource.client.some.getOnActuatorHealth(
+            ActuatorHealthDto.ActuatorHealthResponseDto(status+secondStatus),
+            headers=headers,
+            params=params
+        ), HttpStatus.OK
