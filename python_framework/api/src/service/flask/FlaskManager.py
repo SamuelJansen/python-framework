@@ -463,6 +463,21 @@ def handleControllerMethod(
             args = getArgsWithSerializerReturnAppended(args, serializerReturn)
     headers = FlaskUtil.addToKwargs(FlaskUtil.KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
     query = FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
+    try:
+        if logRequest :
+            log.prettyJson(
+                resourceInstanceMethod,
+                'Request',
+                {
+                    'headers': headers,
+                    # 'query': FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs), ###- safellyGetUrl() returns query param
+                    'body': requestBodyAsJson
+                },
+                condition = logRequest,
+                logLevel = log.INFO
+            )
+    except Exception as exception:
+        log.failure(innerResourceInstanceMethod, 'Not possible to log request properly', exception)
     completeResponse = handleAdditionalResponseHeadersIfNeeded(resourceInstanceMethod(resourceInstance,*args[1:],**kwargs))
     if isNotPythonFrameworkHttpsResponseBody(completeResponse):
         raiseBadResponseImplementation(f'It should be a tuple like this: ({"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HEADERS, HTTPS_CODE). But it is: {completeResponse}')
@@ -618,30 +633,7 @@ def ControllerMethod(
             # r.headers['Cache-Control'] = 'public, max-age=0'
             resourceInstance = args[0]
             completeResponse = None
-
-            try:
-                log.info(resourceInstanceMethod, f'Controller {FlaskUtil.safellyGetVerb()} - {FlaskUtil.safellyGetUrl()}')
-                if logRequest :
-                    requestBodyForLog = {}
-                    if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST:
-                        try:
-                            requestBodyForLog = getRequestBodyAsJson(consumes, requestClass)
-                        except Exception as exception:
-                            log.log(innerResourceInstanceMethod, 'Not possible to capture requestBody for logs', exception=exception, muteStackTrace=True)
-                    log.prettyJson(
-                        resourceInstanceMethod,
-                        'Request',
-                        {
-                            'headers': FlaskUtil.addToKwargs(FlaskUtil.KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs),
-                            # 'query': FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs), ###- safellyGetUrl() returns query param
-                            'body': requestBodyForLog
-                        },
-                        condition = logRequest,
-                        logLevel = log.INFO
-                    )
-            except Exception as exception:
-                log.failure(innerResourceInstanceMethod, 'Not possible to log request properly', exception)
-
+            log.info(resourceInstanceMethod, f'Controller {FlaskUtil.safellyGetVerb()} - {FlaskUtil.safellyGetUrl()}')
             try :
                 completeResponse = handleAnyControllerMethodRequest(
                     args,

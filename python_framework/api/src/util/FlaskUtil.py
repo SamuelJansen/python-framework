@@ -60,7 +60,7 @@ def safellyGetData():
 def safellyGetUrl() :
     url = None
     try :
-        url = request.url
+        url = str(request.url)
     except Exception as exception :
         log.log(safellyGetUrl, 'Not possible to get url', exception=exception)
     return url
@@ -69,7 +69,7 @@ def safellyGetUrl() :
 def safellyGetVerb() :
     verb = None
     try :
-        verb = request.method
+        verb = str(request.method)
     except Exception as exception :
         log.log(safellyGetVerb, 'Not possible to get verb', exception=exception)
     return verb
@@ -78,7 +78,7 @@ def safellyGetVerb() :
 def safellyGetHeaders():
     headers = None
     try:
-        headers= request.headers
+        headers= dict(request.headers)
     except Exception as exception :
         headers = {}
         log.log(safellyGetHeaders, f'Not possible to get request headers. Returning {headers} by default', exception=exception)
@@ -98,7 +98,7 @@ def safellyGetResponseHeaders(response):
 def safellyGetArgs():
     args = None
     try:
-        args = request.args
+        args = dict(request.args)
     except Exception as exception :
         args = {}
         log.log(safellyGetArgs, f'Not possible to get args. Returning {args} by default', exception=exception)

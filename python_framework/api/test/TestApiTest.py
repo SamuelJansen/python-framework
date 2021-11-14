@@ -368,7 +368,7 @@ def testing_Client() :
         OTHER_URL_PARAM = 'efgh'
         BASE_URL = f'http://localhost:5022/client-test-api/test/{EnvironmentHelper.get("URL_VARIANT")}/{URL_PARAM}/{OTHER_URL_PARAM}'
 
-        getResponse = request.get(f'{BASE_URL}/get')
+        getResponse = requests.get(f'{BASE_URL}/get')
         assert ObjectHelper.isNotNone(getResponse)
 
         killProcesses(process)

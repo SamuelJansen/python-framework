@@ -327,7 +327,7 @@ def raiseExceptionIfNeeded(response):
 def getCompleteResponse(response, responseClass, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
     responseBody, responseHeaders, responseStatus = None, None, None
     try :
-        responseBody, responseHeaders, responseStatus = response.json(), dict(response.headers), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(response.status_code) else response.status_code)
+        responseBody, responseHeaders, responseStatus = response.json(), FlaskUtil.safellyGetResponseHeaders(response), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(response.status_code) else response.status_code)
     except Exception as exception :
         tempStatus = None
         responseBody, responseStatus = None, HttpStatus.map(fallbackStatus)
