@@ -22,7 +22,7 @@ class ClientTestController:
     )
     def get(self, urlParam=None, otherUrlParam=None, params=None, headers=None):
         return self.globals.api.resource.client.test.getMethod(
-            f'BASE_CONTROLLER_URL/{urlParam}/{otherUrlParam}/get/all',
+            f'{BASE_CONTROLLER_URL}/{urlParam}/{otherUrlParam}/get/all',
             headers = headers,
             params = params
         ), {'get': 'headers'}, HttpStatus.OK

@@ -812,15 +812,15 @@ def validateResponseClass(responseClass, completeResponse):
             elif 1 == len(responseClass):
                 if ObjectHelper.isNotList(responseClass[0])  :
                     if not isinstance(completeResponse[0], responseClass[0]):
-                        raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass[0].__name__}", response "{completeResponse[0].__class__.__name__}"')
+                        raiseBadResponseImplementation(f'Response does not match expected class. Expected "{responseClass[0].__name__}", but got "{completeResponse[0].__class__.__name__}"')
                 elif ObjectHelper.isNotList(responseClass[0][0]):
                     if ObjectHelper.isNotList(completeResponse[0]):
                         raiseBadResponseImplementation(f'Response is not a list. Expected "{responseClass[0].__class__.__name__}", but found "{completeResponse[0].__class__.__name__}"')
                     elif Serializer.isSerializerList(completeResponse[0]) and 0 < len(completeResponse[0]) and not isinstance(completeResponse[0][0], responseClass[0][0]):
                         raiseBadResponseImplementation(f'Response element class does not match expected element class. Expected "{responseClass[0][0].__name__}", response "{completeResponse[0][0].__class__.__name__}"')
         else :
-            if not isinstance(completeResponse, responseClass):
-                raiseBadResponseImplementation(f'Response class does not match expected class. Expected "{responseClass.__name__}", response "{completeResponse[0].__class__.__name__}"')
+            if not isinstance(completeResponse[0], responseClass):
+                raiseBadResponseImplementation(f'Response does not match expected class. Expected "{responseClass.__name__}", but got "{completeResponse[0].__class__.__name__}"')
     else :
         log.log(validateResponseClass, f'"responseClass" was not defined')
 

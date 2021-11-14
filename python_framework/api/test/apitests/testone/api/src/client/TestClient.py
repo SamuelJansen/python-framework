@@ -7,7 +7,7 @@ from python_framework.api.src.dto import ActuatorHealthDto
 import ClientTestDto
 
 
-@Client(url='http://localhost:5022/client-api')
+@Client(url='http://localhost:5022/client-test-api')
 class TestClient:
 
     @ClientMethod(
