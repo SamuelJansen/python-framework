@@ -223,7 +223,7 @@ def prettify(objectAsDict) :
 def getTypeName(thingInstance) :
     if not type(type) == type(thingInstance) :
         return ReflectionHelper.getName(type(thingInstance))
-    log.debug(getTypeName, f'Not possible to get instance type name')
+    log.log(getTypeName, f'Not possible to get instance type name')
     return ObjectHelper.UNKNOWN_OBJECT_CLASS_NAME
 
 def isJsonifyable(thing) :
@@ -279,7 +279,7 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
                 else :
                     jsonInstance[attributeName] = None
         except Exception as exception :
-            log.warning(getObjectAsDictionary, f'Not possible to get attribute name list from {ReflectionHelper.getName(ReflectionHelper.getClass(instance, muteLogs=True), muteLogs=True)}', exception=exception)
+            log.debug(getObjectAsDictionary, f'Not possible to get attribute name list from {ReflectionHelper.getName(ReflectionHelper.getClass(instance, muteLogs=True), muteLogs=True)}', exception=exception)
         if ObjectHelper.isNotEmpty(jsonInstance) :
             return jsonInstance
         return str(instance)

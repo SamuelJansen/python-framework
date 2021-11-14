@@ -465,10 +465,10 @@ def handleControllerMethod(
             args = getArgsWithSerializerReturnAppended(args, serializerReturn)
     headers = addToKwargs(KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
     query = addToKwargs(KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
-    completeResponse = resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)
-    if not (ObjectHelper.isNotNone(completeResponse) and Serializer.isSerializerCollection(completeResponse) and 2 == len(completeResponse)):
-        raise GlobalException(logMessage=f'''Bad implementation of {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__class__.__name__}() controller method''')
-    return handleAdditionalResponseHeadersIfNeeded(completeResponse)
+    completeResponse = handleAdditionalResponseHeadersIfNeeded(resourceInstanceMethod(resourceInstance,*args[1:],**kwargs))
+    if isNotPythonFrameworkHttpsResponseBody(completeResponse):
+        raiseBadResponseImplementation(f'It should be a tuple like this: ({"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HEADERS, HTTPS_CODE). But it is: {completeResponse}')
+    return completeResponse
 
 def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
     if ObjectHelper.isNotEmpty(givenClass):
@@ -811,17 +811,15 @@ def handleAdditionalResponseHeadersIfNeeded(completeResponse):
                 return completeResponse[0], completeResponse[1][0], completeResponse[1][1]
             else:
                 ###- (serviceResponse, status) --> missing header
-                return completeResponse[0],  dict(),  completeResponse[1]
+                return completeResponse[0], dict(), completeResponse[1]
     elif ObjectHelper.isList(completeResponse) and 2 == len(completeResponse):
         ###- it can only be guessed at this point
         ###- (serviceResponse, status) --> missing header
-        return completeResponse[0],  dict(),  completeResponse[1]
+        return completeResponse[0], dict(), completeResponse[1]
     ###- totally lost at this point
     return completeResponse
 
 def validateResponseClass(responseClass, completeResponse):
-    if isNotPythonFrameworkHttpsResponseBody(completeResponse):
-        raiseBadResponseImplementation(f'Invalid response. It should be a list like this: ({"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HEADERS, HTTPS_CODE). But it is: {completeResponse}')
     if ObjectHelper.isNotNone(responseClass):
         if Serializer.isSerializerList(responseClass):
             if 0 == len(responseClass):
@@ -842,11 +840,7 @@ def validateResponseClass(responseClass, completeResponse):
         log.log(validateResponseClass, f'"responseClass" was not defined')
 
 def isPythonFrameworkHttpsResponseBody(completeResponse):
-    return (
-        ObjectHelper.isTuple(completeResponse) or ObjectHelper.isList(completeResponse)
-    ) and (
-        3 == len(completeResponse)
-    )
+    return ObjectHelper.isTuple(completeResponse) and  3 == len(completeResponse)
 
 def isNotPythonFrameworkHttpsResponseBody(completeResponse):
     return not isPythonFrameworkHttpsResponseBody(completeResponse)
