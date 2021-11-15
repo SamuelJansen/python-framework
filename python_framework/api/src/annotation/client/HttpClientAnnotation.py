@@ -108,21 +108,21 @@ def HttpClient(url=c.BLANK, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=Fa
 
 class ClientMethodConfig:
     def __init__(self,
-        url = url
-        headers = headers
-        requestHeaderClass = requestHeaderClass
-        requestParamClass = requestParamClass
-        requestClass = requestClass
-        responseClass = responseClass
-        returnOnlyBody = returnOnlyBody
-        timeout = timeout
-        propagateAuthorization = propagateAuthorization
-        propagateApiKey = propagateApiKey
-        propagateSession = propagateSession
-        produces = produces
-        consumes = consumes
-        logRequest = logRequest
-        logResponse = logResponse
+        url = None
+        headers = None
+        requestHeaderClass = None
+        requestParamClass = None
+        requestClass = None
+        responseClass = None
+        returnOnlyBody = None
+        timeout = None
+        propagateAuthorization = None
+        propagateApiKey = None
+        propagateSession = None
+        produces = None
+        consumes = None
+        logRequest = None
+        logResponse = None
     ):
         self.url = url
         self.headers = headers
@@ -160,21 +160,21 @@ def HttpClientMethod(
     logResponse = False
 ):
     clientMethodConfig = ClientMethodConfig(
-        url = url
-        headers = headers
-        requestHeaderClass = requestHeaderClass
-        requestParamClass = requestParamClass
-        requestClass = requestClass
-        responseClass = responseClass
-        returnOnlyBody = returnOnlyBody
-        timeout = timeout
-        propagateAuthorization = propagateAuthorization
-        propagateApiKey = propagateApiKey
-        propagateSession = propagateSession
-        produces = produces
-        consumes = consumes
-        logRequest = logRequest
-        logResponse = logResponse
+        url = url,
+        headers = headers,
+        requestHeaderClass = requestHeaderClass,
+        requestParamClass = requestParamClass,
+        requestClass = requestClass,
+        responseClass = responseClass,
+        returnOnlyBody = returnOnlyBody,
+        timeout = timeout,
+        propagateAuthorization = propagateAuthorization,
+        propagateApiKey = propagateApiKey,
+        propagateSession = propagateSession,
+        produces = produces,
+        consumes = consumes,
+        logRequest = logRequest,
+        logResponse = logResponse,
     )
     def innerMethodWrapper(resourceInstanceMethod,*args, **kwargs) :
 
