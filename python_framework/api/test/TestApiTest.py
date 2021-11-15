@@ -1105,7 +1105,7 @@ def pythonRun_apiKeyManager() :
         expectedResponseGetConsumeAfterRefreshBeforeRefresh = {
             "message": "ApiKey not allowed",
             "timestamp": "2021-11-02 21:47:32.444629",
-            "uri": f"/api-key-manager-api/test/{TEST_VARIANT}/api-key-manager/consume"
+            "uri": f"/api-key-manager-api/test/{TEST_VARIANT}/api-key-manager/consume/only-after-refresh"
         }
         assert ObjectHelper.equals(
             expectedResponseGetConsumeAfterRefreshBeforeRefresh,

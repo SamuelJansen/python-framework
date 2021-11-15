@@ -41,7 +41,7 @@ class TestClient:
     )
     def postMethod(self, uri, dto, headers=None, params=None):
         return self.post(
-            self.getMethod,
+            self.postMethod,
             Serializer.getObjectAsDictionary(dto),
             aditionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
@@ -59,7 +59,7 @@ class TestClient:
     )
     def putMethod(self, uri, dto, headers=None, params=None):
         return self.put(
-            self.getMethod,
+            self.putMethod,
             Serializer.getObjectAsDictionary(dto),
             aditionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
@@ -77,7 +77,7 @@ class TestClient:
     )
     def patchMethod(self, uri, dto, headers=None, params=None):
         return self.patch(
-            self.getMethod,
+            self.patchMethod,
             Serializer.getObjectAsDictionary(dto),
             aditionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
@@ -95,7 +95,7 @@ class TestClient:
     )
     def deleteMethod(self, uri, dto, headers=None, params=None):
         return self.delete(
-            self.getMethod,
+            self.deleteMethod,
             Serializer.getObjectAsDictionary(dto),
             aditionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),

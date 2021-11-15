@@ -19,9 +19,9 @@ TestHelper.run(
     runOnly = [
         # 'TestApiTest.appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess',
         # 'TestApiTest.pythonRun_securityManager',
-        'TestApiTest.pythonRun_apiKeyManager',
-        'TestApiTest.pythonRun_sessionManager',
-        # 'TestApiTest.testing_Client'
+        # 'TestApiTest.pythonRun_apiKeyManager',
+        # 'TestApiTest.pythonRun_sessionManager',
+        'TestApiTest.testing_Client'
     ]
 )
 # TestHelper.run(

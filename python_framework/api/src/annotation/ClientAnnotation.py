@@ -30,7 +30,7 @@ class Verb:
 
 
 @Function
-def Client(url=c.SLASH, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=False, logResponse=False) :
+def Client(url=c.BLANK, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=False, logResponse=False) :
     clientUrl = url
     clientHeaders = ConverterStatic.getValueOrDefault(headers, dict())
     clientTimeout = timeout
@@ -256,7 +256,7 @@ def Client(url=c.SLASH, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=False,
 
 @Function
 def ClientMethod(
-    url = c.SLASH,
+    url = c.BLANK,
     headers = None,
     requestHeaderClass = None,
     requestParamClass = None,

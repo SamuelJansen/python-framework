@@ -1,0 +1,594 @@
+import requests
+from python_helper import Constant as c
+from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringHelper
+
+from python_framework.api.src.util import FlaskUtil
+from python_framework.api.src.util import Serializer
+from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.service.flask import FlaskManager
+from python_framework.api.src.service.openapi import OpenApiManager
+from python_framework.api.src.service.ExceptionHandler import GlobalException
+
+
+CLIENT_DID_NOT_SENT_ANY_MESSAGE = 'Client did not sent any message'
+ERROR_AT_CLIENT_CALL_MESSAGE = 'Error at client call'
+DEFAULT_TIMEOUT = 30
+
+
+class HeaderKey:
+    CONTENT_TYPE = 'Content-Type'
+
+
+class Verb:
+    GET = 'GET'
+    POST = 'POST'
+    PUT = 'PUT'
+    DELETE = 'DELETE'
+    PATCH = 'PATCH'
+    OPTIONS = 'OPTIONS'
+
+
+class HttpClientEvent(Exception):
+    def __init__(self, verb, *args, **kwargs):
+        if ObjectHelper.isNone(verb):
+            raise Exception('Http client event verb cannot be none')
+        Exception.__init__(self, f'Http client {verb} event')
+        self.verb = verb
+        self.args = args
+        self.kwargs = kwargs
+
+
+# class HttpClientEvent(Exception):
+#     def __init__(self, verb):
+#         if ObjectHelper.isNone(verb):
+#             raise Exception('HttpClientEvent verb cannot be none')
+#         Exception.__init__(self, f'Http client {verb} event')
+#         self.verb = verb
+
+
+class ManualHttpClientEvent(Exception):
+    def __init__(self, completeResponse):
+        Exception.__init__(self, f'Manual http client event')
+        self.completeResponse = completeResponse
+
+
+def getHttpClientEvent(resourceInstanceMethod, *args, **kwargs):
+    completeResponse = None
+    try:
+        completeResponse = resourceInstanceMethod(*args, **kwargs)
+    except HttpClientEvent as httpClientEvent:
+        return httpClientEvent
+    except Exception as exception:
+        raise exception
+    if ObjectHelper.isNotNone(completeResponse):
+        return ManualHttpClientEvent(completeResponse)
+
+
+def raiseHttpClientEventNotFoundException(*args, **kwargs):
+    raise Exception('HttpClientEvent not found')
+
+
+@Function
+def HttpClient(url=c.BLANK, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=False, logResponse=False) :
+    clientUrl = url
+    clientHeaders = ConverterStatic.getValueOrDefault(headers, dict())
+    clientTimeout = timeout
+    clientLogRequest = logRequest
+    clientLogResponse = logResponse
+    def Wrapper(OuterClass, *args, **kwargs):
+        log.wrapper(Client,f'''wrapping {OuterClass.__name__}''')
+        class InnerClass(OuterClass):
+            url = clientUrl
+            headers = clientHeaders
+            timeout = clientTimeout
+            logRequest = clientLogRequest
+            logResponse = clientLogResponse
+            def __init__(self,*args, **kwargs):
+                log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
+                apiInstance = FlaskManager.getApi()
+                OuterClass.__init__(self,*args, **kwargs)
+                self.globals = apiInstance.globals
+            def options(self, *args, **kwargs):
+                raise HttpClientEvent(Verb.OPTIONS, *args, **kwargs)
+            def get(self, *args, **kwargs):
+                raise HttpClientEvent(Verb.GET, *args, **kwargs)
+            def post(self, *args, **kwargs):
+                raise HttpClientEvent(Verb.POST, *args, **kwargs)
+            def put(self, *args, **kwargs):
+                raise HttpClientEvent(Verb.PUT, *args, **kwargs)
+            def patch(self, *args, **kwargs):
+                raise HttpClientEvent(Verb.PATCH, *args, **kwargs)
+            def delete(self, *args, **kwargs):
+                raise HttpClientEvent(Verb.DELETE, *args, **kwargs)
+        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
+        return InnerClass
+    return Wrapper
+
+
+class ClientMethodConfig:
+    def __init__(self,
+        url = url
+        headers = headers
+        requestHeaderClass = requestHeaderClass
+        requestParamClass = requestParamClass
+        requestClass = requestClass
+        responseClass = responseClass
+        returnOnlyBody = returnOnlyBody
+        timeout = timeout
+        propagateAuthorization = propagateAuthorization
+        propagateApiKey = propagateApiKey
+        propagateSession = propagateSession
+        produces = produces
+        consumes = consumes
+        logRequest = logRequest
+        logResponse = logResponse
+    ):
+        self.url = url
+        self.headers = headers
+        self.requestHeaderClass = requestHeaderClass
+        self.requestParamClass = requestParamClass
+        self.requestClass = requestClass
+        self.responseClass = responseClass
+        self.returnOnlyBody = returnOnlyBody
+        self.timeout = timeout
+        self.propagateAuthorization = propagateAuthorization
+        self.propagateApiKey = propagateApiKey
+        self.propagateSession = propagateSession
+        self.produces = produces
+        self.consumes = consumes
+        self.logRequest = logRequest
+        self.logResponse = logResponse
+
+
+@Function
+def HttpClientMethod(
+    url = c.BLANK,
+    headers = None,
+    requestHeaderClass = None,
+    requestParamClass = None,
+    requestClass = None,
+    responseClass = None,
+    returnOnlyBody = True,
+    timeout = None,
+    propagateAuthorization = False,
+    propagateApiKey = False,
+    propagateSession = False,
+    consumes = OpenApiManager.DEFAULT_CONTENT_TYPE,
+    produces = OpenApiManager.DEFAULT_CONTENT_TYPE,
+    logRequest = False,
+    logResponse = False
+):
+    clientMethodConfig = ClientMethodConfig(
+        url = url
+        headers = headers
+        requestHeaderClass = requestHeaderClass
+        requestParamClass = requestParamClass
+        requestClass = requestClass
+        responseClass = responseClass
+        returnOnlyBody = returnOnlyBody
+        timeout = timeout
+        propagateAuthorization = propagateAuthorization
+        propagateApiKey = propagateApiKey
+        propagateSession = propagateSession
+        produces = produces
+        consumes = consumes
+        logRequest = logRequest
+        logResponse = logResponse
+    )
+    def innerMethodWrapper(resourceInstanceMethod,*args, **kwargs) :
+
+        def options(
+            resourceInstance,
+            aditionalUrl = None,
+            params = None,
+            headers = None,
+            timeout = None,
+            logRequest = False,
+            **kwargs
+        ):
+            verb = Verb.OPTIONS
+            body = dict()
+            url, params, headers, timeout, logRequest = parseParameters(
+                resourceInstance,
+                clientMethodConfig,
+                aditionalUrl,
+                params,
+                headers,
+                timeout,
+                logRequest
+            )
+            self.logRequest(verb, url, body, params, headers, logRequest)
+            clientResponse = requests.options(
+                url,
+                params = params,
+                headers = headers,
+                timeout = timeout,
+                **kwargs
+            )
+            return clientResponse
+
+        def get(
+            resourceInstance,
+            aditionalUrl = None,
+            params = None,
+            headers = None,
+            timeout = None,
+            logRequest = logRequest,
+            **kwargs
+        ):
+            verb = Verb.GET
+            body = dict()
+            url, params, headers, timeout, logRequest = parseParameters(
+                resourceInstance,
+                clientMethodConfig,
+                aditionalUrl,
+                params,
+                headers,
+                timeout,
+                logRequest
+            )
+            self.logRequest(verb, url, body, params, headers, logRequest)
+            clientResponse = requests.get(
+                url,
+                params = params,
+                headers = headers,
+                timeout = timeout,
+                **kwargs
+            )
+            return clientResponse
+
+        def post(
+            resourceInstance,
+            body,
+            aditionalUrl = None,
+            headers = None,
+            params = None,
+            timeout = None,
+            logRequest = logRequest,
+            **kwargs
+        ):
+            verb = Verb.POST
+            url, params, headers, timeout, logRequest = parseParameters(
+                resourceInstance,
+                clientMethodConfig,
+                aditionalUrl,
+                params,
+                headers,
+                timeout,
+                logRequest
+            )
+            self.logRequest(verb, url, body, params, headers, logRequest)
+            clientResponse = requests.post(
+                url,
+                params = params,
+                headers = headers,
+                json = body,
+                timeout = timeout,
+                **kwargs
+            )
+            return clientResponse
+
+        def put(
+            resourceInstance,
+            body,
+            aditionalUrl = None,
+            headers = None,
+            params = None,
+            timeout = None,
+            logRequest = logRequest,
+            **kwargs
+        ):
+            verb = Verb.PUT
+            url, params, headers, timeout, logRequest = parseParameters(
+                resourceInstance,
+                clientMethodConfig,
+                aditionalUrl,
+                params,
+                headers,
+                timeout,
+                logRequest
+            )
+            self.logRequest(verb, url, body, params, headers, logRequest)
+            clientResponse = requests.put(
+                url,
+                params = params,
+                headers = headers,
+                json = body,
+                timeout = timeout,
+                **kwargs
+            )
+            return clientResponse
+
+        def patch(
+            resourceInstance,
+            body,
+            aditionalUrl = None,
+            headers = None,
+            params = None,
+            timeout = None,
+            logRequest = logRequest,
+            **kwargs
+        ):
+            verb = Verb.PATCH
+            url, params, headers, timeout, logRequest = parseParameters(
+                resourceInstance,
+                clientMethodConfig,
+                aditionalUrl,
+                params,
+                headers,
+                timeout,
+                logRequest
+            )
+            self.logRequest(verb, url, body, params, headers, logRequest)
+            clientResponse = requests.patch(
+                url,
+                params = params,
+                headers = headers,
+                json = body,
+                timeout = timeout,
+                **kwargs
+            )
+            return clientResponse
+
+        def delete(
+            resourceInstance,
+            body,
+            aditionalUrl = None,
+            headers = None,
+            params = None,
+            timeout = None,
+            logRequest = logRequest,
+            **kwargs
+        ):
+            verb = Verb.DELETE
+            url, params, headers, timeout, logRequest = parseParameters(
+                resourceInstance,
+                clientMethodConfig,
+                aditionalUrl,
+                params,
+                headers,
+                timeout,
+                logRequest
+            )
+            self.logRequest(verb, url, body, params, headers, logRequest)
+            clientResponse = requests.delete(
+                url,
+                params = params,
+                headers = headers,
+                json = body,
+                timeout = timeout,
+                **kwargs
+            )
+            return clientResponse
+
+        def logRequest(verb, url, body, params, headers, logRequest):
+            log.info(resourceInstanceMethod, f'Client {verb} - {url}')
+            if logRequest:
+                log.prettyJson(
+                    resourceInstanceMethod,
+                    'Request',
+                    {
+                        'headers': ConverterStatic.getValueOrDefault(headers, dict()),
+                        'query': ConverterStatic.getValueOrDefault(params, dict()),
+                        'body': ConverterStatic.getValueOrDefault(body, dict())
+                    },
+                    condition = True,
+                    logLevel = log.INFO
+                )
+
+        HTTP_CLIENT_RESOLVERS_MAP = {
+            Verb.OPTIONS : options,
+            Verb.GET : get,
+            Verb.POST : post,
+            Verb.PUT : put,
+            Verb.PATCH : patch,
+            Verb.DELETE : delete
+        }
+
+        log.wrapper(ClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        def innerResourceInstanceMethod(*args, **kwargs):
+            f'''(*args, {FlaskUtil.KW_HEADERS}={{}}, {FlaskUtil.KW_PARAMETERS}={{}}, **kwargs)'''
+            resourceInstance = args[0]
+            clientResponse = None
+            completeResponse = None
+            try :
+                FlaskManager.validateKwargs(
+                    kwargs,
+                    resourceInstance,
+                    resourceInstanceMethod,
+                    requestHeaderClass,
+                    requestParamClass
+                )
+                FlaskManager.validateArgs(args, requestClass, resourceInstanceMethod)
+                clientResponse = None
+                httpClientEvent = getHttpClientEvent(resourceInstanceMethod, *args, **kwargs)
+                if isinstance(httpClientEvent, ManualHttpClientEvent):
+                    completeResponse = httpClientEvent.completeResponse
+                elif isinstance(httpClientEvent, HttpClientEvent):
+                    try :
+                        clientResponse = HTTP_CLIENT_RESOLVERS_MAP.get(
+                            httpClientEvent.key,
+                            raiseHttpClientEventNotFoundException
+                        )(
+                            resourceInstance,
+                            *httpClientEvent.args,
+                            **httpClientEvent.kwargs
+                        )
+                    except Exception as exception:
+                        raiseException(clientResponse, exception)
+                    raiseExceptionIfNeeded(clientResponse)
+                    completeResponse = getCompleteResponse(clientResponse, responseClass, produces)
+                    FlaskManager.validateResponseClass(responseClass, completeResponse)
+                else:
+                    raise Exception('Unknown http client event')
+            except Exception as exception :
+                log.log(innerResourceInstanceMethod, 'Failure at client method execution', exception=exception, muteStackTrace=True)
+                raise exception
+            clientResponseStatus = completeResponse[-1]
+            clientResponseHeaders = completeResponse[1]
+            clientResponseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : HttpStatus.map(clientResponseStatus).enumName}
+            if resourceInstance.logResponse or logResponse :
+                log.prettyJson(
+                    resourceInstanceMethod,
+                    'Response',
+                    {
+                        'headers': clientResponseHeaders,
+                        'body': Serializer.getObjectAsDictionary(clientResponseBody),
+                        'status': clientResponseStatus
+                    },
+                    condition = True,
+                    logLevel = log.INFO
+                )
+            if returnOnlyBody:
+                return completeResponse[0]
+            else:
+                return completeResponse
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        innerResourceInstanceMethod.url = clientMethodConfig.url
+        innerResourceInstanceMethod.headers = clientMethodConfig.headers
+        innerResourceInstanceMethod.requestHeaderClass = clientMethodConfig.requestHeaderClass
+        innerResourceInstanceMethod.requestParamClass = clientMethodConfig.requestParamClass
+        innerResourceInstanceMethod.requestClass = clientMethodConfig.requestClass
+        innerResourceInstanceMethod.responseClass = clientMethodConfig.responseClass
+        innerResourceInstanceMethod.returnOnlyBody = clientMethodConfig.returnOnlyBody
+        innerResourceInstanceMethod.timeout = clientMethodConfig.timeout
+        innerResourceInstanceMethod.propagateAuthorization = clientMethodConfig.propagateAuthorization
+        innerResourceInstanceMethod.propagateApiKey = clientMethodConfig.propagateApiKey
+        innerResourceInstanceMethod.propagateSession = clientMethodConfig.propagateSession
+        innerResourceInstanceMethod.produces = clientMethodConfig.produces
+        innerResourceInstanceMethod.consumes = clientMethodConfig.consumes
+        innerResourceInstanceMethod.logRequest = clientMethodConfig.logRequest
+        innerResourceInstanceMethod.logResponse = clientMethodConfig.logResponse
+
+        return innerResourceInstanceMethod
+    return innerMethodWrapper
+
+
+@Function
+def getUrl(client, resourceInstanceMethod, aditionalUrl):
+    return StringHelper.join(
+        [
+            ConverterStatic.getValueOrDefault(u, c.BLANK) for u in [
+                client.url,
+                resourceInstanceMethod.url,
+                aditionalUrl
+            ]
+        ],
+        character = c.BLANK
+    )
+
+
+@Function
+def getHeaders(client, resourceInstanceMethod, headers):
+    return {
+        **ConverterStatic.getValueOrDefault(client.headers, dict()),
+        **{HeaderKey.CONTENT_TYPE: resourceInstanceMethod.consumes},
+        **ConverterStatic.getValueOrDefault(resourceInstanceMethod.headers, dict()),
+        **ConverterStatic.getValueOrDefault(headers, dict())
+    }
+
+
+@Function
+def getTimeout(client, resourceInstanceMethod, timeout):
+    return ConverterStatic.getValueOrDefault(timeout, ConverterStatic.getValueOrDefault(resourceInstanceMethod.timeout, client.timeout))
+
+
+@Function
+def getLogRequest(client, resourceInstanceMethod, logRequest):
+    return client.logRequest or resourceInstanceMethod.logRequest or logRequest
+
+
+@Function
+def parseParameters(client, resourceInstanceMethod, aditionalUrl, params, headers, timeout, logRequest):
+    url = getUrl(client, resourceInstanceMethod, aditionalUrl)
+    params = ConverterStatic.getValueOrDefault(params, dict())
+    headers = getHeaders(client, resourceInstanceMethod, headers)
+    timeout = getTimeout(client, resourceInstanceMethod, timeout)
+    logRequest = getLogRequest(client, resourceInstanceMethod, logRequest)
+    return url, params, headers, timeout, logRequest
+
+
+def raiseException(clientResponse, exception):
+        raise GlobalException(
+            logMessage = getErrorMessage(clientResponse, exception=exception)
+        )
+
+
+def raiseExceptionIfNeeded(clientResponse):
+    # if ObjectHelper.isDictionary(clientResponse):
+    #     raise Exception('Invalid client response')
+    # if ObjectHelper.isTuple(clientResponse):
+    #     if ObjectHelper.isNone(clientResponse[-1]) or 500 <= clientResponse[-1]:
+    #         raise GlobalException(logMessage = getErrorMessage(clientResponse))
+    #     elif ObjectHelper.isNotNone(clientResponse[-1]) and 400 <= clientResponse[-1]:
+    #         raise GlobalException(
+    #             message = getErrorMessage(clientResponse),
+    #             status = HttpStatus.map(clientResponse.status_code),
+    #             logMessage = ERROR_AT_CLIENT_CALL_MESSAGE
+    #         )
+    # else:
+    if ObjectHelper.isNone(clientResponse.status_code) or 500 <= clientResponse.status_code:
+        raise GlobalException(logMessage = getErrorMessage(clientResponse))
+    elif 400 <= clientResponse.status_code:
+        raise GlobalException(
+            message = getErrorMessage(clientResponse),
+            status = HttpStatus.map(clientResponse.status_code),
+            logMessage = ERROR_AT_CLIENT_CALL_MESSAGE
+        )
+
+
+@Function
+def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
+    responseBody, responseHeaders, responseStatus = {}, {}, fallbackStatus
+    # if ObjectHelper.isDictionary(clientResponse):
+    #     raise Exception('Invalid client response')
+    # if ObjectHelper.isTuple(clientResponse):
+    #     if 2 == len(clientResponse):
+    #         responseBody, responseHeaders, responseStatus = clientResponse[0], dict(), clientResponse[-1]
+    #     if 3 == len(clientResponse):
+    #         responseBody, responseHeaders, responseStatus = clientResponse[0], clientResponse[1], clientResponse[-1]
+    # else:
+    try :
+        responseBody, responseHeaders, responseStatus = clientResponse.json(), FlaskUtil.safellyGetResponseHeaders(clientResponse), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
+    except Exception as exception :
+        responseBody, responseStatus = dict(), HttpStatus.map(fallbackStatus)
+        log.failure(getCompleteResponse, 'Not possible to parse client response as json', exception=exception, muteStackTrace=True)
+    responseHeaders = {
+        **{HeaderKey.CONTENT_TYPE: produces},
+        **responseHeaders
+    }
+    # if ObjectHelper.isNone(responseClass) or (ObjectHelper.isNotDictionary(responseBody) and ObjectHelper.isNotList(responseBody)):
+    #     return responseBody, responseHeaders, responseStatus
+    # else:
+    return Serializer.convertFromJsonToObject(responseBody, responseClass), responseHeaders, responseStatus
+
+
+@Function
+def getErrorMessage(clientResponse, exception=None):
+    # if ObjectHelper.isDictionary(clientResponse):
+    #     raise Exception('Invalid client response')
+    errorMessage = CLIENT_DID_NOT_SENT_ANY_MESSAGE
+    possibleErrorMessage = None
+    bodyAsJson = {}
+    try :
+        # if ObjectHelper.isTuple(clientResponse):
+        #     bodyAsJson = Serializer.getObjectAsDictionary(clientResponse)
+        # else:
+        bodyAsJson = clientResponse.json()
+    except Exception as innerException :
+        # log.warning(getErrorMessage, f'Not possible to get error message from client response: {safellyGetBody(clientResponse, bodyAsJson)}', exception=innerException)
+        log.warning(getErrorMessage, f'Not possible to get error message from client response: {FlaskUtil.safellyGetResponseJson(clientResponse)}', exception=innerException)
+    if ObjectHelper.isNotNone(clientResponse):
+        possibleErrorMessage = bodyAsJson.get('message', bodyAsJson.get('error')).strip()
+    if ObjectHelper.isNotNone(possibleErrorMessage) and StringHelper.isNotBlank(possibleErrorMessage):
+        errorMessage = f'{c.LOG_CAUSE}{possibleErrorMessage}'
+    else:
+        # log.debug(getErrorMessage, f'Client response {safellyGetBody(clientResponse, bodyAsJson)}')
+        log.debug(getErrorMessage, f'Client response {FlaskUtil.safellyGetResponseJson(clientResponse)}')
+    exceptionPortion = ERROR_AT_CLIENT_CALL_MESSAGE if ObjectHelper.isNone(exception) or StringHelper.isBlank(exception) else str(exception)
+    return f'{exceptionPortion}{c.DOT_SPACE}{errorMessage}'
+
+
+# def safellyGetBody(clientResponse, bodyAsJson):
+#     return bodyAsJson if ObjectHelper.isNotEmpty(bodyAsJson) else FlaskUtil.safellyGetResponseJson(clientResponse)

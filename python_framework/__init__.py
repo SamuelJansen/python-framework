@@ -45,12 +45,14 @@ from python_framework.api.src.constant import HealthCheckConstant
 from python_framework.api.src.constant import SchedulerConstant
 from python_framework.api.src.constant import JwtConstant
 
-from python_framework.api.src.annotation.EnumAnnotation import *
 from python_framework.api.src.service.flask.FlaskManager import *
+
+from python_framework.api.src.annotation.EnumAnnotation import *
 from python_framework.api.src.annotation.SchedulerAnnotation import *
 from python_framework.api.src.annotation.ServiceAnnotation import *
-from python_framework.api.src.annotation.ClientAnnotation import *
 from python_framework.api.src.annotation.RepositoryAnnotation import *
+from python_framework.api.src.annotation.ClientAnnotation import *
+from python_framework.api.src.annotation.client.HttpClientAnnotation import *
 from python_framework.api.src.annotation.ValidatorAnnotation import *
 from python_framework.api.src.annotation.MapperAnnotation import *
 from python_framework.api.src.annotation.ConverterAnnotation import *
