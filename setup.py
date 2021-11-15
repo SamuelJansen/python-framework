@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.2.209.10'
+VERSION = '0.2.209.11'
 
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
@@ -30,6 +30,7 @@ setup(
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}annotation{OS_SEPARATOR}client',
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}model',
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}util',
+        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}domain',
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}constant',
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}controller',
         f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}converter',
