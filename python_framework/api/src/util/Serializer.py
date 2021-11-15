@@ -199,8 +199,8 @@ def serializeIt(fromJson, toClass, fatherClass=None):
 
 @Function
 def convertFromJsonToObject(fromJson, toClass, fatherClass=None):
-    validateToClassIsNotNone(toClass)
-    validateJsonIsNotNone(fromJson)
+    validateToClassIsNotNone(fromJson, toClass)
+    validateJsonIsNotNone(fromJson, toClass)
     if ObjectHelper.isNone(fatherClass):
         fatherClass = toClass
     # print(f'isSerializerList(toClass): {isSerializerList(toClass)}')
