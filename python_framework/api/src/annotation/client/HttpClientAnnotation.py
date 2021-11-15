@@ -408,7 +408,7 @@ def HttpClientMethod(
                 elif isinstance(httpClientEvent, HttpClientEvent):
                     try :
                         clientResponse = HTTP_CLIENT_RESOLVERS_MAP.get(
-                            httpClientEvent.key,
+                            httpClientEvent.verb,
                             raiseHttpClientEventNotFoundException
                         )(
                             resourceInstance,
