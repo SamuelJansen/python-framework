@@ -354,15 +354,16 @@ def ClientMethod(
 
 @Function
 def getUrl(client, resourceInstanceMethod, aditionalUrl):
-return StringHelper.join([
-    ConverterStatic.getValueOrDefault(u, c.BLANK) for u in [
-            client.url,
-            resourceInstanceMethod.url,
-            aditionalUrl
-        ]
-    ],
-    character = c.BLANK
-)
+    return StringHelper.join(
+        [
+            ConverterStatic.getValueOrDefault(u, c.BLANK) for u in [
+                client.url,
+                resourceInstanceMethod.url,
+                aditionalUrl
+            ]
+        ],
+        character = c.BLANK
+    )
 
 @Function
 def getHeaders(client, resourceInstanceMethod, headers):
