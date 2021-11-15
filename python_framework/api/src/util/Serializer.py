@@ -62,6 +62,16 @@ DATE_TIME_RELATED = [
     'timedelta'
 ]
 
+def validateJsonIsNotNone(fromJson, toClass):
+    if ObjectHelper.isNone(fromJson):
+        log.log(validateJsonIsNotNone, f'fromJson: {fromJson}, toClass: {toClass}')
+        raise Exception('''The argument 'fromJson' cannot be none''')
+
+def validateToClassIsNotNone(fromJson, toClass):
+    if ObjectHelper.isNone(toClass):
+        log.log(validateToClassIsNotNone, f'fromJson: {fromJson}, toClass: {toClass}')
+        raise Exception('''The argument 'toClass' cannot be none''')
+
 def newUuid():
     return uuid4()
 
@@ -116,80 +126,81 @@ def getAttributeNameList_andPleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy
 
 @Function
 def serializeIt(fromJson, toClass, fatherClass=None):
+    if ObjectHelper.isNotDictionary(fromJson):
+        if ObjectHelper.isNativeClassInstance(fromJson) and toClass == fromJson.__class__ :
+            return fromJson
+        if isinstance(fromJson, UUID):
+            return str(fromJson)
     # print(f'fromJson: {fromJson}, toClass: {toClass}, fatherClass: {fatherClass}')
-    if ObjectHelper.isDictionary(fromJson) and ObjectHelper.isDictionaryClass(toClass):
-        # objectInstance = {}
-        # for key, value in fromJson.items():
-        #     innerToClass = getTargetClassFromFatherClassAndChildMethodName(fatherClass, key)
-        #     objectInstance[key] = serializeIt(fromJson, innerToClass, fatherClass=fatherClass)
-        # return objectInstance
-        return fromJson
-    # print()
-    # print()
-    # print(fromJson)
-    # print(f'fromJson: {fromJson}')
-    # print(f'toClass: {toClass}')
-    if ObjectHelper.isNativeClassInstance(fromJson) and toClass == fromJson.__class__ :
-        return fromJson
-    if isinstance(fromJson, UUID):
-        return str(fromJson)
-    attributeNameList = getAttributeNameList_andPleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass)
-    classRole = getClassRole(toClass)
-    # print(f'        classRole = {classRole}')
-    # print(f'        attributeNameList = {attributeNameList}')
-    fromJsonToDictionary = {}
-    for attributeName in attributeNameList :
-        # print(f'        fromJson.get({attributeName}) = {fromJson.get(attributeName)}')
-        jsonAttributeValue = fromJson.get(attributeName)
-        if ObjectHelper.isNone(jsonAttributeValue):
-            jsonAttributeValue = fromJson.get(f'{attributeName[0].upper()}{attributeName[1:].lower()}')
-        if ObjectHelper.isNotNone(jsonAttributeValue):
-            # print(f'jsonAttributeValue: {jsonAttributeValue}')
-            fromJsonToDictionary[attributeName] = resolveValue(jsonAttributeValue, attributeName, classRole, fatherClass=fatherClass)
-            # logList = [
-            #     f'jsonAttributeValue: {jsonAttributeValue}',
-            #     f'attributeName: {attributeName}',
-            #     f'classRole: {classRole}',
-            #     f'fromJsonToDictionary: {fromJsonToDictionary}',
-            #     f'toClass: {toClass}'
-            # ]
-            # log.prettyPython(serializeIt, 'logList', logList, logLevel=log.DEBUG)
-        else :
-            fromJsonToDictionary[attributeName] = jsonAttributeValue
-        # if jsonAttributeValue :
-        #     ReflectionHelper.setAttributeOrMethod(fromObject, attributeName, jsonAttributeValue)
-
-    if isModelClass(toClass):
-        objectInstance = pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDictionary)
     else:
-        args = []
-        kwargs = fromJsonToDictionary.copy()
-        # print(f'fromJsonToDictionary = {fromJsonToDictionary}')
-        objectInstance = None
-        for key,value in fromJsonToDictionary.items():
-            # print(f'*args{args},**kwargs{kwargs}')
-            try :
-                objectInstance = toClass(*args,**kwargs)
-                break
-            except Exception as exception :
-                # print(exception)
-                args.append(value)
-                # del kwargs[key]
-                kwargs.pop(key)
+        validateToClassIsNotNone(fromJson, toClass)
+        validateJsonIsNotNone(fromJson, toClass)
+        if ObjectHelper.isDictionaryClass(toClass):
+            # objectInstance = {}
+            # for key, value in fromJson.items():
+            #     innerToClass = getTargetClassFromFatherClassAndChildMethodName(fatherClass, key)
+            #     objectInstance[key] = serializeIt(fromJson, innerToClass, fatherClass=fatherClass)
+            # return objectInstance
+            return fromJson
+        # print(fromJson)
+        # print(f'fromJson: {fromJson}')
+        # print(f'toClass: {toClass}')
+        attributeNameList = getAttributeNameList_andPleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass)
+        classRole = getClassRole(toClass)
+        # print(f'        classRole = {classRole}')
+        # print(f'        attributeNameList = {attributeNameList}')
+        fromJsonToDictionary = {}
+        for attributeName in attributeNameList :
+            # print(f'        fromJson.get({attributeName}) = {fromJson.get(attributeName)}')
+            jsonAttributeValue = fromJson.get(attributeName)
+            if ObjectHelper.isNone(jsonAttributeValue):
+                jsonAttributeValue = fromJson.get(f'{attributeName[0].upper()}{attributeName[1:].lower()}')
+            if ObjectHelper.isNotNone(jsonAttributeValue):
+                # print(f'jsonAttributeValue: {jsonAttributeValue}')
+                fromJsonToDictionary[attributeName] = resolveValue(jsonAttributeValue, attributeName, classRole, fatherClass=fatherClass)
+                # logList = [
+                #     f'jsonAttributeValue: {jsonAttributeValue}',
+                #     f'attributeName: {attributeName}',
+                #     f'classRole: {classRole}',
+                #     f'fromJsonToDictionary: {fromJsonToDictionary}',
+                #     f'toClass: {toClass}'
+                # ]
+                # log.prettyPython(serializeIt, 'logList', logList, logLevel=log.DEBUG)
+            else :
+                fromJsonToDictionary[attributeName] = jsonAttributeValue
+            # if jsonAttributeValue :
+            #     ReflectionHelper.setAttributeOrMethod(fromObject, attributeName, jsonAttributeValue)
 
-    if ObjectHelper.isNone(objectInstance):
-        raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class')
-    # print(objectInstance)
-    # print()
-    # print()
-    # if objectInstance is [] :
-    #     print(fromJson, toClass, fatherClass)
-    return objectInstance
+        if isModelClass(toClass):
+            objectInstance = pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDictionary)
+        else:
+            args = []
+            kwargs = fromJsonToDictionary.copy()
+            # print(f'fromJsonToDictionary = {fromJsonToDictionary}')
+            objectInstance = None
+            for key,value in fromJsonToDictionary.items():
+                # print(f'*args{args},**kwargs{kwargs}')
+                try :
+                    objectInstance = toClass(*args,**kwargs)
+                    break
+                except Exception as exception :
+                    # print(exception)
+                    args.append(value)
+                    # del kwargs[key]
+                    kwargs.pop(key)
+
+        if ObjectHelper.isNone(objectInstance):
+            raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class')
+        # print(objectInstance)
+        # if objectInstance is [] :
+        #     print(fromJson, toClass, fatherClass)
+        return objectInstance
+
 
 @Function
 def convertFromJsonToObject(fromJson, toClass, fatherClass=None):
-    if ObjectHelper.isNone(toClass):
-        raise Exception('''The argument 'toClass' cannot be none''')
+    validateToClassIsNotNone(toClass)
+    validateJsonIsNotNone(fromJson)
     if ObjectHelper.isNone(fatherClass):
         fatherClass = toClass
     # print(f'isSerializerList(toClass): {isSerializerList(toClass)}')
