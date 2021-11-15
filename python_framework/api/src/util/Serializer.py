@@ -72,6 +72,10 @@ def validateToClassIsNotNone(fromJson, toClass):
         log.log(validateToClassIsNotNone, f'fromJson: {fromJson}, toClass: {toClass}')
         raise Exception('''The argument 'toClass' cannot be none''')
 
+def raiseUnhandledConversion(fromJson, toClass):
+    log.log(raiseUnhandledConversion, f'fromJson: {fromJson}, toClass: {toClass}')
+    raise Exception('Unhandled conversion')
+
 def newUuid():
     return uuid4()
 
@@ -131,6 +135,7 @@ def serializeIt(fromJson, toClass, fatherClass=None):
             return fromJson
         if isinstance(fromJson, UUID):
             return str(fromJson)
+        raiseUnhandledConversion(fromJson, toClass)
     # print(f'fromJson: {fromJson}, toClass: {toClass}, fatherClass: {fatherClass}')
     else:
         validateToClassIsNotNone(fromJson, toClass)
@@ -216,6 +221,7 @@ def convertFromJsonToObject(fromJson, toClass, fatherClass=None):
                 return convertFromJsonToObject(fromJson, innerToObjectClass, fatherClass=fatherClass)
     else :
         return serializeIt(fromJson, toClass, fatherClass=fatherClass)
+    raiseUnhandledConversion(fromJson, toClass)
 
 @Function
 def convertFromObjectToObject(fromObject, toClass):
