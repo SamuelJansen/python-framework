@@ -77,7 +77,7 @@ def HttpClient(url=c.BLANK, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=Fa
     clientLogRequest = logRequest
     clientLogResponse = logResponse
     def Wrapper(OuterClass, *args, **kwargs):
-        log.wrapper(Client,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(HttpClient,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             url = clientUrl
             headers = clientHeaders
@@ -386,7 +386,7 @@ def HttpClientMethod(
             Verb.DELETE : delete
         }
 
-        log.wrapper(ClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
+        log.wrapper(HttpClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         def innerResourceInstanceMethod(*args, **kwargs):
             f'''(*args, {FlaskUtil.KW_HEADERS}={{}}, {FlaskUtil.KW_PARAMETERS}={{}}, **kwargs)'''
             resourceInstance = args[0]
