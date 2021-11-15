@@ -74,7 +74,7 @@ def validateToClassIsNotNone(fromJson, toClass):
 
 def raiseUnhandledConversion(fromJson, toClass):
     log.log(raiseUnhandledConversion, f'fromJson: {fromJson}, toClass: {toClass}')
-    raise Exception('Unhandled conversion')
+    raise Exception(f'''Unhandled serialization between {"Json Collection" if ObjectHelper.isList(fromJson) else "Json Object"} and {toClass} ''')
 
 def newUuid():
     return uuid4()

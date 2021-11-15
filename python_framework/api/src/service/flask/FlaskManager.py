@@ -4,11 +4,15 @@ import json
 from python_helper import Constant as c
 from python_helper import log, Function, ReflectionHelper, ObjectHelper, SettingHelper, EnvironmentHelper, StringHelper
 
-from python_framework.api.src.service import WebBrowser
-from python_framework.api.src.enumeration.HttpStatus import HttpStatus
-from python_framework.api.src.service.ExceptionHandler import GlobalException
+from python_framework.api.src.annotation.EnumAnnotation import EnumItem
+from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
+from python_framework.api.src.constant import ConfigurationKeyConstant, JwtConstant, HealthCheckConstant
+from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
+from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.service import WebBrowser
+from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.service import ExceptionHandler
 from python_framework.api.src.service import SqlAlchemyProxy
 from python_framework.api.src.service import SchedulerManager
@@ -16,9 +20,6 @@ from python_framework.api.src.service import SessionManager
 from python_framework.api.src.service import ApiKeyManager
 from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service.openapi import OpenApiManager
-from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
-from python_framework.api.src.constant import ConfigurationKeyConstant, JwtConstant, HealthCheckConstant
-from python_framework.api.src.converter.static import ConverterStatic
 
 
 KW_URL = 'url'
@@ -777,7 +778,7 @@ def getCompleteResponseByException(
 
 
 def handleAdditionalResponseHeadersIfNeeded(completeResponse):
-    log.log(handleAdditionalResponseHeadersIfNeeded, f'Complete response: {completeResponse}')
+    ###- log.log(handleAdditionalResponseHeadersIfNeeded, f'Complete response: {completeResponse}')
     if ObjectHelper.isTuple(completeResponse):
         if 3 == len(completeResponse):
             if ObjectHelper.isTuple(completeResponse[0]):
