@@ -108,20 +108,20 @@ def HttpClient(url=c.BLANK, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=Fa
 
 class ClientMethodConfig:
     def __init__(self,
-        url = None
-        headers = None
-        requestHeaderClass = None
-        requestParamClass = None
-        requestClass = None
-        responseClass = None
-        returnOnlyBody = None
-        timeout = None
-        propagateAuthorization = None
-        propagateApiKey = None
-        propagateSession = None
-        produces = None
-        consumes = None
-        logRequest = None
+        url = None,
+        headers = None,
+        requestHeaderClass = None,
+        requestParamClass = None,
+        requestClass = None,
+        responseClass = None,
+        returnOnlyBody = None,
+        timeout = None,
+        propagateAuthorization = None,
+        propagateApiKey = None,
+        propagateSession = None,
+        produces = None,
+        consumes = None,
+        logRequest = None,
         logResponse = None
     ):
         self.url = url
