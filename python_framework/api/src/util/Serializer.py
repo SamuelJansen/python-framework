@@ -68,21 +68,21 @@ def newUuid():
 def newUuidAsString():
     return str(newUuid())
 
-def isSerializerList(instance) :
+def isSerializerList(instance):
     return ObjectHelper.isList(instance) or type(instance) == InstrumentedList
 
-def isSerializerCollection(instance) :
+def isSerializerCollection(instance):
     return ObjectHelper.isCollection(instance) or type(instance) == InstrumentedList
 
-def requestBodyIsPresent(requestBody) :
+def requestBodyIsPresent(requestBody):
     return ObjectHelper.isNotNone(requestBody) and (ObjectHelper.isDictionary(requestBody) or ObjectHelper.isList(requestBody))
 
-def isDatetimeRelated(thing) :
+def isDatetimeRelated(thing):
     return ReflectionHelper.getName(type(thing)) in DATE_TIME_RELATED
 
 @Function
-def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]) :
-    if isJsonifyable(instance) :
+def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]):
+    if isJsonifyable(instance):
         # jsonCompleted = json.dumps(instance, cls=getJsonifier(classTree={}), check_circular = False)
         # return jsonCompleted.replace('}, null]','}]').replace('[null]','[]')
         # print(f'getObjectAsDictionary(instance): {getObjectAsDictionary(instance)}')
@@ -100,7 +100,7 @@ def pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDict
     if SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE in kwargs:
         kwargs.pop(SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE) ###- this particular job from SqlAlchemy was a big shity one...
     objectInstance = None
-    for key,value in fromJsonToDictionary.items() :
+    for key,value in fromJsonToDictionary.items():
         try :
             objectInstance = toClass(*args,**kwargs)
             break
@@ -115,11 +115,11 @@ def getAttributeNameList_andPleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy
     return attributeNameList if not isModelClass(instanceClass) else [attributeName for attributeName in attributeNameList if not SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE == attributeName]
 
 @Function
-def serializeIt(fromJson, toClass, fatherClass=None) :
+def serializeIt(fromJson, toClass, fatherClass=None):
     # print(f'fromJson: {fromJson}, toClass: {toClass}, fatherClass: {fatherClass}')
-    if ObjectHelper.isDictionary(fromJson) and ObjectHelper.isDictionaryClass(toClass) :
+    if ObjectHelper.isDictionary(fromJson) and ObjectHelper.isDictionaryClass(toClass):
         # objectInstance = {}
-        # for key, value in fromJson.items() :
+        # for key, value in fromJson.items():
         #     innerToClass = getTargetClassFromFatherClassAndChildMethodName(fatherClass, key)
         #     objectInstance[key] = serializeIt(fromJson, innerToClass, fatherClass=fatherClass)
         # return objectInstance
@@ -141,9 +141,9 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
     for attributeName in attributeNameList :
         # print(f'        fromJson.get({attributeName}) = {fromJson.get(attributeName)}')
         jsonAttributeValue = fromJson.get(attributeName)
-        if ObjectHelper.isNone(jsonAttributeValue) :
+        if ObjectHelper.isNone(jsonAttributeValue):
             jsonAttributeValue = fromJson.get(f'{attributeName[0].upper()}{attributeName[1:].lower()}')
-        if ObjectHelper.isNotNone(jsonAttributeValue) :
+        if ObjectHelper.isNotNone(jsonAttributeValue):
             # print(f'jsonAttributeValue: {jsonAttributeValue}')
             fromJsonToDictionary[attributeName] = resolveValue(jsonAttributeValue, attributeName, classRole, fatherClass=fatherClass)
             # logList = [
@@ -166,7 +166,7 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
         kwargs = fromJsonToDictionary.copy()
         # print(f'fromJsonToDictionary = {fromJsonToDictionary}')
         objectInstance = None
-        for key,value in fromJsonToDictionary.items() :
+        for key,value in fromJsonToDictionary.items():
             # print(f'*args{args},**kwargs{kwargs}')
             try :
                 objectInstance = toClass(*args,**kwargs)
@@ -177,7 +177,7 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
                 # del kwargs[key]
                 kwargs.pop(key)
 
-    if ObjectHelper.isNone(objectInstance) :
+    if ObjectHelper.isNone(objectInstance):
         raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class')
     # print(objectInstance)
     # print()
@@ -187,13 +187,15 @@ def serializeIt(fromJson, toClass, fatherClass=None) :
     return objectInstance
 
 @Function
-def convertFromJsonToObject(fromJson, toClass, fatherClass=None) :
-    if ObjectHelper.isNone(fatherClass) :
+def convertFromJsonToObject(fromJson, toClass, fatherClass=None):
+    if ObjectHelper.isNone(toClass):
+        raise Exception('''The argument 'toClass' cannot be none''')
+    if ObjectHelper.isNone(fatherClass):
         fatherClass = toClass
     # print(f'isSerializerList(toClass): {isSerializerList(toClass)}')
-    if isSerializerList(toClass) :
+    if isSerializerList(toClass):
         for innerToObjectClass in toClass :
-            if isSerializerList(innerToObjectClass) :
+            if isSerializerList(innerToObjectClass):
                 objectList = []
                 for fromJsonElement in fromJson :
                     objectList.append(convertFromJsonToObject(fromJsonElement, innerToObjectClass[0], fatherClass=fatherClass))
@@ -205,7 +207,7 @@ def convertFromJsonToObject(fromJson, toClass, fatherClass=None) :
         return serializeIt(fromJson, toClass, fatherClass=fatherClass)
 
 @Function
-def convertFromObjectToObject(fromObject, toClass) :
+def convertFromObjectToObject(fromObject, toClass):
     # print(f'jsonifyIt({fromObject}): {jsonifyIt(fromObject)}, toClass: {toClass}')
     fromJson = json.loads(jsonifyIt(fromObject))
     # print(f'fromJson: {fromJson}')
@@ -214,22 +216,22 @@ def convertFromObjectToObject(fromObject, toClass) :
     return convertFromJsonToObject(fromJson, toClass)
 
 @Function
-def prettify(objectAsDict) :
-    if ObjectHelper.isNativeClassInstance(objectAsDict) :
+def prettify(objectAsDict):
+    if ObjectHelper.isNativeClassInstance(objectAsDict):
         return objectAsDict
     ###- someone please give a hint on SqlAlchemy developers on this fucking "registry" thing...
     return StringHelper.prettyJson(objectAsDict, ignoreKeyList=[SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE] if isModel(objectAsDict) else [])
 
-def getTypeName(thingInstance) :
-    if not type(type) == type(thingInstance) :
+def getTypeName(thingInstance):
+    if not type(type) == type(thingInstance):
         return ReflectionHelper.getName(type(thingInstance))
     log.log(getTypeName, f'Not possible to get instance type name')
     return ObjectHelper.UNKNOWN_OBJECT_CLASS_NAME
 
-def isJsonifyable(thing) :
+def isJsonifyable(thing):
     return getTypeName(thing) not in NOT_SERIALIZABLE_CLASS_NAME_LIST
 
-def isModel(thing) :
+def isModel(thing):
     if ObjectHelper.isNone(thing):
         return False
     return (
@@ -238,32 +240,32 @@ def isModel(thing) :
         )
     )
 
-def isModelClass(thingClass) :
+def isModelClass(thingClass):
     return ObjectHelper.isNotNone(thingClass) and (thingClass == DeclarativeMeta or isinstance(thingClass, DeclarativeMeta))
 
-def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedIdInstances=None) :
+def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedIdInstances=None):
     # print(instance)
-    if ObjectHelper.isNone(visitedIdInstances) :
+    if ObjectHelper.isNone(visitedIdInstances):
         visitedIdInstances = []
-    if ObjectHelper.isNativeClassInstance(instance) or ObjectHelper.isNone(instance) :
+    if ObjectHelper.isNativeClassInstance(instance) or ObjectHelper.isNone(instance):
         return instance
-    if EnumAnnotation.isEnumItem(instance) :
+    if EnumAnnotation.isEnumItem(instance):
         return instance.enumValue
-    if isDatetimeRelated(instance) :
+    if isDatetimeRelated(instance):
         return str(instance)
     # print(f'{instance} not in {visitedIdInstances}: {instance not in visitedIdInstances}')
     isVisitedInstance = id(instance) in visitedIdInstances
     innerVisitedIdInstances = [*visitedIdInstances.copy()]
     if ObjectHelper.isDictionary(instance) and not isVisitedInstance :
-        # for key,value in instance.items() :
+        # for key,value in instance.items():
         #     instance[key] = getObjectAsDictionary(value, visitedIdInstances=innerVisitedIdInstances)
         # return instance
         return {key: getObjectAsDictionary(value, visitedIdInstances=innerVisitedIdInstances) for key, value in instance.items() }
-    elif isSerializerCollection(instance) :
+    elif isSerializerCollection(instance):
         objectValueList = []
         for innerObject in instance :
             innerAttributeValue = getObjectAsDictionary(innerObject, visitedIdInstances=innerVisitedIdInstances)
-            if ObjectHelper.isNotNone(innerAttributeValue) :
+            if ObjectHelper.isNotNone(innerAttributeValue):
                 objectValueList.append(innerAttributeValue)
         return objectValueList
     elif not isVisitedInstance :
@@ -280,11 +282,11 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
                     jsonInstance[attributeName] = None
         except Exception as exception :
             log.debug(getObjectAsDictionary, f'Not possible to get attribute name list from {ReflectionHelper.getName(ReflectionHelper.getClass(instance, muteLogs=True), muteLogs=True)}', exception=exception)
-        if ObjectHelper.isNotEmpty(jsonInstance) :
+        if ObjectHelper.isNotEmpty(jsonInstance):
             return jsonInstance
         return str(instance)
 
-def getClassRole(instanceClass) :
+def getClassRole(instanceClass):
     if DTO_SUFIX == ReflectionHelper.getName(instanceClass)[-len(DTO_SUFIX):] :
         sufixList = [str(DTO_CLASS_ROLE)]
         concatenatedSufix = str(DTO_SUFIX)
@@ -302,10 +304,10 @@ def getTargetClassFromFatherClassAndChildMethodName(fatherClass, childAttributeN
     # print(f'classRole: {classRole}, dtoClassName: {dtoClassName}, dtoModuleName: {dtoModuleName}')
     return globals.importResource(dtoClassName, resourceModuleName=dtoModuleName)
 
-def getListRemovedFromKey(key) :
+def getListRemovedFromKey(key):
     return key.replace(LIST_SUFIX, c.NOTHING)
 
-def getResourceName(key, classRole) :
+def getResourceName(key, classRole):
     filteredKey = getListRemovedFromKey(key)
     resourceName = f'{filteredKey[0].upper()}{filteredKey[1:]}'
     if DTO_CLASS_ROLE in classRole :
@@ -315,17 +317,17 @@ def getResourceName(key, classRole) :
                 resourceName += f'{sufix[0].upper()}{sufix[1:]}'
     return resourceName
 
-def getResourceModuleName(key, classRole) :
+def getResourceModuleName(key, classRole):
     filteredKey = getListRemovedFromKey(key)
     resourceModuleName = f'{filteredKey[0].upper()}{filteredKey[1:]}'
     if DTO_CLASS_ROLE in classRole :
         resourceModuleName += DTO_SUFIX
     return resourceModuleName
 
-def resolveValue(value, key, classRole, fatherClass=None) :
-    if ObjectHelper.isNativeClassInstance(value) :
+def resolveValue(value, key, classRole, fatherClass=None):
+    if ObjectHelper.isNativeClassInstance(value):
         return value
-    if ObjectHelper.isList(value) :
+    if ObjectHelper.isList(value):
         if LIST_SUFIX == key[-4:] :
             resourceName = getResourceName(key, classRole)
             resourceModuleName = getResourceModuleName(key, classRole)
@@ -339,7 +341,7 @@ def resolveValue(value, key, classRole, fatherClass=None) :
     resourceName = getResourceName(key, classRole)
     resourceModuleName = getResourceModuleName(key, classRole)
     keyClass = globals.importResource(resourceName, resourceModuleName=resourceModuleName)
-    if ObjectHelper.isNone(keyClass) :
+    if ObjectHelper.isNone(keyClass):
         return value
     else :
         return convertFromJsonToObject(value, keyClass, fatherClass=fatherClass)

@@ -514,6 +514,8 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
         **{HttpDomain.HeaderKey.CONTENT_TYPE: produces},
         **responseHeaders
     }
+    if ObjectHelper.isNone(responseClass):
+        return responseBody, responseHeaders, responseStatus
     return Serializer.convertFromJsonToObject(responseBody, responseClass), responseHeaders, responseStatus
 
 
