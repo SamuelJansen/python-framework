@@ -21,7 +21,9 @@ TestHelper.run(
         # 'TestApiTest.pythonRun_securityManager',
         # 'TestApiTest.pythonRun_apiKeyManager',
         # 'TestApiTest.pythonRun_sessionManager',
-        'TestApiTest.testing_Client'
+        'TestApiTest.testing_headersAndParams'
+        # ,
+        # 'TestApiTest.testing_Client'
     ]
 )
 # TestHelper.run(

@@ -672,14 +672,24 @@ def ControllerMethod(
                 ###- request.full_path:           /alert/dingding/test?x=y
                 ###- request.args:                ImmutableMultiDict([('x', 'y')])
                 ###- request.args.get('x'):       y
-            status =  HttpStatus.map(completeResponse[-1])
-            additionalResponseHeaders = completeResponse[1]
-            if ObjectHelper.isNotNone(resourceInstance.responseHeaders):
-                additionalResponseHeaders = {**resourceInstance.responseHeaders, **additionalResponseHeaders}
-            if ObjectHelper.isNotNone(responseHeaders):
-                additionalResponseHeaders = {**responseHeaders, **additionalResponseHeaders}
-            responseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : status.enumName}
-            httpResponse = FlaskUtil.buildHttpResponse(additionalResponseHeaders, responseBody, status.enumValue, produces)
+            try:
+                status = HttpStatus.map(completeResponse[-1])
+                additionalResponseHeaders = completeResponse[1]
+                if ObjectHelper.isNotNone(resourceInstance.responseHeaders):
+                    additionalResponseHeaders = {**resourceInstance.responseHeaders, **additionalResponseHeaders}
+                if ObjectHelper.isNotNone(responseHeaders):
+                    additionalResponseHeaders = {**responseHeaders, **additionalResponseHeaders}
+                responseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : status.enumName}
+                httpResponse = FlaskUtil.buildHttpResponse(additionalResponseHeaders, responseBody, status.enumValue, produces)
+            except Exception as exception:
+                log.failure(innerResourceInstanceMethod, f'Failure while parsing complete response: {completeResponse}. Returning simplified version of it', exception, muteStackTrace=True)
+                completeResponse = getCompleteResponseByException(
+                    Exception('Not possible to handle complete response'),
+                    resourceInstance,
+                    resourceInstanceMethod,
+                    muteStacktraceOnBusinessRuleException
+                )
+                httpResponse = FlaskUtil.buildHttpResponse(completeResponse[1], completeResponse[0], completeResponse[-1].enumValue, produces)
 
             try:
                 if logResponse :

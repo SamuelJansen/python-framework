@@ -313,59 +313,64 @@ def testing_headersAndParams() :
         time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
 
         #act
-        responseComplete = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi', params=params, headers=headers)
-        responseWithoutParams = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi', headers=headers)
-        responseWithoutHeaders = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi', params=params)
-        responseWithoutHeadersAndWithoutParams = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi')
-        log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
-
         #assert
+        responseComplete = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi', params=params, headers=headers)
+        expectedBodyResponse = {
+            "first": "first_p",
+            "firstHeader": "firstHeader_h",
+            "second": "second_p",
+            "secondHeader": "secondHeader_h",
+            "status": "abcdefoi"
+        }
         assert ObjectHelper.equals(
-            {
-                "first": "first_p",
-                "firstHeader": "firstHeader_h",
-                "second": "second_p",
-                "secondHeader": "secondHeader_h",
-                "status": "abcdefoi"
-            },
+            expectedBodyResponse,
             responseComplete.json()
-        )
+        ), (expectedBodyResponse, responseComplete.json())
         assert 200 == responseComplete.status_code
-        assert ObjectHelper.equals(
-            {
-                "first": None,
-                "firstHeader": "firstHeader_h",
-                "second": None,
-                "secondHeader": "secondHeader_h",
-                "status": "abcdefoi"
-            },
-            responseWithoutParams.json()
-        )
-        assert 200 == responseWithoutParams.status_code
-        assert ObjectHelper.equals(
-            {
-                "first": "first_p",
-                "firstHeader": None,
-                "second": "second_p",
-                "secondHeader": None,
-                "status": "abcdefoi"
-            },
-            responseWithoutHeaders.json()
-        )
-        assert 200 == responseWithoutHeaders.status_code
-        assert ObjectHelper.equals(
-            {
-                "first": None,
-                "firstHeader": None,
-                "second": None,
-                "secondHeader": None,
-                "status": "abcdefoi"
-            },
-            responseWithoutHeadersAndWithoutParams.json()
-        )
-        assert 200 == responseWithoutHeadersAndWithoutParams.status_code
-        log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
 
+        responseWithoutParams = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi', headers=headers)
+        expectedBodyResponse = {
+            "first": None,
+            "firstHeader": "firstHeader_h",
+            "second": None,
+            "secondHeader": "secondHeader_h",
+            "status": "abcdefoi"
+        }
+        assert ObjectHelper.equals(
+            expectedBodyResponse,
+            responseWithoutParams.json()
+        ), (expectedBodyResponse, responseWithoutParams.json())
+        assert 200 == responseWithoutParams.status_code
+
+        responseWithoutHeaders = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi', params=params)
+        expectedBodyResponse = {
+            "first": "first_p",
+            "firstHeader": None,
+            "second": "second_p",
+            "secondHeader": None,
+            "status": "abcdefoi"
+        }
+        assert ObjectHelper.equals(
+            expectedBodyResponse,
+            responseWithoutHeaders.json()
+        ), (expectedBodyResponse, responseWithoutHeaders.json())
+        assert 200 == responseWithoutHeaders.status_code
+
+        responseWithoutHeadersAndWithoutParams = requests.get(BASE_URL + f'/test/actuator/health/{EnvironmentHelper.get("URL_VARIANT")}/abcdef/oi')
+        expectedBodyResponse = {
+            "first": None,
+            "firstHeader": None,
+            "second": None,
+            "secondHeader": None,
+            "status": "abcdefoi"
+        }
+        assert ObjectHelper.equals(
+            expectedBodyResponse,
+            responseWithoutHeadersAndWithoutParams.json()
+        ), (expectedBodyResponse, responseWithoutHeadersAndWithoutParams.json())
+        assert 200 == responseWithoutHeadersAndWithoutParams.status_code
+
+        log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
         killProcesses(process)
     except Exception as exception:
         killProcesses(process)
