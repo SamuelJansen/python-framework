@@ -369,7 +369,7 @@ def getUrl(client, resourceInstanceMethod, aditionalUrl):
 def getHeaders(client, resourceInstanceMethod, headers):
     return {
         **ConverterStatic.getValueOrDefault(client.headers, dict()),
-        **{HeaderKey.CONTENT_TYPE: resourceInstanceMethod.consumes}
+        **{HeaderKey.CONTENT_TYPE: resourceInstanceMethod.consumes},
         **ConverterStatic.getValueOrDefault(resourceInstanceMethod.headers, dict()),
         **ConverterStatic.getValueOrDefault(headers, dict())
     }
