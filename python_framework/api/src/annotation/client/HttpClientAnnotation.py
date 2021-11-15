@@ -198,7 +198,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            self.logRequest(verb, url, body, params, headers, logRequest)
+            logRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.options(
                 url,
                 params = params,
@@ -228,7 +228,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            self.logRequest(verb, url, body, params, headers, logRequest)
+            logRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.get(
                 url,
                 params = params,
@@ -258,7 +258,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            self.logRequest(verb, url, body, params, headers, logRequest)
+            logRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.post(
                 url,
                 params = params,
@@ -289,7 +289,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            self.logRequest(verb, url, body, params, headers, logRequest)
+            logRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.put(
                 url,
                 params = params,
@@ -320,7 +320,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            self.logRequest(verb, url, body, params, headers, logRequest)
+            logRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.patch(
                 url,
                 params = params,
@@ -351,7 +351,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            self.logRequest(verb, url, body, params, headers, logRequest)
+            logRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.delete(
                 url,
                 params = params,
@@ -516,18 +516,6 @@ def raiseException(clientResponse, exception):
 
 
 def raiseExceptionIfNeeded(clientResponse):
-    # if ObjectHelper.isDictionary(clientResponse):
-    #     raise Exception('Invalid client response')
-    # if ObjectHelper.isTuple(clientResponse):
-    #     if ObjectHelper.isNone(clientResponse[-1]) or 500 <= clientResponse[-1]:
-    #         raise GlobalException(logMessage = getErrorMessage(clientResponse))
-    #     elif ObjectHelper.isNotNone(clientResponse[-1]) and 400 <= clientResponse[-1]:
-    #         raise GlobalException(
-    #             message = getErrorMessage(clientResponse),
-    #             status = HttpStatus.map(clientResponse.status_code),
-    #             logMessage = ERROR_AT_CLIENT_CALL_MESSAGE
-    #         )
-    # else:
     if ObjectHelper.isNone(clientResponse.status_code) or 500 <= clientResponse.status_code:
         raise GlobalException(logMessage = getErrorMessage(clientResponse))
     elif 400 <= clientResponse.status_code:
@@ -541,14 +529,6 @@ def raiseExceptionIfNeeded(clientResponse):
 @Function
 def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
     responseBody, responseHeaders, responseStatus = {}, {}, fallbackStatus
-    # if ObjectHelper.isDictionary(clientResponse):
-    #     raise Exception('Invalid client response')
-    # if ObjectHelper.isTuple(clientResponse):
-    #     if 2 == len(clientResponse):
-    #         responseBody, responseHeaders, responseStatus = clientResponse[0], dict(), clientResponse[-1]
-    #     if 3 == len(clientResponse):
-    #         responseBody, responseHeaders, responseStatus = clientResponse[0], clientResponse[1], clientResponse[-1]
-    # else:
     try :
         responseBody, responseHeaders, responseStatus = clientResponse.json(), FlaskUtil.safellyGetResponseHeaders(clientResponse), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
     except Exception as exception :
@@ -558,37 +538,23 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
         **{HeaderKey.CONTENT_TYPE: produces},
         **responseHeaders
     }
-    # if ObjectHelper.isNone(responseClass) or (ObjectHelper.isNotDictionary(responseBody) and ObjectHelper.isNotList(responseBody)):
-    #     return responseBody, responseHeaders, responseStatus
-    # else:
     return Serializer.convertFromJsonToObject(responseBody, responseClass), responseHeaders, responseStatus
 
 
 @Function
 def getErrorMessage(clientResponse, exception=None):
-    # if ObjectHelper.isDictionary(clientResponse):
-    #     raise Exception('Invalid client response')
     errorMessage = CLIENT_DID_NOT_SENT_ANY_MESSAGE
     possibleErrorMessage = None
     bodyAsJson = {}
     try :
-        # if ObjectHelper.isTuple(clientResponse):
-        #     bodyAsJson = Serializer.getObjectAsDictionary(clientResponse)
-        # else:
         bodyAsJson = clientResponse.json()
     except Exception as innerException :
-        # log.warning(getErrorMessage, f'Not possible to get error message from client response: {safellyGetBody(clientResponse, bodyAsJson)}', exception=innerException)
         log.warning(getErrorMessage, f'Not possible to get error message from client response: {FlaskUtil.safellyGetResponseJson(clientResponse)}', exception=innerException)
     if ObjectHelper.isNotNone(clientResponse):
         possibleErrorMessage = bodyAsJson.get('message', bodyAsJson.get('error')).strip()
     if ObjectHelper.isNotNone(possibleErrorMessage) and StringHelper.isNotBlank(possibleErrorMessage):
         errorMessage = f'{c.LOG_CAUSE}{possibleErrorMessage}'
     else:
-        # log.debug(getErrorMessage, f'Client response {safellyGetBody(clientResponse, bodyAsJson)}')
         log.debug(getErrorMessage, f'Client response {FlaskUtil.safellyGetResponseJson(clientResponse)}')
     exceptionPortion = ERROR_AT_CLIENT_CALL_MESSAGE if ObjectHelper.isNone(exception) or StringHelper.isBlank(exception) else str(exception)
     return f'{exceptionPortion}{c.DOT_SPACE}{errorMessage}'
-
-
-# def safellyGetBody(clientResponse, bodyAsJson):
-#     return bodyAsJson if ObjectHelper.isNotEmpty(bodyAsJson) else FlaskUtil.safellyGetResponseJson(clientResponse)
