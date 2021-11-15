@@ -198,7 +198,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            logRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.options(
                 url,
                 params = params,
@@ -228,7 +228,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            logRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.get(
                 url,
                 params = params,
@@ -258,7 +258,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            logRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.post(
                 url,
                 params = params,
@@ -289,7 +289,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            logRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.put(
                 url,
                 params = params,
@@ -320,7 +320,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            logRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.patch(
                 url,
                 params = params,
@@ -351,7 +351,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            logRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest)
             clientResponse = requests.delete(
                 url,
                 params = params,
@@ -362,7 +362,7 @@ def HttpClientMethod(
             )
             return clientResponse
 
-        def logRequest(verb, url, body, params, headers, logRequest):
+        def doLogRequest(verb, url, body, params, headers, logRequest):
             log.info(resourceInstanceMethod, f'Client {verb} - {url}')
             if logRequest:
                 log.prettyJson(
