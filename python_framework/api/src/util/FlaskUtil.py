@@ -65,6 +65,15 @@ def safellyGetUrl():
         log.log(safellyGetUrl, 'Not possible to get url', exception=exception)
     return url
 
+def safellyGetHost():
+    host = None
+    try :
+        path = str(request.host)
+    except Exception as exception:
+        host = c.FOWARD_SLASH
+        log.log(safellyGetUrl, f'Not possible to get host. Returning {host} by default', exception=exception)
+    return host
+
 def safellyGetPath():
     path = None
     try :

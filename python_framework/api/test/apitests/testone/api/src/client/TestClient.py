@@ -29,3 +29,75 @@ class TestClient:
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
         )
+
+    @ClientMethod(
+        url = f'{BASE_CONTROLLER_URL}',
+        requestHeaderClass = [ClientTestDto.ClientTestRequestHeaderDto],
+        requestParamClass = [ClientTestDto.ClientTestRequestParamDto],
+        requestClass = [str, ClientTestDto.ClientTestRequestDto],
+        responseClass = [[ClientTestDto.ClientTestResponseDto]],
+        logResponse = True,
+        logRequest = True
+    )
+    def postMethod(self, uri, dto, headers=None, params=None):
+        return self.post(
+            self.getMethod,
+            Serializer.getObjectAsDictionary(dto),
+            aditionalUrl = uri,
+            params = Serializer.getObjectAsDictionary(params),
+            headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
+        )
+
+    @ClientMethod(
+        url = f'{BASE_CONTROLLER_URL}',
+        requestHeaderClass = [ClientTestDto.ClientTestRequestHeaderDto],
+        requestParamClass = [ClientTestDto.ClientTestRequestParamDto],
+        requestClass = [str, ClientTestDto.ClientTestRequestDto],
+        responseClass = [[ClientTestDto.ClientTestResponseDto]],
+        logResponse = True,
+        logRequest = True
+    )
+    def putMethod(self, uri, dto, headers=None, params=None):
+        return self.put(
+            self.getMethod,
+            Serializer.getObjectAsDictionary(dto),
+            aditionalUrl = uri,
+            params = Serializer.getObjectAsDictionary(params),
+            headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
+        )
+
+    @ClientMethod(
+        url = f'{BASE_CONTROLLER_URL}',
+        requestHeaderClass = [ClientTestDto.ClientTestRequestHeaderDto],
+        requestParamClass = [ClientTestDto.ClientTestRequestParamDto],
+        requestClass = [str, ClientTestDto.ClientTestRequestDto],
+        responseClass = [[ClientTestDto.ClientTestResponseDto]],
+        logResponse = True,
+        logRequest = True
+    )
+    def patchMethod(self, uri, dto, headers=None, params=None):
+        return self.patch(
+            self.getMethod,
+            Serializer.getObjectAsDictionary(dto),
+            aditionalUrl = uri,
+            params = Serializer.getObjectAsDictionary(params),
+            headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
+        )
+
+    @ClientMethod(
+        url = f'{BASE_CONTROLLER_URL}',
+        requestHeaderClass = [ClientTestDto.ClientTestRequestHeaderDto],
+        requestParamClass = [ClientTestDto.ClientTestRequestParamDto],
+        requestClass = [str, ClientTestDto.ClientTestRequestDto],
+        responseClass = [[ClientTestDto.ClientTestResponseDto]],
+        logResponse = True,
+        logRequest = True
+    )
+    def deleteMethod(self, uri, dto, headers=None, params=None):
+        return self.delete(
+            self.getMethod,
+            Serializer.getObjectAsDictionary(dto),
+            aditionalUrl = uri,
+            params = Serializer.getObjectAsDictionary(params),
+            headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
+        )

@@ -16,19 +16,23 @@ KW_POST = 'post'
 KW_PUT = 'put'
 KW_PATCH = 'patch'
 KW_DELETE = 'delete'
+KW_OPTIONS = 'options'
 
 VERB_LIST = [
     KW_GET,
     KW_POST,
     KW_PUT,
     KW_PATCH,
-    KW_DELETE
+    KW_DELETE,
+    KW_OPTIONS
 ]
 
 ABLE_TO_RECIEVE_BODY_LIST = [
     KW_POST
     , KW_PUT
     , KW_PATCH
+    , KW_DELETE
+    , KW_OPTIONS
 ]
 
 DEFAULT_CONTENT_TYPE = 'application/json'

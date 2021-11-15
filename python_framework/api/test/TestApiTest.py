@@ -363,13 +363,14 @@ def testing_Client() :
         muteLogs = muteLogs
     )
     time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
-    log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
+    TEST_VARIANT = EnvironmentHelper.get("URL_VARIANT")
+    log.debug(log.debug, f'variant: {TEST_VARIANT}')
     try:
         URL_PARAM = 'abcd'
         OTHER_URL_PARAM = 'efgh'
         BASE_SIMPLE_URL = 'http://localhost:5022/client-test-api'
-        BASE_URL = f'{BASE_SIMPLE_URL}/test/{EnvironmentHelper.get("URL_VARIANT")}/{URL_PARAM}/{OTHER_URL_PARAM}'
-        BASE_EXCEPTON_URL = f'{BASE_SIMPLE_URL}/exception/test/{EnvironmentHelper.get("URL_VARIANT")}/{URL_PARAM}/{OTHER_URL_PARAM}'
+        BASE_URL = f'{BASE_SIMPLE_URL}/test/{TEST_VARIANT}/{URL_PARAM}/{OTHER_URL_PARAM}'
+        BASE_EXCEPTON_URL = f'{BASE_SIMPLE_URL}/exception/test/{TEST_VARIANT}/{URL_PARAM}/{OTHER_URL_PARAM}'
         PARAMS = {
             'someParam': 'given-someParam'
         }
@@ -380,32 +381,202 @@ def testing_Client() :
         ##################
         ###- getTest
         ##################
-        getResponse = requests.get(f'{BASE_URL}/get', params=PARAMS, headers=HEADERS, timeout=10)
-        assert ObjectHelper.isNotNone(getResponse)
-        assert ObjectHelper.equals(200, getResponse.status_code)
-        assert ObjectHelper.equals('headers-get', dict(getResponse.headers).get('get'))
-        expectedGetResponse = {
+        GET_TEST = 'get'
+        GET_TEST_URL = f'/{GET_TEST}'
+        testResponse = requests.get(f'{BASE_URL}{GET_TEST_URL}', params=PARAMS, headers=HEADERS, timeout=10)
+        assert ObjectHelper.isNotNone(testResponse)
+        assert ObjectHelper.equals(200, testResponse.status_code)
+        assert ObjectHelper.equals(f'headers-{GET_TEST}', dict(testResponse.headers).get(GET_TEST))
+        expectedTestResponse = {
             "someBody": URL_PARAM + OTHER_URL_PARAM,
             "someOtherBody": {
                 "someHeader": "given-someHeader",
                 "someParam": "given-someParam"
             }
         }
-        assert ObjectHelper.equals(expectedGetResponse, getResponse.json())
+        assert ObjectHelper.equals(
+            expectedTestResponse,
+            testResponse.json()
+        ), (expectedTestResponse, testResponse.json())
 
-        getExceptionResponse = requests.get(f'{BASE_EXCEPTON_URL}/get', params=PARAMS, headers=HEADERS, timeout=10)
-        assert ObjectHelper.isNotNone(getExceptionResponse)
-        assert ObjectHelper.equals(200, getExceptionResponse.status_code)
-        assert ObjectHelper.equals('headers-get', dict(getExceptionResponse.headers).get('get'))
-        expectedGetExceptionResponse = {
-            'message': 'Something bad happened. Please, try again later',
-            'timestamp': '2021-03-18 21:43:47.299735'
+        testExceptionResponse = requests.get(f'{BASE_EXCEPTON_URL}{GET_TEST_URL}', params=PARAMS, headers=HEADERS, timeout=10)
+        assert ObjectHelper.isNotNone(testExceptionResponse)
+        assert ObjectHelper.equals(500, testExceptionResponse.status_code)
+        assert ObjectHelper.equals(None, dict(testExceptionResponse.headers).get(GET_TEST))
+        expectedTestExceptionResponse = {
+            "message": "Something bad happened. Please, try again later",
+            "timestamp": "2021-11-14 22:06:33.914222",
+            "uri": f"/client-test-api/exception/test/{TEST_VARIANT}/{URL_PARAM}/{OTHER_URL_PARAM}{GET_TEST_URL}"
         }
         assert ObjectHelper.equals(
-            expectedGetExceptionResponse,
-            getResponse.json(),
+            expectedTestExceptionResponse,
+            testExceptionResponse.json(),
             ignoreKeyList=['timestamp']
-        )
+        ), (expectedTestExceptionResponse, testExceptionResponse.json())
+
+        ##################
+        ###- postTest
+        ##################
+        POST_TEST = 'post'
+        POST_TEST_URL = f'/{POST_TEST}'
+        BODY = {
+            'someBody': 'someBodyValue',
+            'someOtherBody': 2
+        }
+        testResponse = requests.post(f'{BASE_URL}{POST_TEST_URL}', params=PARAMS, headers=HEADERS, json=BODY, timeout=10)
+        assert ObjectHelper.isNotNone(testResponse)
+        assert ObjectHelper.equals(201, testResponse.status_code)
+        assert ObjectHelper.equals(f'headers-{POST_TEST}', dict(testResponse.headers).get(POST_TEST))
+        expectedTestResponse = {
+            "someBody": URL_PARAM + OTHER_URL_PARAM,
+            "someOtherBody": {
+                "someHeader": "given-someHeader",
+                "someParam": "given-someParam",
+                **BODY
+            }
+        }
+        assert ObjectHelper.equals(
+            expectedTestResponse,
+            testResponse.json()
+        ), (expectedTestResponse, testResponse.json())
+
+        testExceptionResponse = requests.post(f'{BASE_EXCEPTON_URL}{POST_TEST_URL}', params=PARAMS, headers=HEADERS, json=BODY, timeout=10)
+        assert ObjectHelper.isNotNone(testExceptionResponse)
+        assert ObjectHelper.equals(500, testExceptionResponse.status_code)
+        assert ObjectHelper.equals(None, dict(testExceptionResponse.headers).get(POST_TEST))
+        expectedTestExceptionResponse = {
+            "message": "Something bad happened. Please, try again later",
+            "timestamp": "2021-11-14 22:06:33.914222",
+            "uri": f"/client-test-api/exception/test/{TEST_VARIANT}/{URL_PARAM}/{OTHER_URL_PARAM}{POST_TEST_URL}"
+        }
+        assert ObjectHelper.equals(
+            expectedTestExceptionResponse,
+            testExceptionResponse.json(),
+            ignoreKeyList=['timestamp']
+        ), (expectedTestExceptionResponse, testExceptionResponse.json())
+
+        ##################
+        ###- putTest
+        ##################
+        PUT_TEST = 'put'
+        PUT_TEST_URL = f'/{PUT_TEST}'
+        BODY = {
+            'someBody': 'someBodyValue',
+            'someOtherBody': 2
+        }
+        testResponse = requests.put(f'{BASE_URL}{PUT_TEST_URL}', params=PARAMS, headers=HEADERS, json=BODY, timeout=10)
+        assert ObjectHelper.isNotNone(testResponse)
+        assert ObjectHelper.equals(200, testResponse.status_code)
+        assert ObjectHelper.equals(f'headers-{PUT_TEST}', dict(testResponse.headers).get(PUT_TEST))
+        expectedTestResponse = {
+            "someBody": URL_PARAM + OTHER_URL_PARAM,
+            "someOtherBody": {
+                "someHeader": "given-someHeader",
+                "someParam": "given-someParam",
+                **BODY
+            }
+        }
+        assert ObjectHelper.equals(
+            expectedTestResponse,
+            testResponse.json()
+        ), (expectedTestResponse, testResponse.json())
+
+        testExceptionResponse = requests.put(f'{BASE_EXCEPTON_URL}{PUT_TEST_URL}', params=PARAMS, headers=HEADERS, json=BODY, timeout=10)
+        assert ObjectHelper.isNotNone(testExceptionResponse)
+        assert ObjectHelper.equals(500, testExceptionResponse.status_code)
+        assert ObjectHelper.equals(None, dict(testExceptionResponse.headers).get(PUT_TEST))
+        expectedTestExceptionResponse = {
+            "message": "Something bad happened. Please, try again later",
+            "timestamp": "2021-11-14 22:06:33.914222",
+            "uri": f"/client-test-api/exception/test/{TEST_VARIANT}/{URL_PARAM}/{OTHER_URL_PARAM}{PUT_TEST_URL}"
+        }
+        assert ObjectHelper.equals(
+            expectedTestExceptionResponse,
+            testExceptionResponse.json(),
+            ignoreKeyList=['timestamp']
+        ), (expectedTestExceptionResponse, testExceptionResponse.json())
+
+        ##################
+        ###- patchTest
+        ##################
+        PATCH_TEST = 'patch'
+        PATCH_TEST_URL = f'/{PATCH_TEST}'
+        BODY = {
+            'someBody': 'someBodyValue',
+            'someOtherBody': 2
+        }
+        testResponse = requests.patch(f'{BASE_URL}{PATCH_TEST_URL}', params=PARAMS, headers=HEADERS, json=BODY, timeout=10)
+        assert ObjectHelper.isNotNone(testResponse)
+        assert ObjectHelper.equals(200, testResponse.status_code)
+        assert ObjectHelper.equals(f'headers-{PATCH_TEST}', dict(testResponse.headers).get(PATCH_TEST))
+        expectedTestResponse = {
+            "someBody": URL_PARAM + OTHER_URL_PARAM,
+            "someOtherBody": {
+                "someHeader": "given-someHeader",
+                "someParam": "given-someParam",
+                **BODY
+            }
+        }
+        assert ObjectHelper.equals(
+            expectedTestResponse,
+            testResponse.json()
+        ), (expectedTestResponse, testResponse.json())
+
+        testExceptionResponse = requests.patch(f'{BASE_EXCEPTON_URL}{PATCH_TEST_URL}', params=PARAMS, headers=HEADERS, json=BODY, timeout=10)
+        assert ObjectHelper.isNotNone(testExceptionResponse)
+        assert ObjectHelper.equals(500, testExceptionResponse.status_code)
+        assert ObjectHelper.equals(None, dict(testExceptionResponse.headers).get(PATCH_TEST))
+        expectedTestExceptionResponse = {
+            "message": "Something bad happened. Please, try again later",
+            "timestamp": "2021-11-14 22:06:33.914222",
+            "uri": f"/client-test-api/exception/test/{TEST_VARIANT}/{URL_PARAM}/{OTHER_URL_PARAM}{PATCH_TEST_URL}"
+        }
+        assert ObjectHelper.equals(
+            expectedTestExceptionResponse,
+            testExceptionResponse.json(),
+            ignoreKeyList=['timestamp']
+        ), (expectedTestExceptionResponse, testExceptionResponse.json())
+
+        ##################
+        ###- deleteTest
+        ##################
+        DELETE_TEST = 'delete'
+        DELETE_TEST_URL = f'/{DELETE_TEST}'
+        BODY = {
+            'someBody': 'someBodyValue',
+            'someOtherBody': 2
+        }
+        testResponse = requests.delete(f'{BASE_URL}{DELETE_TEST_URL}', params=PARAMS, headers=HEADERS, json=BODY, timeout=10)
+        assert ObjectHelper.isNotNone(testResponse)
+        assert ObjectHelper.equals(200, testResponse.status_code)
+        assert ObjectHelper.equals(f'headers-{DELETE_TEST}', dict(testResponse.headers).get(DELETE_TEST))
+        expectedTestResponse = {
+            "someBody": URL_PARAM + OTHER_URL_PARAM,
+            "someOtherBody": {
+                "someHeader": "given-someHeader",
+                "someParam": "given-someParam",
+                **BODY
+            }
+        }
+        assert ObjectHelper.equals(
+            expectedTestResponse,
+            testResponse.json()
+        ), (expectedTestResponse, testResponse.json())
+
+        testExceptionResponse = requests.delete(f'{BASE_EXCEPTON_URL}{DELETE_TEST_URL}', params=PARAMS, headers=HEADERS, json=BODY, timeout=10)
+        assert ObjectHelper.isNotNone(testExceptionResponse)
+        assert ObjectHelper.equals(500, testExceptionResponse.status_code)
+        assert ObjectHelper.equals(None, dict(testExceptionResponse.headers).get(DELETE_TEST))
+        expectedTestExceptionResponse = {
+            "message": "Something bad happened. Please, try again later",
+            "timestamp": "2021-11-14 22:06:33.914222",
+            "uri": f"/client-test-api/exception/test/{TEST_VARIANT}/{URL_PARAM}/{OTHER_URL_PARAM}{DELETE_TEST_URL}"
+        }
+        assert ObjectHelper.equals(
+            expectedTestExceptionResponse,
+            testExceptionResponse.json(),
+            ignoreKeyList=['timestamp']
+        ), (expectedTestExceptionResponse, testExceptionResponse.json())
 
         killProcesses(process)
     except Exception as exception:

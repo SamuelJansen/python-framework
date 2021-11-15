@@ -248,7 +248,7 @@ def Client(url=c.SLASH, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=False,
                         condition = logRequest,
                         logLevel = log.INFO
                     )
-                    
+
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -437,7 +437,7 @@ def getErrorMessage(clientResponse, exception=None):
         if ObjectHelper.isNotNone(clientResponse):
             possibleErrorMessage = clientResponse.json().get('message', clientResponse.json().get('error')).strip()
         if ObjectHelper.isNotNone(possibleErrorMessage) and StringHelper.isNotBlank(possibleErrorMessage):
-            errorMessage = f'{c.DOT_SPACE_CAUSE}{possibleErrorMessage}'
+            errorMessage = f'{c.LOG_CAUSE}{possibleErrorMessage}'
         else:
             log.debug(getErrorMessage, 'Client response', FlaskUtil.safellyGetResponseJson(clientResponse))
     except Exception as innerException :
