@@ -298,7 +298,6 @@ def testing_headersAndParams() :
         muteLogs = muteLogs
     )
     try:
-        log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
         BASE_URL = f'http://localhost:{serverPort}/local-test-api'
         params = {'first': 'first_p', 'second': 'second_p', 'ytu': 'uty', 'ytv': 'vty'}
         headers = {
@@ -370,7 +369,6 @@ def testing_headersAndParams() :
         ), (expectedBodyResponse, responseWithoutHeadersAndWithoutParams.json())
         assert 200 == responseWithoutHeadersAndWithoutParams.status_code
 
-        log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
         killProcesses(process)
     except Exception as exception:
         killProcesses(process)
