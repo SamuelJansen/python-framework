@@ -409,23 +409,23 @@ def raiseExceptionIfNeeded(clientResponse):
     if ObjectHelper.isDictionary(clientResponse):
         raise Exception('Invalid client response')
     if ObjectHelper.isTuple(clientResponse):
-        if ObjectHelper.isNotNone(clientResponse[-1]) and 400 <= clientResponse[-1]:
+        if ObjectHelper.isNone(clientResponse[-1]) or 500 <= clientResponse[-1]:
+            raise GlobalException(logMessage = getErrorMessage(clientResponse))
+        elif ObjectHelper.isNotNone(clientResponse[-1]) and 400 <= clientResponse[-1]:
             raise GlobalException(
                 message = getErrorMessage(clientResponse),
                 status = HttpStatus.map(clientResponse.status_code),
                 logMessage = ERROR_AT_CLIENT_CALL_MESSAGE
             )
-        elif ObjectHelper.isNone(clientResponse[-1]) or 500 <= clientResponse[-1]:
-            raise GlobalException(logMessage = getErrorMessage(clientResponse))
     else:
-        if 400 <= clientResponse.status_code:
+        if ObjectHelper.isNone(clientResponse.status_code) or 500 <= clientResponse.status_code:
+            raise GlobalException(logMessage = getErrorMessage(clientResponse))
+        elif 400 <= clientResponse.status_code:
             raise GlobalException(
                 message = getErrorMessage(clientResponse),
                 status = HttpStatus.map(clientResponse.status_code),
                 logMessage = ERROR_AT_CLIENT_CALL_MESSAGE
             )
-        elif ObjectHelper.isNone(clientResponse.status_code) or 500 <= clientResponse.status_code:
-            raise GlobalException(logMessage = getErrorMessage(clientResponse))
 
 
 @Function
