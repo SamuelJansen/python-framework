@@ -72,6 +72,7 @@ def ClientMethod(
             resourceInstance = args[0]
             completeResponse = None
             try :
+                FlaskManager.validateArgs(args, requestClass, resourceInstanceMethod)
                 completeResponse = resourceInstanceMethod(*args, **kwargs)
             except Exception as exception :
                 log.log(innerResourceInstanceMethod, 'Failure at client method execution', exception=exception, muteStackTrace=True)

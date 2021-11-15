@@ -716,34 +716,6 @@ def ControllerMethod(
         return innerResourceInstanceMethod
     return innerMethodWrapper
 
-@Function
-def SimpleClient():
-    def Wrapper(OuterClass, *args, **kwargs):
-        log.wrapper(SimpleClient, f'''wrapping {OuterClass.__name__}''')
-        class InnerClass(OuterClass):
-            def __init__(self,*args,**kwargs):
-                log.wrapper(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
-                OuterClass.__init__(self,*args,**kwargs)
-                self.globals = FlaskUtil.getApi().globals
-        ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
-        return InnerClass
-    return Wrapper
-
-@Function
-def SimpleClientMethod(requestClass=None):
-    def innerMethodWrapper(resourceInstanceMethod,*args,**kwargs):
-        log.wrapper(SimpleClientMethod, f'''wrapping {resourceInstanceMethod.__name__}''')
-        def innerResourceInstanceMethod(*args,**kwargs):
-            resourceInstance = args[0]
-            try :
-                validateArgs(args,requestClass,resourceInstanceMethod)
-                methodReturn = resourceInstanceMethod(*args,**kwargs)
-            except Exception as exception :
-                raiseGlobalException(exception, resourceInstance, resourceInstanceMethod)
-            return methodReturn
-        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
-        return innerResourceInstanceMethod
-    return innerMethodWrapper
 
 def getGlobalException(
     exception,
@@ -758,8 +730,10 @@ def getGlobalException(
         apiInstance = apiInstance if ObjectHelper.isNotNone(apiInstance) else FlaskUtil.getNullableApi()
     )
 
+
 def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod):
     raise getGlobalException(exception, resourceInstance, resourceInstanceMethod)
+
 
 def getCompleteResponseByException(
     exception,
@@ -787,6 +761,7 @@ def getCompleteResponseByException(
         log.error(getCompleteResponseByException, 'Error processing request', exception)
     return handleAdditionalResponseHeadersIfNeeded(completeResponse)
 
+
 def handleAdditionalResponseHeadersIfNeeded(completeResponse):
     if ObjectHelper.isTuple(completeResponse):
         if 3 == len(completeResponse):
@@ -811,6 +786,7 @@ def handleAdditionalResponseHeadersIfNeeded(completeResponse):
     ###- totally lost at this point
     return completeResponse
 
+
 def validateResponseClass(responseClass, completeResponse):
     if ObjectHelper.isNotNone(responseClass):
         if Serializer.isSerializerList(responseClass):
@@ -831,21 +807,27 @@ def validateResponseClass(responseClass, completeResponse):
     else :
         log.log(validateResponseClass, f'"responseClass" was not defined')
 
+
 def isPythonFrameworkHttpsResponseBody(completeResponse):
     return ObjectHelper.isTuple(completeResponse) and 3 == len(completeResponse)
+
 
 def isNotPythonFrameworkHttpsResponseBody(completeResponse):
     return not isPythonFrameworkHttpsResponseBody(completeResponse)
 
+
 def raiseBadResponseImplementation(cause):
     raise Exception(f'Bad response implementation. {cause}')
+
 
 @Function
 def getGlobals():
     return FlaskUtil.getGlobals()
 
+
 def getApi():
     return FlaskUtil.getApi()
+
 
 def getNullableApi():
     return FlaskUtil.getNullableApi()
