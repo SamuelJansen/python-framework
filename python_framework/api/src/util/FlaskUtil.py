@@ -61,7 +61,7 @@ def safellyGetUrl() :
     url = None
     try :
         url = str(request.url)
-    except Exception as exception :
+    except Exception as exception:
         log.log(safellyGetUrl, 'Not possible to get url', exception=exception)
     return url
 
@@ -70,7 +70,7 @@ def safellyGetVerb() :
     verb = None
     try :
         verb = str(request.method)
-    except Exception as exception :
+    except Exception as exception:
         log.log(safellyGetVerb, 'Not possible to get verb', exception=exception)
     return verb
 
@@ -79,7 +79,7 @@ def safellyGetHeaders():
     headers = None
     try:
         headers= dict(request.headers)
-    except Exception as exception :
+    except Exception as exception:
         headers = {}
         log.log(safellyGetHeaders, f'Not possible to get request headers. Returning {headers} by default', exception=exception)
     return headers if ObjectHelper.isNotNone(headers) else dict()
@@ -89,7 +89,7 @@ def safellyGetResponseHeaders(response):
     headers = None
     try:
         headers= dict(response.headers)
-    except Exception as exception :
+    except Exception as exception:
         headers = {}
         log.log(safellyGetResponseHeaders, f'Not possible to get response headers. Returning {headers} by default', exception=exception)
     return headers if ObjectHelper.isNotNone(headers) else dict()
@@ -99,7 +99,7 @@ def safellyGetArgs():
     args = None
     try:
         args = dict(request.args)
-    except Exception as exception :
+    except Exception as exception:
         args = {}
         log.log(safellyGetArgs, f'Not possible to get args. Returning {args} by default', exception=exception)
     return args if ObjectHelper.isNotNone(args) else dict()
@@ -127,7 +127,7 @@ def getApi() :
     api = None
     try:
         api = getGlobals().api
-    except Exception as exception :
+    except Exception as exception:
         raise Exception(f'Failed to return api from "globals" instance. Cause: {str(exception)}')
     return api
 
@@ -135,7 +135,7 @@ def getNullableApi() :
     api = None
     try :
         api = getApi()
-    except Exception as exception :
+    except Exception as exception:
         log.warning(getNullableApi, 'Not possible to get api', exception=exception)
     return api
 

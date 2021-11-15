@@ -768,15 +768,14 @@ def getCompleteResponseByException(
     muteStacktraceOnBusinessRuleException
 ):
     exception = getGlobalException(exception, resourceInstance, resourceInstanceMethod)
-    completeResponse = (
-        {
-            'message': exception.message,
-            'url': ,
-            'timestamp': str(exception.timeStamp)
-        },
-        {},
-        exception.status
-    )
+    urlIfAny = FlaskUtil.safellyGetUrl()
+    bodyErrorResponse = {
+        'message': exception.message,
+        'timestamp': str(exception.timeStamp)
+    }
+    if ObjectHelper.isNotNone(urlIfAny) and StringHelper.isNotBlank(urlIfAny):
+        bodyErrorResponse['url'] = urlIfAny
+    completeResponse = (bodyErrorResponse, {}, exception.status)
     try :
         logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request'
         if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):
