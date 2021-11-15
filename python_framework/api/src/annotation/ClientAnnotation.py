@@ -248,6 +248,7 @@ def Client(url=c.SLASH, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=False,
                         condition = logRequest,
                         logLevel = log.INFO
                     )
+                    
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -316,7 +317,7 @@ def ClientMethod(
             clientResponseStatus = completeResponse[-1]
             clientResponseHeaders = completeResponse[1]
             clientResponseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : HttpStatus.map(clientResponseStatus).enumName}
-            if self.logResponse or logResponse :
+            if resourceInstance.logResponse or logResponse :
                 log.prettyJson(
                     resourceInstanceMethod,
                     'Response',
@@ -325,7 +326,7 @@ def ClientMethod(
                         'body': FlaskUtil.safellyGetResponseJson(clientResponse),
                         'status': clientResponseStatus
                     },
-                    condition = self.logResponse or logResponse,
+                    condition = resourceInstance.logResponse or logResponse,
                     logLevel = log.INFO
                 )
             if returnOnlyBody:
