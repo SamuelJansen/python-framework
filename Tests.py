@@ -5,7 +5,7 @@ EnvironmentHelper.update("URL_VARIANT", RandomHelper.integer(minimum=0, maximum=
 log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
 
 from python_helper import TestHelper
-TestHelper.run(__file__)
+# TestHelper.run(__file__)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
@@ -13,17 +13,17 @@ TestHelper.run(__file__)
 #         'ApiKeyManagerTest.apiKeyManager_worksProperly'
 #     ]
 # )
-# TestHelper.run(
-#     __file__,
-#     # times=10,
-#     runOnly = [
-#         # 'TestApiTest.appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess',
-#         # 'TestApiTest.pythonRun_securityManager',
-#         # 'TestApiTest.pythonRun_apiKeyManager',
-#         # 'TestApiTest.pythonRun_sessionManager',
-#         'TestApiTest.testing_Client'
-#     ]
-# )
+TestHelper.run(
+    __file__,
+    # times=10,
+    runOnly = [
+        # 'TestApiTest.appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess',
+        # 'TestApiTest.pythonRun_securityManager',
+        'TestApiTest.pythonRun_apiKeyManager',
+        'TestApiTest.pythonRun_sessionManager',
+        # 'TestApiTest.testing_Client'
+    ]
+)
 # TestHelper.run(
 #     __file__,
 #     runOnly = [

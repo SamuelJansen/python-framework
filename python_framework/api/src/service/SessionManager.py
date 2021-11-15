@@ -16,10 +16,6 @@ from python_framework.api.src.annotation.GlobalExceptionAnnotation import Encaps
 
 
 OPTION_VERIFY_SIGNATURE = 'verify_signature'
-KEY_API_INSTANCE = 'apiInstance'
-API_INSTANCE_HOLDER = {
-    KEY_API_INSTANCE: None
-}
 BLACK_LIST = set()
 
 

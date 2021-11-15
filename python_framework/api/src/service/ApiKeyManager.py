@@ -205,6 +205,7 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
+    data = Serializer.getObjectAsDictionary(data)
     return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
