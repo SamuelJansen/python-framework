@@ -156,6 +156,7 @@ def HttpClientMethod(
 
         def options(
             resourceInstance,
+            body = None,
             aditionalUrl = None,
             params = None,
             headers = None,
@@ -164,13 +165,13 @@ def HttpClientMethod(
             **kwargs
         ):
             verb = HttpDomain.Verb.OPTIONS
-            body = dict()
-            url, params, headers, timeout, logRequest = parseParameters(
+            url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
                 aditionalUrl,
                 params,
                 headers,
+                body,
                 timeout,
                 logRequest
             )
@@ -179,6 +180,7 @@ def HttpClientMethod(
                 url,
                 params = params,
                 headers = headers,
+                json = body,
                 timeout = timeout,
                 **kwargs
             )
@@ -186,6 +188,7 @@ def HttpClientMethod(
 
         def get(
             resourceInstance,
+            body = None,
             aditionalUrl = None,
             params = None,
             headers = None,
@@ -194,13 +197,13 @@ def HttpClientMethod(
             **kwargs
         ):
             verb = HttpDomain.Verb.GET
-            body = dict()
-            url, params, headers, timeout, logRequest = parseParameters(
+            url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
                 aditionalUrl,
                 params,
                 headers,
+                body,
                 timeout,
                 logRequest
             )
@@ -209,6 +212,7 @@ def HttpClientMethod(
                 url,
                 params = params,
                 headers = headers,
+                json = body,
                 timeout = timeout,
                 **kwargs
             )
@@ -216,7 +220,7 @@ def HttpClientMethod(
 
         def post(
             resourceInstance,
-            body,
+            body = None,
             aditionalUrl = None,
             headers = None,
             params = None,
@@ -225,12 +229,13 @@ def HttpClientMethod(
             **kwargs
         ):
             verb = HttpDomain.Verb.POST
-            url, params, headers, timeout, logRequest = parseParameters(
+            url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
                 aditionalUrl,
                 params,
                 headers,
+                body,
                 timeout,
                 logRequest
             )
@@ -247,7 +252,7 @@ def HttpClientMethod(
 
         def put(
             resourceInstance,
-            body,
+            body = None,
             aditionalUrl = None,
             headers = None,
             params = None,
@@ -256,12 +261,13 @@ def HttpClientMethod(
             **kwargs
         ):
             verb = HttpDomain.Verb.PUT
-            url, params, headers, timeout, logRequest = parseParameters(
+            url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
                 aditionalUrl,
                 params,
                 headers,
+                body,
                 timeout,
                 logRequest
             )
@@ -278,7 +284,7 @@ def HttpClientMethod(
 
         def patch(
             resourceInstance,
-            body,
+            body = None,
             aditionalUrl = None,
             headers = None,
             params = None,
@@ -287,12 +293,13 @@ def HttpClientMethod(
             **kwargs
         ):
             verb = HttpDomain.Verb.PATCH
-            url, params, headers, timeout, logRequest = parseParameters(
+            url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
                 aditionalUrl,
                 params,
                 headers,
+                body,
                 timeout,
                 logRequest
             )
@@ -309,7 +316,7 @@ def HttpClientMethod(
 
         def delete(
             resourceInstance,
-            body,
+            body = None,
             aditionalUrl = None,
             headers = None,
             params = None,
@@ -318,12 +325,13 @@ def HttpClientMethod(
             **kwargs
         ):
             verb = HttpDomain.Verb.DELETE
-            url, params, headers, timeout, logRequest = parseParameters(
+            url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
                 aditionalUrl,
                 params,
                 headers,
+                body,
                 timeout,
                 logRequest
             )
@@ -476,13 +484,14 @@ def getLogRequest(client, clientMethodConfig, logRequest):
 
 
 @Function
-def parseParameters(client, clientMethodConfig, aditionalUrl, params, headers, timeout, logRequest):
+def parseParameters(client, clientMethodConfig, aditionalUrl, params, headers, body, timeout, logRequest):
     url = getUrl(client, clientMethodConfig, aditionalUrl)
     params = ConverterStatic.getValueOrDefault(params, dict())
     headers = getHeaders(client, clientMethodConfig, headers)
+    body = ConverterStatic.getValueOrDefault(body, dict())
     timeout = getTimeout(client, clientMethodConfig, timeout)
     logRequest = getLogRequest(client, clientMethodConfig, logRequest)
-    return url, params, headers, timeout, logRequest
+    return url, params, headers, body, timeout, logRequest
 
 
 def raiseException(clientResponse, exception):
@@ -527,7 +536,9 @@ def getErrorMessage(clientResponse, exception=None):
     try :
         bodyAsJson = clientResponse.json()
     except Exception as innerException :
-        log.warning(getErrorMessage, f'Not possible to get error message from client response: {FlaskUtil.safellyGetResponseJson(clientResponse)}', exception=innerException)
+        bodyAsJsonException = FlaskUtil.safellyGetResponseJson(clientResponse)
+        log.log(getErrorMessage, f'Invalid client response: {bodyAsJsonException}', exception=innerException)
+        log.warning(getErrorMessage, f'Not possible to get error message from client response: {bodyAsJsonException}. Proceeding with value {bodyAsJson} by default', exception=innerException, muteStackTrace=True)
     if ObjectHelper.isNotNone(clientResponse):
         possibleErrorMessage = bodyAsJson.get('message', bodyAsJson.get('error')).strip()
     if ObjectHelper.isNotNone(possibleErrorMessage) and StringHelper.isNotBlank(possibleErrorMessage):

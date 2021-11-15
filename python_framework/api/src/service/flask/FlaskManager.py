@@ -85,13 +85,13 @@ def raiseBadResponseImplementation(cause):
 def newApp(
     filePath
     , successStatus = True
-    , failureStatus = True
     , errorStatus = True
+    , failureStatus = True
+    , warningStatus = True
     , settingStatus = True
     , statusStatus = True
     , infoStatus = True
     , debugStatus = False
-    , warningStatus = False
     , wrapperStatus = False
     , testStatus = False
     , logStatus = False
