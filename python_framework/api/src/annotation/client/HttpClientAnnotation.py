@@ -214,7 +214,7 @@ def HttpClientMethod(
             params = None,
             headers = None,
             timeout = None,
-            logRequest = logRequest,
+            logRequest = False,
             **kwargs
         ):
             verb = Verb.GET
@@ -245,7 +245,7 @@ def HttpClientMethod(
             headers = None,
             params = None,
             timeout = None,
-            logRequest = logRequest,
+            logRequest = False,
             **kwargs
         ):
             verb = Verb.POST
@@ -276,7 +276,7 @@ def HttpClientMethod(
             headers = None,
             params = None,
             timeout = None,
-            logRequest = logRequest,
+            logRequest = False,
             **kwargs
         ):
             verb = Verb.PUT
@@ -307,7 +307,7 @@ def HttpClientMethod(
             headers = None,
             params = None,
             timeout = None,
-            logRequest = logRequest,
+            logRequest = False,
             **kwargs
         ):
             verb = Verb.PATCH
@@ -338,7 +338,7 @@ def HttpClientMethod(
             headers = None,
             params = None,
             timeout = None,
-            logRequest = logRequest,
+            logRequest = False,
             **kwargs
         ):
             verb = Verb.DELETE
@@ -466,12 +466,12 @@ def HttpClientMethod(
 
 
 @Function
-def getUrl(client, resourceInstanceMethod, aditionalUrl):
+def getUrl(client, clientMethodConfig, aditionalUrl):
     return StringHelper.join(
         [
             ConverterStatic.getValueOrDefault(u, c.BLANK) for u in [
                 client.url,
-                resourceInstanceMethod.url,
+                clientMethodConfig.url,
                 aditionalUrl
             ]
         ],
@@ -480,32 +480,32 @@ def getUrl(client, resourceInstanceMethod, aditionalUrl):
 
 
 @Function
-def getHeaders(client, resourceInstanceMethod, headers):
+def getHeaders(client, clientMethodConfig, headers):
     return {
         **ConverterStatic.getValueOrDefault(client.headers, dict()),
-        **{HeaderKey.CONTENT_TYPE: resourceInstanceMethod.consumes},
-        **ConverterStatic.getValueOrDefault(resourceInstanceMethod.headers, dict()),
+        **{HeaderKey.CONTENT_TYPE: clientMethodConfig.consumes},
+        **ConverterStatic.getValueOrDefault(clientMethodConfig.headers, dict()),
         **ConverterStatic.getValueOrDefault(headers, dict())
     }
 
 
 @Function
-def getTimeout(client, resourceInstanceMethod, timeout):
-    return ConverterStatic.getValueOrDefault(timeout, ConverterStatic.getValueOrDefault(resourceInstanceMethod.timeout, client.timeout))
+def getTimeout(client, clientMethodConfig, timeout):
+    return ConverterStatic.getValueOrDefault(timeout, ConverterStatic.getValueOrDefault(clientMethodConfig.timeout, client.timeout))
 
 
 @Function
-def getLogRequest(client, resourceInstanceMethod, logRequest):
-    return client.logRequest or resourceInstanceMethod.logRequest or logRequest
+def getLogRequest(client, clientMethodConfig, logRequest):
+    return client.logRequest or clientMethodConfig.logRequest or logRequest
 
 
 @Function
-def parseParameters(client, resourceInstanceMethod, aditionalUrl, params, headers, timeout, logRequest):
-    url = getUrl(client, resourceInstanceMethod, aditionalUrl)
+def parseParameters(client, clientMethodConfig, aditionalUrl, params, headers, timeout, logRequest):
+    url = getUrl(client, clientMethodConfig, aditionalUrl)
     params = ConverterStatic.getValueOrDefault(params, dict())
-    headers = getHeaders(client, resourceInstanceMethod, headers)
-    timeout = getTimeout(client, resourceInstanceMethod, timeout)
-    logRequest = getLogRequest(client, resourceInstanceMethod, logRequest)
+    headers = getHeaders(client, clientMethodConfig, headers)
+    timeout = getTimeout(client, clientMethodConfig, timeout)
+    logRequest = getLogRequest(client, clientMethodConfig, logRequest)
     return url, params, headers, timeout, logRequest
 
 
