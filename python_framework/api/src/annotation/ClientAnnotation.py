@@ -308,7 +308,7 @@ def ClientMethod(
                 except Exception as exception:
                     raiseException(clientResponse, exception)
                 raiseExceptionIfNeeded(clientResponse)
-                completeResponse = getCompleteResponse(clientResponse, responseClass, resourceInstanceMethod)
+                completeResponse = getCompleteResponse(clientResponse, responseClass, produces)
                 FlaskManager.validateResponseClass(responseClass, completeResponse)
             except Exception as exception :
                 log.log(innerResourceInstanceMethod, 'Failure at client method execution', exception=exception, muteStackTrace=True)
@@ -411,7 +411,7 @@ def raiseExceptionIfNeeded(clientResponse):
 
 
 @Function
-def getCompleteResponse(clientResponse, responseClass, resourceInstanceMethod, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
+def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
     responseBody, responseHeaders, responseStatus = None, None, None
     try :
         responseBody, responseHeaders, responseStatus = clientResponse.json(), FlaskUtil.safellyGetResponseHeaders(clientResponse), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
@@ -419,7 +419,7 @@ def getCompleteResponse(clientResponse, responseClass, resourceInstanceMethod, f
         responseBody, responseStatus = dict(), HttpStatus.map(fallbackStatus)
         log.failure(getCompleteResponse, 'Not possible to parse client response as json', exception=exception, muteStackTrace=True)
     responseHeaders = {
-        **{HeaderKey.CONTENT_TYPE: resourceInstanceMethod.produces},
+        **{HeaderKey.CONTENT_TYPE: produces},
         **responseHeaders
     }
     if ObjectHelper.isNone(responseClass):
