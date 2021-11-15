@@ -1,11 +1,15 @@
+import requests
 from python_helper import EnvironmentHelper
+
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.annotation.ClientAnnotation import Client, ClientMethod
 from python_framework.api.src.dto import ActuatorHealthDto
+from python_framework.api.src.util import Serializer
 
 import EnumAsQueryDto
 
 from dto import TestRequestDto
+
 
 @Client(url='http://localhost:5010/local-test-api')
 class SomeClient:
@@ -23,8 +27,6 @@ class SomeClient:
         # print(dto.__dict__)
         # print(headers.__dict__)
         # print(params.__dict__)
-        import requests
-        from python_framework.api.src.util import Serializer
         response = requests.put(
             f'{self.url}{self.getOnActuatorHealth.url}',
             data = Serializer.jsonifyIt(dto),

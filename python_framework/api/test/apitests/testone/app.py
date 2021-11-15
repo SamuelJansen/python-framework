@@ -13,11 +13,11 @@ globalsInstance = globals.newGlobalsInstance(__file__
     , errorStatus = True
     , warningStatus = True
 
-    # , debugStatus = True
-    # , failureStatus = True
-    # , wrapperStatus = True
-    # , logStatus = True
-    # , testStatus = True
+    , debugStatus = True
+    , failureStatus = True
+    , wrapperStatus = True
+    , logStatus = True
+    , testStatus = True
 )
 
 from python_framework.api.src.service.flask import FlaskManager

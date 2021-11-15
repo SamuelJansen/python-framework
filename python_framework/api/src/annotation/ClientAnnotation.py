@@ -245,7 +245,7 @@ def Client(url=c.SLASH, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=False,
                             'query': ConverterStatic.getValueOrDefault(params, dict()),
                             'body': ConverterStatic.getValueOrDefault(body, dict())
                         },
-                        condition = logRequest,
+                        condition = True,
                         logLevel = log.INFO
                     )
 
@@ -323,10 +323,10 @@ def ClientMethod(
                     'Response',
                     {
                         'headers': clientResponseHeaders,
-                        'body': FlaskUtil.safellyGetResponseJson(clientResponse),
+                        'body': Serializer.getObjectAsDictionary(clientResponseBody),
                         'status': clientResponseStatus
                     },
-                    condition = resourceInstance.logResponse or logResponse,
+                    condition = True,
                     logLevel = log.INFO
                 )
             if returnOnlyBody:
@@ -366,6 +366,7 @@ def getUrl(client, resourceInstanceMethod, aditionalUrl):
         character = c.BLANK
     )
 
+
 @Function
 def getHeaders(client, resourceInstanceMethod, headers):
     return {
@@ -375,13 +376,16 @@ def getHeaders(client, resourceInstanceMethod, headers):
         **ConverterStatic.getValueOrDefault(headers, dict())
     }
 
+
 @Function
 def getTimeout(client, resourceInstanceMethod, timeout):
     return ConverterStatic.getValueOrDefault(timeout, ConverterStatic.getValueOrDefault(resourceInstanceMethod.timeout, client.timeout))
 
+
 @Function
 def getLogRequest(client, resourceInstanceMethod, logRequest):
     return client.logRequest or resourceInstanceMethod.logRequest or logRequest
+
 
 @Function
 def parseParameters(client, resourceInstanceMethod, aditionalUrl, params, headers, timeout, logRequest):
@@ -392,6 +396,7 @@ def parseParameters(client, resourceInstanceMethod, aditionalUrl, params, header
     logRequest = getLogRequest(client, resourceInstanceMethod, logRequest)
     return url, params, headers, timeout, logRequest
 
+
 @Function
 def raiseException(clientResponse, exception):
         raise GlobalException(
@@ -401,28 +406,48 @@ def raiseException(clientResponse, exception):
 
 @Function
 def raiseExceptionIfNeeded(clientResponse):
-    if ObjectHelper.isNone(clientResponse) or ObjectHelper.isNone(clientResponse.status_code) or 500 <= clientResponse.status_code:
-        raise GlobalException(logMessage = getErrorMessage(clientResponse))
-    elif 400 <= clientResponse.status_code :
-        raise GlobalException(
-            message = getErrorMessage(clientResponse),
-            status = HttpStatus.map(clientResponse.status_code),
-            logMessage = ERROR_AT_CLIENT_CALL_MESSAGE
-        )
+    if ObjectHelper.isDictionary(clientResponse):
+        raise Exception('Invalid client response')
+    if ObjectHelper.isTuple(clientResponse):
+        if ObjectHelper.isNotNone(clientResponse[-1]) and 400 <= clientResponse[-1]:
+            raise GlobalException(
+                message = getErrorMessage(clientResponse),
+                status = HttpStatus.map(clientResponse.status_code),
+                logMessage = ERROR_AT_CLIENT_CALL_MESSAGE
+            )
+        elif ObjectHelper.isNone(clientResponse[-1]) or 500 <= clientResponse[-1]:
+            raise GlobalException(logMessage = getErrorMessage(clientResponse))
+    else:
+        if 400 <= clientResponse.status_code:
+            raise GlobalException(
+                message = getErrorMessage(clientResponse),
+                status = HttpStatus.map(clientResponse.status_code),
+                logMessage = ERROR_AT_CLIENT_CALL_MESSAGE
+            )
+        elif ObjectHelper.isNone(clientResponse.status_code) or 500 <= clientResponse.status_code:
+            raise GlobalException(logMessage = getErrorMessage(clientResponse))
 
 
 @Function
 def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
+    if ObjectHelper.isDictionary(clientResponse):
+        raise Exception('Invalid client response')
     responseBody, responseHeaders, responseStatus = None, None, None
-    try :
-        responseBody, responseHeaders, responseStatus = clientResponse.json(), FlaskUtil.safellyGetResponseHeaders(clientResponse), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
-    except Exception as exception :
-        responseBody, responseStatus = dict(), HttpStatus.map(fallbackStatus)
-        log.failure(getCompleteResponse, 'Not possible to parse client response as json', exception=exception, muteStackTrace=True)
-    responseHeaders = {
-        **{HeaderKey.CONTENT_TYPE: produces},
-        **responseHeaders
-    }
+    if ObjectHelper.isTuple(clientResponse):
+        if 2 == len(clientResponse):
+            responseBody, responseHeaders, responseStatus = clientResponse[0], dict(), clientResponse[-1]
+        if 3 == len(clientResponse):
+            responseBody, responseHeaders, responseStatus = clientResponse[0], clientResponse[1], clientResponse[-1]
+    else:
+        try :
+            responseBody, responseHeaders, responseStatus = clientResponse.json(), FlaskUtil.safellyGetResponseHeaders(clientResponse), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
+        except Exception as exception :
+            responseBody, responseStatus = dict(), HttpStatus.map(fallbackStatus)
+            log.failure(getCompleteResponse, 'Not possible to parse client response as json', exception=exception, muteStackTrace=True)
+        responseHeaders = {
+            **{HeaderKey.CONTENT_TYPE: produces},
+            **responseHeaders
+        }
     if ObjectHelper.isNone(responseClass):
         return responseBody, responseHeaders, responseStatus
     else:
@@ -431,16 +456,27 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
 
 @Function
 def getErrorMessage(clientResponse, exception=None):
+    if ObjectHelper.isDictionary(clientResponse):
+        raise Exception('Invalid client response')
     errorMessage = CLIENT_DID_NOT_SENT_ANY_MESSAGE
     possibleErrorMessage = None
+    bodyAsJson = {}
     try :
-        if ObjectHelper.isNotNone(clientResponse):
-            possibleErrorMessage = clientResponse.json().get('message', clientResponse.json().get('error')).strip()
-        if ObjectHelper.isNotNone(possibleErrorMessage) and StringHelper.isNotBlank(possibleErrorMessage):
-            errorMessage = f'{c.LOG_CAUSE}{possibleErrorMessage}'
+        if ObjectHelper.isTuple(clientResponse):
+            bodyAsJson = Serializer.getObjectAsDictionary(clientResponse)
         else:
-            log.debug(getErrorMessage, 'Client response', FlaskUtil.safellyGetResponseJson(clientResponse))
+            bodyAsJson = clientResponse.json()
     except Exception as innerException :
-        log.warning(getErrorMessage, f'Not possible to get error message from client response: {FlaskUtil.safellyGetResponseJson(clientResponse)}', exception=innerException)
+        log.warning(getErrorMessage, f'Not possible to get error message from client response: {safellyGetBody(clientResponse, bodyAsJson)}', exception=innerException)
+    if ObjectHelper.isNotNone(clientResponse):
+        possibleErrorMessage = bodyAsJson.get('message', bodyAsJson.get('error')).strip()
+    if ObjectHelper.isNotNone(possibleErrorMessage) and StringHelper.isNotBlank(possibleErrorMessage):
+        errorMessage = f'{c.LOG_CAUSE}{possibleErrorMessage}'
+    else:
+        log.debug(getErrorMessage, f'Client response {safellyGetBody(clientResponse, bodyAsJson)}')
     exceptionPortion = ERROR_AT_CLIENT_CALL_MESSAGE if ObjectHelper.isNone(exception) or StringHelper.isBlank(exception) else str(exception)
     return f'{exceptionPortion}{c.DOT_SPACE}{errorMessage}'
+
+
+def safellyGetBody(clientResponse, bodyAsJson):
+    return bodyAsJson if ObjectHelper.isNotEmpty(bodyAsJson) else FlaskUtil.safellyGetResponseJson(clientResponse)

@@ -166,40 +166,63 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
         assert 200 == responseGetNone.status_code
 
         responseGetNoneBatch = requests.post(BASE_URL + GET_NONE_ONE_BATCH, json=payload, headers=headers)
+        expectedBodyResponseWithUri = {
+            'message': 'Something bad happened. Please, try again later',
+            'timestamp': '2021-03-18 21:43:47.299735',
+            "uri": "/local-test-api/test-controller/batch/all-fine-if-its-none"
+        }
         assert ObjectHelper.equals(
-            {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.299735'},
+            expectedBodyResponseWithUri,
             responseGetNoneBatch.json(),
             ignoreKeyList=['timestamp']
-        )
+        ), (expectedBodyResponseWithUri, responseGetNoneBatch.json())
         assert 500 == responseGetNoneBatch.status_code
 
         responsePostSendPayload = requests.post(BASE_URL + POST_PAYLOAD_ONE, json=payload, headers=headers)
-        expectedResponsePostSendPayload = {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'}
+        expectedResponsePostSendPayload = {
+            'message': 'Bad request',
+            'timestamp': '2021-03-18 21:43:47.405736',
+            "uri": "/local-test-api/test-controller/payload-validation-test"
+        }
         assert ObjectHelper.equals(
-            {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'},
+            expectedResponsePostSendPayload,
             responsePostSendPayload.json(),
             ignoreKeyList=['timestamp']
         ), f'{expectedResponsePostSendPayload} should be equals to {responsePostSendPayload.json()}'
         assert 400 == responsePostSendPayload.status_code
 
         responsePostSendPayloadList = requests.post(BASE_URL + POST_PAYLOAD_ONE, json=payloadList, headers=headers)
+        expectedBodyResponseWithUri = {
+            'message': 'Something bad happened. Please, try again later',
+            'timestamp': '2021-03-18 21:43:47.299735',
+            "uri": "/local-test-api/test-controller/payload-validation-test"
+        }
         assert ObjectHelper.equals(
-            {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-19 08:36:20.925177'},
+            expectedBodyResponseWithUri,
             responsePostSendPayloadList.json(),
             ignoreKeyList=['timestamp']
-        )
+        ), (expectedBodyResponseWithUri, responsePostSendPayloadList.json())
         assert 500 == responsePostSendPayloadList.status_code
 
         responsePostSendPayloadBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload, headers=headers)
+        expectedBodyResponseWithUri = {
+            'message': 'Something bad happened. Please, try again later',
+            'timestamp': '2021-03-18 21:43:47.299735',
+            "uri": "/local-test-api/test-controller/batch/payload-validation-test"
+        }
         assert ObjectHelper.equals(
-            {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'},
+            expectedBodyResponseWithUri,
             responsePostSendPayloadBatch.json(),
             ignoreKeyList=['timestamp']
-        )
+        ), (expectedBodyResponseWithUri, responsePostSendPayloadBatch.json())
         assert 500 == responsePostSendPayloadBatch.status_code
 
         responsePostSendPayloadListBatch = requests.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList, headers=headers)
-        expectedResponsePostSendPayloadListBatch = {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'}
+        expectedResponsePostSendPayloadListBatch = {
+            'message': 'Bad request',
+            'timestamp': '2021-03-18 21:43:47.767735',
+            "uri": "/local-test-api/test-controller/batch/payload-validation-test"
+        }
         assert ObjectHelper.equals(
             expectedResponsePostSendPayloadListBatch,
             responsePostSendPayloadListBatch.json(),
@@ -587,7 +610,7 @@ def testing_Client() :
     SettingHelper.ACTIVE_ENVIRONMENT : 'local'
 })
 def pythonRun_worksProperly() :
-    # arrange
+    #arrange
     muteLogs = False
     devServerPort = 5001 ### - on local config
     process = getProcess(
@@ -595,92 +618,97 @@ def pythonRun_worksProperly() :
         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
         muteLogs = muteLogs
     )
+    BASE_URL = f'http://localhost:{devServerPort}/local-test-api'
+    payload = {'me':'and you'}
+    payloadList = [payload]
+    headers = {
+        "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
+        'Cache-Control': 'no-cache'
+    }
+    time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
+
     try:
-        BASE_URL = f'http://localhost:{devServerPort}/local-test-api'
-        payload = {'me':'and you'}
-        payloadList = [payload]
-        time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
-
-        # act
-        headers = {
-            "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
-            'Cache-Control': 'no-cache'
-        }
-
+        #act
+        #assert
         session = requests.Session()
 
         responseGetHealth = session.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER, headers=headers)
-
-        responseGetNone = session.get(BASE_URL + GET_NONE_ONE)
-        responseGetNoneBatch = session.post(BASE_URL + GET_NONE_ONE_BATCH, json=payload, headers=headers)
-
-        responsePostSendPayload = session.post(BASE_URL + POST_PAYLOAD_ONE, json=payload, headers=headers)
-        responsePostSendPayloadList = session.post(BASE_URL + POST_PAYLOAD_ONE, json=payloadList, headers=headers)
-        responsePostSendPayloadBatch = session.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload, headers=headers)
-        responsePostSendPayloadListBatch = session.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList, headers=headers)
-
-        # print(requests.get('https://www.google.com/search?q=something&rlz=1C1GCEU_pt-BRBR884BR884&oq=something&aqs=chrome..69i57.5839j0j7&sourceid=chrome&ie=UTF-8'))
-        # print(requests.get('https://www.google.com/search?q=something+else&rlz=1C1GCEU_pt-BRBR884BR884&sxsrf=ALeKk03rn_R9yREVJSkMqIUeAJfmFMVSfA%3A1619326195697&ei=8_SEYNWPKsGn5OUPobip-AQ&oq=something+else&gs_lcp=Cgdnd3Mtd2l6EAMyBQgAEJECMgUIABDLATIFCC4QywEyBQgAEMsBMgUILhDLATIFCC4QywEyBQgAEMsBMgUILhDLATICCAAyBQgAEMsBOgcIABBHELADOgcIABCwAxBDOg0ILhCwAxDIAxBDEJMCOgoILhCwAxDIAxBDOgIILjoHCAAQChDLAUoFCDgSATFQr_wLWPyCDGDdigxoAXACeACAAZYBiAGiBpIBAzAuNpgBAKABAaoBB2d3cy13aXrIAQ_AAQE&sclient=gws-wiz&ved=0ahUKEwiV1a2VzJjwAhXBE7kGHSFcCk8Q4dUDCA4&uact=5'))
-
-        # print(f'responseGetNone: {responseGetNone.json()}')
-        # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
-        #
-        # print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
-        # print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
-        # print(f'responsePostSendPayloadBatch: {responsePostSendPayloadBatch.json()}')
-        # print(f'responsePostSendPayloadListBatch: {responsePostSendPayloadListBatch.json()}')
-
-        # assert
         assert ObjectHelper.equals(
             {'status':'UP'},
             responseGetHealth.json()
         )
         assert 200 == responseGetHealth.status_code
 
-        {'message': 'OK'}
-        {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.299735'}
-        {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'}
-        {'me': 'and you'}
-        {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'}
-        {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'}
-        # print(f'responseGetNone: {responseGetNone.json()}')
+        responseGetNone = session.get(BASE_URL + GET_NONE_ONE)
         assert ObjectHelper.equals(
             {'message': 'OK'},
             responseGetNone.json()
         )
         assert 200 == responseGetNone.status_code
-        # print(f'responseGetNoneBatch: {responseGetNoneBatch.json()}')
+
+        responseGetNoneBatch = session.post(BASE_URL + GET_NONE_ONE_BATCH, json=payload, headers=headers)
+        expectedBodyResponseWithUri = {
+            "message": "Something bad happened. Please, try again later",
+            "timestamp": "2021-11-14 23:34:35.554823",
+            "uri": "/local-test-api/test-controller/batch/all-fine-if-its-none"
+        }
         assert ObjectHelper.equals(
-            {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.299735'},
+            expectedBodyResponseWithUri,
             responseGetNoneBatch.json(),
             ignoreKeyList=['timestamp']
-        )
+        ), (expectedBodyResponseWithUri, responseGetNoneBatch.json())
         assert 500 == responseGetNoneBatch.status_code
-        # print(f'responsePostSendPayload: {responsePostSendPayload.json()}')
+
+        responsePostSendPayload = session.post(BASE_URL + POST_PAYLOAD_ONE, json=payload, headers=headers)
+        expectedBodyResponseWithUri = {
+            'message': 'Bad request',
+            'timestamp': '2021-11-15 00:19:30.431058',
+            'uri': '/local-test-api/test-controller/payload-validation-test'
+        }
         assert ObjectHelper.equals(
-            {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.405736'},
+            expectedBodyResponseWithUri,
             responsePostSendPayload.json(),
             ignoreKeyList=['timestamp']
-        )
+        ), (expectedBodyResponseWithUri, responsePostSendPayload.json())
         assert 400 == responsePostSendPayload.status_code
-        # print(f'responsePostSendPayloadList: {responsePostSendPayloadList.json()}')
+
+        responsePostSendPayloadList = session.post(BASE_URL + POST_PAYLOAD_ONE, json=payloadList, headers=headers)
+        expectedBodyResponseWithUri = {
+            "message": "Something bad happened. Please, try again later",
+            "timestamp": "2021-11-15 00:16:46.216862",
+            "uri": '/local-test-api/test-controller/payload-validation-test'
+        }
         assert ObjectHelper.equals(
-            {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-19 08:36:20.925177'},
+            expectedBodyResponseWithUri,
             responsePostSendPayloadList.json(),
             ignoreKeyList=['timestamp']
-        )
+        ), (expectedBodyResponseWithUri, responsePostSendPayloadList.json())
         assert 500 == responsePostSendPayloadList.status_code
+
+        responsePostSendPayloadBatch = session.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payload, headers=headers)
+        expectedBodyResponseWithUri = {
+            "message": "Something bad happened. Please, try again later",
+            "timestamp": "2021-11-14 23:34:35.554823",
+            "uri": "/local-test-api/test-controller/batch/payload-validation-test"
+        }
         assert ObjectHelper.equals(
-            {'message': 'Something bad happened. Please, try again later', 'timestamp': '2021-03-18 21:43:47.636759'},
+            expectedBodyResponseWithUri,
             responsePostSendPayloadBatch.json(),
             ignoreKeyList=['timestamp']
-        )
+        ), (expectedBodyResponseWithUri, responsePostSendPayloadBatch.json())
         assert 500 == responsePostSendPayloadBatch.status_code
+
+        responsePostSendPayloadListBatch = session.post(BASE_URL + POST_PAYLOAD_ONE_BATCH, json=payloadList, headers=headers)
+        expectedBodyResponseWithUri = {
+            "message": "Bad request",
+            "timestamp": "2021-11-15 00:14:04.622693",
+            "uri": "/local-test-api/test-controller/batch/payload-validation-test"
+        }
         assert ObjectHelper.equals(
-            {'message': 'Bad request', 'timestamp': '2021-03-18 21:43:47.767735'},
+            expectedBodyResponseWithUri,
             responsePostSendPayloadListBatch.json(),
             ignoreKeyList=['timestamp']
-        )
+        ), (expectedBodyResponseWithUri, responsePostSendPayloadListBatch.json())
         assert 400 == responsePostSendPayloadListBatch.status_code
 
         killProcesses(process)
@@ -703,8 +731,9 @@ def pythonRun_securityManager() :
         muteLogs = muteLogs
     )
     try:
+        TEST_VARIANT = EnvironmentHelper.get("URL_VARIANT")
         BASE_URL = f'http://localhost:{securityServerPort}/security-manager-api'
-        BASE_URI = f'{BASE_URL}/test/{EnvironmentHelper.get("URL_VARIANT")}/security-manager'
+        BASE_URI = f'{BASE_URL}/test/{TEST_VARIANT}/security-manager'
         POST_LOGIN_URI = '/login'
         GET_CONSUME_URI = '/consume'
         GET_CONSUME_AFTER_REFRESH_URI = '/consume/only-after-refresh'
@@ -733,7 +762,8 @@ def pythonRun_securityManager() :
         responseGetConsumeBeforeLogin = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
         expectedResponseGetConsumeBeforeLogin = {
             "message": "Unauthorized",
-            "timestamp": "2021-11-02 21:47:32.444629"
+            "timestamp": "2021-11-02 21:47:32.444629",
+            "uri": f"/security-manager-api/test/{TEST_VARIANT}/security-manager/consume"
         }
         assert ObjectHelper.isNotNone(responseGetConsumeBeforeLogin)
         assert ObjectHelper.equals(
@@ -772,7 +802,8 @@ def pythonRun_securityManager() :
         responseGetConsumeAfterRefreshBeforeRefresh = requests.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
         assert ObjectHelper.equals({
                 "message": "Role not allowed",
-                "timestamp": "2021-11-02 21:47:32.444629"
+                "timestamp": "2021-11-02 21:47:32.444629",
+                "uri": f"/security-manager-api/test/{TEST_VARIANT}/security-manager/consume/only-after-refresh"
             },
             responseGetConsumeAfterRefreshBeforeRefresh.json(),
             ignoreKeyList=['timestamp']
@@ -819,7 +850,11 @@ def pythonRun_securityManager() :
 
         responseGetConsumeAfterLogout = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
         assert ObjectHelper.isNotNone(responseGetConsumeAfterLogout.json())
-        expectedResponseGetConsumeAfterLogout = {'message': 'Unauthorized', 'timestamp': '2021-11-03 01:10:10.876113'}
+        expectedResponseGetConsumeAfterLogout = {
+            'message': 'Unauthorized',
+            'timestamp': '2021-11-03 01:10:10.876113',
+            "uri": f"/security-manager-api/test/{TEST_VARIANT}/security-manager/consume"
+        }
         assert ObjectHelper.equals(
             expectedResponseGetConsumeAfterLogout,
             responseGetConsumeAfterLogout.json(),
@@ -847,8 +882,9 @@ def pythonRun_sessionManager() :
         muteLogs = muteLogs
     )
     try:
+        TEST_VARIANT = EnvironmentHelper.get("URL_VARIANT")
         BASE_URL = f'http://localhost:{sessionServerPort}/session-manager-api'
-        BASE_URI = f'{BASE_URL}/test/{EnvironmentHelper.get("URL_VARIANT")}/session-manager'
+        BASE_URI = f'{BASE_URL}/test/{TEST_VARIANT}/session-manager'
         POST_LOGIN_URI = '/login'
         GET_CONSUME_URI = '/consume'
         GET_CONSUME_AFTER_REFRESH_URI = '/consume/only-after-refresh'
@@ -876,7 +912,8 @@ def pythonRun_sessionManager() :
         responseGetConsumeBeforeLogin = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
         expectedResponseGetConsumeBeforeLogin = {
             "message": "Invalid session",
-            "timestamp": "2021-11-02 21:47:32.444629"
+            "timestamp": "2021-11-02 21:47:32.444629",
+            "uri": f"/session-manager-api/test/{TEST_VARIANT}/session-manager/consume"
         }
         assert ObjectHelper.isNotNone(responseGetConsumeBeforeLogin)
         assert ObjectHelper.equals(
@@ -915,7 +952,8 @@ def pythonRun_sessionManager() :
         responseGetConsumeAfterRefreshBeforeRefresh = requests.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
         expectedResponseGetConsumeAfterRefreshBeforeRefresh = {
             "message": "Session not allowed",
-            "timestamp": "2021-11-02 21:47:32.444629"
+            "timestamp": "2021-11-02 21:47:32.444629",
+            "uri": f"/session-manager-api/test/{TEST_VARIANT}/session-manager/consume/only-after-refresh"
         }
         assert ObjectHelper.equals(
             expectedResponseGetConsumeAfterRefreshBeforeRefresh,
@@ -964,7 +1002,11 @@ def pythonRun_sessionManager() :
 
         responseGetConsumeAfterLogout = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
         assert ObjectHelper.isNotNone(responseGetConsumeAfterLogout.json())
-        expectedResponseGetConsumeAfterLogout = {'message': 'Invalid session', 'timestamp': '2021-11-03 01:10:10.876113'}
+        expectedResponseGetConsumeAfterLogout = {
+            'message': 'Invalid session',
+            'timestamp': '2021-11-03 01:10:10.876113',
+            "uri": f"/session-manager-api/test/{TEST_VARIANT}/session-manager/consume"
+        }
         assert ObjectHelper.equals(
             expectedResponseGetConsumeAfterLogout,
             responseGetConsumeAfterLogout.json(),
@@ -978,146 +1020,153 @@ def pythonRun_sessionManager() :
         raise exception
 
 
-@Test(environmentVariables={
-    log.ENABLE_LOGS_WITH_COLORS: True,
-    SettingHelper.ACTIVE_ENVIRONMENT : 'api-key-manager'
-})
-def pythonRun_apiKeyManager() :
-    # arrange
-    muteLogs = False
-    apiKeyServerPort = 5013 ### - on apiKey-manager config
-    process = getProcess(
-        f'python app.py',
-        f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
-        muteLogs = muteLogs
-    )
-    try:
-        BASE_URL = f'http://localhost:{apiKeyServerPort}/api-key-manager-api'
-        BASE_URI = f'{BASE_URL}/test/{EnvironmentHelper.get("URL_VARIANT")}/api-key-manager'
-        POST_LOGIN_URI = '/login'
-        GET_CONSUME_URI = '/consume'
-        GET_CONSUME_AFTER_REFRESH_URI = '/consume/only-after-refresh'
-        PATCH_REFRESH_URI = '/refresh'
-        PUT_LOGOUT_URI = '/logout'
-        time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
-        headers = {
-            "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
-            'Cache-Control': 'no-cache'
-        }
-        id = time.time()
-        payload = {
-            'id': id
-        }
-
-        # act
-        # assert
-        responseGetHealth = requests.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER, headers=headers)
-        assert ObjectHelper.equals(
-            {'status':'UP'},
-            responseGetHealth.json()
-        )
-        assert 200 == responseGetHealth.status_code
-
-        responseGetConsumeBeforeLogin = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
-        expectedResponseGetConsumeBeforeLogin = {
-            "message": "Invalid apiKey",
-            "timestamp": "2021-11-02 21:47:32.444629"
-        }
-        assert ObjectHelper.isNotNone(responseGetConsumeBeforeLogin)
-        assert ObjectHelper.equals(
-            expectedResponseGetConsumeBeforeLogin,
-            responseGetConsumeBeforeLogin.json(),
-            ignoreKeyList=['timestamp']
-        ), f'{expectedResponseGetConsumeBeforeLogin} should be equals to {responseGetConsumeBeforeLogin.json()}'
-
-        responseLogin = requests.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
-        firstAuthorization = responseLogin.json().get('accessToken')
-        firstAuthorizationHeaders = responseLogin.headers
-        assert ObjectHelper.isNotNone(firstAuthorization)
-        headers['Api-key'] = 'Bearer ' + firstAuthorization
-        assert ObjectHelper.isNotNone(firstAuthorization)
-        assert ObjectHelper.isNotNone(id)
-        assert ObjectHelper.isNone(firstAuthorizationHeaders.get('some'))
-
-        responseGetConsumeBeforeRefresh = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
-        expectedResponseGetConsumeBeforeRefresh = {
-            "secured": "information",
-            "currentUser": {
-                "identity": id,
-                "context": [
-                    "TEST_API_KEY"
-                ],
-                "data": {
-                    "some": "data"
-                }
-            }
-        }
-        assert ObjectHelper.equals(
-            expectedResponseGetConsumeBeforeRefresh,
-            responseGetConsumeBeforeRefresh.json()
-        ), f'{expectedResponseGetConsumeBeforeRefresh} should be equals to {responseGetConsumeBeforeRefresh.json()}'
-
-        responseGetConsumeAfterRefreshBeforeRefresh = requests.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
-        expectedResponseGetConsumeAfterRefreshBeforeRefresh = {
-            "message": "ApiKey not allowed",
-            "timestamp": "2021-11-02 21:47:32.444629"
-        }
-        assert ObjectHelper.equals(
-            expectedResponseGetConsumeAfterRefreshBeforeRefresh,
-            responseGetConsumeAfterRefreshBeforeRefresh.json(),
-            ignoreKeyList=['timestamp']
-        ), f'{expectedResponseGetConsumeAfterRefreshBeforeRefresh} should be equals to {responseGetConsumeAfterRefreshBeforeRefresh.json()}'
-        assert 403 == responseGetConsumeAfterRefreshBeforeRefresh.status_code
-
-        responsePatchRefresh = requests.patch(BASE_URI + PATCH_REFRESH_URI, json=payload, headers=headers)
-        patchedAuthorizationHeaders = responseLogin.headers
-        patchedAuthorization = responsePatchRefresh.json().get('accessToken')
-        assert ObjectHelper.isNotNone(patchedAuthorization)
-        headers['Api-key'] = 'Bearer ' + patchedAuthorization
-        assert ObjectHelper.isNotNone(responsePatchRefresh)
-        assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
-        assert ObjectHelper.isNotNone(id)
-        assert ObjectHelper.isNone(patchedAuthorizationHeaders.get('some'))
-
-        responseGetConsumeAfterRefresh = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
-        expectedResponseGetConsumeAfterRefresh = {
-            "secured": "information",
-            "currentUser": {
-                "identity": id,
-                "context": [
-                    "TEST_API_KEY",
-                    "TEST_API_KEY_REFRESH"
-                ],
-                "data": {
-                    "some": "other data"
-                }
-            }
-        }
-        assert ObjectHelper.equals(
-            expectedResponseGetConsumeAfterRefresh,
-            responseGetConsumeAfterRefresh.json()
-        ), f'{expectedResponseGetConsumeAfterRefresh} should be equals to {responseGetConsumeAfterRefresh.json()}'
-
-        responseLogout = requests.put(BASE_URI + PUT_LOGOUT_URI, json=payload, headers=headers)
-        assert ObjectHelper.isNotNone(responseLogout.json())
-        expectedResponseLogout = {'message': 'ApiKey closed'}
-        assert ObjectHelper.equals(
-            expectedResponseLogout,
-            responseLogout.json()
-        ), f'{expectedResponseLogout} should be equals to {responseLogout.json()}'
-        assert 202 == responseLogout.status_code
-
-        responseGetConsumeAfterLogout = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
-        assert ObjectHelper.isNotNone(responseGetConsumeAfterLogout.json())
-        expectedResponseGetConsumeAfterLogout = {'message': 'Invalid apiKey', 'timestamp': '2021-11-03 01:10:10.876113'}
-        assert ObjectHelper.equals(
-            expectedResponseGetConsumeAfterLogout,
-            responseGetConsumeAfterLogout.json(),
-            ignoreKeyList=['timestamp']
-        ), f'{expectedResponseGetConsumeAfterLogout} should be equals to {responseGetConsumeAfterLogout.json()}'
-        assert 401 == responseGetConsumeAfterLogout.status_code
-
-        killProcesses(process)
-    except Exception as exception:
-        killProcesses(process)
-        raise exception
+# @Test(environmentVariables={
+#     log.ENABLE_LOGS_WITH_COLORS: True,
+#     SettingHelper.ACTIVE_ENVIRONMENT : 'api-key-manager'
+# })
+# def pythonRun_apiKeyManager() :
+#     # arrange
+#     muteLogs = False
+#     apiKeyServerPort = 5013 ### - on apiKey-manager config
+#     process = getProcess(
+#         f'python app.py',
+#         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
+#         muteLogs = muteLogs
+#     )
+#     try:
+#         TEST_VARIANT = EnvironmentHelper.get("URL_VARIANT")
+#         BASE_URL = f'http://localhost:{apiKeyServerPort}/api-key-manager-api'
+#         BASE_URI = f'{BASE_URL}/test/{TEST_VARIANT}/api-key-manager'
+#         POST_LOGIN_URI = '/login'
+#         GET_CONSUME_URI = '/consume'
+#         GET_CONSUME_AFTER_REFRESH_URI = '/consume/only-after-refresh'
+#         PATCH_REFRESH_URI = '/refresh'
+#         PUT_LOGOUT_URI = '/logout'
+#         time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
+#         headers = {
+#             "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
+#             'Cache-Control': 'no-cache'
+#         }
+#         id = time.time()
+#         payload = {
+#             'id': id
+#         }
+#
+#         # act
+#         # assert
+#         responseGetHealth = requests.get(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER, headers=headers)
+#         assert ObjectHelper.equals(
+#             {'status':'UP'},
+#             responseGetHealth.json()
+#         )
+#         assert 200 == responseGetHealth.status_code
+#
+#         responseGetConsumeBeforeLogin = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
+#         expectedResponseGetConsumeBeforeLogin = {
+#             "message": "Invalid apiKey",
+#             "timestamp": "2021-11-02 21:47:32.444629",
+#             "uri": f"/api-key-manager-api/test/{TEST_VARIANT}/api-key-manager/consume"
+#         }
+#         assert ObjectHelper.isNotNone(responseGetConsumeBeforeLogin)
+#         assert ObjectHelper.equals(
+#             expectedResponseGetConsumeBeforeLogin,
+#             responseGetConsumeBeforeLogin.json(),
+#             ignoreKeyList=['timestamp']
+#         ), f'{expectedResponseGetConsumeBeforeLogin} should be equals to {responseGetConsumeBeforeLogin.json()}'
+#
+#         responseLogin = requests.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
+#         firstAuthorization = responseLogin.json().get('accessToken')
+#         firstAuthorizationHeaders = responseLogin.headers
+#         assert ObjectHelper.isNotNone(firstAuthorization)
+#         headers['Api-key'] = 'Bearer ' + firstAuthorization
+#         assert ObjectHelper.isNotNone(firstAuthorization)
+#         assert ObjectHelper.isNotNone(id)
+#         assert ObjectHelper.isNone(firstAuthorizationHeaders.get('some'))
+#
+#         responseGetConsumeBeforeRefresh = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
+#         expectedResponseGetConsumeBeforeRefresh = {
+#             "secured": "information",
+#             "currentUser": {
+#                 "identity": id,
+#                 "context": [
+#                     "TEST_API_KEY"
+#                 ],
+#                 "data": {
+#                     "some": "data"
+#                 }
+#             }
+#         }
+#         assert ObjectHelper.equals(
+#             expectedResponseGetConsumeBeforeRefresh,
+#             responseGetConsumeBeforeRefresh.json()
+#         ), f'{expectedResponseGetConsumeBeforeRefresh} should be equals to {responseGetConsumeBeforeRefresh.json()}'
+#
+#         responseGetConsumeAfterRefreshBeforeRefresh = requests.get(BASE_URI + GET_CONSUME_AFTER_REFRESH_URI, headers=headers)
+#         expectedResponseGetConsumeAfterRefreshBeforeRefresh = {
+#             "message": "ApiKey not allowed",
+#             "timestamp": "2021-11-02 21:47:32.444629",
+#             "uri": f"/api-key-manager-api/test/{TEST_VARIANT}/api-key-manager/consume"
+#         }
+#         assert ObjectHelper.equals(
+#             expectedResponseGetConsumeAfterRefreshBeforeRefresh,
+#             responseGetConsumeAfterRefreshBeforeRefresh.json(),
+#             ignoreKeyList=['timestamp']
+#         ), f'{expectedResponseGetConsumeAfterRefreshBeforeRefresh} should be equals to {responseGetConsumeAfterRefreshBeforeRefresh.json()}'
+#         assert 403 == responseGetConsumeAfterRefreshBeforeRefresh.status_code
+#
+#         responsePatchRefresh = requests.patch(BASE_URI + PATCH_REFRESH_URI, json=payload, headers=headers)
+#         patchedAuthorizationHeaders = responseLogin.headers
+#         patchedAuthorization = responsePatchRefresh.json().get('accessToken')
+#         assert ObjectHelper.isNotNone(patchedAuthorization)
+#         headers['Api-key'] = 'Bearer ' + patchedAuthorization
+#         assert ObjectHelper.isNotNone(responsePatchRefresh)
+#         assert not ObjectHelper.equals(firstAuthorization, patchedAuthorization)
+#         assert ObjectHelper.isNotNone(id)
+#         assert ObjectHelper.isNone(patchedAuthorizationHeaders.get('some'))
+#
+#         responseGetConsumeAfterRefresh = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
+#         expectedResponseGetConsumeAfterRefresh = {
+#             "secured": "information",
+#             "currentUser": {
+#                 "identity": id,
+#                 "context": [
+#                     "TEST_API_KEY",
+#                     "TEST_API_KEY_REFRESH"
+#                 ],
+#                 "data": {
+#                     "some": "other data"
+#                 }
+#             }
+#         }
+#         assert ObjectHelper.equals(
+#             expectedResponseGetConsumeAfterRefresh,
+#             responseGetConsumeAfterRefresh.json()
+#         ), f'{expectedResponseGetConsumeAfterRefresh} should be equals to {responseGetConsumeAfterRefresh.json()}'
+#
+#         responseLogout = requests.put(BASE_URI + PUT_LOGOUT_URI, json=payload, headers=headers)
+#         assert ObjectHelper.isNotNone(responseLogout.json())
+#         expectedResponseLogout = {'message': 'ApiKey closed'}
+#         assert ObjectHelper.equals(
+#             expectedResponseLogout,
+#             responseLogout.json()
+#         ), f'{expectedResponseLogout} should be equals to {responseLogout.json()}'
+#         assert 202 == responseLogout.status_code
+#
+#         responseGetConsumeAfterLogout = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
+#         assert ObjectHelper.isNotNone(responseGetConsumeAfterLogout.json())
+#         expectedResponseGetConsumeAfterLogout = {
+#             'message': 'Invalid apiKey',
+#             'timestamp': '2021-11-03 01:10:10.876113',
+#             "uri": f"/api-key-manager-api/test/{TEST_VARIANT}/api-key-manager/consume"
+#         }
+#         assert ObjectHelper.equals(
+#             expectedResponseGetConsumeAfterLogout,
+#             responseGetConsumeAfterLogout.json(),
+#             ignoreKeyList=['timestamp']
+#         ), f'{expectedResponseGetConsumeAfterLogout} should be equals to {responseGetConsumeAfterLogout.json()}'
+#         assert 401 == responseGetConsumeAfterLogout.status_code
+#
+#         killProcesses(process)
+#     except Exception as exception:
+#         killProcesses(process)
+#         raise exception

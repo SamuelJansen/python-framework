@@ -473,7 +473,7 @@ def handleControllerMethod(
                     # 'query': FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs), ###- safellyGetUrl() returns query param
                     'body': requestBodyAsJson
                 },
-                condition = logRequest,
+                condition = True,
                 logLevel = log.INFO
             )
     except Exception as exception:
@@ -691,7 +691,7 @@ def ControllerMethod(
                             'body': FlaskUtil.safellyGetResponseJson(httpResponse), ###- json.loads(Serializer.jsonifyIt(responseBody))
                             'status': status
                         },
-                        condition = logResponse,
+                        condition = True,
                         logLevel = log.INFO
                     )
             except Exception as exception:
