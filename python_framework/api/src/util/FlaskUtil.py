@@ -20,7 +20,7 @@ request = request
 Resource = flask_restful.Resource
 
 @Function
-def safellyGetRequestBody() :
+def safellyGetRequestBody():
     requestBody = safellyGetJson()
     if ObjectHelper.isNone(requestBody):
         requestBody = safellyGetData()
@@ -57,7 +57,7 @@ def safellyGetData():
     return dataBody
 
 @Function
-def safellyGetUrl() :
+def safellyGetUrl():
     url = None
     try :
         url = str(request.url)
@@ -65,8 +65,17 @@ def safellyGetUrl() :
         log.log(safellyGetUrl, 'Not possible to get url', exception=exception)
     return url
 
+def safellyGetPath():
+    path = None
+    try :
+        path = str(request.path)
+    except Exception as exception:
+        path = c.FOWARD_SLASH
+        log.log(safellyGetUrl, f'Not possible to get path. Returning {path} by default', exception=exception)
+    return path
+
 @Function
-def safellyGetVerb() :
+def safellyGetVerb():
     verb = None
     try :
         verb = str(request.method)
@@ -119,11 +128,11 @@ def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
     return valuesAsDictionary
 
 @Function
-def getGlobals() :
+def getGlobals():
     return globals.getGlobalsInstance()
 
 @Function
-def getApi() :
+def getApi():
     api = None
     try:
         api = getGlobals().api
@@ -131,7 +140,7 @@ def getApi() :
         raise Exception(f'Failed to return api from "globals" instance. Cause: {str(exception)}')
     return api
 
-def getNullableApi() :
+def getNullableApi():
     api = None
     try :
         api = getApi()
@@ -140,15 +149,15 @@ def getNullableApi() :
     return api
 
 @Function
-def getClassName(instance) :
+def getClassName(instance):
     return instance.__class__.__name__
 
 @Function
-def getModuleName(instance) :
+def getModuleName(instance):
     return instance.__class__.__module__
 
 @Function
-def getQualitativeName(instance) :
+def getQualitativeName(instance):
     return instance.__class__.__qualname__
 
 @Function
@@ -159,12 +168,12 @@ def isApiInstance(apiInstance):
     moduleName = flask_restful.__name__
     return apiClassName == getClassName(apiInstance) and apiClassName == getQualitativeName(apiInstance) and moduleName == getModuleName(apiInstance)
 
-def validateFlaskApi(apiInstance) :
-    if not isApiInstance(apiInstance) :
+def validateFlaskApi(apiInstance):
+    if not isApiInstance(apiInstance):
         raise Exception(f'Invalid "flask_restful.Api" instance. {apiInstance} is not an Api instance')
 
-def validateResourceInstance(resourceInstance) :
-    if ObjectHelper.isNone(resourceInstance) :
+def validateResourceInstance(resourceInstance):
+    if ObjectHelper.isNone(resourceInstance):
         raise Exception(f'Resource cannot be None')
 
 @Function

@@ -349,8 +349,9 @@ def testing_headersAndParams() :
         raise exception
 
 @Test(environmentVariables={
-    SettingHelper.ACTIVE_ENVIRONMENT : 'client',
-    **LOG_HELPER_SETTINGS
+    SettingHelper.ACTIVE_ENVIRONMENT : 'client'
+    , log.ENABLE_LOGS_WITH_COLORS: True
+    # , **LOG_HELPER_SETTINGS
 })
 def testing_Client() :
     #arrange
@@ -366,7 +367,9 @@ def testing_Client() :
     try:
         URL_PARAM = 'abcd'
         OTHER_URL_PARAM = 'efgh'
-        BASE_URL = f'http://localhost:5022/client-test-api/test/{EnvironmentHelper.get("URL_VARIANT")}/{URL_PARAM}/{OTHER_URL_PARAM}'
+        BASE_SIMPLE_URL = 'http://localhost:5022/client-test-api'
+        BASE_URL = f'{BASE_SIMPLE_URL}/test/{EnvironmentHelper.get("URL_VARIANT")}/{URL_PARAM}/{OTHER_URL_PARAM}'
+        BASE_EXCEPTON_URL = f'{BASE_SIMPLE_URL}/exception/test/{EnvironmentHelper.get("URL_VARIANT")}/{URL_PARAM}/{OTHER_URL_PARAM}'
         PARAMS = {
             'someParam': 'given-someParam'
         }
@@ -374,6 +377,9 @@ def testing_Client() :
             'someHeader': 'given-someHeader'
         }
 
+        ##################
+        ###- getTest
+        ##################
         getResponse = requests.get(f'{BASE_URL}/get', params=PARAMS, headers=HEADERS, timeout=10)
         assert ObjectHelper.isNotNone(getResponse)
         assert ObjectHelper.equals(200, getResponse.status_code)
@@ -386,6 +392,20 @@ def testing_Client() :
             }
         }
         assert ObjectHelper.equals(expectedGetResponse, getResponse.json())
+
+        getExceptionResponse = requests.get(f'{BASE_EXCEPTON_URL}/get', params=PARAMS, headers=HEADERS, timeout=10)
+        assert ObjectHelper.isNotNone(getExceptionResponse)
+        assert ObjectHelper.equals(200, getExceptionResponse.status_code)
+        assert ObjectHelper.equals('headers-get', dict(getExceptionResponse.headers).get('get'))
+        expectedGetExceptionResponse = {
+            'message': 'Something bad happened. Please, try again later',
+            'timestamp': '2021-03-18 21:43:47.299735'
+        }
+        assert ObjectHelper.equals(
+            expectedGetExceptionResponse,
+            getResponse.json(),
+            ignoreKeyList=['timestamp']
+        )
 
         killProcesses(process)
     except Exception as exception:

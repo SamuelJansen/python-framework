@@ -264,7 +264,8 @@ def addHeadersListToUrlVerb(verb, url, endPointUrl, requestHeaderClass, document
                     if ObjectHelper.isNotNone(requestHeaderClass[0][0]) and ObjectHelper.isNotList(requestHeaderClass[0][0]) :
                         # addHeadersListToUrlVerb(verb, url, endPointUrl, requestHeaderClass[0][0], documentation) ###-, where=where
                         log.warning(addHeadersListToUrlVerb, f'Request header class as list not implemented yet. requestHeaderClass: {requestHeaderClass}')
-        log.warning(addHeadersListToUrlVerb, f'Unexpected request header class. requestHeaderClass: {requestHeaderClass}')
+        else:
+            log.warning(addHeadersListToUrlVerb, f'Unexpected request header class. requestHeaderClass: {requestHeaderClass}')
 
 def getAttributeType(typeUrlParam):
     if c.TYPE_INTEGER == typeUrlParam :
