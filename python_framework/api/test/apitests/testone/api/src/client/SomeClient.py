@@ -33,7 +33,7 @@ class SomeClient:
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Content-Type': self.getOnActuatorHealth.consumes, **Serializer.getObjectAsDictionary(headers)}
         )
-        # print(response.text)
+        print(response.json())
         return TestRequestDto.TestResponseDto(
             status = Serializer.convertFromJsonToObject(response.json(), [[ActuatorHealthDto.ActuatorHealthResponseDto]])[0].status,
             first = params.first,

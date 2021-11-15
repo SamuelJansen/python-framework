@@ -77,6 +77,10 @@ PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
 KW_RESOURCE_LIST = list(PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.keys())
 
 
+def raiseBadResponseImplementation(cause):
+    raise Exception(f'Bad response implementation. {cause}')
+
+
 def newApp(
     filePath
     , successStatus = True
@@ -833,10 +837,6 @@ def isPythonFrameworkHttpsResponseBody(completeResponse):
 
 def isNotPythonFrameworkHttpsResponseBody(completeResponse):
     return not isPythonFrameworkHttpsResponseBody(completeResponse)
-
-
-def raiseBadResponseImplementation(cause):
-    raise Exception(f'Bad response implementation. {cause}')
 
 
 @Function

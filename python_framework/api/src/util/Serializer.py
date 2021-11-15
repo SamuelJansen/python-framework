@@ -211,15 +211,15 @@ def convertFromJsonToObject(fromJson, toClass, fatherClass=None):
     # print(f'isSerializerList(toClass): {isSerializerList(toClass)}')
     if isSerializerList(toClass):
         for innerToObjectClass in toClass :
-            if isSerializerList(innerToObjectClass):
+            if isSerializerList(innerToObjectClass) and ObjectHelper.isList(fromJson):
                 objectList = []
                 for fromJsonElement in fromJson :
                     objectList.append(convertFromJsonToObject(fromJsonElement, innerToObjectClass[0], fatherClass=fatherClass))
                 # print(f'convertFromJsonToObject: {objectList}')
                 return objectList
-            else :
+            elif not isSerializerList(innerToObjectClass) and not ObjectHelper.isList(fromJson):
                 return convertFromJsonToObject(fromJson, innerToObjectClass, fatherClass=fatherClass)
-    else :
+    else:
         return serializeIt(fromJson, toClass, fatherClass=fatherClass)
     raiseUnhandledConversion(fromJson, toClass)
 
