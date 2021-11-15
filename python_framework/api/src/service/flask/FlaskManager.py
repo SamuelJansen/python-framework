@@ -820,7 +820,15 @@ def validateResponseClass(responseClass, completeResponse):
 
 
 def isPythonFrameworkHttpsResponseBody(completeResponse):
-    return ObjectHelper.isTuple(completeResponse) and 3 == len(completeResponse)
+    return (
+        ObjectHelper.isTuple(completeResponse)
+    ) and (
+        3 == len(completeResponse)
+    ) and (
+        isinstance(completeResponse[1], dict)
+    ) and (
+        isinstance(completeResponse[-1], EnumItem) or isinstance(completeResponse[-1], int)
+    )
 
 
 def isNotPythonFrameworkHttpsResponseBody(completeResponse):

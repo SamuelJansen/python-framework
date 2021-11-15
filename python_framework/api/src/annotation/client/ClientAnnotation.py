@@ -74,6 +74,9 @@ def ClientMethod(
             try :
                 FlaskManager.validateArgs(args, requestClass, resourceInstanceMethod)
                 completeResponse = resourceInstanceMethod(*args, **kwargs)
+                ###- This simple client cannot handle headers or anything this much elegant
+                if ObjectHelper.isTuple() and 0 < len(completeResponse):
+                    completeResponse = completeResponse[1]
             except Exception as exception :
                 log.log(innerResourceInstanceMethod, 'Failure at client method execution', exception=exception, muteStackTrace=True)
                 raise exception
