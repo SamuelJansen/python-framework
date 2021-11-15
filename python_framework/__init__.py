@@ -24,6 +24,14 @@ from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.enumeration.ActuatorHealthStatus import ActuatorHealthStatus
 from python_framework.api.src.enumeration.SchedulerType import SchedulerType
 
+from python_framework.api.src.domain import HttpDomain
+
+from python_framework.api.src.constant import ConfigurationKeyConstant
+from python_framework.api.src.constant import HealthCheckConstant
+from python_framework.api.src.constant import SchedulerConstant
+from python_framework.api.src.constant import JwtConstant
+from python_framework.api.src.constant import HttpClientConstant
+
 from python_framework.api.src.converter.static import ConverterStatic
 
 from python_framework.api.src.model import FrameworkModel
@@ -40,18 +48,13 @@ from python_framework.api.src.controller import DocumentationController
 from python_framework.api.src.service import DocumentationService
 from python_framework.api.src.repository import DocumentationRepository
 
-from python_framework.api.src.constant import ConfigurationKeyConstant
-from python_framework.api.src.constant import HealthCheckConstant
-from python_framework.api.src.constant import SchedulerConstant
-from python_framework.api.src.constant import JwtConstant
-
 from python_framework.api.src.service.flask.FlaskManager import *
 
 from python_framework.api.src.annotation.EnumAnnotation import *
 from python_framework.api.src.annotation.SchedulerAnnotation import *
 from python_framework.api.src.annotation.ServiceAnnotation import *
 from python_framework.api.src.annotation.RepositoryAnnotation import *
-from python_framework.api.src.annotation.ClientAnnotation import *
+from python_framework.api.src.annotation.client.ClientAnnotation import *
 from python_framework.api.src.annotation.client.HttpClientAnnotation import *
 from python_framework.api.src.annotation.ValidatorAnnotation import *
 from python_framework.api.src.annotation.MapperAnnotation import *

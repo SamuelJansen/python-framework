@@ -4,29 +4,13 @@ from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringH
 
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
+from python_framework.api.src.domain import HttpDomain
+from python_framework.api.src.constant import HttpClientConstant
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service.openapi import OpenApiManager
 from python_framework.api.src.service.ExceptionHandler import GlobalException
-
-
-CLIENT_DID_NOT_SENT_ANY_MESSAGE = 'Client did not sent any message'
-ERROR_AT_CLIENT_CALL_MESSAGE = 'Error at client call'
-DEFAULT_TIMEOUT = 30
-
-
-class HeaderKey:
-    CONTENT_TYPE = 'Content-Type'
-
-
-class Verb:
-    GET = 'GET'
-    POST = 'POST'
-    PUT = 'PUT'
-    DELETE = 'DELETE'
-    PATCH = 'PATCH'
-    OPTIONS = 'OPTIONS'
 
 
 class HttpClientEvent(Exception):
@@ -37,14 +21,6 @@ class HttpClientEvent(Exception):
         self.verb = verb
         self.args = args
         self.kwargs = kwargs
-
-
-# class HttpClientEvent(Exception):
-#     def __init__(self, verb):
-#         if ObjectHelper.isNone(verb):
-#             raise Exception('HttpClientEvent verb cannot be none')
-#         Exception.__init__(self, f'Http client {verb} event')
-#         self.verb = verb
 
 
 class ManualHttpClientEvent(Exception):
@@ -70,7 +46,7 @@ def raiseHttpClientEventNotFoundException(*args, **kwargs):
 
 
 @Function
-def HttpClient(url=c.BLANK, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=False, logResponse=False) :
+def HttpClient(url=c.BLANK, headers=None, timeout=HttpClientConstant.DEFAULT_TIMEOUT, logRequest=False, logResponse=False) :
     clientUrl = url
     clientHeaders = ConverterStatic.getValueOrDefault(headers, dict())
     clientTimeout = timeout
@@ -90,17 +66,17 @@ def HttpClient(url=c.BLANK, headers=None, timeout=DEFAULT_TIMEOUT, logRequest=Fa
                 OuterClass.__init__(self,*args, **kwargs)
                 self.globals = apiInstance.globals
             def options(self, *args, **kwargs):
-                raise HttpClientEvent(Verb.OPTIONS, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.OPTIONS, *args, **kwargs)
             def get(self, *args, **kwargs):
-                raise HttpClientEvent(Verb.GET, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.GET, *args, **kwargs)
             def post(self, *args, **kwargs):
-                raise HttpClientEvent(Verb.POST, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.POST, *args, **kwargs)
             def put(self, *args, **kwargs):
-                raise HttpClientEvent(Verb.PUT, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.PUT, *args, **kwargs)
             def patch(self, *args, **kwargs):
-                raise HttpClientEvent(Verb.PATCH, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.PATCH, *args, **kwargs)
             def delete(self, *args, **kwargs):
-                raise HttpClientEvent(Verb.DELETE, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.DELETE, *args, **kwargs)
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -187,7 +163,7 @@ def HttpClientMethod(
             logRequest = False,
             **kwargs
         ):
-            verb = Verb.OPTIONS
+            verb = HttpDomain.Verb.OPTIONS
             body = dict()
             url, params, headers, timeout, logRequest = parseParameters(
                 resourceInstance,
@@ -217,7 +193,7 @@ def HttpClientMethod(
             logRequest = False,
             **kwargs
         ):
-            verb = Verb.GET
+            verb = HttpDomain.Verb.GET
             body = dict()
             url, params, headers, timeout, logRequest = parseParameters(
                 resourceInstance,
@@ -248,7 +224,7 @@ def HttpClientMethod(
             logRequest = False,
             **kwargs
         ):
-            verb = Verb.POST
+            verb = HttpDomain.Verb.POST
             url, params, headers, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
@@ -279,7 +255,7 @@ def HttpClientMethod(
             logRequest = False,
             **kwargs
         ):
-            verb = Verb.PUT
+            verb = HttpDomain.Verb.PUT
             url, params, headers, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
@@ -310,7 +286,7 @@ def HttpClientMethod(
             logRequest = False,
             **kwargs
         ):
-            verb = Verb.PATCH
+            verb = HttpDomain.Verb.PATCH
             url, params, headers, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
@@ -341,7 +317,7 @@ def HttpClientMethod(
             logRequest = False,
             **kwargs
         ):
-            verb = Verb.DELETE
+            verb = HttpDomain.Verb.DELETE
             url, params, headers, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
@@ -378,12 +354,12 @@ def HttpClientMethod(
                 )
 
         HTTP_CLIENT_RESOLVERS_MAP = {
-            Verb.OPTIONS : options,
-            Verb.GET : get,
-            Verb.POST : post,
-            Verb.PUT : put,
-            Verb.PATCH : patch,
-            Verb.DELETE : delete
+            HttpDomain.Verb.OPTIONS : options,
+            HttpDomain.Verb.GET : get,
+            HttpDomain.Verb.POST : post,
+            HttpDomain.Verb.PUT : put,
+            HttpDomain.Verb.PATCH : patch,
+            HttpDomain.Verb.DELETE : delete
         }
 
         log.wrapper(HttpClientMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
@@ -483,7 +459,7 @@ def getUrl(client, clientMethodConfig, aditionalUrl):
 def getHeaders(client, clientMethodConfig, headers):
     return {
         **ConverterStatic.getValueOrDefault(client.headers, dict()),
-        **{HeaderKey.CONTENT_TYPE: clientMethodConfig.consumes},
+        **{HttpDomain.HeaderKey.CONTENT_TYPE: clientMethodConfig.consumes},
         **ConverterStatic.getValueOrDefault(clientMethodConfig.headers, dict()),
         **ConverterStatic.getValueOrDefault(headers, dict())
     }
@@ -522,7 +498,7 @@ def raiseExceptionIfNeeded(clientResponse):
         raise GlobalException(
             message = getErrorMessage(clientResponse),
             status = HttpStatus.map(clientResponse.status_code),
-            logMessage = ERROR_AT_CLIENT_CALL_MESSAGE
+            logMessage = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE
         )
 
 
@@ -535,7 +511,7 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
         responseBody, responseStatus = dict(), HttpStatus.map(fallbackStatus)
         log.failure(getCompleteResponse, 'Not possible to parse client response as json', exception=exception, muteStackTrace=True)
     responseHeaders = {
-        **{HeaderKey.CONTENT_TYPE: produces},
+        **{HttpDomain.HeaderKey.CONTENT_TYPE: produces},
         **responseHeaders
     }
     return Serializer.convertFromJsonToObject(responseBody, responseClass), responseHeaders, responseStatus
@@ -543,7 +519,7 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
 
 @Function
 def getErrorMessage(clientResponse, exception=None):
-    errorMessage = CLIENT_DID_NOT_SENT_ANY_MESSAGE
+    errorMessage = HttpClientConstant.CLIENT_DID_NOT_SENT_ANY_MESSAGE
     possibleErrorMessage = None
     bodyAsJson = {}
     try :
@@ -556,5 +532,5 @@ def getErrorMessage(clientResponse, exception=None):
         errorMessage = f'{c.LOG_CAUSE}{possibleErrorMessage}'
     else:
         log.debug(getErrorMessage, f'Client response {FlaskUtil.safellyGetResponseJson(clientResponse)}')
-    exceptionPortion = ERROR_AT_CLIENT_CALL_MESSAGE if ObjectHelper.isNone(exception) or StringHelper.isBlank(exception) else str(exception)
+    exceptionPortion = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE if ObjectHelper.isNone(exception) or StringHelper.isBlank(exception) else str(exception)
     return f'{exceptionPortion}{c.DOT_SPACE}{errorMessage}'

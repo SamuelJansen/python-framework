@@ -2,7 +2,7 @@ import requests
 from python_helper import EnvironmentHelper
 
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
-from python_framework.api.src.annotation.ClientAnnotation import Client, ClientMethod
+from python_framework.api.src.annotation.client.ClientAnnotation import Client, ClientMethod
 from python_framework.api.src.dto import ActuatorHealthDto
 from python_framework.api.src.util import Serializer
 
