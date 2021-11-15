@@ -448,7 +448,7 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
             **{HeaderKey.CONTENT_TYPE: produces},
             **responseHeaders
         }
-    if ObjectHelper.isNone(responseClass):
+    if ObjectHelper.isNone(responseClass) or ObjectHelper.isNotDictionary(responseBody):
         return responseBody, responseHeaders, responseStatus
     else:
         return Serializer.convertFromJsonToObject(responseBody, responseClass), responseHeaders, responseStatus
