@@ -97,7 +97,7 @@ class JwtManager:
 
     def getEncodedTokenWithoutType(self):
         encodedPayload = self.captureTokenFromRequestHeader()
-        assert ObjectHelper.isNotNone(encodedPayload), 'JWT session token cannot be None'
+        assert ObjectHelper.isNotNone(encodedPayload), f'JWT session token cannot be None. Header: {self.headerName}'
         assert encodedPayload.startswith(f'{self.headerType} '), f'JWT session token must starts with {self.headerType}'
         return encodedPayload[len(f'{self.headerType} '):].encode()
 
