@@ -86,16 +86,16 @@ def validateArgs(self, method, objectRequest, expecteObjectClass):
         raise GlobalException(logMessage = f'Failed to validate args of {method.__name__} method{DOT_SPACE_CAUSE}{str(exception)}')
 
 @Function
-def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, apiInstance = None) :
-    if not (isinstance(exception.__class__, GlobalException) or GlobalException.__name__ == exception.__class__.__name__) :
+def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, context, apiInstance = None) :
+    if not (isinstance(exception, GlobalException) or GlobalException.__name__ == exception.__class__.__name__) :
         log.debug(handleLogErrorException, f'Failed to excecute {resourceInstanceMethod.__name__} method due to {exception.__class__.__name__} exception', exception=exception)
         message = None
         status = None
         logMessage = None
-        if (isinstance(exception.__class__, NoAuthorizationError) or NoAuthorizationError.__name__ == exception.__class__.__name__ or
-            isinstance(exception.__class__, RevokedTokenError) or RevokedTokenError.__name__ == exception.__class__.__name__ or
-            isinstance(exception.__class__, InvalidSignatureError) or InvalidSignatureError.__name__ == exception.__class__.__name__ or
-            isinstance(exception.__class__, ExpiredSignatureError) or ExpiredSignatureError.__name__ == exception.__class__.__name__):
+        if (isinstance(exception, NoAuthorizationError) or NoAuthorizationError.__name__ == exception.__class__.__name__ or
+            isinstance(exception, RevokedTokenError) or RevokedTokenError.__name__ == exception.__class__.__name__ or
+            isinstance(exception, InvalidSignatureError) or InvalidSignatureError.__name__ == exception.__class__.__name__ or
+            isinstance(exception, ExpiredSignatureError) or ExpiredSignatureError.__name__ == exception.__class__.__name__):
             message = 'Unauthorized' if ObjectHelper.isNone(exception) or StringHelper.isBlank(str(exception)) else str(exception)
             status = HttpStatus.UNAUTHORIZED
         if ObjectHelper.isNotNone(exception) and StringHelper.isNotBlank(str(exception)) :
@@ -110,10 +110,20 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
             status = status
         )
     try :
-        if not exception.logResource or c.NOTHING == exception.logResource or not resourceInstance == exception.logResource :
-            exception.logResource = resourceInstance
-        if not exception.logResourceMethod or c.NOTHING == exception.logResourceMethod or not resourceInstanceMethod == exception.logResourceMethod :
-            exception.logResourceMethod = resourceInstanceMethod
+        if not context == exception.context:
+            exception = GlobalException(
+                message = message,
+                logMessage = logMessage,
+                logResource = resourceInstance,
+                logResourceMethod = resourceInstanceMethod,
+                status = exception.status,
+                context = context
+            )
+        else:
+            if not exception.logResource or c.NOTHING == exception.logResource or not resourceInstance == exception.logResource :
+                exception.logResource = resourceInstance
+            if not exception.logResourceMethod or c.NOTHING == exception.logResourceMethod or not resourceInstanceMethod == exception.logResourceMethod :
+                exception.logResourceMethod = resourceInstanceMethod
         httpErrorLog = ErrorLog.ErrorLog()
         httpErrorLog.override(exception)
         if ObjectHelper.isNone(apiInstance):

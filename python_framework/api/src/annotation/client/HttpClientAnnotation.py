@@ -408,7 +408,7 @@ def HttpClientMethod(
                     raise Exception('Unknown http client event')
             except Exception as exception:
                 log.log(innerResourceInstanceMethod, 'Failure at client method execution', exception=exception, muteStackTrace=True)
-                raise FlaskManager.getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
+                FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.CLIENT_CONTEXT)
             clientResponseStatus = completeResponse[-1]
             clientResponseHeaders = completeResponse[1]
             clientResponseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : HttpStatus.map(clientResponseStatus).enumName}

@@ -66,7 +66,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=DEFAUTL_DISABLE, mut
                 except Exception as exception :
                     if not muteLogs:
                         log.warning(resourceMethod, f'Not possible to run {resourceMethod.shedulerId} properly', exception=exception, muteStackTrace=True)
-                    FlaskManager.raiseGlobalException(exception, resourceInstance, resourceMethod)
+                    FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceMethod)
                 if not muteLogs:
                     log.debug(resourceMethod, f'{resourceMethod.shedulerId} scheduler finished')
                 return methodReturn

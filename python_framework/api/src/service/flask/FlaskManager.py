@@ -7,6 +7,7 @@ from python_helper import log, Function, ReflectionHelper, ObjectHelper, Setting
 from python_framework.api.src.annotation.EnumAnnotation import EnumItem
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
 from python_framework.api.src.constant import ConfigurationKeyConstant, JwtConstant, HealthCheckConstant
+from python_framework.api.src.domain import HttpDomain
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
@@ -736,18 +737,20 @@ def getAndPersistGlobalException(
     exception,
     resourceInstance,
     resourceInstanceMethod,
-    apiInstance = None
+    apiInstance = None,
+    context = HttpDomain.CONTROLLER_CONTEXT
 ):
     return ExceptionHandler.handleLogErrorException(
         exception,
         resourceInstance,
         resourceInstanceMethod,
-        apiInstance = apiInstance if ObjectHelper.isNotNone(apiInstance) else FlaskUtil.getNullableApi()
+        apiInstance = apiInstance if ObjectHelper.isNotNone(apiInstance) else FlaskUtil.getNullableApi(),
+        context
     )
 
 
-def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod):
-    raise getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
+def raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=None):
+    raise getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=context)
 
 
 def getCompleteResponseByException(
