@@ -744,8 +744,8 @@ def getAndPersistGlobalException(
         exception,
         resourceInstance,
         resourceInstanceMethod,
-        apiInstance = apiInstance if ObjectHelper.isNotNone(apiInstance) else FlaskUtil.getNullableApi(),
-        context
+        context,
+        apiInstance = apiInstance if ObjectHelper.isNotNone(apiInstance) else FlaskUtil.getNullableApi()
     )
 
 
