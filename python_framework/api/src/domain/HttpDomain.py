@@ -12,3 +12,6 @@ class Verb:
     DELETE = 'DELETE'
     PATCH = 'PATCH'
     OPTIONS = 'OPTIONS'
+
+CONTROLLER_CONTEXT = 'ControllerRequest'
+CLIENT_CONTEXT = 'ClientRequest'

@@ -1,10 +1,14 @@
 from flask_jwt_extended.exceptions import NoAuthorizationError, RevokedTokenError
 from jwt import ExpiredSignatureError, InvalidSignatureError
+
 from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper, StringHelper, DateTimeHelper
-from python_framework.api.src.util import FlaskUtil
+
+from python_framework.api.src.domain import HttpDomain
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.model import ErrorLog
+
 
 DEFAULT_MESSAGE = 'Something bad happened. Please, try again later'
 DEFAULT_STATUS = HttpStatus.INTERNAL_SERVER_ERROR
@@ -12,9 +16,6 @@ DEFAULT_LOG_MESSAGE = 'Log message not present'
 
 DEFAULT_LOG_RESOURCE = 'ResourceNotInformed'
 DEFAULT_LOG_RESOURCE_METHOD = 'resourceMethodNotInformed'
-
-CONTROLLER_CONTEXT = 'ControllerRequest'
-CLIENT_CONTEXT = 'ClientRequest'
 
 DOT_SPACE_CAUSE = f'''{c.DOT_SPACE}{c.LOG_CAUSE}'''
 
@@ -40,6 +41,7 @@ class GlobalException(Exception):
         verb = None,
         url = None,
         logPayload = None,
+        logHeaders = None,
         context = None
     ):
         self.timeStamp = DateTimeHelper.now()
@@ -51,7 +53,8 @@ class GlobalException(Exception):
         self.logResource = DEFAULT_LOG_RESOURCE if ObjectHelper.isNone(logResource) else logResource
         self.logResourceMethod = DEFAULT_LOG_RESOURCE_METHOD if ObjectHelper.isNone(logResourceMethod) else logResourceMethod
         self.logPayload = logPayload if ObjectHelper.isNotNone(logPayload) else self.getRequestBody()
-        self.context = CONTROLLER_CONTEXT if ObjectHelper.isNone(context) else context
+        self.logHeaders = logHeaders if ObjectHelper.isNotNone(logHeaders) else self.getRequestHeaders()
+        self.context = HttpDomain.CONTROLLER_CONTEXT if ObjectHelper.isNone(context) else context
 
     def __str__(self):
         return f'''{GlobalException.__name__} thrown at {self.timeStamp}. Status: {self.status}, message: {self.message}, verb: {self.verb}, url: {self.url}{', logMessage: ' if self.logMessage else c.NOTHING}{self.logMessage}'''
@@ -64,6 +67,9 @@ class GlobalException(Exception):
 
     def getRequestUrl(self) :
         return FlaskUtil.safellyGetUrl()
+
+    def getRequestHeaders(self):
+        return FlaskUtil.safellyGetHeaders()
 
 
 @Function

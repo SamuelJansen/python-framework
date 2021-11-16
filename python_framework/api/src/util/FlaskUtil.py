@@ -110,7 +110,7 @@ def safellyGetVerb():
 def safellyGetHeaders():
     headers = None
     try:
-        headers= dict(request.headers)
+        headers = dict(request.headers)
     except Exception as exception:
         headers = {}
         log.log(safellyGetHeaders, f'Not possible to get request headers. Returning {headers} by default', exception=exception)
@@ -120,10 +120,20 @@ def safellyGetHeaders():
 def safellyGetResponseHeaders(response):
     headers = None
     try:
-        headers= dict(response.headers)
+        headers = dict(response.headers)
     except Exception as exception:
         headers = {}
         log.log(safellyGetResponseHeaders, f'Not possible to get response headers. Returning {headers} by default', exception=exception)
+    return headers if ObjectHelper.isNotNone(headers) else dict()
+
+@Function
+def safellyGetRequestHeadersFromResponse(response):
+    headers = None
+    try:
+        headers = dict(response.request.headers)
+    except Exception as exception:
+        headers = {}
+        log.log(safellyGetRequestHeadersFromResponse, f'Not possible to get request headers from response. Returning {headers} by default', exception=exception)
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @Function

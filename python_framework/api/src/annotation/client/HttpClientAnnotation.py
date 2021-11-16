@@ -406,9 +406,9 @@ def HttpClientMethod(
                     FlaskManager.validateResponseClass(responseClass, completeResponse)
                 else:
                     raise Exception('Unknown http client event')
-            except Exception as exception :
+            except Exception as exception:
                 log.log(innerResourceInstanceMethod, 'Failure at client method execution', exception=exception, muteStackTrace=True)
-                raise exception
+                raise FlaskManager.getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
             clientResponseStatus = completeResponse[-1]
             clientResponseHeaders = completeResponse[1]
             clientResponseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : HttpStatus.map(clientResponseStatus).enumName}
@@ -499,10 +499,15 @@ def raiseException(clientResponse, exception):
         logMessage = getErrorMessage(clientResponse, exception=exception),
         url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
         status = FlaskUtil.safellyGetResponseStatus(clientResponse),
+        logHeaders = {
+            'requestHeaders': FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
+            'responseHeaders': FlaskUtil.safellyGetResponseHeaders(clientResponse)
+        },
         logPayload = {
             'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
             'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
-        }
+        },
+        context = HttpDomain.CLIENT_CONTEXT
     )
 
 
@@ -513,10 +518,15 @@ def raiseExceptionIfNeeded(clientResponse):
             logMessage = getErrorMessage(clientResponse),
             url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
             status = status,
+            logHeaders = {
+                'requestHeaders': FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
+                'responseHeaders': FlaskUtil.safellyGetResponseHeaders(clientResponse)
+            },
             logPayload = {
                 'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
                 'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
-            }
+            },
+            context = HttpDomain.CLIENT_CONTEXT
         )
     elif 400 <= status:
         raise GlobalException(
@@ -524,10 +534,15 @@ def raiseExceptionIfNeeded(clientResponse):
             logMessage = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE,
             url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
             status = status,
+            logHeaders = {
+                'requestHeaders': FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
+                'responseHeaders': FlaskUtil.safellyGetResponseHeaders(clientResponse)
+            },
             logPayload = {
                 'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
                 'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
-            }
+            },
+            context = HttpDomain.CLIENT_CONTEXT
         )
 
 

@@ -732,7 +732,7 @@ def ControllerMethod(
     return innerMethodWrapper
 
 
-def getGlobalException(
+def getAndPersistGlobalException(
     exception,
     resourceInstance,
     resourceInstanceMethod,
@@ -747,7 +747,7 @@ def getGlobalException(
 
 
 def raiseGlobalException(exception, resourceInstance, resourceInstanceMethod):
-    raise getGlobalException(exception, resourceInstance, resourceInstanceMethod)
+    raise getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
 
 
 def getCompleteResponseByException(
@@ -756,7 +756,7 @@ def getCompleteResponseByException(
     resourceInstanceMethod,
     muteStacktraceOnBusinessRuleException
 ):
-    exception = getGlobalException(exception, resourceInstance, resourceInstanceMethod)
+    exception = getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
     bodyErrorResponse = {
         'message': exception.message,
         'timestamp': str(exception.timeStamp)
