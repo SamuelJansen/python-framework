@@ -17,6 +17,7 @@ API_INSTANCE_HOLDER = {
 KW_PARAMETERS = 'params'
 KW_HEADERS = 'headers'
 
+UNKNOWN_VERB = 'UNKNOWN'
 
 Response = Response
 request = request
@@ -149,11 +150,21 @@ def safellyGetRequestJsonFromResponse(response):
 def safellyGetRequestUrlFromResponse(response):
     url = None
     try:
-        response.url
+        url = response.url
     except Exception as exception:
         url = c.BLANK
         log.log(safellyGetRequestUrlFromResponse, f'Not possible to get request url from response. Returning {url} by default', exception=exception)
     return url if ObjectHelper.isNotNone(url) else c.BLANK
+
+@Function
+def safellyGetRequestVerbFromResponse(response):
+    verb = None
+    try:
+        verb = response.request.method
+    except Exception as exception:
+        verb = UNKNOWN_VERB
+        log.log(safellyGetRequestUrlFromResponse, f'Not possible to get request verb from response. Returning {verb} by default', exception=exception)
+    return verb
 
 @Function
 def safellyGetResponseStatus(response):

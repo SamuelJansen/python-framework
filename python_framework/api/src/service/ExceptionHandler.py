@@ -13,6 +13,9 @@ DEFAULT_LOG_MESSAGE = 'Log message not present'
 DEFAULT_LOG_RESOURCE = 'ResourceNotInformed'
 DEFAULT_LOG_RESOURCE_METHOD = 'resourceMethodNotInformed'
 
+CONTROLLER_CONTEXT = 'ControllerRequest'
+CLIENT_CONTEXT = 'ClientRequest'
+
 DOT_SPACE_CAUSE = f'''{c.DOT_SPACE}{c.LOG_CAUSE}'''
 
 KW_GET = 'get'
@@ -36,7 +39,8 @@ class GlobalException(Exception):
         logResourceMethod = None,
         verb = None,
         url = None,
-        logPayload = None
+        logPayload = None,
+        context = None
     ):
         self.timeStamp = DateTimeHelper.now()
         self.status = HttpStatus.map(DEFAULT_STATUS if ObjectHelper.isNone(status) else status).enumValue
@@ -47,6 +51,7 @@ class GlobalException(Exception):
         self.logResource = DEFAULT_LOG_RESOURCE if ObjectHelper.isNone(logResource) else logResource
         self.logResourceMethod = DEFAULT_LOG_RESOURCE_METHOD if ObjectHelper.isNone(logResourceMethod) else logResourceMethod
         self.logPayload = logPayload if ObjectHelper.isNotNone(logPayload) else self.getRequestBody()
+        self.context = CONTROLLER_CONTEXT if ObjectHelper.isNone(context) else context
 
     def __str__(self):
         return f'''{GlobalException.__name__} thrown at {self.timeStamp}. Status: {self.status}, message: {self.message}, verb: {self.verb}, url: {self.url}{', logMessage: ' if self.logMessage else c.NOTHING}{self.logMessage}'''
