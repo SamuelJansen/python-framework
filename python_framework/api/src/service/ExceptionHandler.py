@@ -29,11 +29,14 @@ ABLE_TO_RECIEVE_BODY_LIST = [
 
 class GlobalException(Exception):
     def __init__(self,
-        status = None,
         message = None,
         logMessage = None,
+        status = None,
         logResource = None,
-        logResourceMethod = None
+        logResourceMethod = None,
+        verb = None,
+        url = None,
+        logPayload = None
     ):
         self.timeStamp = DateTimeHelper.now()
         self.status = HttpStatus.map(DEFAULT_STATUS if ObjectHelper.isNone(status) else status).enumValue

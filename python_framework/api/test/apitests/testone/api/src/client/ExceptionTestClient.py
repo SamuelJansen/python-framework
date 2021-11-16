@@ -40,7 +40,7 @@ class ExceptionTestClient:
     )
     def postMethod(self, uri, dto, headers=None, params=None):
         return self.post(
-            Serializer.getObjectAsDictionary(dto),
+            body = Serializer.getObjectAsDictionary(dto),
             aditionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
@@ -57,7 +57,7 @@ class ExceptionTestClient:
     )
     def putMethod(self, uri, dto, headers=None, params=None):
         return self.put(
-            Serializer.getObjectAsDictionary(dto),
+            body = Serializer.getObjectAsDictionary(dto),
             aditionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
@@ -74,7 +74,7 @@ class ExceptionTestClient:
     )
     def patchMethod(self, uri, dto, headers=None, params=None):
         return self.patch(
-            Serializer.getObjectAsDictionary(dto),
+            body = Serializer.getObjectAsDictionary(dto),
             aditionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
@@ -91,7 +91,7 @@ class ExceptionTestClient:
     )
     def deleteMethod(self, uri, dto, headers=None, params=None):
         return self.delete(
-            Serializer.getObjectAsDictionary(dto),
+            body = Serializer.getObjectAsDictionary(dto),
             aditionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}

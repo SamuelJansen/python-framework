@@ -496,15 +496,32 @@ def parseParameters(client, clientMethodConfig, aditionalUrl, params, headers, b
 
 def raiseException(clientResponse, exception):
         raise GlobalException(
+            url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
+            logPayload = {
+                'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
+                'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
+            },
             logMessage = getErrorMessage(clientResponse, exception=exception)
         )
 
 
 def raiseExceptionIfNeeded(clientResponse):
     if ObjectHelper.isNone(clientResponse.status_code) or 500 <= clientResponse.status_code:
-        raise GlobalException(logMessage = getErrorMessage(clientResponse))
+        raise GlobalException(
+            url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
+            logPayload = {
+                'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
+                'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
+            },
+            logMessage = getErrorMessage(clientResponse)
+        )
     elif 400 <= clientResponse.status_code:
         raise GlobalException(
+            url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
+            logPayload = {
+                'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
+                'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
+            },
             message = getErrorMessage(clientResponse),
             status = HttpStatus.map(clientResponse.status_code),
             logMessage = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE

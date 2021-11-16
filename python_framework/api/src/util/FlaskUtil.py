@@ -123,6 +123,26 @@ def safellyGetArgs():
     return args if ObjectHelper.isNotNone(args) else dict()
 
 @Function
+def safellyGetRequestJsonFromResponse(response):
+    requestBody = None
+    try:
+        requestBody = dict(response.request.body)
+    except Exception as exception:
+        requestBody = {}
+        log.log(safellyGetRequestJsonFromResponse, f'Not possible to get request body from response. Returning {requestBody} by default', exception=exception)
+    return requestBody if ObjectHelper.isNotNone(requestBody) else dict()
+
+@Function
+def safellyGetRequestUrlFromResponse(response):
+    url = None
+    try:
+        response.url
+    except Exception as exception:
+        url = c.BLANK
+        log.log(safellyGetRequestUrlFromResponse, f'Not possible to get request url from response. Returning {url} by default', exception=exception)
+    return url if ObjectHelper.isNotNone(url) else c.BLANK
+
+@Function
 def buildHttpResponse(additionalResponseHeaders, controllerResponseBody, status, contentType):
     httpResponse = Response(Serializer.jsonifyIt(controllerResponseBody),  mimetype=contentType, status=status)
     for key, value in additionalResponseHeaders.items():
