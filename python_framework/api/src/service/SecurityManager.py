@@ -99,12 +99,11 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_access_token
-    data = Serializer.getObjectAsDictionary(data)
     return create_access_token(
         identity = identity,
         user_claims = {
-            JwtConstant.KW_CONTEXT: ConverterStatic.getValueOrDefault(roleList, list()),
-            JwtConstant.KW_DATA: ConverterStatic.getValueOrDefault(data, dict())
+            JwtConstant.KW_CONTEXT: safellyGetContext(contextList),
+            JwtConstant.KW_DATA: safellyGetData(data)
         },
         fresh = False,
         expires_delta = DateTimeHelper.timeDelta(minutes=deltaMinutes),
@@ -114,12 +113,11 @@ def createAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=Non
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def refreshAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_refresh_token
-    data = Serializer.getObjectAsDictionary(data)
     return create_refresh_token(
         identity = identity,
         user_claims = {
-            JwtConstant.KW_CONTEXT: roleList,
-            JwtConstant.KW_DATA: data
+            JwtConstant.KW_CONTEXT: safellyGetContext(contextList),
+            JwtConstant.KW_DATA: safellyGetData(data)
         },
         expires_delta = DateTimeHelper.timeDelta(minutes=deltaMinutes),
         headers = ConverterStatic.getValueOrDefault(headers, dict())
@@ -132,16 +130,12 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
     deltaMinutes = UtcDateTimeUtil.ofTimestamp(getExpiration(rawJwt=rawJwt)) - UtcDateTimeUtil.now()
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
-            *getContext(rawJwt=rawJwt),
-            *[
-                element for element in list([] if ObjectHelper.isNone(newContextList) else newContextList)
-            ]
+            *safellyGetContext(getContext(rawJwt=rawJwt)),
+            *safellyGetContext(newContextList)
         ])),
         JwtConstant.KW_DATA: {
-            **getData(rawJwt=rawJwt),
-            **{
-                k: v for k, v in (data if ObjectHelper.isNotNone(data) else dict()).items()
-            }
+            **safellyGetData(getData(rawJwt=rawJwt)),
+            **safellyGetData(data)
         }
     }
     addUserToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
@@ -225,3 +219,12 @@ def shutdown(apiInstance, appInstance):
 def onShutdown(apiInstance, appInstance):
     import atexit
     atexit.register(lambda: shutdown(apiInstance, appInstance))
+
+def raiseSessionContextCannotBeNone():
+    raise Exception('Security context cannot be None')
+
+def safellyGetContext(contextList):
+    return Serializer.getObjectAsDictionary(contextList) if ObjectHelper.isList(contextList) else [] if ObjectHelper.isNone(contextList) else raiseSessionContextCannotBeNone()
+
+def safellyGetData(data):
+    return dict() if ObjectHelper.isNone(data) else Serializer.getObjectAsDictionary(data)

@@ -205,7 +205,6 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
-    data = Serializer.getObjectAsDictionary(data)
     return retrieveApiInstance(apiInstance=apiInstance).sessionManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
@@ -215,8 +214,8 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
             JwtConstant.KW_FRESH: False,
             JwtConstant.KW_TYPE: JwtConstant.ACCESS_VALUE_TYPE,
             JwtConstant.KW_CLAIMS: {
-                JwtConstant.KW_CONTEXT: contextList if ObjectHelper.isList(contextList) else [] if ObjectHelper.isNone(contextList) else raiseSessionContextCannotBeNone(),
-                JwtConstant.KW_DATA: data if ObjectHelper.isNotNone(data) else {}
+                JwtConstant.KW_CONTEXT: safellyGetContext(contextList),
+                JwtConstant.KW_DATA: safellyGetData(data)
             }
         },
         headers = ConverterStatic.getValueOrDefault(headers, dict())
@@ -225,7 +224,6 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
-    data = Serializer.getObjectAsDictionary(data)
     return retrieveApiInstance(apiInstance=apiInstance).sessionManager.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
@@ -235,8 +233,8 @@ def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data
             JwtConstant.KW_FRESH: False,
             JwtConstant.KW_TYPE: JwtConstant.REFRESH_VALUE_TYPE,
             JwtConstant.KW_CLAIMS: {
-                JwtConstant.KW_CONTEXT: contextList if ObjectHelper.isList(contextList) else [] if ObjectHelper.isNone(contextList) else raiseSessionContextCannotBeNone(),
-                JwtConstant.KW_DATA: data if ObjectHelper.isNotNone(data) else {}
+                JwtConstant.KW_CONTEXT: safellyGetContext(contextList),
+                JwtConstant.KW_DATA: safellyGetData(data)
             }
         },
         headers = ConverterStatic.getValueOrDefault(headers, dict())
@@ -246,19 +244,14 @@ def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data
 def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, apiInstance=None):
     headers = headers if ObjectHelper.isNone(rawJwt) else {**getJwtHeaders(), **ConverterStatic.getValueOrDefault(headers, dict())}
     rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
-    data = Serializer.getObjectAsDictionary(data)
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
-            *getContext(rawJwt=rawJwt),
-            *[
-                element for element in list([] if ObjectHelper.isNone(newContextList) else newContextList)
-            ]
+            *safellyGetContext(getContext(rawJwt=rawJwt)),
+            *safellyGetContext(newContextList)
         ])),
         JwtConstant.KW_DATA: {
-            **getData(rawJwt=rawJwt),
-            **{
-                k: v for k, v in (data if ObjectHelper.isNotNone(data) else dict()).items()
-            }
+            **safellyGetData(getData(rawJwt=rawJwt)),
+            **safellyGetData(data)
         }
     }
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
@@ -344,7 +337,13 @@ def retrieveApiInstance(apiInstance=None, arguments=None):
     return apiInstance
 
 def raiseSessionContextCannotBeNone():
-    raise Exception('Context cannot be None')
+    raise Exception('Session context cannot be None')
+
+def safellyGetContext(contextList):
+    return Serializer.getObjectAsDictionary(contextList) if ObjectHelper.isList(contextList) else [] if ObjectHelper.isNone(contextList) else raiseSessionContextCannotBeNone()
+
+def safellyGetData(data):
+    return dict() if ObjectHelper.isNone(data) else Serializer.getObjectAsDictionary(data)
 
 def getNewJti():
     return Serializer.newUuidAsString()
