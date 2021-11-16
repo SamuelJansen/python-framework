@@ -1,9 +1,12 @@
 from flask import Response, request
 import flask_restful
+
 from python_helper import Constant as c
 from python_helper import ObjectHelper, log, Function
 import globals
+
 from python_framework.api.src.util import Serializer
+from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 
 
 KEY_API_INSTANCE = 'apiInstance'
@@ -141,6 +144,21 @@ def safellyGetRequestUrlFromResponse(response):
         url = c.BLANK
         log.log(safellyGetRequestUrlFromResponse, f'Not possible to get request url from response. Returning {url} by default', exception=exception)
     return url if ObjectHelper.isNotNone(url) else c.BLANK
+
+@Function
+def safellyGetResponseStatus(response):
+    status = None
+    try:
+        response.status_code
+    except Exception as exception:
+        status = HttpStatus.INTERNAL_SERVER_ERROR
+        log.log(safellyGetResponseStatus, f'Not possible to get response status. Returning {status} by default', exception=exception)
+    try:
+        status = HttpStatus.map(status if ObjectHelper.isNotNone(status) else HttpStatus.INTERNAL_SERVER_ERROR)
+    except Exception as exception:
+        status = HttpStatus.INTERNAL_SERVER_ERROR
+        log.log(safellyGetResponseStatus, f'Not possible to parse response status. Returning {status} by default', exception=exception)
+    return status
 
 @Function
 def buildHttpResponse(additionalResponseHeaders, controllerResponseBody, status, contentType):

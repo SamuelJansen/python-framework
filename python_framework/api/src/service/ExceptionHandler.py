@@ -41,12 +41,12 @@ class GlobalException(Exception):
         self.timeStamp = DateTimeHelper.now()
         self.status = HttpStatus.map(DEFAULT_STATUS if ObjectHelper.isNone(status) else status).enumValue
         self.message = message if ObjectHelper.isNotEmpty(message) and StringHelper.isNotBlank(message) else DEFAULT_MESSAGE if 500 <= self.status else self.status.enumName
-        self.verb = self.getRequestVerb()
-        self.url = self.getRequestUrl()
+        self.verb = verb if ObjectHelper.isNotNone(verb) else self.getRequestVerb()
+        self.url = url if ObjectHelper.isNotNone(url) else self.getRequestUrl()
         self.logMessage = DEFAULT_LOG_MESSAGE if ObjectHelper.isNone(logMessage) or StringHelper.isBlank(logMessage) else logMessage
         self.logResource = DEFAULT_LOG_RESOURCE if ObjectHelper.isNone(logResource) else logResource
         self.logResourceMethod = DEFAULT_LOG_RESOURCE_METHOD if ObjectHelper.isNone(logResourceMethod) else logResourceMethod
-        self.logPayload = self.getRequestBody()
+        self.logPayload = logPayload if ObjectHelper.isNotNone(logPayload) else self.getRequestBody()
 
     def __str__(self):
         return f'''{GlobalException.__name__} thrown at {self.timeStamp}. Status: {self.status}, message: {self.message}, verb: {self.verb}, url: {self.url}{', logMessage: ' if self.logMessage else c.NOTHING}{self.logMessage}'''

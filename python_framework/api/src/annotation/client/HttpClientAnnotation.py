@@ -497,6 +497,7 @@ def parseParameters(client, clientMethodConfig, aditionalUrl, params, headers, b
 def raiseException(clientResponse, exception):
         raise GlobalException(
             url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
+            status = FlaskUtil.safellyGetResponseStatus(clientResponse),
             logPayload = {
                 'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
                 'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
@@ -506,16 +507,18 @@ def raiseException(clientResponse, exception):
 
 
 def raiseExceptionIfNeeded(clientResponse):
-    if ObjectHelper.isNone(clientResponse.status_code) or 500 <= clientResponse.status_code:
+    status = FlaskUtil.safellyGetResponseStatus(clientResponse) ###- clientResponse.status_code
+    if ObjectHelper.isNone(status) or 500 <= status:
         raise GlobalException(
             url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
+            status = status,
             logPayload = {
                 'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
                 'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
             },
             logMessage = getErrorMessage(clientResponse)
         )
-    elif 400 <= clientResponse.status_code:
+    elif 400 <= status:
         raise GlobalException(
             url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
             logPayload = {
@@ -523,7 +526,7 @@ def raiseExceptionIfNeeded(clientResponse):
                 'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
             },
             message = getErrorMessage(clientResponse),
-            status = HttpStatus.map(clientResponse.status_code),
+            status = status,
             logMessage = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE
         )
 
