@@ -40,10 +40,20 @@ def safellyGetJson():
     return jsonBody
 
 @Function
-def safellyGetResponseJson(response):
+def safellyGetFlaskResponseJson(response: Response):
     jsonBody = None
     try :
         jsonBody = response.get_json(force=True)
+    except Exception as exception:
+        jsonBody = {}
+        log.log(safellyGetFlaskResponseJson, f'Not possible to get response body. Returning {jsonBody} by default', exception=exception)
+    return jsonBody
+
+@Function
+def safellyGetResponseJson(response):
+    jsonBody = None
+    try :
+        jsonBody = response.json()
     except Exception as exception:
         jsonBody = {}
         log.log(safellyGetResponseJson, f'Not possible to get response body. Returning {jsonBody} by default', exception=exception)

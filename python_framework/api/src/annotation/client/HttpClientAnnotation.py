@@ -496,13 +496,13 @@ def parseParameters(client, clientMethodConfig, aditionalUrl, params, headers, b
 
 def raiseException(clientResponse, exception):
         raise GlobalException(
+            logMessage = getErrorMessage(clientResponse, exception=exception),
             url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
             status = FlaskUtil.safellyGetResponseStatus(clientResponse),
             logPayload = {
                 'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
                 'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
-            },
-            logMessage = getErrorMessage(clientResponse, exception=exception)
+            }
         )
 
 
@@ -510,24 +510,24 @@ def raiseExceptionIfNeeded(clientResponse):
     status = FlaskUtil.safellyGetResponseStatus(clientResponse) ###- clientResponse.status_code
     if ObjectHelper.isNone(status) or 500 <= status:
         raise GlobalException(
+            logMessage = getErrorMessage(clientResponse),
             url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
             status = status,
             logPayload = {
                 'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
                 'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
-            },
-            logMessage = getErrorMessage(clientResponse)
+            }
         )
     elif 400 <= status:
         raise GlobalException(
+            message = getErrorMessage(clientResponse),
+            logMessage = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE,
             url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
+            status = status,
             logPayload = {
                 'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
                 'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
-            },
-            message = getErrorMessage(clientResponse),
-            status = status,
-            logMessage = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE
+            }
         )
 
 

@@ -703,7 +703,7 @@ def ControllerMethod(
                         'Response',
                         {
                             'headers': FlaskUtil.safellyGetResponseHeaders(httpResponse),
-                            'body': FlaskUtil.safellyGetResponseJson(httpResponse), ###- json.loads(Serializer.jsonifyIt(responseBody))
+                            'body': FlaskUtil.safellyGetFlaskResponseJson(httpResponse), ###- json.loads(Serializer.jsonifyIt(responseBody))
                             'status': status
                         },
                         condition = True,
