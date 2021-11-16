@@ -24,7 +24,7 @@ class ExceptionTestClient:
     )
     def getMethod(self, uri, headers=None, params=None):
         return self.get(
-            aditionalUrl = uri,
+            additionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
         )
@@ -41,7 +41,7 @@ class ExceptionTestClient:
     def postMethod(self, uri, dto, headers=None, params=None):
         return self.post(
             body = Serializer.getObjectAsDictionary(dto),
-            aditionalUrl = uri,
+            additionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
         )
@@ -58,7 +58,7 @@ class ExceptionTestClient:
     def putMethod(self, uri, dto, headers=None, params=None):
         return self.put(
             body = Serializer.getObjectAsDictionary(dto),
-            aditionalUrl = uri,
+            additionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
         )
@@ -75,7 +75,7 @@ class ExceptionTestClient:
     def patchMethod(self, uri, dto, headers=None, params=None):
         return self.patch(
             body = Serializer.getObjectAsDictionary(dto),
-            aditionalUrl = uri,
+            additionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
         )
@@ -92,7 +92,7 @@ class ExceptionTestClient:
     def deleteMethod(self, uri, dto, headers=None, params=None):
         return self.delete(
             body = Serializer.getObjectAsDictionary(dto),
-            aditionalUrl = uri,
+            additionalUrl = uri,
             params = Serializer.getObjectAsDictionary(params),
             headers = {'Some-Cool-Header': 'cool-value', **Serializer.getObjectAsDictionary(headers)}
         )

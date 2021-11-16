@@ -157,7 +157,7 @@ def HttpClientMethod(
         def options(
             resourceInstance,
             body = None,
-            aditionalUrl = None,
+            additionalUrl = None,
             params = None,
             headers = None,
             timeout = None,
@@ -168,7 +168,7 @@ def HttpClientMethod(
             url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
-                aditionalUrl,
+                additionalUrl,
                 params,
                 headers,
                 body,
@@ -189,7 +189,7 @@ def HttpClientMethod(
         def get(
             resourceInstance,
             body = None,
-            aditionalUrl = None,
+            additionalUrl = None,
             params = None,
             headers = None,
             timeout = None,
@@ -200,7 +200,7 @@ def HttpClientMethod(
             url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
-                aditionalUrl,
+                additionalUrl,
                 params,
                 headers,
                 body,
@@ -221,7 +221,7 @@ def HttpClientMethod(
         def post(
             resourceInstance,
             body = None,
-            aditionalUrl = None,
+            additionalUrl = None,
             headers = None,
             params = None,
             timeout = None,
@@ -232,7 +232,7 @@ def HttpClientMethod(
             url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
-                aditionalUrl,
+                additionalUrl,
                 params,
                 headers,
                 body,
@@ -253,7 +253,7 @@ def HttpClientMethod(
         def put(
             resourceInstance,
             body = None,
-            aditionalUrl = None,
+            additionalUrl = None,
             headers = None,
             params = None,
             timeout = None,
@@ -264,7 +264,7 @@ def HttpClientMethod(
             url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
-                aditionalUrl,
+                additionalUrl,
                 params,
                 headers,
                 body,
@@ -285,7 +285,7 @@ def HttpClientMethod(
         def patch(
             resourceInstance,
             body = None,
-            aditionalUrl = None,
+            additionalUrl = None,
             headers = None,
             params = None,
             timeout = None,
@@ -296,7 +296,7 @@ def HttpClientMethod(
             url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
-                aditionalUrl,
+                additionalUrl,
                 params,
                 headers,
                 body,
@@ -317,7 +317,7 @@ def HttpClientMethod(
         def delete(
             resourceInstance,
             body = None,
-            aditionalUrl = None,
+            additionalUrl = None,
             headers = None,
             params = None,
             timeout = None,
@@ -328,7 +328,7 @@ def HttpClientMethod(
             url, params, headers, body, timeout, logRequest = parseParameters(
                 resourceInstance,
                 clientMethodConfig,
-                aditionalUrl,
+                additionalUrl,
                 params,
                 headers,
                 body,
@@ -450,13 +450,13 @@ def HttpClientMethod(
 
 
 @Function
-def getUrl(client, clientMethodConfig, aditionalUrl):
+def getUrl(client, clientMethodConfig, additionalUrl):
     return StringHelper.join(
         [
             ConverterStatic.getValueOrDefault(u, c.BLANK) for u in [
                 client.url,
                 clientMethodConfig.url,
-                aditionalUrl
+                additionalUrl
             ]
         ],
         character = c.BLANK
@@ -484,8 +484,8 @@ def getLogRequest(client, clientMethodConfig, logRequest):
 
 
 @Function
-def parseParameters(client, clientMethodConfig, aditionalUrl, params, headers, body, timeout, logRequest):
-    url = getUrl(client, clientMethodConfig, aditionalUrl)
+def parseParameters(client, clientMethodConfig, additionalUrl, params, headers, body, timeout, logRequest):
+    url = getUrl(client, clientMethodConfig, additionalUrl)
     params = ConverterStatic.getValueOrDefault(params, dict())
     headers = getHeaders(client, clientMethodConfig, headers)
     body = ConverterStatic.getValueOrDefault(body, dict())
