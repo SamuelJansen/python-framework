@@ -129,7 +129,7 @@ def safellyGetArgs():
 def safellyGetRequestJsonFromResponse(response):
     requestBody = None
     try:
-        requestBody = dict(response.request.body)
+        requestBody = response.request.body
     except Exception as exception:
         requestBody = {}
         log.log(safellyGetRequestJsonFromResponse, f'Not possible to get request body from response. Returning {requestBody} by default', exception=exception)
