@@ -17,3 +17,6 @@ flask-specific-port: flask run --host=${api.server.host} --port=${api.server.por
 heroku addons:attach heroku-postgresql -a <app-name> --as HEROKU_DATABASE
 heroku addons:detach DATABASE -a <app-name>
 heroku config:add DATABASE_URL=<database-url>
+
+
+git push --delete origin tagname

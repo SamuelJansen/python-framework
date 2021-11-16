@@ -159,7 +159,7 @@ def safellyGetRequestUrlFromResponse(response):
 def safellyGetResponseStatus(response):
     status = None
     try:
-        response.status_code
+        status = response.status_code
     except Exception as exception:
         status = HttpStatus.INTERNAL_SERVER_ERROR
         log.log(safellyGetResponseStatus, f'Not possible to get response status. Returning {status} by default', exception=exception)

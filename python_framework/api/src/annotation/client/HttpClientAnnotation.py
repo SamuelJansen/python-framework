@@ -495,15 +495,15 @@ def parseParameters(client, clientMethodConfig, aditionalUrl, params, headers, b
 
 
 def raiseException(clientResponse, exception):
-        raise GlobalException(
-            logMessage = getErrorMessage(clientResponse, exception=exception),
-            url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
-            status = FlaskUtil.safellyGetResponseStatus(clientResponse),
-            logPayload = {
-                'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
-                'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
-            }
-        )
+    raise GlobalException(
+        logMessage = getErrorMessage(clientResponse, exception=exception),
+        url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
+        status = FlaskUtil.safellyGetResponseStatus(clientResponse),
+        logPayload = {
+            'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
+            'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
+        }
+    )
 
 
 def raiseExceptionIfNeeded(clientResponse):
@@ -550,6 +550,7 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
 
 @Function
 def getErrorMessage(clientResponse, exception=None):
+    completeErrorMessage = f'{HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE}{c.DOT_SPACE}{HttpClientConstant.CLIENT_DID_NOT_SENT_ANY_MESSAGE}'
     errorMessage = HttpClientConstant.CLIENT_DID_NOT_SENT_ANY_MESSAGE
     possibleErrorMessage = None
     bodyAsJson = {}
@@ -558,12 +559,19 @@ def getErrorMessage(clientResponse, exception=None):
     except Exception as innerException :
         bodyAsJsonException = FlaskUtil.safellyGetResponseJson(clientResponse)
         log.log(getErrorMessage, f'Invalid client response: {bodyAsJsonException}', exception=innerException)
-        log.warning(getErrorMessage, f'Not possible to get error message from client response: {bodyAsJsonException}. Proceeding with value {bodyAsJson} by default', exception=innerException, muteStackTrace=True)
-    if ObjectHelper.isNotNone(clientResponse):
-        possibleErrorMessage = bodyAsJson.get('message', bodyAsJson.get('error')).strip()
-    if ObjectHelper.isNotNone(possibleErrorMessage) and StringHelper.isNotBlank(possibleErrorMessage):
-        errorMessage = f'{c.LOG_CAUSE}{possibleErrorMessage}'
-    else:
-        log.debug(getErrorMessage, f'Client response {FlaskUtil.safellyGetResponseJson(clientResponse)}')
-    exceptionPortion = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE if ObjectHelper.isNone(exception) or StringHelper.isBlank(exception) else str(exception)
-    return f'{exceptionPortion}{c.DOT_SPACE}{errorMessage}'
+        log.debug(getErrorMessage, f'Not possible to get error message from client response: {bodyAsJsonException}. Proceeding with value {bodyAsJson} by default', exception=innerException, muteStackTrace=True)
+    try:
+        if ObjectHelper.isNotNone(clientResponse):
+            if ObjectHelper.isDictionary(bodyAsJson):
+                possibleErrorMessage = bodyAsJson.get('message', bodyAsJson.get('error')).strip()
+            if ObjectHelper.isList(bodyAsJson) and 0 < len(bodyAsJson):
+                possibleErrorMessage = bodyAsJson[0].get('message', bodyAsJson[0].get('error')).strip()
+        if ObjectHelper.isNotNone(possibleErrorMessage) and StringHelper.isNotBlank(possibleErrorMessage):
+            errorMessage = f'{c.LOG_CAUSE}{possibleErrorMessage}'
+        else:
+            log.debug(getErrorMessage, f'Client response {FlaskUtil.safellyGetResponseJson(clientResponse)}')
+        exceptionPortion = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE if ObjectHelper.isNone(exception) or StringHelper.isBlank(exception) else str(exception)
+        completeErrorMessage = f'{exceptionPortion}{c.DOT_SPACE}{errorMessage}'
+    except Exception as exception:
+        log.warning(getErrorMessage, f'Not possible to get error message. Returning {completeErrorMessage} by default', exception=exception)
+    return completeErrorMessage
