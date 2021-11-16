@@ -112,8 +112,8 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
     try :
         if not context == exception.context:
             exception = GlobalException(
-                message = message,
-                logMessage = logMessage,
+                message = exception.message,
+                logMessage = exception.logMessage,
                 logResource = resourceInstance,
                 logResourceMethod = resourceInstanceMethod,
                 status = exception.status,
