@@ -469,10 +469,10 @@ def handleControllerMethod(
     headers = FlaskUtil.addToKwargs(FlaskUtil.KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
     query = FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
     try:
-        if logRequest :
+        if resourceInstance.logRequest or  logRequest :
             log.prettyJson(
                 resourceInstanceMethod,
-                'Request',
+                '[CONTROLLER] Request',
                 {
                     'headers': headers,
                     # 'query': FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs), ###- safellyGetUrl() returns query param
@@ -570,12 +570,16 @@ def Controller(
     url = c.SLASH,
     responseHeaders = None,
     tag = 'Tag not defined',
-    description = 'Controller not descripted'
+    description = 'Controller not descripted',
+    logRequest = False,
+    logResponse = False
 ):
     controllerUrl = url
     controllerTag = tag
     controllerDescription = description
     controllerResponseHeaders = responseHeaders
+    controllerLogRequest = logRequest
+    controllerLogResponse = logResponse
     def Wrapper(OuterClass,*args,**kwargs):
         log.wrapper(Controller, f'''wrapping {OuterClass.__name__}''', None)
         class InnerClass(OuterClass, FlaskUtil.Resource):
@@ -583,6 +587,8 @@ def Controller(
             responseHeaders = controllerResponseHeaders
             tag = controllerTag
             description = controllerDescription
+            logRequest = controllerLogRequest
+            logResponse = controllerLogResponse
             def __init__(self,*args,**kwargs):
                 log.wrapper(OuterClass, f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})', None)
                 apiInstance = FlaskUtil.getApi()
@@ -635,7 +641,7 @@ def ControllerMethod(
             # r.headers['Cache-Control'] = 'public, max-age=0'
             resourceInstance = args[0]
             completeResponse = None
-            log.info(resourceInstanceMethod, f'Controller {FlaskUtil.safellyGetVerb()} - {FlaskUtil.safellyGetUrl()}')
+            log.info(resourceInstanceMethod, f'[CONTROLLER] {FlaskUtil.safellyGetVerb()} - {FlaskUtil.safellyGetUrl()}')
             try :
                 completeResponse = handleAnyControllerMethodRequest(
                     args,
@@ -694,10 +700,10 @@ def ControllerMethod(
                 httpResponse = FlaskUtil.buildHttpResponse(completeResponse[1], completeResponse[0], completeResponse[-1].enumValue, produces)
 
             try:
-                if logResponse :
+                if resourceInstance.logResponse or logResponse :
                     log.prettyJson(
                         resourceInstanceMethod,
-                        'Response',
+                        '[CONTROLLER] Response',
                         {
                             'headers': FlaskUtil.safellyGetResponseHeaders(httpResponse),
                             'body': FlaskUtil.safellyGetFlaskResponseJson(httpResponse), ###- json.loads(Serializer.jsonifyIt(responseBody))
@@ -786,7 +792,7 @@ def validateAndReturnResponse(completeResponse):
     return completeResponse
 
 def handleAdditionalResponseHeadersIfNeeded(completeResponse):
-    log.log(handleAdditionalResponseHeadersIfNeeded, f'Complete response: {completeResponse}')
+    # log.log(handleAdditionalResponseHeadersIfNeeded, f'Complete response: {completeResponse}')
     if ObjectHelper.isTuple(completeResponse):
         if 3 == len(completeResponse):
             if ObjectHelper.isTuple(completeResponse[0]):

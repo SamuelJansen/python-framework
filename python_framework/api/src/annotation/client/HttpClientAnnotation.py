@@ -347,11 +347,11 @@ def HttpClientMethod(
             return clientResponse
 
         def doLogRequest(verb, url, body, params, headers, logRequest):
-            log.info(resourceInstanceMethod, f'Client {verb} - {url}')
+            log.info(resourceInstanceMethod, f'[CLIENT    ] {verb} - {url}')
             if logRequest:
                 log.prettyJson(
                     resourceInstanceMethod,
-                    'Request',
+                    '[CLIENT    ] Request',
                     {
                         'headers': ConverterStatic.getValueOrDefault(headers, dict()),
                         'query': ConverterStatic.getValueOrDefault(params, dict()),
@@ -415,7 +415,7 @@ def HttpClientMethod(
             if resourceInstance.logResponse or logResponse :
                 log.prettyJson(
                     resourceInstanceMethod,
-                    'Response',
+                    '[CLIENT    ] Response',
                     {
                         'headers': clientResponseHeaders,
                         'body': Serializer.getObjectAsDictionary(clientResponseBody),
