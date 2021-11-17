@@ -484,10 +484,7 @@ def handleControllerMethod(
             )
     except Exception as exception:
         log.failure(innerResourceInstanceMethod, 'Not possible to log request properly', exception)
-    completeResponse = handleAdditionalResponseHeadersIfNeeded(resourceInstanceMethod(resourceInstance,*args[1:],**kwargs))
-    if isNotPythonFrameworkHttpsResponseBody(completeResponse):
-        raiseBadResponseImplementation(f'It should be a tuple like this: ({"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HEADERS, HTTPS_CODE). But it is: {completeResponse}')
-    return completeResponse
+    return handleAdditionalResponseHeadersIfNeeded(resourceInstanceMethod(resourceInstance,*args[1:],**kwargs))
 
 @Function
 def getArgsWithSerializerReturnAppended(args, argument):
@@ -656,7 +653,7 @@ def ControllerMethod(
                     logRequest,
                     muteStacktraceOnBusinessRuleException
                 )
-                validateResponseClass(responseClass, completeResponse)
+                validateCompleteResponse(responseClass, completeResponse)
             except Exception as exception :
                 log.log(innerResourceInstanceMethod, 'Failure at controller method execution. Getting complete response as exception', exception=exception, muteStackTrace=True)
                 completeResponse = getCompleteResponseByException(
@@ -806,11 +803,13 @@ def handleAdditionalResponseHeadersIfNeeded(completeResponse):
     return completeResponse
 
 
-def validateResponseClass(responseClass, completeResponse):
+def validateCompleteResponse(responseClass, completeResponse):
+    if isNotPythonFrameworkHttpsResponseBody(completeResponse):
+        raiseBadResponseImplementation(f'It should be a tuple like this: ({"RESPONSE_CLASS" if ObjectHelper.isNone(responseClass) else responseClass if ObjectHelper.isNotList(responseClass) else responseClass[0]}, HEADERS, HTTPS_CODE). But it is: {completeResponse}')
     if ObjectHelper.isNotNone(responseClass):
         if Serializer.isSerializerList(responseClass):
             if 0 == len(responseClass):
-                log.log(validateResponseClass, f'"responseClass" was not defined')
+                log.log(validateCompleteResponse, f'"responseClass" was not defined')
             elif 1 == len(responseClass):
                 if ObjectHelper.isNotList(responseClass[0])  :
                     if not isinstance(completeResponse[0], responseClass[0]):
@@ -824,7 +823,7 @@ def validateResponseClass(responseClass, completeResponse):
             if not isinstance(completeResponse[0], responseClass):
                 raiseBadResponseImplementation(f'Response does not match expected class. Expected "{responseClass.__name__}", but got "{completeResponse[0].__class__.__name__}"')
     else :
-        log.log(validateResponseClass, f'"responseClass" was not defined')
+        log.log(validateCompleteResponse, f'"responseClass" was not defined')
 
 
 def isPythonFrameworkHttpsResponseBody(completeResponse):

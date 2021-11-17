@@ -63,7 +63,7 @@ class SecurityManagerTestController:
         roleRequired=['TEST_ROLE', 'TEST_ROLE_REFRESH']
     )
     def put(self, dto):
-        SecurityManager.addUserToBlackList()
+        SecurityManager.addAccessTokenToBlackList()
         return {'message': 'Logged out'}, HttpStatus.ACCEPTED
 
 

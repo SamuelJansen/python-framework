@@ -63,7 +63,7 @@ class ApiKeyManagerTestController:
         apiKeyRequired=['TEST_API_KEY', 'TEST_API_KEY_REFRESH']
     )
     def put(self, dto):
-        ApiKeyManager.addUserToBlackList()
+        ApiKeyManager.addAccessTokenToBlackList()
         return {'message': 'ApiKey closed'}, HttpStatus.ACCEPTED
 
 

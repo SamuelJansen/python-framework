@@ -43,7 +43,7 @@ class JwtManager:
             jwtType = getType(rawJwt=decodedApiKeyToken)
             assert jwtType == JwtConstant.ACCESS_VALUE_TYPE, f'Access apiKey should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
-            addUserToBlackList(rawJwt=decodedApiKeyToken)
+            addAccessTokenToBlackList(rawJwt=decodedApiKeyToken)
             log.log(self.validateAccessApiKey, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
             raise exception
 
@@ -55,7 +55,7 @@ class JwtManager:
             jwtType = getType(rawJwt=decodedApiKeyToken)
             assert jwtType == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh apiKey should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
-            addUserToBlackList(rawJwt=decodedApiKeyToken)
+            addAccessTokenToBlackList(rawJwt=decodedApiKeyToken)
             log.log(self.validateRefreshApiKey, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
             raise exception
 
@@ -75,7 +75,7 @@ class JwtManager:
             expiration = getExpiration(rawJwt=decodedApiKeyToken)
             assert UtcDateTimeUtil.now() <= UtcDateTimeUtil.ofTimestamp(expiration), f'JWT apiKey token expired at {UtcDateTimeUtil.ofTimestamp(expiration)}'
         except Exception as exception:
-            addUserToBlackList(rawJwt=decodedApiKeyToken)
+            addAccessTokenToBlackList(rawJwt=decodedApiKeyToken)
             log.log(self.validateGeneralApiKeyAndReturnItDecoded, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
             raise exception
         return decodedApiKeyToken
@@ -178,7 +178,7 @@ def getIsFresh(rawJwt=None, apiInstance=None):
     return getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance).get(JwtConstant.KW_FRESH)
 
 @Function
-def addUserToBlackList(rawJwt=None, apiInstance=None):
+def addAccessTokenToBlackList(rawJwt=None, apiInstance=None):
     BLACK_LIST.add(getJti(rawJwt=rawJwt, apiInstance=apiInstance))
 
 @Function
@@ -255,7 +255,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
         }
     }
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
-    addUserToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
+    addAccessTokenToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
     return apiInstance.apiKeyManager.encode({
             JwtConstant.KW_IAT: getIat(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_NFB: UtcDateTimeUtil.now(),

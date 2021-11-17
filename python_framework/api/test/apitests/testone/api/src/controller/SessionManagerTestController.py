@@ -63,7 +63,7 @@ class SessionManagerTestController:
         contextRequired=['TEST_SESSION', 'TEST_SESSION_REFRESH']
     )
     def put(self, dto):
-        SessionManager.addUserToBlackList()
+        SessionManager.addAccessTokenToBlackList()
         return {'message': 'Session closed'}, HttpStatus.ACCEPTED
 
 

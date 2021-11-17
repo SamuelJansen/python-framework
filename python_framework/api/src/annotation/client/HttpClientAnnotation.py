@@ -403,7 +403,7 @@ def HttpClientMethod(
                         raiseException(clientResponse, exception)
                     raiseExceptionIfNeeded(clientResponse)
                     completeResponse = getCompleteResponse(clientResponse, responseClass, produces)
-                    FlaskManager.validateResponseClass(responseClass, completeResponse)
+                    FlaskManager.validateCompleteResponse(responseClass, completeResponse)
                 else:
                     raise Exception('Unknown http client event')
             except Exception as exception:

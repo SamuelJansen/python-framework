@@ -72,7 +72,7 @@ def jwtAccessRequired(*arg,**kwargs):
     return jwt_required(*arg,**kwargs)
 
 @Function
-def addUserToBlackList(rawJwt=None, apiInstance=None):
+def addAccessTokenToBlackList(rawJwt=None, apiInstance=None):
     BLACK_LIST.add(getJti(rawJwt=rawJwt, apiInstance=apiInstance))
 
 @Function
@@ -97,7 +97,7 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
         return jwtMannager
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def createAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
+def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_access_token
     return create_access_token(
         identity = identity,
@@ -111,7 +111,7 @@ def createAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=Non
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def refreshAccessToken(identity, roleList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
+def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     ###- https://flask-jwt-extended.readthedocs.io/en/stable/_modules/flask_jwt_extended/utils/#create_refresh_token
     return create_refresh_token(
         identity = identity,
@@ -138,7 +138,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
             **safellyGetData(data)
         }
     }
-    addUserToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
+    addAccessTokenToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
     return create_access_token(
         identity = getIdentity(rawJwt=rawJwt),
         user_claims = userClaims,
