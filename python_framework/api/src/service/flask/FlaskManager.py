@@ -460,13 +460,12 @@ def handleControllerMethod(
     logRequest,
     muteStacktraceOnBusinessRuleException
 ):
-    completeResponse = None
     requestBodyAsJson = {}
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
         requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
         if Serializer.requestBodyIsPresent(requestBodyAsJson):
-            serializerReturn = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
-            args = getArgsWithSerializerReturnAppended(args, serializerReturn)
+            requestBodyAsJsonSerialized = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
+            args = getArgsWithSerializerReturnAppended(args, requestBodyAsJsonSerialized)
     headers = FlaskUtil.addToKwargs(FlaskUtil.KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
     query = FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
     try:
@@ -484,7 +483,7 @@ def handleControllerMethod(
             )
     except Exception as exception:
         log.failure(innerResourceInstanceMethod, 'Not possible to log request properly', exception)
-    return handleAdditionalResponseHeadersIfNeeded(resourceInstanceMethod(resourceInstance,*args[1:],**kwargs))
+    return validateAndReturnResponse(handleAdditionalResponseHeadersIfNeeded(resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)))
 
 @Function
 def getArgsWithSerializerReturnAppended(args, argument):
@@ -502,8 +501,8 @@ def getArgsWithResponseClassInstanceAppended(args, responseClass):
     if responseClass :
         resourceInstance = args[0]
         objectRequest = args[1]
-        serializerReturn = Serializer.convertFromObjectToObject(objectRequest, responseClass)
-        args = getArgsWithSerializerReturnAppended(args, serializerReturn)
+        objectRequestSerialized = Serializer.convertFromObjectToObject(objectRequest, responseClass)
+        return getArgsWithSerializerReturnAppended(args, objectRequestSerialized)
     return args
 
 @Function
@@ -756,26 +755,37 @@ def getCompleteResponseByException(
     resourceInstanceMethod,
     muteStacktraceOnBusinessRuleException
 ):
-    exception = getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
-    bodyErrorResponse = {
-        'message': exception.message,
-        'timestamp': str(exception.timeStamp)
-    }
-    uriIfAny = FlaskUtil.safellyGetPath()
-    if ObjectHelper.isNotNone(uriIfAny) and StringHelper.isNotBlank(uriIfAny):
-        bodyErrorResponse['uri'] = uriIfAny
-    completeResponse = (bodyErrorResponse, {}, exception.status)
-    try :
-        logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request'
-        if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):
-            log.error(resourceInstance.__class__, logErrorMessage, exception)
-        else :
-            log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=muteStacktraceOnBusinessRuleException)
-    except Exception as logErrorMessageException :
-        log.debug(getCompleteResponseByException, 'Error logging exception at controller', exception=logErrorMessageException)
+    try:
+        exception = getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
+        completeResponse = (ExceptionHandler.getDefaultBodyException(exception=exception), {}, exception.status)
+        try :
+            logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request'
+            if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):
+                log.error(resourceInstance.__class__, logErrorMessage, exception)
+            else :
+                log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=muteStacktraceOnBusinessRuleException)
+        except Exception as logErrorMessageException :
+            log.debug(getCompleteResponseByException, 'Error logging exception at controller', exception=logErrorMessageException)
+            log.error(getCompleteResponseByException, 'Error processing request', exception)
+        return validateAndReturnResponse(handleAdditionalResponseHeadersIfNeeded(completeResponse))
+    except Exception as unexpectedException:
+        log.error(getCompleteResponseByException, 'Error while building exception return', unexpectedException)
         log.error(getCompleteResponseByException, 'Error processing request', exception)
-    return handleAdditionalResponseHeadersIfNeeded(completeResponse)
+        return validateAndReturnResponse((ExceptionHandler.getDefaultBodyException(), {}, ExceptionHandler.DEFAULT_STATUS))
 
+def validateAndReturnResponse(completeResponse):
+    if (
+        ObjectHelper.isNotTuple(completeResponse)
+    ) or (
+        ObjectHelper.isNotDictionary(completeResponse[0]) or ObjectHelper.isNotList(completeResponse[0])
+    ) or (
+        ObjectHelper.isNotDictionary(completeResponse[1])
+    ) or (
+        not isinstance(HttpStatus.map(completeResponse[-1]), EnumItem)
+    ):
+        log.debug(validateAndReturnResponse, f'completeResponse: {completeResponse}')
+        raise Exception('Invalid complete response')
+    return completeResponse
 
 def handleAdditionalResponseHeadersIfNeeded(completeResponse):
     log.log(handleAdditionalResponseHeadersIfNeeded, f'Complete response: {completeResponse}')

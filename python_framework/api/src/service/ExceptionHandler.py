@@ -31,6 +31,22 @@ ABLE_TO_RECIEVE_BODY_LIST = [
     KW_PATCH
 ]
 
+def getDefaultBodyException(exception=None):
+    try:
+        bodyErrorResponse = {
+            'message': exception.message,
+            'timestamp': str(exception.timeStamp)
+        }
+    except:
+        bodyErrorResponse = {
+            'message': DEFAULT_MESSAGE.,
+            'timestamp': str(DateTimeHelper.now())
+        }
+    uriIfAny = FlaskUtil.safellyGetPath()
+    if ObjectHelper.isNotNone(uriIfAny) and StringHelper.isNotBlank(uriIfAny):
+        bodyErrorResponse['uri'] = uriIfAny
+    return bodyErrorResponse
+
 class GlobalException(Exception):
     def __init__(self,
         message = None,

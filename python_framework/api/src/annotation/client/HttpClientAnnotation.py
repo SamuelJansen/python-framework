@@ -548,16 +548,17 @@ def raiseExceptionIfNeeded(clientResponse):
 
 @Function
 def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
-    responseBody, responseHeaders, responseStatus = {}, {}, fallbackStatus
+    responseBody, responseHeaders, responseStatus = dict(), dict(), fallbackStatus
     try :
-        responseBody, responseHeaders, responseStatus = clientResponse.json(), FlaskUtil.safellyGetResponseHeaders(clientResponse), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
+        responseBody, responseHeaders, responseStatus = ConverterStatic.getValueOrDefault(clientResponse.json(), dict()), FlaskUtil.safellyGetResponseHeaders(clientResponse), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
     except Exception as exception :
-        responseBody, responseStatus = dict(), HttpStatus.map(fallbackStatus)
+        responseBody, responseHeaders, responseStatus = dict(), dict(), HttpStatus.map(fallbackStatus)
         log.failure(getCompleteResponse, 'Not possible to parse client response as json', exception=exception, muteStackTrace=True)
     responseHeaders = {
         **{HttpDomain.HeaderKey.CONTENT_TYPE: produces},
         **responseHeaders
     }
+    responseStatus = ConverterStatic.getValueOrDefault(responseStatus, HttpStatus.map(fallbackStatus))
     if ObjectHelper.isNone(responseClass):
         return responseBody, responseHeaders, responseStatus
     return Serializer.convertFromJsonToObject(responseBody, responseClass), responseHeaders, responseStatus

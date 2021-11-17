@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.2.214.1'
+VERSION = '0.2.214.2'
 
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
