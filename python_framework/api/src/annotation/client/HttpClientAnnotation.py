@@ -550,9 +550,11 @@ def raiseExceptionIfNeeded(clientResponse):
 def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
     responseBody, responseHeaders, responseStatus = dict(), dict(), fallbackStatus
     try :
-        responseBody, responseHeaders, responseStatus = ConverterStatic.getValueOrDefault(clientResponse.json(), dict()), FlaskUtil.safellyGetResponseHeaders(clientResponse), HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
+        responseStatus = HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
+        responseHeaders = FlaskUtil.safellyGetResponseHeaders(clientResponse)
+        responseBody = ConverterStatic.getValueOrDefault(clientResponse.json(), dict())
     except Exception as exception :
-        responseBody, responseHeaders, responseStatus = dict(), dict(), HttpStatus.map(fallbackStatus)
+        responseBody, responseHeaders, responseStatus = FlaskUtil.safellyGetResponseJson(clientResponse), dict(), HttpStatus.map(fallbackStatus)
         log.failure(getCompleteResponse, 'Not possible to parse client response as json', exception=exception, muteStackTrace=True)
     responseHeaders = {
         **{HttpDomain.HeaderKey.CONTENT_TYPE: produces},
