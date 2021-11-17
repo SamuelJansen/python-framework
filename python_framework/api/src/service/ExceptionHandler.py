@@ -39,7 +39,7 @@ def getDefaultBodyException(exception=None):
         }
     except:
         bodyErrorResponse = {
-            'message': DEFAULT_MESSAGE.,
+            'message': DEFAULT_MESSAGE,
             'timestamp': str(DateTimeHelper.now())
         }
     uriIfAny = FlaskUtil.safellyGetPath()
