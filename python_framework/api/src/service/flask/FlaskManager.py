@@ -775,15 +775,13 @@ def getCompleteResponseByException(
 
 def validateAndReturnResponse(completeResponse):
     if (
-        ObjectHelper.isNotTuple(completeResponse)
-    ) or (
-        ObjectHelper.isNotDictionary(completeResponse[0]) and ObjectHelper.isNotList(completeResponse[0])
+        ObjectHelper.isNotTuple(completeResponse) or not 3 == len(completeResponse)
     ) or (
         ObjectHelper.isNotDictionary(completeResponse[1])
     ) or (
         not isinstance(HttpStatus.map(completeResponse[-1]), EnumItem)
     ):
-        log.debug(validateAndReturnResponse, f'completeResponse: {completeResponse}')
+        log.debug(validateAndReturnResponse, f'Invalid completeResponse: {completeResponse}')
         raise Exception('Invalid complete response')
     return completeResponse
 
