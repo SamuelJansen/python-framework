@@ -778,7 +778,7 @@ def getCompleteResponseByException(
 
 
 def handleAdditionalResponseHeadersIfNeeded(completeResponse):
-    ###- log.log(handleAdditionalResponseHeadersIfNeeded, f'Complete response: {completeResponse}')
+    log.log(handleAdditionalResponseHeadersIfNeeded, f'Complete response: {completeResponse}')
     if ObjectHelper.isTuple(completeResponse):
         if 3 == len(completeResponse):
             if ObjectHelper.isTuple(completeResponse[0]):
