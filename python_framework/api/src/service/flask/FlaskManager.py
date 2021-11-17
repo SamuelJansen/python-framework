@@ -777,7 +777,7 @@ def validateAndReturnResponse(completeResponse):
     if (
         ObjectHelper.isNotTuple(completeResponse)
     ) or (
-        ObjectHelper.isNotDictionary(completeResponse[0]) or ObjectHelper.isNotList(completeResponse[0])
+        ObjectHelper.isNotDictionary(completeResponse[0]) and ObjectHelper.isNotList(completeResponse[0])
     ) or (
         ObjectHelper.isNotDictionary(completeResponse[1])
     ) or (
