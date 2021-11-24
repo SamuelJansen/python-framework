@@ -8,5 +8,6 @@ class Value:
     DEFAULT_RESPONSE = 'successful operation'
     INTEGER = 'integer'
     STRING = 'string'
+    NUMBER = 'number'
     HEADER = 'header'
     TOKEN_DESCRIPTION = '<token>'

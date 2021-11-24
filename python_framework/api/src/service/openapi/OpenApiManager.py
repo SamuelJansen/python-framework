@@ -35,6 +35,11 @@ ABLE_TO_RECIEVE_BODY_LIST = [
     , KW_OPTIONS
 ]
 
+TYPE_NUMBER_LIST = [
+    c.TYPE_FLOAT,
+    'double'
+]
+
 DEFAULT_CONTENT_TYPE = 'application/json'
 MULTIPART_X_MIXED_REPLACE = 'multipart/x-mixed-replace'
 JSON_OBJECT_NAME = 'json'
@@ -276,6 +281,8 @@ def getAttributeType(typeUrlParam):
         return v.INTEGER
     if c.TYPE_STRING == typeUrlParam:
         return v.STRING
+    if typeUrlParam in TYPE_NUMBER_LIST:
+        return v.NUMBER
     return typeUrlParam
 
 def getUrl(endPointUrl, baseUrl):
