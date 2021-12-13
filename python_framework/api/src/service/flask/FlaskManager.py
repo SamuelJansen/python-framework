@@ -174,6 +174,7 @@ def runApi(*args, api=None, **kwargs):
     SecurityManager.onShutdown(api, api.app)
     SchedulerManager.onShutdown(api, api.app)
     SqlAlchemyProxy.onShutdown(api, api.app)
+    log.success(runApi, f'{api.globals.apiName} successfully shutdown')
 
 @Function
 def getApiUrl(api):

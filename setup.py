@@ -65,7 +65,7 @@ setup(
         'PyJWT==1.7.1',
         'Flask-Cors==3.0.9',
         'Flask-Swagger-Ui==3.36.0',
-        'psycopg2-binary==2.8.6',
+        'psycopg2-binary<3.0,>=2.8.6',
         'SQLAlchemy==1.4.25',
         'globals>=0.3.22',
         'python_helper>=0.3.37',
