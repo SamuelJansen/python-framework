@@ -23,6 +23,7 @@ from python_framework.api.src.service.flask import ResourceManager
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.enumeration.ActuatorHealthStatus import ActuatorHealthStatus
 from python_framework.api.src.enumeration.SchedulerType import SchedulerType
+from python_framework.api.src.enumeration.WeekDay import WeekDay
 
 from python_framework.api.src.domain import HttpDomain
 
