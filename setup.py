@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.2.222'
+VERSION = '0.2.223'
 
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
@@ -72,7 +72,8 @@ setup(
         'Flask-APScheduler==1.12.2',
         # 'psutil<6.0,>=5.8.0',
         'requests==2.26.0',
-        'werkzeug<2.0,>=0.15.0'
+        'werkzeug<2.0,>=0.15.0',
+        'markupsafe==1.1.1' #https://github.com/pallets/markupsafe/releases
     ],
     classifiers = [
         'Development Status :: 3 - Alpha',
