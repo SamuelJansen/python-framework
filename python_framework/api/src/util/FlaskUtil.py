@@ -58,7 +58,6 @@ def safellyGetResponseJson(response):
     jsonBody = None
     try :
         jsonBody = response.json()
-        jsonBody[CLIENT_RESPONSE] = response
     except Exception as exception:
         jsonBody = {
             CLIENT_RESPONSE_TEXT: response.text,
