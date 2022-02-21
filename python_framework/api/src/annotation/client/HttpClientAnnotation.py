@@ -550,7 +550,7 @@ def raiseExceptionIfNeeded(clientResponse):
 def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=HttpStatus.INTERNAL_SERVER_ERROR):
     responseBody, responseHeaders, responseStatus = dict(), dict(), fallbackStatus
     responseHeaders = FlaskUtil.safellyGetResponseHeaders(clientResponse)
-    responseBody = FlaskUtil.safellyGetResponseJson(clientResponse)
+    responseBody = FlaskUtil.safellyGetResponseJson(clientResponse, produces)
     try :
         responseStatus = HttpStatus.map(HttpStatus.NOT_FOUND if ObjectHelper.isNone(clientResponse.status_code) else clientResponse.status_code)
     except Exception as exception :
@@ -562,8 +562,19 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
     }
     responseStatus = ConverterStatic.getValueOrDefault(responseStatus, HttpStatus.map(fallbackStatus))
     if ObjectHelper.isNone(responseClass):
-        return responseBody, responseHeaders, responseStatus
-    return Serializer.convertFromJsonToObject(responseBody, responseClass), responseHeaders, responseStatus
+        responseClass = dict
+    return addClientResponseAndReturnCompleteResponse(
+        Serializer.convertFromJsonToObject(responseBody, responseClass),
+        responseHeaders,
+        responseStatus,
+        clientResponse
+    )
+
+
+@Function
+def addClientResponseAndReturnCompleteResponse(responseBody, responseHeaders, responseStatus, clientResponse):
+    responseBody._clientResponse = clientResponse
+    return responseBody, responseHeaders, responseStatus
 
 
 @Function
