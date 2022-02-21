@@ -409,7 +409,8 @@ def HttpClientMethod(
             except Exception as exception:
                 log.log(innerResourceInstanceMethod, 'Failure at client method execution', exception=exception, muteStackTrace=True)
                 FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.CLIENT_CONTEXT)
-            clientResponseStatus = completeResponse[-1]
+            clientResponseClientResponse = completeResponse[-1]
+            clientResponseStatus = completeResponse[2]
             clientResponseHeaders = completeResponse[1]
             clientResponseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : HttpStatus.map(clientResponseStatus).enumName}
             if resourceInstance.logResponse or logResponse :
@@ -562,19 +563,8 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
     }
     responseStatus = ConverterStatic.getValueOrDefault(responseStatus, HttpStatus.map(fallbackStatus))
     if ObjectHelper.isNone(responseClass):
-        responseClass = dict
-    return addClientResponseAndReturnCompleteResponse(
-        Serializer.convertFromJsonToObject(responseBody, responseClass),
-        responseHeaders,
-        responseStatus,
-        clientResponse
-    )
-
-
-@Function
-def addClientResponseAndReturnCompleteResponse(responseBody, responseHeaders, responseStatus, clientResponse):
-    responseBody._clientResponse = clientResponse
-    return responseBody, responseHeaders, responseStatus
+        return responseBody, responseHeaders, responseStatus, clientResponse
+    return Serializer.convertFromJsonToObject(responseBody, responseClass), responseHeaders, responseStatus, clientResponse
 
 
 @Function
