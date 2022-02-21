@@ -55,8 +55,12 @@ def safellyGetResponseJson(response):
     jsonBody = None
     try :
         jsonBody = response.json()
+        jsonBody['_clientResponse'] = response
     except Exception as exception:
-        jsonBody = {}
+        jsonBody = {
+            '_clientResponseData': response.text,
+            '_clientResponse': response
+        }
         log.log(safellyGetResponseJson, f'Not possible to get response body. Returning {jsonBody} by default', exception=exception)
     return jsonBody
 

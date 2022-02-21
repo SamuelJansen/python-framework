@@ -563,8 +563,8 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
     }
     responseStatus = ConverterStatic.getValueOrDefault(responseStatus, HttpStatus.map(fallbackStatus))
     if ObjectHelper.isNone(responseClass):
-        return responseBody, responseHeaders, responseStatus, clientResponse
-    return Serializer.convertFromJsonToObject(responseBody, responseClass), responseHeaders, responseStatus, clientResponse
+        responseBody = Serializer.convertFromJsonToObject(responseBody, responseClass)
+    return responseBody, responseHeaders, responseStatus#, clientResponse
 
 
 @Function
