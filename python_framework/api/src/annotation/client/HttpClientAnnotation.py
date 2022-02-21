@@ -175,7 +175,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            doLogRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest, kwargs)
             clientResponse = requests.options(
                 url,
                 params = params,
@@ -207,7 +207,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            doLogRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest, kwargs)
             clientResponse = requests.get(
                 url,
                 params = params,
@@ -239,7 +239,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            doLogRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest, kwargs)
             clientResponse = requests.post(
                 url,
                 params = params,
@@ -271,7 +271,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            doLogRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest, kwargs)
             clientResponse = requests.put(
                 url,
                 params = params,
@@ -303,7 +303,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            doLogRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest, kwargs)
             clientResponse = requests.patch(
                 url,
                 params = params,
@@ -335,7 +335,7 @@ def HttpClientMethod(
                 timeout,
                 logRequest
             )
-            doLogRequest(verb, url, body, params, headers, logRequest)
+            doLogRequest(verb, url, body, params, headers, logRequest, kwargs)
             clientResponse = requests.delete(
                 url,
                 params = params,
@@ -346,7 +346,7 @@ def HttpClientMethod(
             )
             return clientResponse
 
-        def doLogRequest(verb, url, body, params, headers, logRequest):
+        def doLogRequest(verb, url, body, params, headers, logRequest, requestKwargs):
             log.info(resourceInstanceMethod, f'[CLIENT    ] {verb} - {url}')
             if logRequest:
                 log.prettyJson(
@@ -355,7 +355,8 @@ def HttpClientMethod(
                     {
                         'headers': ConverterStatic.getValueOrDefault(headers, dict()),
                         'query': ConverterStatic.getValueOrDefault(params, dict()),
-                        'body': ConverterStatic.getValueOrDefault(body, dict())
+                        'body': ConverterStatic.getValueOrDefault(body, dict()),
+                        'requestKwargs': {**requestKwargs}
                     },
                     condition = True,
                     logLevel = log.INFO
@@ -409,8 +410,7 @@ def HttpClientMethod(
             except Exception as exception:
                 log.log(innerResourceInstanceMethod, 'Failure at client method execution', exception=exception, muteStackTrace=True)
                 FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.CLIENT_CONTEXT)
-            clientResponseClientResponse = completeResponse[-1]
-            clientResponseStatus = completeResponse[2]
+            clientResponseStatus = completeResponse[-1]
             clientResponseHeaders = completeResponse[1]
             clientResponseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : HttpStatus.map(clientResponseStatus).enumName}
             if resourceInstance.logResponse or logResponse :

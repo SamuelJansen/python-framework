@@ -19,6 +19,9 @@ KW_HEADERS = 'headers'
 
 UNKNOWN_VERB = 'UNKNOWN'
 
+CLIENT_RESPONSE_TEXT = '__clientResponseText__'
+CLIENT_RESPONSE = '__clientResponse__'
+
 Response = Response
 request = request
 Resource = flask_restful.Resource
@@ -55,11 +58,11 @@ def safellyGetResponseJson(response):
     jsonBody = None
     try :
         jsonBody = response.json()
-        jsonBody['_clientResponse'] = response
+        jsonBody[CLIENT_RESPONSE] = response
     except Exception as exception:
         jsonBody = {
-            '_clientResponseData': response.text,
-            '_clientResponse': response
+            CLIENT_RESPONSE_TEXT: response.text,
+            CLIENT_RESPONSE: response
         }
         log.log(safellyGetResponseJson, f'Not possible to get response body. Returning {jsonBody} by default', exception=exception)
     return jsonBody
