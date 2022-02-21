@@ -157,28 +157,28 @@ def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
         # print(f'        attributeNameList = {attributeNameList}')
         fromJsonToDictionary = {}
         for attributeName in attributeNameList :
-            if isinstance(attributeName, str) and not (
-                attributeName.startswith(DOUBLE_UNDERSCORE) and attributeName.endswith(DOUBLE_UNDERSCORE)
-            ):
-                # print(f'        fromJson.get({attributeName}) = {fromJson.get(attributeName)}')
-                jsonAttributeValue = fromJson.get(attributeName)
-                if ObjectHelper.isNone(jsonAttributeValue):
-                    jsonAttributeValue = fromJson.get(f'{attributeName[0].upper()}{attributeName[1:].lower()}')
-                if ObjectHelper.isNotNone(jsonAttributeValue):
-                    # print(f'jsonAttributeValue: {jsonAttributeValue}')
-                    fromJsonToDictionary[attributeName] = resolveValue(jsonAttributeValue, attributeName, classRole, fatherClass=fatherClass)
-                    # logList = [
-                    #     f'jsonAttributeValue: {jsonAttributeValue}',
-                    #     f'attributeName: {attributeName}',
-                    #     f'classRole: {classRole}',
-                    #     f'fromJsonToDictionary: {fromJsonToDictionary}',
-                    #     f'toClass: {toClass}'
-                    # ]
-                    # log.prettyPython(serializeIt, 'logList', logList, logLevel=log.DEBUG)
-                else :
-                    fromJsonToDictionary[attributeName] = jsonAttributeValue
-                # if jsonAttributeValue :
-                #     ReflectionHelper.setAttributeOrMethod(fromObject, attributeName, jsonAttributeValue)
+            # if isinstance(attributeName, str) and not (
+            #     attributeName.startswith(DOUBLE_UNDERSCORE) and attributeName.endswith(DOUBLE_UNDERSCORE)
+            # ):
+            # print(f'        fromJson.get({attributeName}) = {fromJson.get(attributeName)}')
+            jsonAttributeValue = fromJson.get(attributeName)
+            if ObjectHelper.isNone(jsonAttributeValue):
+                jsonAttributeValue = fromJson.get(f'{attributeName[0].upper()}{attributeName[1:].lower()}')
+            if ObjectHelper.isNotNone(jsonAttributeValue):
+                # print(f'jsonAttributeValue: {jsonAttributeValue}')
+                fromJsonToDictionary[attributeName] = resolveValue(jsonAttributeValue, attributeName, classRole, fatherClass=fatherClass)
+                # logList = [
+                #     f'jsonAttributeValue: {jsonAttributeValue}',
+                #     f'attributeName: {attributeName}',
+                #     f'classRole: {classRole}',
+                #     f'fromJsonToDictionary: {fromJsonToDictionary}',
+                #     f'toClass: {toClass}'
+                # ]
+                # log.prettyPython(serializeIt, 'logList', logList, logLevel=log.DEBUG)
+            else :
+                fromJsonToDictionary[attributeName] = jsonAttributeValue
+            # if jsonAttributeValue :
+            #     ReflectionHelper.setAttributeOrMethod(fromObject, attributeName, jsonAttributeValue)
 
         if isModelClass(toClass):
             objectInstance = pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDictionary)
@@ -302,7 +302,7 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
                 else :
                     jsonInstance[attributeName] = None
         except Exception as exception :
-            LOGGER = log.debug if not muteLogs else log.log
+            LOGGER = log.log if muteLogs else log.debug 
             LOGGER(getObjectAsDictionary, f'Not possible to get attribute name list from {ReflectionHelper.getName(ReflectionHelper.getClass(instance, muteLogs=True), muteLogs=True)}', exception=exception)
         if ObjectHelper.isNotEmpty(jsonInstance):
             return jsonInstance

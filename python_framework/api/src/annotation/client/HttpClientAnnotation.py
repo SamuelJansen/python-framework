@@ -133,7 +133,8 @@ def HttpClientMethod(
     consumes = OpenApiManager.DEFAULT_CONTENT_TYPE,
     produces = OpenApiManager.DEFAULT_CONTENT_TYPE,
     logRequest = False,
-    logResponse = False
+    logResponse = False,
+    debugIt = False
 ):
     clientMethodConfig = ClientMethodConfig(
         url = url,
@@ -349,6 +350,7 @@ def HttpClientMethod(
         def doLogRequest(verb, url, body, params, headers, logRequest, requestKwargs):
             log.info(resourceInstanceMethod, f'[CLIENT    ] {verb} - {url}')
             if logRequest:
+                parsetRequestKwargs = {} if ObjectHelper.isEmpty(requestKwargs) else {'requestKwargs': {**requestKwargs}}
                 log.prettyJson(
                     resourceInstanceMethod,
                     '[CLIENT    ] Request',
@@ -356,7 +358,7 @@ def HttpClientMethod(
                         'headers': ConverterStatic.getValueOrDefault(headers, dict()),
                         'query': ConverterStatic.getValueOrDefault(params, dict()),
                         'body': ConverterStatic.getValueOrDefault(body, dict()),
-                        'requestKwargs': {**requestKwargs}
+                        **parsetRequestKwargs
                     },
                     condition = True,
                     logLevel = log.INFO
@@ -419,7 +421,7 @@ def HttpClientMethod(
                     '[CLIENT    ] Response',
                     {
                         'headers': clientResponseHeaders,
-                        'body': Serializer.getObjectAsDictionary(clientResponseBody),
+                        'body': Serializer.getObjectAsDictionary(clientResponseBody, muteLogs=not debugIt),
                         'status': clientResponseStatus
                     },
                     condition = True,
