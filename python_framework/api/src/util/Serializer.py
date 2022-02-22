@@ -16,7 +16,6 @@ SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW
 
 
 UTF8_ENCODE = 'utf8'
-DOUBLE_UNDERSCORE = f'{2 * c.UNDERSCORE}'
 
 EXPAND_ALL_FIELDS = 'EXPAND_ALL_FIELDS'
 
@@ -157,9 +156,6 @@ def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
         # print(f'        attributeNameList = {attributeNameList}')
         fromJsonToDictionary = {}
         for attributeName in attributeNameList :
-            # if isinstance(attributeName, str) and not (
-            #     attributeName.startswith(DOUBLE_UNDERSCORE) and attributeName.endswith(DOUBLE_UNDERSCORE)
-            # ):
             # print(f'        fromJson.get({attributeName}) = {fromJson.get(attributeName)}')
             jsonAttributeValue = fromJson.get(attributeName)
             if ObjectHelper.isNone(jsonAttributeValue):
@@ -297,12 +293,12 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
             atributeNameList = getAttributeNameList_andPleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(instance.__class__, muteLogs=muteLogs)
             for attributeName in atributeNameList :
                 attributeValue = getattr(instance, attributeName)
-                if ReflectionHelper.isNotMethodInstance(attributeValue):
+                if ReflectionHelper.isNotMethodInstance(attributeValue, muteLogs=muteLogs):
                     jsonInstance[attributeName] = getObjectAsDictionary(attributeValue, visitedIdInstances=innerVisitedIdInstances, muteLogs=muteLogs)
                 else :
                     jsonInstance[attributeName] = None
         except Exception as exception :
-            LOGGER = log.log if muteLogs else log.debug 
+            LOGGER = log.log if muteLogs else log.debug
             LOGGER(getObjectAsDictionary, f'Not possible to get attribute name list from {ReflectionHelper.getName(ReflectionHelper.getClass(instance, muteLogs=True), muteLogs=True)}', exception=exception)
         if ObjectHelper.isNotEmpty(jsonInstance):
             return jsonInstance
