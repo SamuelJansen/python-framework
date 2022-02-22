@@ -1,5 +1,6 @@
 from python_framework.api.src.annotation.EnumAnnotation import Enum, EnumItem
 
+
 @Enum(associateReturnsTo='number')
 class WeekDayEnumeration :
     MONDAY = EnumItem(number=0, short='mon')

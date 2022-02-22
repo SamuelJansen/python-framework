@@ -32,6 +32,7 @@ from python_framework.api.src.constant import HealthCheckConstant
 from python_framework.api.src.constant import SchedulerConstant
 from python_framework.api.src.constant import JwtConstant
 from python_framework.api.src.constant import HttpClientConstant
+from python_framework.api.src.constant import WeekDayConstant
 
 from python_framework.api.src.converter.static import ConverterStatic
 

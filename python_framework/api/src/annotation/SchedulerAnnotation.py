@@ -11,7 +11,7 @@ DEFAUTL_DISABLE = False
 
 
 @Function
-def Scheduler(*schedulerArgs, disable=False, muteLogs=DEFAUTL_MUTE_LOGS, **schedulerKwargs) :
+def Scheduler(*schedulerArgs, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **schedulerKwargs) :
     def Wrapper(OuterClass, *args, **kwargs):
         log.wrapper(Scheduler,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
@@ -58,7 +58,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=DEFAUTL_DISABLE, mut
             muteLogs = resourceInstance.muteLogs or resourceMethod.muteLogs
             if resourceInstance.enabled and not resourceInstance.disabled and not resourceMethod.disabled:
                 if not muteLogs:
-                    log.debug(resourceMethod, f'{resourceMethod.shedulerId} scheduler started with args={methodArgs} and kwargs={methodKwargs}')
+                    log.info(resourceMethod, f'{resourceMethod.shedulerId} scheduler started with args={methodArgs} and kwargs={methodKwargs}')
                 methodReturn = None
                 try :
                     FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
@@ -68,7 +68,7 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=DEFAUTL_DISABLE, mut
                         log.warning(resourceMethod, f'Not possible to run {resourceMethod.shedulerId} properly', exception=exception, muteStackTrace=True)
                     FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceMethod)
                 if not muteLogs:
-                    log.debug(resourceMethod, f'{resourceMethod.shedulerId} scheduler finished')
+                    log.info(resourceMethod, f'{resourceMethod.shedulerId} scheduler finished')
                 return methodReturn
             if not muteLogs:
                 log.warning(resourceMethod, f'{resourceMethod.shedulerId} scheduler didn{c.SINGLE_QUOTE}t started. {"Schedulers are disabled" if not resourceInstance.enabled else "This scheduler is disabled" if resourceInstance.disabled else "This scheduler method is disabled"}')
