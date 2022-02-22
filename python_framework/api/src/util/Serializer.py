@@ -204,6 +204,8 @@ def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
 
 @Function
 def convertFromJsonToObject(fromJson, toClass, fatherClass=None):
+    if ObjectHelper.isNone(fromJson) or ObjectHelper.isNone(toClass):
+        return fromJson
     validateToClassIsNotNone(fromJson, toClass)
     validateJsonIsNotNone(fromJson, toClass)
     if ObjectHelper.isNone(fatherClass):

@@ -8,20 +8,29 @@ from MyThirdDto import MyThirdDto
 from TestCallDto import TestCallRequestDto
 import CallServiceName, CallType, CallStatus
 
+
 def generatorFunction() :
     while True :
         yield 'something'
         break
+
 
 class MyClass :
     def __init__(self, myAttribute=None):
         self.myAttribute = myAttribute
         self.myNeutralAttribute = 'someString'
 
+
 class MyAttributeClass :
     def __init__(self, myClass=None):
         self.myClass = myClass
         self.myNeutralClassAttribute = 'someOtherString'
+
+
+class MyListClass :
+    def __init__(self, myList=None):
+        self.myList = myList
+
 
 MY_DICTIONARY = {
     'myString' : 'myValue',
@@ -686,7 +695,7 @@ def convertFromJsonToObject_whenThereAreEnums() :
     )
 
 @Test()
-def weirdIdList() :
+def convertFromObjectToObject_weirdIdList() :
     #arrange
     class TestContact(MODEL):
         __tablename__ = 'TestContact'
@@ -719,3 +728,18 @@ def weirdIdList() :
 
     assert int == type(dto.id)
     assert 2 == dto.id
+
+
+@Test()
+def convertFromJsonToObject_nativeClassAtributeList():
+    #arrange
+    fromJson = {
+        'myList': [1, 2, 3, 4]
+    }
+    expected = MyListClass(myList=[1, 2, 3, 4])
+
+    #act
+    toAssert = Serializer.convertFromJsonToObject(fromJson, MyListClass, fatherClass=None)
+
+    #aqssert
+    assert ObjectHelper.equals(expected, toAssert), f'{expected} == {toAssert}'

@@ -60,7 +60,11 @@ TestHelper.run(__file__)
 #         'SerializerTest.isModelTest',
 #         'SerializerTest.isJsonifyable',
 #         'SerializerTest.jsonifyIt',
-#         'SerializerTest.weirdIdList'
+#         'SerializerTest.fromDtoToModel',
+#         'SerializerTest.fromModelToDto',
+#         'SerializerTest.convertFromJsonToObject_whenThereAreEnums',
+#         'SerializerTest.convertFromObjectToObject_weirdIdList',
+#         'SerializerTest.convertFromJsonToObject_nativeClassAtributeList'
 #     ]
 # )
 # TestHelper.run(
