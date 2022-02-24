@@ -119,9 +119,13 @@ def addGlobalsTo(apiInstance) :
 def initialize(
     rootName,
     refferenceModel,
+    managerList = None,
     staticPackage = 'static',
     viewsPackage = 'views'
 ) :
+
+    if ObjectHelper.isNone(managerList) :
+        managerList = []
 
     app = Flask(
         rootName,
@@ -131,6 +135,7 @@ def initialize(
     api = Api(app)
     api.app = app
     api.app.api = api
+    api.managerList = managerList
 
     api.cors = CORS(app)
     api.cors.api = api
@@ -142,7 +147,11 @@ def initialize(
     SessionManager.addResource(api, app)
     ApiKeyManager.addResource(api, app)
     SecurityManager.addResource(api, app)
+    for manager in api.managerList:
+        manager.addResource(api, app)
     addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
+    for manager in api.managerList:
+        manager.onHttpRequestCompletion(api, app)
     SessionManager.onHttpRequestCompletion(api, app)
     ApiKeyManager.onHttpRequestCompletion(api, app)
     SecurityManager.onHttpRequestCompletion(api, app)

@@ -49,6 +49,7 @@ KW_CONTROLLER_RESOURCE = 'Controller'
 KW_SCHEDULER_RESOURCE = 'Scheduler'
 KW_SERVICE_RESOURCE = 'Service'
 KW_CLIENT_RESOURCE = 'Client'
+KW_LISTENER_RESOURCE = 'Listener'
 KW_REPOSITORY_RESOURCE = 'Repository'
 KW_VALIDATOR_RESOURCE = 'Validator'
 KW_MAPPER_RESOURCE = 'Mapper'
@@ -130,6 +131,7 @@ def newApp(
         raise Exception('Not possible to load app. Check logs for more details')
     return app
 
+
 @Function
 def initialize(
     apiInstance
@@ -154,7 +156,8 @@ def initialize(
         return innerFunction
     return inBetweenFunction
 
-def runApi(*args, api=None, **kwargs):
+
+def runApi(*args, api=None, managers=None, **kwargs):
     if ObjectHelper.isNone(api):
         api = FlaskUtil.getApi()
     muteLogs(api)
@@ -168,13 +171,18 @@ def runApi(*args, api=None, **kwargs):
     log.success(runApi, f'Api will run at {apiUrl}')
     log.success(runApi, f'Health check will be available at {healthCheckUrl}')
     log.success(runApi, f'Documentation will be available at {documentationUrl}')
+    for manager in api.managerList:
+        manager.onRun(api, api.app)
     api.app.run(*args, **kwargs)
+    for manager in api.managerList:
+        manager.onShutdown(api, api.app)
     SessionManager.onShutdown(api, api.app)
     ApiKeyManager.onShutdown(api, api.app)
     SecurityManager.onShutdown(api, api.app)
     SchedulerManager.onShutdown(api, api.app)
     SqlAlchemyProxy.onShutdown(api, api.app)
     log.success(runApi, f'{api.globals.apiName} successfully shutdown')
+
 
 @Function
 def getApiUrl(api):
@@ -184,6 +192,7 @@ def getApiUrl(api):
     except Exception as exception :
         log.error(getApiUrl.__class__, 'Not possible to parse pai url', exception)
     return apiUrl
+
 
 @Function
 def muteLogs(api):
@@ -200,6 +209,7 @@ def muteLogs(api):
     default_apscheduler_logger.disabled = apscheduler_logger.disabled
     default_apscheduler_logger.propagate = not apscheduler_logger.disabled
     WSGIRequestHandler.log = lambda self, type, message, *args: None ###- getattr(werkzeug_logger, type)('%s %s' % (self.address_string(), message % args))
+
 
 @Function
 def getRequestBodyAsJson(contentType, requestClass):
@@ -855,6 +865,20 @@ def isPythonFrameworkHttpsResponseBody(completeResponse):
 
 def isNotPythonFrameworkHttpsResponseBody(completeResponse):
     return not isPythonFrameworkHttpsResponseBody(completeResponse)
+
+
+def getResourceSelf(apiInstance, resourceType, resourceInstanceName):
+    return ReflectionHelper.getAttributeOrMethodByNamePath(
+        apiInstance,
+        StringHelper.join(
+            [
+                KW_RESOURCE.lower(),
+                resourceType.lower(),
+                resourceInstanceName
+            ],
+            charactere = c.DOT
+        )
+    )
 
 
 @Function

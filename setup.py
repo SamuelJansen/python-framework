@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.2.238'
+VERSION = '0.3.0'
 
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
@@ -71,7 +71,7 @@ setup(
         'python_helper<1.0,>=0.3.39',
         'Flask-APScheduler==1.12.2',
         # 'psutil<6.0,>=5.8.0',
-        'requests==2.26.0',
+        'requests<3.0,>=2.26.0',
         'werkzeug<2.0,>=0.15.0',
         'markupsafe==1.1.1' #https://github.com/pallets/markupsafe/releases
     ],

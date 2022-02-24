@@ -63,3 +63,4 @@ from python_framework.api.src.annotation.MapperAnnotation import *
 from python_framework.api.src.annotation.ConverterAnnotation import *
 from python_framework.api.src.annotation.HelperAnnotation import *
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import *
+from python_framework.api.src.annotation.ListenerAnnotation import *

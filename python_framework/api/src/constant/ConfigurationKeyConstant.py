@@ -2,6 +2,9 @@ API_SCHEDULER_ENABLE = 'api.scheduler.enable'
 API_SCHEDULER_MUTE_LOGS = 'api.scheduler.mute-logs'
 API_SCHEDULER_TIMEZONE = 'api.scheduler.time-zone'
 
+API_LISTENER_ENABLE = 'api.listener.enable'
+API_LISTENER_MUTE_LOGS = 'api.listener.mute-logs'
+
 API_SERVER_SCHEME = 'api.server.scheme'
 API_SERVER_HOST = 'api.server.host'
 API_SERVER_PORT = 'api.server.port'
@@ -21,3 +24,5 @@ API_SECURITY_SECRET = 'api.security.secret'
 API_SECURITY_ALGORITHM = 'api.security.algorithm'
 API_SECURITY_HEADER = 'api.security.header'
 API_SECURITY_TYPE = 'api.security.type'
+
+HEALTH_CHECK_LOG_RESPONSE = 'api.health-check.log-response'
