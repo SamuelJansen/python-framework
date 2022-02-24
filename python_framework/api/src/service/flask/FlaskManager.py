@@ -66,6 +66,7 @@ PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
         'DocumentationService'
     ],
     KW_CLIENT_RESOURCE : [],
+    KW_LISTENER_RESOURCE : [],
     KW_REPOSITORY_RESOURCE : [
         'ActuatorHealthRepository',
         'DocumentationRepository'
