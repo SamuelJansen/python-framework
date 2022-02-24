@@ -877,7 +877,7 @@ def getResourceSelf(apiInstance, resourceType, resourceInstanceName):
                 resourceType.lower(),
                 resourceInstanceName
             ],
-            charactere = c.DOT
+            character = c.DOT
         )
     )
 
