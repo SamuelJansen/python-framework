@@ -327,7 +327,7 @@ def handleSecuredControllerMethod(
     if not any(role in set(contextList) for role in roleRequired):
         raise GlobalException(
             message = 'Role not allowed',
-            logMessage = f'''Roles {contextList} trying to access denied resourse. Allowed roles {roleRequired}''',
+            logMessage = f'''Roles {contextList} trying to access denied resource. Allowed roles {roleRequired}''',
             status = HttpStatus.FORBIDDEN
         )
     elif ObjectHelper.isNotEmptyCollection(apiKeyRequired):
@@ -392,7 +392,7 @@ def handleLockedByApiKeyControllerMethod(
     if not any(apiKey in set(contextList) for apiKey in apiKeyRequired):
         raise GlobalException(
             message = 'ApiKey not allowed',
-            logMessage = f'''ApiKey {contextList} trying to access denied resourse. Allowed apiKeys {apiKeyRequired}''',
+            logMessage = f'''ApiKey {contextList} trying to access denied resource. Allowed apiKeys {apiKeyRequired}''',
             status = HttpStatus.FORBIDDEN
         )
     elif ObjectHelper.isNotEmptyCollection(contextRequired):
@@ -441,7 +441,7 @@ def handleSessionedControllerMethod(
     if not any(context in set(contextList) for context in contextRequired):
         raise GlobalException(
             message = 'Session not allowed',
-            logMessage = f'''Sessions {contextList} trying to access denied resourse. Allowed contexts: {contextRequired}''',
+            logMessage = f'''Sessions {contextList} trying to access denied resource. Allowed contexts: {contextRequired}''',
             status = HttpStatus.FORBIDDEN
         )
     else:

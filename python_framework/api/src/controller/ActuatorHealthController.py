@@ -9,8 +9,8 @@ from python_framework.api.src.dto import ActuatorHealthDto
 class ActuatorHealthController:
 
     @ControllerMethod(
-        responseClass=ActuatorHealthDto.ActuatorHealthResponseDto,
-        logResponse=globals.getGlobalsInstance().getSetting(ConfigurationKeyConstant.HEALTH_CHECK_LOG_RESPONSE)
+        responseClass=ActuatorHealthDto.ActuatorHealthResponseDto
+        # , logResponse=globals.getGlobalsInstance().getSetting(ConfigurationKeyConstant.HEALTH_CHECK_LOG_RESPONSE)
     )
     def get(self):
         return self.service.actuatorHealth.getStatus(), HttpStatus.OK

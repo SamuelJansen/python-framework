@@ -137,10 +137,10 @@ def initialize(
     api.app.api = api
     api.managerList = managerList
 
-    api.cors = CORS(app)
+    addGlobalsTo(api)
+    api.cors = CORS(app, resources={f"{apiInstance.baseUrl}/*": {"origins": "*"}})
     api.cors.api = api
 
-    addGlobalsTo(api)
     OpenApiManager.newDocumentation(api, app)
     SqlAlchemyProxy.addResource(api, app, baseModel=refferenceModel, echo=False)
     SchedulerManager.addResource(api, app)
