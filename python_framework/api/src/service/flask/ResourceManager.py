@@ -138,7 +138,7 @@ def initialize(
     api.managerList = managerList
 
     addGlobalsTo(api)
-    api.cors = CORS(app, resources={f"{apiInstance.baseUrl}/*": {"origins": "*"}})
+    api.cors = CORS(app, resources={f"{api.baseUrl}/*": {"origins": "*"}})
     api.cors.api = api
 
     OpenApiManager.newDocumentation(api, app)
