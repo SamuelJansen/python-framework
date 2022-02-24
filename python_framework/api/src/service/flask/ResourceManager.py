@@ -263,4 +263,6 @@ def addFlaskApiResources(
     SecurityManager.initialize(apiInstance, appInstance)
     ApiKeyManager.initialize(apiInstance, appInstance)
     SessionManager.initialize(apiInstance, appInstance)
+    for manager in apiInstance.managerList:
+        manager.initialize(apiInstance, appInstance)
     OpenApiManager.addSwagger(apiInstance, appInstance)

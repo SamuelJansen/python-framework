@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.3.02'
+VERSION = '0.3.03'
 
 NAME = 'python_framework'
 URL = f'https://github.com/SamuelJansen/{NAME}/'
@@ -68,7 +68,7 @@ setup(
         'psycopg2-binary<3.0,>=2.8.6',
         'SQLAlchemy==1.4.25',
         'globals<1.0,>=0.3.22',
-        'python_helper<1.0,>=0.3.39',
+        'python_helper<1.0,>=0.3.40',
         'Flask-APScheduler==1.12.2',
         # 'psutil<6.0,>=5.8.0',
         'requests<3.0,>=2.26.0',

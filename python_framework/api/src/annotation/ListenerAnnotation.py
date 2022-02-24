@@ -12,7 +12,7 @@ DEFAUTL_DISABLE = False
 @Function
 def Listener(*listenerArgs, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **listenerKwargs) :
     def Wrapper(OuterClass, *args, **kwargs):
-        log.wrapper(Scheduler,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(Listener,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
                 log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
@@ -33,7 +33,7 @@ def ListenerMethod(*methodArgs, requestClass=None, managerMethodPath='manager.me
     resourceMethodDisable = disable
     resourceMethodMuteLogs = muteLogs
     def innerMethodWrapper(resourceMethod, *innerMethodArgs, **innerMethodKwargs) :
-        log.wrapper(SchedulerMethod,f'''wrapping {resourceMethod.__name__}''')
+        log.wrapper(ListenerMethod,f'''wrapping {resourceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
         methodClassName = ReflectionHelper.getMethodClassName(resourceMethod)
         methodName = ReflectionHelper.getName(resourceMethod)
