@@ -212,6 +212,12 @@ def addListenerTo(apiInstance,listenerList) :
 
 
 @Function
+def addProducerTo(apiInstance, producerList)
+    for producer in producerList :
+        apiInstance.bindResource(apiInstance,producer())
+
+
+@Function
 def addRepositoryTo(apiInstance, repositoryList) :
     for repository in repositoryList :
         apiInstance.bindResource(apiInstance,repository())
@@ -258,6 +264,7 @@ def addFlaskApiResources(
         serviceList,
         clientList,
         listenerList,
+        producerList,
         repositoryList,
         validatorList,
         mapperList,
@@ -270,6 +277,7 @@ def addFlaskApiResources(
     addSchedulerListTo(apiInstance, schedulerList)
     addClientListTo(apiInstance, clientList)
     addListenerTo(apiInstance, listenerList)
+    addProducerTo(apiInstance, producerList)
     addServiceListTo(apiInstance, serviceList)
     addControllerListTo(apiInstance, controllerList)
     addValidatorListTo(apiInstance, validatorList)

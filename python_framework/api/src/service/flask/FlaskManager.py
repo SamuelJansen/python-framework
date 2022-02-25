@@ -50,6 +50,7 @@ KW_SCHEDULER_RESOURCE = 'Scheduler'
 KW_SERVICE_RESOURCE = 'Service'
 KW_CLIENT_RESOURCE = 'Client'
 KW_LISTENER_RESOURCE = 'Listener'
+KW_PRODUCER_RESOURCE = 'Producer'
 KW_REPOSITORY_RESOURCE = 'Repository'
 KW_VALIDATOR_RESOURCE = 'Validator'
 KW_MAPPER_RESOURCE = 'Mapper'
@@ -67,6 +68,7 @@ PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
     ],
     KW_CLIENT_RESOURCE : [],
     KW_LISTENER_RESOURCE : [],
+    KW_PRODUCER_RESOURCE : [],
     KW_REPOSITORY_RESOURCE : [
         'ActuatorHealthRepository',
         'DocumentationRepository'

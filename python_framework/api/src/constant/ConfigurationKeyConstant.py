@@ -5,6 +5,9 @@ API_SCHEDULER_TIMEZONE = 'api.scheduler.time-zone'
 API_LISTENER_ENABLE = 'api.listener.enable'
 API_LISTENER_MUTE_LOGS = 'api.listener.mute-logs'
 
+API_PRODUCER_ENABLE = 'api.producer.enable'
+API_PRODUCER_MUTE_LOGS = 'api.producer.mute-logs'
+
 API_SERVER_SCHEME = 'api.server.scheme'
 API_SERVER_HOST = 'api.server.host'
 API_SERVER_PORT = 'api.server.port'

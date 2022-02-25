@@ -100,7 +100,7 @@ def safellyGetPath():
         path = str(request.path)
     except Exception as exception:
         path = c.FOWARD_SLASH
-        log.log(safellyGetUrl, f'Not possible to get path. Returning {path} by default', exception=exception)
+        log.log(safellyGetPath, f'Not possible to get path. Returning {path} by default', exception=exception)
     return path
 
 @Function
