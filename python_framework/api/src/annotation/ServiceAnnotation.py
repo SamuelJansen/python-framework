@@ -13,6 +13,7 @@ def Service() :
                 OuterClass.__init__(self,*args,**kwargs)
                 self.service = apiInstance.resource.service
                 self.client = apiInstance.resource.client
+                self.producer = apiInstance.resource.producer
                 self.repository = apiInstance.resource.repository
                 self.validator = apiInstance.resource.validator
                 self.mapper = apiInstance.resource.mapper
