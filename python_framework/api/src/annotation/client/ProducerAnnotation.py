@@ -36,6 +36,7 @@ def Producer(*producerArgs, manager=None, managerClient=None, disable=DEFAUTL_DI
 def ProducerMethod(*methodArgs, requestClass=None, interceptor=None, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **methodKwargs) :
     resourceMethodDisable = disable
     resourceMethodMuteLogs = muteLogs
+    resourceInterceptor = interceptor
     def innerMethodWrapper(resourceMethod, *innerMethodArgs, **innerMethodKwargs) :
         log.wrapper(ProducerMethod,f'''wrapping {resourceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
@@ -48,7 +49,7 @@ def ProducerMethod(*methodArgs, requestClass=None, interceptor=None, disable=DEF
         producerKwargs = {**methodKwargs}
         resourceInstanceName = methodClassName[:-len(FlaskManager.KW_PRODUCER_RESOURCE)]
         resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
-        interceptor = interceptor if not isinstance(interceptor, str) else  ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, interceptor)
+        interceptor = resourceInterceptor if not isinstance(resourceInterceptor, str) else  ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, resourceInterceptor)
         @interceptor(*producerArgs, **producerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
             resourceInstance = FlaskManager.getResourceSelf(apiInstance, FlaskManager.KW_PRODUCER_RESOURCE, resourceInstanceName)
@@ -73,5 +74,6 @@ def ProducerMethod(*methodArgs, requestClass=None, interceptor=None, disable=DEF
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceMethod)
         innerResourceInstanceMethod.disable = resourceMethodDisable
         innerResourceInstanceMethod.muteLogs = resourceMethodMuteLogs
+        innerResourceInstanceMethod.interceptor = resourceInterceptor
         return innerResourceInstanceMethod
     return innerMethodWrapper

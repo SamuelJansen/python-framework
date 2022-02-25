@@ -33,9 +33,10 @@ def Listener(*listenerArgs, manager=None, managerClient=None, disable=DEFAUTL_DI
 
 
 @Function
-def ListenerMethod(*methodArgs, requestClass=None, method=None, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **methodKwargs) :
+def ListenerMethod(*methodArgs, requestClass=None, interceptor=None, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **methodKwargs) :
     resourceMethodDisable = disable
     resourceMethodMuteLogs = muteLogs
+    resourceInterceptor = interceptor
     def innerMethodWrapper(resourceMethod, *innerMethodArgs, **innerMethodKwargs) :
         log.wrapper(ListenerMethod,f'''wrapping {resourceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
@@ -48,7 +49,7 @@ def ListenerMethod(*methodArgs, requestClass=None, method=None, disable=DEFAUTL_
         listenerKwargs = {**methodKwargs}
         resourceInstanceName = methodClassName[:-len(FlaskManager.KW_LISTENER_RESOURCE)]
         resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
-        interceptor = interceptor if not isinstance(interceptor, str) else  ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, interceptor)
+        interceptor = resourceInterceptor if not isinstance(resourceInterceptor, str) else  ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, resourceInterceptor)
         @interceptor(*listenerArgs, **listenerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
             resourceInstance = FlaskManager.getResourceSelf(apiInstance, FlaskManager.KW_LISTENER_RESOURCE, resourceInstanceName)
@@ -73,5 +74,6 @@ def ListenerMethod(*methodArgs, requestClass=None, method=None, disable=DEFAUTL_
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceMethod)
         innerResourceInstanceMethod.disable = resourceMethodDisable
         innerResourceInstanceMethod.muteLogs = resourceMethodMuteLogs
+        innerResourceInstanceMethod.interceptor = resourceInterceptor
         return innerResourceInstanceMethod
     return innerMethodWrapper
