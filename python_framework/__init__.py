@@ -59,7 +59,7 @@ from python_framework.api.src.annotation.RepositoryAnnotation import *
 from python_framework.api.src.annotation.client.ClientAnnotation import *
 from python_framework.api.src.annotation.client.HttpClientAnnotation import *
 from python_framework.api.src.annotation.client.ListenerAnnotation import *
-from python_framework.api.src.annotation.client.ProducerAnnotation import *
+from python_framework.api.src.annotation.client.EmitterAnnotation import *
 from python_framework.api.src.annotation.ValidatorAnnotation import *
 from python_framework.api.src.annotation.MapperAnnotation import *
 from python_framework.api.src.annotation.ConverterAnnotation import *

@@ -33,7 +33,14 @@ def Listener(*listenerArgs, manager=None, managerClient=None, disable=DEFAUTL_DI
 
 
 @Function
-def ListenerMethod(*methodArgs, requestClass=None, interceptor=None, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **methodKwargs) :
+def ListenerMethod(
+    *methodArgs,
+    requestClass = None,
+    interceptor = FlaskManager.defaultResourceInterceptor,
+    disable = DEFAUTL_DISABLE,
+    muteLogs = DEFAUTL_MUTE_LOGS,
+    **methodKwargs
+):
     resourceMethodDisable = disable
     resourceMethodMuteLogs = muteLogs
     resourceInterceptor = interceptor

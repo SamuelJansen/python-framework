@@ -50,7 +50,7 @@ KW_SCHEDULER_RESOURCE = 'Scheduler'
 KW_SERVICE_RESOURCE = 'Service'
 KW_CLIENT_RESOURCE = 'Client'
 KW_LISTENER_RESOURCE = 'Listener'
-KW_PRODUCER_RESOURCE = 'Producer'
+KW_EMITTER_RESOURCE = 'Emitter'
 KW_REPOSITORY_RESOURCE = 'Repository'
 KW_VALIDATOR_RESOURCE = 'Validator'
 KW_MAPPER_RESOURCE = 'Mapper'
@@ -68,7 +68,7 @@ PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY = {
     ],
     KW_CLIENT_RESOURCE : [],
     KW_LISTENER_RESOURCE : [],
-    KW_PRODUCER_RESOURCE : [],
+    KW_EMITTER_RESOURCE : [],
     KW_REPOSITORY_RESOURCE : [
         'ActuatorHealthRepository',
         'DocumentationRepository'
@@ -160,7 +160,7 @@ def initialize(
     return inBetweenFunction
 
 
-def runApi(*args, api=None, managers=None, **kwargs):
+def runApi(*args, api=None, managers=None, shutdownWithSysExit=True, **kwargs):
     if ObjectHelper.isNone(api):
         api = FlaskUtil.getApi()
     muteLogs(api)
@@ -184,7 +184,10 @@ def runApi(*args, api=None, managers=None, **kwargs):
     SecurityManager.onShutdown(api, api.app)
     SchedulerManager.onShutdown(api, api.app)
     SqlAlchemyProxy.onShutdown(api, api.app)
-    log.success(runApi, f'{api.globals.apiName} successfully shutdown')
+    log.success(runApi, f'{api.globals.apiName} is successfully shuting down')
+    # if shutdownWithSysExit:
+    #     log.success(runApi, f'Application context will shutdown with sys.exit() now. Set "runApi(shutdownWithSysExit=False)" to avoid it in further application runs')
+    #     EnvironmentHelper.SYS.exit()
 
 
 @Function
@@ -895,3 +898,13 @@ def getApi():
 
 def getNullableApi():
     return FlaskUtil.getNullableApi()
+
+
+def defaultResourceInterceptor(*args, **kwargs):
+    def defaultInterceptor(resourceInstanceMethod, *defaultInnerArgs, **defaultInnerKwargs):
+        def defaultInnerInterceptor(*defaultInnerInterceptorArgs, **defaultInnerInterceptorKwargs):
+            # the reason we have to take self out here is because resource annotation adds it back later on
+            return resourceInstanceMethod(*defaultInnerInterceptorArgs[1:], **defaultInnerInterceptorKwargs)
+        ReflectionHelper.overrideSignatures(defaultInnerInterceptor, resourceInstanceMethod)
+        return defaultInnerInterceptor
+    return defaultInterceptor

@@ -10,54 +10,61 @@ DEFAUTL_DISABLE = False
 
 
 @Function
-def Producer(*producerArgs, manager=None, managerClient=None, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **producerKwargs) :
-    producerManager = manager
-    producerManagerClient = managerClient
+def Emitter(*emitterArgs, manager=None, managerClient=None, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **emitterKwargs) :
+    emitterManager = manager
+    emitterManagerClient = managerClient
     def Wrapper(OuterClass, *args, **kwargs):
-        log.wrapper(Producer,f'''wrapping {OuterClass.__name__}''')
+        log.wrapper(Emitter,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             def __init__(self,*args,**kwargs):
                 log.wrapper(OuterClass,f'in {InnerClass.__name__}.__init__(*{args},**{kwargs})')
                 apiInstance = FlaskManager.getApi()
                 OuterClass.__init__(self,*args,**kwargs)
-                self.manager = producerManager if not isinstance(producerManager, str) else ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, producerManager)
-                self.managerClient = producerManagerClient if not isinstance(producerManagerClient, str) else ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, producerManagerClient)
+                self.manager = emitterManager if not isinstance(emitterManager, str) else ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, emitterManager)
+                self.managerClient = emitterManagerClient if not isinstance(emitterManagerClient, str) else ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, emitterManagerClient)
                 self.globals = apiInstance.globals
                 self.service = apiInstance.resource.service
-                self.enabled = self.globals.getApiSetting(ConfigurationKeyConstant.API_PRODUCER_ENABLE)
+                self.enabled = self.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_ENABLE)
                 self.disabled = disable
-                self.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.API_PRODUCER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and muteLogs)
+                self.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and muteLogs)
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
 
 
 @Function
-def ProducerMethod(*methodArgs, requestClass=None, interceptor=None, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **methodKwargs) :
+def EmitterMethod(
+    *methodArgs,
+    requestClass = None,
+    interceptor = FlaskManager.defaultResourceInterceptor,
+    disable = DEFAUTL_DISABLE,
+    muteLogs = DEFAUTL_MUTE_LOGS,
+    **methodKwargs
+):
     resourceMethodDisable = disable
     resourceMethodMuteLogs = muteLogs
     resourceInterceptor = interceptor
     def innerMethodWrapper(resourceMethod, *innerMethodArgs, **innerMethodKwargs) :
-        log.wrapper(ProducerMethod,f'''wrapping {resourceMethod.__name__}''')
+        log.wrapper(EmitterMethod,f'''wrapping {resourceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
         methodClassName = ReflectionHelper.getMethodClassName(resourceMethod)
         methodName = ReflectionHelper.getName(resourceMethod)
         resourceMethod.disabled = disable
         resourceMethod.id = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
-        resourceMethod.muteLogs = resourceMethodMuteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_PRODUCER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceMethodMuteLogs)
-        producerArgs = [*methodArgs]
-        producerKwargs = {**methodKwargs}
-        resourceInstanceName = methodClassName[:-len(FlaskManager.KW_PRODUCER_RESOURCE)]
+        resourceMethod.muteLogs = resourceMethodMuteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceMethodMuteLogs)
+        emitterArgs = [*methodArgs]
+        emitterKwargs = {**methodKwargs}
+        resourceInstanceName = methodClassName[:-len(FlaskManager.KW_EMITTER_RESOURCE)]
         resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
         interceptor = resourceInterceptor if not isinstance(resourceInterceptor, str) else  ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, resourceInterceptor)
-        @interceptor(*producerArgs, **producerKwargs)
+        @interceptor(*emitterArgs, **emitterKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
-            resourceInstance = FlaskManager.getResourceSelf(apiInstance, FlaskManager.KW_PRODUCER_RESOURCE, resourceInstanceName)
+            resourceInstance = FlaskManager.getResourceSelf(apiInstance, FlaskManager.KW_EMITTER_RESOURCE, resourceInstanceName)
             args = FlaskManager.getArgumentInFrontOfArgs(args, resourceInstance) ###- resourceInstance = args[0]
             muteLogs = resourceInstance.muteLogs or resourceMethod.muteLogs
             if resourceInstance.enabled and not resourceInstance.disabled and not resourceMethod.disabled:
                 if not muteLogs:
-                    log.info(resourceMethod, f'{resourceMethod.id} producer method started with args={methodArgs} and kwargs={methodKwargs}')
+                    log.info(resourceMethod, f'{resourceMethod.id} emitter method started with args={methodArgs} and kwargs={methodKwargs}')
                 methodReturn = None
                 try :
                     FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
@@ -67,10 +74,10 @@ def ProducerMethod(*methodArgs, requestClass=None, interceptor=None, disable=DEF
                         log.warning(resourceMethod, f'Not possible to run {resourceMethod.id} properly', exception=exception, muteStackTrace=True)
                     FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceMethod)
                 if not muteLogs:
-                    log.info(resourceMethod, f'{resourceMethod.id} producer method finished')
+                    log.info(resourceMethod, f'{resourceMethod.id} emitter method finished')
                 return methodReturn
             if not muteLogs:
-                log.warning(resourceMethod, f'{resourceMethod.id} producer method didn{c.SINGLE_QUOTE}t started. {"Handlers are disabled" if not resourceInstance.enabled else "This producer class is disabled" if resourceInstance.disabled else "This producer method is disabled"}')
+                log.warning(resourceMethod, f'{resourceMethod.id} emitter method didn{c.SINGLE_QUOTE}t started. {"Handlers are disabled" if not resourceInstance.enabled else "This emitter class is disabled" if resourceInstance.disabled else "This emitter method is disabled"}')
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceMethod)
         innerResourceInstanceMethod.disable = resourceMethodDisable
         innerResourceInstanceMethod.muteLogs = resourceMethodMuteLogs

@@ -23,7 +23,7 @@ def Scheduler(*schedulerArgs, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOG
                 self.service = apiInstance.resource.service
                 self.enabled = self.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE)
                 self.disabled = disable
-                self.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS)
+                self.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and muteLogs)
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -41,8 +41,8 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=DEFAUTL_DISABLE, mut
         instancesUpTo = methodKwargs.pop('instancesUpTo', 1)
         weekDays = methodKwargs.pop('weekDays', None)
         resourceMethod.disabled = disable
-        resourceMethod.shedulerId = methodKwargs['id']
-        resourceMethod.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS)
+        resourceMethod.id = methodKwargs['id']
+        resourceMethod.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceMethodMuteLogs)
         if ObjectHelper.isNotEmpty(methodArgs) and SchedulerType.CRON == methodArgs[0] and ObjectHelper.isNotNone(weekDays) and StringHelper.isNotBlank(weekDays) :
             methodKwargs['day_of_week'] = weekDays
         if ObjectHelper.isNotNone(instancesUpTo) :
@@ -58,22 +58,22 @@ def SchedulerMethod(*methodArgs, requestClass=None, disable=DEFAUTL_DISABLE, mut
             muteLogs = resourceInstance.muteLogs or resourceMethod.muteLogs
             if resourceInstance.enabled and not resourceInstance.disabled and not resourceMethod.disabled:
                 if not muteLogs:
-                    log.info(resourceMethod, f'{resourceMethod.shedulerId} scheduler started with args={methodArgs} and kwargs={methodKwargs}')
+                    log.info(resourceMethod, f'{resourceMethod.id} scheduler method started with args={methodArgs} and kwargs={methodKwargs}')
                 methodReturn = None
                 try :
                     FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
                     methodReturn = resourceMethod(*args,**kwargs)
                 except Exception as exception :
                     if not muteLogs:
-                        log.warning(resourceMethod, f'Not possible to run {resourceMethod.shedulerId} properly', exception=exception, muteStackTrace=True)
+                        log.warning(resourceMethod, f'Not possible to run {resourceMethod.id} properly', exception=exception, muteStackTrace=True)
                     FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceMethod)
                 if not muteLogs:
-                    log.info(resourceMethod, f'{resourceMethod.shedulerId} scheduler finished')
+                    log.info(resourceMethod, f'{resourceMethod.id} scheduler method finished')
                 return methodReturn
             if not muteLogs:
-                log.warning(resourceMethod, f'{resourceMethod.shedulerId} scheduler didn{c.SINGLE_QUOTE}t started. {"Schedulers are disabled" if not resourceInstance.enabled else "This scheduler is disabled" if resourceInstance.disabled else "This scheduler method is disabled"}')
+                log.warning(resourceMethod, f'{resourceMethod.id} scheduler didn{c.SINGLE_QUOTE}t started. {"Schedulers are disabled" if not resourceInstance.enabled else "This scheduler is disabled" if resourceInstance.disabled else "This scheduler method is disabled"}')
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceMethod)
-        resourceMethod.shedulerId = methodKwargs.get('id')
+        resourceMethod.id = methodKwargs.get('id')
         innerResourceInstanceMethod.disable = resourceMethodDisable
         innerResourceInstanceMethod.muteLogs = resourceMethodMuteLogs
         return innerResourceInstanceMethod
