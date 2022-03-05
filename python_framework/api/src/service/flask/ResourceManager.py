@@ -7,6 +7,7 @@ import globals
 from python_framework.api.src.constant import ControllerConstant
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.constant import StaticConstant
+from python_framework.api.src.constant import HealthCheckConstant
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import SqlAlchemyProxy
@@ -119,6 +120,7 @@ def getResourceList(apiInstance, resourceType):
     return resourceList
 
 
+@Function
 def fixInitializeKwargs(initializeKwargs):
     if ObjectHelper.isNotEmpty(initializeKwargs):
         for key in [
@@ -130,10 +132,12 @@ def fixInitializeKwargs(initializeKwargs):
                 initializeKwargs.remove(key)
 
 
+@Function
 def getBaseUrl(globalsInstance):
     return globalsInstance.getSetting(ConfigurationKeyConstant.API_SERVER_BASE_URL)
 
 
+@Function
 def getStaticBaseUrl(staticPackage, givenBaseStaticUrl, globalsInstance):
     if ObjectHelper.isNotEmpty(givenBaseStaticUrl):
         return givenBaseStaticUrl
@@ -146,6 +150,13 @@ def addGlobalsTo(apiInstance, globalsInstance=None):
     apiInstance.globals = globalsInstance if ObjectHelper.isNotNone(globalsInstance) else FlaskUtil.getGlobals()
     apiInstance.globals.api = apiInstance
     apiInstance.bindResource = FlaskManager.bindResource
+
+
+@Function
+def getApiStaticUrl(app=None, api=None):
+    if ObjectHelper.isNone(api):
+        api = app.api
+    return f'{api.documentationUrl[:-(len(api.baseUrl)+len(OpenApiManager.DOCUMENTATION_ENDPOINT))]}{api.baseStaticUrl}'
 
 
 @Function
@@ -185,6 +196,7 @@ def initialize(
     api.port = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_PORT)
     api.baseUrl = getBaseUrl(globalsInstance)
     api.baseStaticUrl = baseStaticUrl
+    api.internalUrl = FlaskManager.getInternalUrl(api)
 
     api.cors = CORS(app, resources={f"{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}})
     api.cors.api = api
@@ -205,6 +217,11 @@ def initialize(
     SecurityManager.onHttpRequestCompletion(api, app)
     SchedulerManager.onHttpRequestCompletion(api, app)
     SqlAlchemyProxy.onHttpRequestCompletion(api, app)
+
+    api.documentationUrl = OpenApiManager.getDocumentationUrl(api)
+    api.healthCheckUrl = f'{api.documentationUrl[:-len(OpenApiManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
+    api.staticUrl = getApiStaticUrl(api=api)
+
     return app
 
 

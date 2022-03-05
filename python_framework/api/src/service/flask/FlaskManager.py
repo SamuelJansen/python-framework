@@ -6,7 +6,7 @@ from python_helper import log, Function, ReflectionHelper, ObjectHelper, Setting
 
 from python_framework.api.src.annotation.EnumAnnotation import EnumItem
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
-from python_framework.api.src.constant import ConfigurationKeyConstant, JwtConstant, HealthCheckConstant
+from python_framework.api.src.constant import ConfigurationKeyConstant, JwtConstant
 from python_framework.api.src.domain import HttpDomain
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.constant import StaticConstant
@@ -142,7 +142,7 @@ def initialize(
     , defaultUrl = None
     , openInBrowser = False
 ):
-    innerDefaultUrl = getUrl(apiInstance)
+    innerDefaultUrl = getInternalUrl(apiInstance)
     if defaultUrl :
         innerDefaultUrl = f'{innerDefaultUrl}{defaultUrl}'
     def inBetweenFunction(function,*argument,**keywordArgument):
@@ -169,14 +169,10 @@ def runApi(*args, api=None, debug=False, **kwargs):
         kwargs['host'] = api.host if not 'localhost' == api.host else '0.0.0.0'
     if 'port' not in kwargs and api.port :
         kwargs['port'] = api.port
-    urlPrefix = getUrlPrefix(api)
-    documentationUrl = OpenApiManager.getDocumentationUrl(api)
-    healthCheckUrl = f'{documentationUrl[:-len(OpenApiManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
-    staticUrl = f'{documentationUrl[:-(len(api.baseUrl)+len(OpenApiManager.DOCUMENTATION_ENDPOINT))]}{api.baseStaticUrl}'
-    log.success(runApi, f'Api will run at {getUrl(api, urlPrefix=urlPrefix)}')
-    log.success(runApi, f'Health check will be available at {healthCheckUrl}')
-    log.success(runApi, f'Documentation will be available at {documentationUrl}')
-    log.success(runApi, f'Api static content will be available at {staticUrl}')
+    log.success(runApi, f'Api will run at {api.internalUrl}')
+    log.success(runApi, f'Health check will be available at {api.healthCheckUrl}')
+    log.success(runApi, f'Documentation will be available at {api.documentationUrl}')
+    log.success(runApi, f'Api static content will be available at {api.staticUrl}')
     for manager in api.managerList:
         manager.onRun(api, api.app)
     api.app.run(*args, debug=debug, **kwargs)
@@ -191,28 +187,23 @@ def runApi(*args, api=None, debug=False, **kwargs):
 
 
 @Function
-def getUrlPrefix(api):
-    return f'{api.scheme}://{api.host}{c.BLANK if ObjectHelper.isEmpty(api.port) else f"{c.COLON}{api.port}"}'
-
-
-@Function
-def getUrl(api, urlPrefix=None):
+def getInternalUrl(apiInstance):
     apiUrl = None
     try :
-        apiUrl = f'{urlPrefix if ObjectHelper.isNotNone(urlPrefix) else getUrlPrefix(api)}{api.baseUrl}'
+        apiUrl = f'{apiInstance.scheme}://{apiInstance.host}{c.BLANK if ObjectHelper.isEmpty(apiInstance.port) else f"{c.COLON}{apiInstance.port}"}{apiInstance.baseUrl}'
     except Exception as exception :
-        log.error(getUrl, 'Not possible to parse pai url', exception)
+        log.error(getInternalUrl, 'Not possible to parse api url', exception)
     return apiUrl
 
 
 @Function
-def muteLogs(api, debug):
+def muteLogs(apiInstance, debug):
     if not debug:
         import logging
         from werkzeug.serving import WSGIRequestHandler
         werkzeug_logger = logging.getLogger('werkzeug')
         werkzeug_logger.disabled = True
-        api.app.logger.disabled = True
+        apiInstance.app.logger.disabled = True
         apschedulerLoggerEnabled = api.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE)
         apscheduler_logger = logging.getLogger('apscheduler.scheduler')
         default_apscheduler_logger = logging.getLogger('apscheduler.executors.default')
