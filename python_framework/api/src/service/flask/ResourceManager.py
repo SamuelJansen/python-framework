@@ -118,9 +118,14 @@ def getResourceList(apiInstance, resourceType):
     return resourceList
 
 
+def getBaseUrl(globalsInstance):
+    return globalsInstance.getSetting(ConfigurationKeyConstant.API_SERVER_BASE_URL)
+
+
 def getStaticBaseUrl(globalsInstance):
     if SettingHelper.activeEnvironmentIsLocal():
         return c.FOWARD_SLASH
+    return getBaseUrl(globalsInstance)
     return globalsInstance.getSetting(ConfigurationKeyConstant.API_SERVER_BASE_URL)
 
 
@@ -133,7 +138,7 @@ def addGlobalsTo(apiInstance, globalsInstance=None):
     apiInstance.scheme = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_SCHEME)
     apiInstance.host = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_HOST)
     apiInstance.port = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_PORT)
-    apiInstance.baseUrl = getStaticBaseUrl(apiInstance.globals)
+    apiInstance.baseUrl = getBaseUrl(apiInstance.globals)
 
 
 @Function
