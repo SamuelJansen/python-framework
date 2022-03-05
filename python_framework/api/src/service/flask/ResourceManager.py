@@ -72,7 +72,7 @@ def getResourceNameList(apiTree, resourceType):
 def getControllerNameList(controllerName):
     # controllerNameList.append(f'{controllerName[:-len(FlaskManager.KW_CONTROLLER_RESOURCE)]}{Serializer.KW_BATCH}{FlaskManager.KW_CONTROLLER_RESOURCE}')
     controllerNameList = [
-        name for name in dir(globals.importResource(controllerName)) if not name.startswith(c.UNDERSCORE) and name.endswith(FlaskManager.KW_CONTROLLER_RESOURCE)
+        name for name in dir(globals.importModule(controllerName)) if not name.startswith(c.UNDERSCORE) and name.endswith(FlaskManager.KW_CONTROLLER_RESOURCE)
     ]
     if controllerName not in controllerNameList:
         return [controllerName, *controllerNameList]
@@ -120,7 +120,7 @@ def getResourceList(apiInstance, resourceType):
 
 def getStaticBaseUrl(globalsInstance):
     if SettingHelper.activeEnvironmentIsLocal():
-        return c.BLANK
+        return c.FOWARD_SLASH
     return globalsInstance.getSetting(ConfigurationKeyConstant.API_SERVER_BASE_URL)
 
 
