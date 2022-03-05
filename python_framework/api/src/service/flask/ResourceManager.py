@@ -130,7 +130,7 @@ def initialize(
     managerList = None,
     staticPackage = 'static',
     viewsPackage = 'views',
-    staticUrl = str(c.BLANK)
+    staticUrl = c.BLANK,
     **kwargs
 ):
 
@@ -143,7 +143,7 @@ def initialize(
         rootName,
         static_folder = staticPackage,
         template_folder = viewsPackage,
-        static_url_path = staticUrl if StringHelper.isNotEmpty(staticUrl) else getStaticBaseUrl(globalsInstance)
+        static_url_path = staticUrl if StringHelper.isNotEmpty(staticUrl) else getStaticBaseUrl(globalsInstance),
         **kwargs
     )
     api = Api(app)
