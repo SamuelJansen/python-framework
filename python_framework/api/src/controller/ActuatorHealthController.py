@@ -10,7 +10,7 @@ class ActuatorHealthController:
 
     @ControllerMethod(
         responseClass=ActuatorHealthDto.ActuatorHealthResponseDto
-        # , logResponse=globals.getGlobalsInstance().getSetting(ConfigurationKeyConstant.HEALTH_CHECK_LOG_RESPONSE)
+        # , logResponse=globals.getGlobalsInstance().getApiSetting(ConfigurationKeyConstant.HEALTH_CHECK_LOG_RESPONSE)
     )
     def get(self):
         return self.service.actuatorHealth.getStatus(), HttpStatus.OK

@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 from python_helper import Constant as c
-from python_helper import log, Function, ReflectionHelper, ObjectHelper, StringHelper
+from python_helper import log, Function, ReflectionHelper, ObjectHelper, StringHelper, SettingHelper
 import globals
 from python_framework.api.src.util import Serializer
 from python_framework.api.src.util import FlaskUtil
@@ -104,16 +104,24 @@ def getResourceList(apiInstance, resourceType):
             resourceList.append(resource)
     return resourceList
 
+
+def getStaticBaseUrl(globalsInstance):
+    if SettingHelper.activeEnvironmentIsLocal():
+        return c.BLANK
+    return globalsInstance.getSetting(ConfigurationKeyConstant.API_SERVER_BASE_URL)
+
+
 @Function
-def addGlobalsTo(apiInstance):
+def addGlobalsTo(apiInstance, globalsInstance=None):
     FlaskUtil.validateFlaskApi(apiInstance)
-    apiInstance.globals = FlaskUtil.getGlobals()
+    apiInstance.globals = globalsInstance if ObjectHelper.isNotNone(globalsInstance) else FlaskUtil.getGlobals()
     apiInstance.globals.api = apiInstance
     apiInstance.bindResource = FlaskManager.bindResource
     apiInstance.scheme = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_SCHEME)
     apiInstance.host = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_HOST)
     apiInstance.port = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_PORT)
-    apiInstance.baseUrl = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_BASE_URL)
+    apiInstance.baseUrl = getStaticBaseUrl(apiInstance.globals)
+
 
 @Function
 def initialize(
@@ -121,23 +129,29 @@ def initialize(
     refferenceModel,
     managerList = None,
     staticPackage = 'static',
-    viewsPackage = 'views'
+    viewsPackage = 'views',
+    staticUrl = str(c.BLANK)
+    **kwargs
 ):
 
     if ObjectHelper.isNone(managerList):
         managerList = []
 
+    globalsInstance = FlaskUtil.getGlobals()
+
     app = Flask(
         rootName,
         static_folder = staticPackage,
-        template_folder = viewsPackage
+        template_folder = viewsPackage,
+        static_url_path = staticUrl if StringHelper.isNotEmpty(staticUrl) else getStaticBaseUrl(globalsInstance)
+        **kwargs
     )
     api = Api(app)
     api.app = app
     api.app.api = api
     api.managerList = managerList
 
-    addGlobalsTo(api)
+    addGlobalsTo(api, globalsInstance=globalsInstance)
     api.cors = CORS(app, resources={f"{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}})
     api.cors.api = api
 

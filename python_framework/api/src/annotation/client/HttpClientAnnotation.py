@@ -571,28 +571,37 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
 
 @Function
 def getErrorMessage(clientResponse, exception=None):
+    bodyAsJson = getClientResponseBodyAsJson(clientResponse)
     completeErrorMessage = f'{HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE}{c.DOT_SPACE}{HttpClientConstant.CLIENT_DID_NOT_SENT_ANY_MESSAGE}'
     errorMessage = HttpClientConstant.CLIENT_DID_NOT_SENT_ANY_MESSAGE
     possibleErrorMessage = None
-    bodyAsJson = {}
-    try :
-        bodyAsJson = clientResponse.json()
-    except Exception as innerException :
-        bodyAsJsonException = FlaskUtil.safellyGetResponseJson(clientResponse)
-        log.log(getErrorMessage, f'Invalid client response: {bodyAsJsonException}', exception=innerException)
-        log.debug(getErrorMessage, f'Not possible to get error message from client response: {bodyAsJsonException}. Proceeding with value {bodyAsJson} by default', exception=innerException, muteStackTrace=True)
     try:
         if ObjectHelper.isNotNone(clientResponse):
             if ObjectHelper.isDictionary(bodyAsJson):
-                possibleErrorMessage = bodyAsJson.get('message', bodyAsJson.get('error')).strip()
+                possibleErrorMessage = getErrorMessageFromClientResponseBodyAsJson(bodyAsJson)
             if ObjectHelper.isList(bodyAsJson) and 0 < len(bodyAsJson):
-                possibleErrorMessage = bodyAsJson[0].get('message', bodyAsJson[0].get('error')).strip()
+                possibleErrorMessage = getErrorMessageFromClientResponseBodyAsJson(bodyAsJson[0])
         if ObjectHelper.isNotNone(possibleErrorMessage) and StringHelper.isNotBlank(possibleErrorMessage):
             errorMessage = f'{c.LOG_CAUSE}{possibleErrorMessage}'
         else:
             log.debug(getErrorMessage, f'Client response {FlaskUtil.safellyGetResponseJson(clientResponse)}')
         exceptionPortion = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE if ObjectHelper.isNone(exception) or StringHelper.isBlank(exception) else str(exception)
         completeErrorMessage = f'{exceptionPortion}{c.DOT_SPACE}{errorMessage}'
-    except Exception as exception:
-        log.warning(getErrorMessage, f'Not possible to get error message. Returning {completeErrorMessage} by default', exception=exception)
+    except Exception as innerException:
+        log.warning(getErrorMessage, f'Not possible to get error message. Returning "{completeErrorMessage}" by default', exception=innerException)
     return completeErrorMessage
+
+
+def getClientResponseBodyAsJson(clientResponse):
+    bodyAsJson = {}
+    try :
+        bodyAsJson = clientResponse.json()
+    except Exception as exception :
+        bodyAsJsonException = FlaskUtil.safellyGetResponseJson(clientResponse)
+        log.log(getErrorMessage, f'Invalid client response: {bodyAsJsonException}', exception=exception)
+        log.debug(getErrorMessage, f'Not possible to get error message from client response: {bodyAsJsonException}. Proceeding with value {bodyAsJson} by default', exception=exception, muteStackTrace=True)
+    return bodyAsJson
+
+
+def getErrorMessageFromClientResponseBodyAsJson(bodyAsJson):
+    return bodyAsJson.get('message', bodyAsJson.get('error', HttpClientConstant.CLIENT_DID_NOT_SENT_ANY_MESSAGE)).strip()

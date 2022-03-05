@@ -160,10 +160,10 @@ def initialize(
     return inBetweenFunction
 
 
-def runApi(*args, api=None, managers=None, shutdownWithSysExit=True, **kwargs):
+def runApi(*args, api=None, debug=False, **kwargs):
     if ObjectHelper.isNone(api):
         api = FlaskUtil.getApi()
-    muteLogs(api)
+    muteLogs(api, debug)
     if 'host' not in kwargs and api.host :
         kwargs['host'] = api.host if not 'localhost' == api.host else '0.0.0.0'
     if 'port' not in kwargs and api.port :
@@ -176,7 +176,7 @@ def runApi(*args, api=None, managers=None, shutdownWithSysExit=True, **kwargs):
     log.success(runApi, f'Documentation will be available at {documentationUrl}')
     for manager in api.managerList:
         manager.onRun(api, api.app)
-    api.app.run(*args, **kwargs)
+    api.app.run(*args, debug=debug, **kwargs)
     for manager in api.managerList:
         manager.onShutdown(api, api.app)
     SessionManager.onShutdown(api, api.app)
@@ -185,9 +185,6 @@ def runApi(*args, api=None, managers=None, shutdownWithSysExit=True, **kwargs):
     SchedulerManager.onShutdown(api, api.app)
     SqlAlchemyProxy.onShutdown(api, api.app)
     log.success(runApi, f'{api.globals.apiName} is successfully shuting down')
-    # if shutdownWithSysExit:
-    #     log.success(runApi, f'Application context will shutdown with sys.exit() now. Set "runApi(shutdownWithSysExit=False)" to avoid it in further application runs')
-    #     EnvironmentHelper.SYS.exit()
 
 
 @Function
@@ -201,20 +198,21 @@ def getApiUrl(api):
 
 
 @Function
-def muteLogs(api):
-    import logging
-    from werkzeug.serving import WSGIRequestHandler
-    werkzeug_logger = logging.getLogger('werkzeug')
-    werkzeug_logger.disabled = True
-    api.app.logger.disabled = True
-    apschedulerLoggerEnabled = api.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE)
-    apscheduler_logger = logging.getLogger('apscheduler.scheduler')
-    default_apscheduler_logger = logging.getLogger('apscheduler.executors.default')
-    apscheduler_logger.disabled = True if ObjectHelper.isNone(apschedulerLoggerEnabled) else not apschedulerLoggerEnabled
-    apscheduler_logger.propagate = not apscheduler_logger.disabled
-    default_apscheduler_logger.disabled = apscheduler_logger.disabled
-    default_apscheduler_logger.propagate = not apscheduler_logger.disabled
-    WSGIRequestHandler.log = lambda self, type, message, *args: None ###- getattr(werkzeug_logger, type)('%s %s' % (self.address_string(), message % args))
+def muteLogs(api, debug):
+    if not debug:
+        import logging
+        from werkzeug.serving import WSGIRequestHandler
+        werkzeug_logger = logging.getLogger('werkzeug')
+        werkzeug_logger.disabled = True
+        api.app.logger.disabled = True
+        apschedulerLoggerEnabled = api.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE)
+        apscheduler_logger = logging.getLogger('apscheduler.scheduler')
+        default_apscheduler_logger = logging.getLogger('apscheduler.executors.default')
+        apscheduler_logger.disabled = True if ObjectHelper.isNone(apschedulerLoggerEnabled) else not apschedulerLoggerEnabled
+        apscheduler_logger.propagate = not apscheduler_logger.disabled
+        default_apscheduler_logger.disabled = apscheduler_logger.disabled
+        default_apscheduler_logger.propagate = not apscheduler_logger.disabled
+        WSGIRequestHandler.log = lambda self, type, message, *args: None ###- getattr(werkzeug_logger, type)('%s %s' % (self.address_string(), message % args))
 
 
 @Function
