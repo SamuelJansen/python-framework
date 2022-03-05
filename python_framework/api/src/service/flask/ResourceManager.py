@@ -143,7 +143,7 @@ def initialize(
     managerList = None,
     staticPackage = 'static',
     viewsPackage = 'views',
-    staticUrl = c.BLANK,
+    staticUrl = c.FOWARD_SLASH,
     **kwargs
 ):
 
