@@ -9,6 +9,7 @@ from python_framework.api.src.annotation.GlobalExceptionAnnotation import Encaps
 from python_framework.api.src.constant import ConfigurationKeyConstant, JwtConstant, HealthCheckConstant
 from python_framework.api.src.domain import HttpDomain
 from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.constant import StaticConstant
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
@@ -171,7 +172,7 @@ def runApi(*args, api=None, debug=False, **kwargs):
     urlPrefix = getUrlPrefix(api)
     documentationUrl = OpenApiManager.getDocumentationUrl(api)
     healthCheckUrl = f'{documentationUrl[:-len(OpenApiManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
-    staticUrl = f'{documentationUrl[:-(len(api.baseUrl)+len(OpenApiManager.DOCUMENTATION_ENDPOINT))]}{HealthCheckConstant.URI}'
+    staticUrl = f'{documentationUrl[:-(len(api.baseUrl)+len(OpenApiManager.DOCUMENTATION_ENDPOINT))]}{api.baseStaticUrl}'
     log.success(runApi, f'Api will run at {getUrl(api, urlPrefix=urlPrefix)}')
     log.success(runApi, f'Health check will be available at {healthCheckUrl}')
     log.success(runApi, f'Documentation will be available at {documentationUrl}')
