@@ -141,7 +141,7 @@ def initialize(
     , defaultUrl = None
     , openInBrowser = False
 ):
-    innerDefaultUrl = getApiUrl(apiInstance)
+    innerDefaultUrl = getUrl(apiInstance)
     if defaultUrl :
         innerDefaultUrl = f'{innerDefaultUrl}{defaultUrl}'
     def inBetweenFunction(function,*argument,**keywordArgument):
@@ -168,12 +168,14 @@ def runApi(*args, api=None, debug=False, **kwargs):
         kwargs['host'] = api.host if not 'localhost' == api.host else '0.0.0.0'
     if 'port' not in kwargs and api.port :
         kwargs['port'] = api.port
-    apiUrl = getApiUrl(api)
+    urlPrefix = getUrlPrefix(api)
     documentationUrl = OpenApiManager.getDocumentationUrl(api)
     healthCheckUrl = f'{documentationUrl[:-len(OpenApiManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
-    log.success(runApi, f'Api will run at {apiUrl}')
+    staticUrl = f'{documentationUrl[:-(len(api.baseUrl)+len(OpenApiManager.DOCUMENTATION_ENDPOINT))]}{HealthCheckConstant.URI}'
+    log.success(runApi, f'Api will run at {getUrl(api, urlPrefix=urlPrefix)}')
     log.success(runApi, f'Health check will be available at {healthCheckUrl}')
     log.success(runApi, f'Documentation will be available at {documentationUrl}')
+    log.success(runApi, f'Api static content will be available at {staticUrl}')
     for manager in api.managerList:
         manager.onRun(api, api.app)
     api.app.run(*args, debug=debug, **kwargs)
@@ -188,12 +190,17 @@ def runApi(*args, api=None, debug=False, **kwargs):
 
 
 @Function
-def getApiUrl(api):
+def getUrlPrefix(api):
+    return f'{api.scheme}://{api.host}{c.BLANK if ObjectHelper.isEmpty(api.port) else f"{c.COLON}{api.port}"}'
+
+
+@Function
+def getUrl(api, urlPrefix=None):
     apiUrl = None
     try :
-        apiUrl = f'{api.scheme}://{api.host}{c.BLANK if ObjectHelper.isEmpty(api.port) else f"{c.COLON}{api.port}"}{api.baseUrl}'
+        apiUrl = f'{urlPrefix if ObjectHelper.isNotNone(urlPrefix) else getUrlPrefix(api)}{api.baseUrl}'
     except Exception as exception :
-        log.error(getApiUrl.__class__, 'Not possible to parse pai url', exception)
+        log.error(getUrl, 'Not possible to parse pai url', exception)
     return apiUrl
 
 

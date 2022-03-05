@@ -302,7 +302,6 @@ def getApiUrl(apiInstance):
     return f'{apiInstance.scheme}{SCHEME_HOST_SEPARATOR}{apiInstance.host}{apiInstance.baseUrl}'.replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
 
 def getDocumentationUrl(apiInstance):
-    # return f'{getApiUrl(apiInstance)}{DOCUMENTATION_ENDPOINT}'
     globalsInstance = apiInstance.globals
     sheme = ConverterStatic.getValueOrDefault(ConverterStatic.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}'), [apiInstance.scheme]), [apiInstance.scheme])[0]
     host = ConverterStatic.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_HOST}'), apiInstance.host).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)

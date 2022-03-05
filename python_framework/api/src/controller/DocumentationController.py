@@ -9,7 +9,7 @@ class DocumentationController:
         return self.service.documentation.getSwaggerDocumentation(), HttpStatus.OK
 
 @Controller(url='/documentation/environment', tag='Documentation', description='Api Tree')
-class DocumentationBatchController:
+class DocumentationBulkController:
 
     @ControllerMethod(responseClass=dict)
     def get(self):

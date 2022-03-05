@@ -25,8 +25,6 @@ MODEL_CLASS_ROLE = 'MODEL'
 DTO_SUFIX = 'Dto'
 LIST_SUFIX = 'List'
 
-KW_BATCH = 'Batch'
-
 KW_REQUEST = 'Request'
 KW_RESPONSE = 'Response'
 

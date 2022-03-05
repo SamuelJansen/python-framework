@@ -4,7 +4,7 @@ from flask_cors import CORS
 from python_helper import Constant as c
 from python_helper import log, Function, ReflectionHelper, ObjectHelper, StringHelper, SettingHelper
 import globals
-from python_framework.api.src.util import Serializer
+from python_framework.api.src.constant import ControllerConstant
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import SqlAlchemyProxy
@@ -70,12 +70,12 @@ def getResourceNameList(apiTree, resourceType):
 
 @Function
 def getControllerNameList(controllerName):
-    # controllerNameList.append(f'{controllerName[:-len(FlaskManager.KW_CONTROLLER_RESOURCE)]}{Serializer.KW_BATCH}{FlaskManager.KW_CONTROLLER_RESOURCE}')
-    controllerNameList = [
-        name for name in dir(globals.importModule(controllerName)) if not name.startswith(c.UNDERSCORE) and name.endswith(FlaskManager.KW_CONTROLLER_RESOURCE)
-    ]
-    if controllerName not in controllerNameList:
-        return [controllerName, *controllerNameList]
+    # controllerNameList = [
+    #     name for name in dir(globals.importModule(controllerName)) if not name.startswith(c.UNDERSCORE) and name.endswith(FlaskManager.KW_CONTROLLER_RESOURCE)
+    # ]
+    controllerNameList = [controllerName]
+    for controllerType in ControllerConstant.CONTROLLER_TYPE_LIST:
+        controllerNameList.append(f'{controllerName[:-len(FlaskManager.KW_CONTROLLER_RESOURCE)]}{controllerType}{FlaskManager.KW_CONTROLLER_RESOURCE}')
     return controllerNameList
 
 
@@ -133,9 +133,9 @@ def getBaseUrl(globalsInstance):
     return globalsInstance.getSetting(ConfigurationKeyConstant.API_SERVER_BASE_URL)
 
 
-def getStaticBaseUrl(staticPackage, givenStaticUrl, globalsInstance):
-    if ObjectHelper.isNotEmpty(givenStaticUrl):
-        return givenStaticUrl
+def getStaticBaseUrl(staticPackage, givenBaseStaticUrl, globalsInstance):
+    if ObjectHelper.isNotEmpty(givenBaseStaticUrl):
+        return givenBaseStaticUrl
     staticPathUri = f'{c.FOWARD_SLASH}{staticPackage}'
     if SettingHelper.activeEnvironmentIsLocal():
         return staticPathUri
@@ -160,19 +160,19 @@ def initialize(
     staticUrl = None,
     **kwargs
 ):
+    fixInitializeKwargs(kwargs)
     if ObjectHelper.isNone(managerList):
         managerList = []
 
     globalsInstance = FlaskUtil.getGlobals()
 
-    staticUrl = getStaticBaseUrl(staticPackage, staticUrl, globalsInstance)
+    baseStaticUrl = getStaticBaseUrl(staticPackage, staticUrl, globalsInstance)
 
-    fixInitializeKwargs(kwargs)
     app = Flask(
         rootName,
         static_folder = staticPackage,
         template_folder = viewsPackage,
-        static_url_path = staticUrl,
+        static_url_path = baseStaticUrl,
         **kwargs
     )
     api = Api(app)
@@ -186,7 +186,7 @@ def initialize(
     api.host = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_HOST)
     api.port = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_PORT)
     api.baseUrl = getBaseUrl(globalsInstance)
-    api.staticUrl = staticUrl
+    api.baseStaticUrl = baseStaticUrl
 
     api.cors = CORS(app, resources={f"{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}})
     api.cors.api = api
