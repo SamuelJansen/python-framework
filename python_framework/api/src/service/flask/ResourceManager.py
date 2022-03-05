@@ -22,29 +22,37 @@ DOT_PY = '.py'
 def getPythonFrameworkResourceByType(resourceType):
     return FlaskManager.PYTHON_FRAMEWORK_RESOURCE_NAME_DICTIONARY.get(resourceType, [])
 
+
 def isNotPythonFrameworkApiInstance(apiInstance):
     return apiInstance.globals.apiName not in FlaskManager.PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST
+
 
 def isFromPythonFramework(apiInstance, resourceType, resourceName):
     return not (resourceName in getPythonFrameworkResourceByType(resourceType) and isNotPythonFrameworkApiInstance(apiInstance))
 
+
 def getResourceModuleNameAjusted(apiInstance, resourceType, resourceName):
     return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else FlaskManager.PYTHON_FRAMEWORK_MODULE_NAME
+
 
 def getResourceNameAjusted(apiInstance, resourceType, resourceName):
     return resourceName if isFromPythonFramework(apiInstance, resourceType, resourceName) else f'{resourceName}{c.DOT}{resourceName}'
 
+
 def isControllerResourceName(resourceName):
     return FlaskManager.KW_CONTROLLER_RESOURCE == resourceName[-len(FlaskManager.KW_CONTROLLER_RESOURCE):]
+
 
 @Function
 def getResourceName(resourceFileName):
     return resourceFileName.split(DOT_PY)[0]
 
+
 @Function
 def isResourceType(resourceFileName,resourceType):
     splitedResourceFileName = resourceFileName.split(resourceType)
     return len(splitedResourceFileName)>1 and splitedResourceFileName[1] == DOT_PY
+
 
 @Function
 def getResourceNameList(apiTree, resourceType):
@@ -59,13 +67,17 @@ def getResourceNameList(apiTree, resourceType):
             )
     return resourceNameList
 
+
 @Function
 def getControllerNameList(controllerName):
-    controllerNameList = [controllerName]
-    controllerNameList.append(f'{controllerName[:-len(FlaskManager.KW_CONTROLLER_RESOURCE)]}{Serializer.KW_BATCH}{FlaskManager.KW_CONTROLLER_RESOURCE}')
-    # controllerNameList = [name for name in dir(__import__(controllerName)) if not name.startswith(c.UNDERSCORE)]
-    # return ReflectionHelper.getAttributeOrMethodNameList(__import__(controllerName))
+    # controllerNameList.append(f'{controllerName[:-len(FlaskManager.KW_CONTROLLER_RESOURCE)]}{Serializer.KW_BATCH}{FlaskManager.KW_CONTROLLER_RESOURCE}')
+    controllerNameList = [
+        name for name in dir(globals.importResource(controllerName)) if not name.startswith(c.UNDERSCORE) and name.endswith(FlaskManager.KW_CONTROLLER_RESOURCE)
+    ]
+    if controllerName not in controllerNameList:
+        return [controllerName, *controllerNameList]
     return controllerNameList
+
 
 @Function
 def getControllerList(resourceName, resourceModuleName):
@@ -78,6 +90,7 @@ def getControllerList(resourceName, resourceModuleName):
     if 0 == len(importedControllerList):
         raise Exception(f'Not possible to import {resourceName} controller')
     return importedControllerList
+
 
 @Function
 def getResourceList(apiInstance, resourceType):
@@ -143,7 +156,7 @@ def initialize(
         rootName,
         static_folder = staticPackage,
         template_folder = viewsPackage,
-        static_url_path = staticUrl if StringHelper.isNotEmpty(staticUrl) else getStaticBaseUrl(globalsInstance),
+        static_url_path = staticUrl if ObjectHelper.isNotEmpty(staticUrl) else getStaticBaseUrl(globalsInstance),
         **kwargs
     )
     api = Api(app)
@@ -172,6 +185,7 @@ def initialize(
     SchedulerManager.onHttpRequestCompletion(api, app)
     SqlAlchemyProxy.onHttpRequestCompletion(api, app)
     return app
+
 
 @Function
 def addControllerListTo(apiInstance, controllerList):
@@ -263,11 +277,13 @@ def addConverterListTo(apiInstance,converterList):
 class FlaskResource:
     ...
 
+
 @Function
 def addResourceAttibutes(apiInstance):
     ReflectionHelper.setAttributeOrMethod(apiInstance, FlaskManager.KW_RESOURCE, FlaskResource())
     for resourceName in FlaskManager.KW_RESOURCE_LIST:
         ReflectionHelper.setAttributeOrMethod(apiInstance.resource, f'{resourceName[0].lower()}{resourceName[1:]}', FlaskResource())
+
 
 @Function
 def addFlaskApiResources(
