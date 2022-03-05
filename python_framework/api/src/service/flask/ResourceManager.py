@@ -169,7 +169,7 @@ def initialize(
     app = Flask(
         rootName,
         static_folder = staticPackage,
-        template_folder = viewsPackage,
+        template_folder = viewPackage,
         static_url_path = baseStaticUrl,
         **kwargs
     )
