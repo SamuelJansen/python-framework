@@ -204,7 +204,7 @@ def muteLogs(apiInstance, debug):
         werkzeug_logger = logging.getLogger('werkzeug')
         werkzeug_logger.disabled = True
         apiInstance.app.logger.disabled = True
-        apschedulerLoggerEnabled = api.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE)
+        apschedulerLoggerEnabled = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE)
         apscheduler_logger = logging.getLogger('apscheduler.scheduler')
         default_apscheduler_logger = logging.getLogger('apscheduler.executors.default')
         apscheduler_logger.disabled = True if ObjectHelper.isNone(apschedulerLoggerEnabled) else not apschedulerLoggerEnabled

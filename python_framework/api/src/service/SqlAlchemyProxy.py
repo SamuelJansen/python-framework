@@ -52,6 +52,14 @@ LIST = '''List'''
 
 CASCADE_ONE_TO_MANY = '''all,delete'''
 
+
+GIANT_STRING_SIZE = 16384
+LARGE_STRING_SIZE = 1024
+STRING_SIZE = 512
+MEDIUM_STRING_SIZE = 128
+LITTLE_STRING_SIZE = 64
+
+
 @Function
 def getNewModel():
     return declarative_base()
@@ -77,6 +85,8 @@ def getManyToMany(sister, brother, refferenceModel):
 
 @Function
 def getOneToMany(owner, pet, refferenceModel):
+    ###- please try and add "single_parent=True"
+    ###- return relationship(pet, back_populates=attributeIt(f'{owner}'), single_parent=True, cascade=CASCADE_ONE_TO_MANY)
     return relationship(pet, back_populates=attributeIt(f'{owner}'), cascade=CASCADE_ONE_TO_MANY)
 
 @Function
