@@ -23,6 +23,7 @@ class ErrorLog(MODEL):
     url = sap.Column(sap.String(MAX_URL_SIZE))
     message = sap.Column(sap.String(MAX_MESSAGE_SIZE))
     logMessage = sap.Column(sap.String(MAX_MESSAGE_SIZE))
+    logHeaders = sap.Column(sap.String(MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE))
     logPayload = sap.Column(sap.String(MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE))
     logResource = sap.Column(sap.String(MAX_RESOURCE_NAME_SIZE))
     logResourceMethod = sap.Column(sap.String(MAX_RESOURCE_METHOD_NAME_SIZE))
@@ -35,6 +36,7 @@ class ErrorLog(MODEL):
         url = None,
         message = None,
         logMessage = None,
+        logHeaders = None,
         logPayload = None,
         logResource = None,
         logResourceMethod = None,
@@ -46,6 +48,7 @@ class ErrorLog(MODEL):
         self.url = str(url)[:MAX_URL_SIZE-1]
         self.message = str(message)[:MAX_MESSAGE_SIZE-1]
         self.logMessage = str(logMessage)[:MAX_MESSAGE_SIZE-1]
+        self.logHeaders = str(logPayload)[:MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE-1]
         self.logPayload = str(logPayload)[:MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE-1]
         self.logResource = str(logResource)[:MAX_RESOURCE_NAME_SIZE-1]
         self.logResourceMethod = str(logResourceMethod)[:MAX_RESOURCE_METHOD_NAME_SIZE-1]
@@ -57,6 +60,7 @@ class ErrorLog(MODEL):
         self.url = str(globalException.url)[:MAX_URL_SIZE-1]
         self.message = str(globalException.message)[:MAX_MESSAGE_SIZE-1]
         self.logMessage = str(globalException.logMessage)[:MAX_MESSAGE_SIZE-1]
+        self.logHeaders = str(globalException.logHeaders)[:MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE-1]
         self.logPayload = str(globalException.logPayload)[:MAX_HTTP_ERROR_LOG_PAYLOAD_SIZE-1]
         self.logResource = str(globalException.logResource)[:MAX_RESOURCE_NAME_SIZE-1]
         self.logResourceMethod = str(globalException.logResourceMethod)[:MAX_RESOURCE_METHOD_NAME_SIZE-1]
