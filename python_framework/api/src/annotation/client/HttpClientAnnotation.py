@@ -5,7 +5,7 @@ from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringH
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
 from python_framework.api.src.domain import HttpDomain
-from python_framework.api.src.constant import HttpClientConstant
+from python_framework.api.src.constant import HttpClientConstant, LogConstant
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.flask import FlaskManager
@@ -348,12 +348,12 @@ def HttpClientMethod(
             return clientResponse
 
         def doLogRequest(verb, url, body, params, headers, logRequest, requestKwargs):
-            log.info(resourceInstanceMethod, f'[CLIENT    ] {verb} - {url}')
+            log.info(resourceInstanceMethod, f'{LogConstant.CLIENT_SPACE}{verb}{c.SPACE_DASH_SPACE}{url}')
             if logRequest:
                 parsetRequestKwargs = {} if ObjectHelper.isEmpty(requestKwargs) else {'requestKwargs': {**requestKwargs}}
                 log.prettyJson(
                     resourceInstanceMethod,
-                    '[CLIENT    ] Request',
+                    LogConstant.CLIENT_REQUEST,
                     {
                         'headers': ConverterStatic.getValueOrDefault(headers, dict()),
                         'query': ConverterStatic.getValueOrDefault(params, dict()),
@@ -418,7 +418,7 @@ def HttpClientMethod(
             if resourceInstance.logResponse or logResponse :
                 log.prettyJson(
                     resourceInstanceMethod,
-                    '[CLIENT    ] Response',
+                    LogConstant.CLIENT_RESPONSE,
                     {
                         'headers': clientResponseHeaders,
                         'body': Serializer.getObjectAsDictionary(clientResponseBody, muteLogs=not debugIt),
@@ -503,12 +503,12 @@ def raiseException(clientResponse, exception):
         url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
         status = FlaskUtil.safellyGetResponseStatus(clientResponse),
         logHeaders = {
-            'requestHeaders': FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
-            'responseHeaders': FlaskUtil.safellyGetResponseHeaders(clientResponse)
+            HttpClientConstant.REQUEST_HEADERS_KEY: FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
+            HttpClientConstant.RESPONSE_HEADERS_KEY: FlaskUtil.safellyGetResponseHeaders(clientResponse)
         },
         logPayload = {
-            'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
-            'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
+            HttpClientConstant.REQUEST_BODY_KEY: FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
+            HttpClientConstant.RESPONSE_BODY_KEY: FlaskUtil.safellyGetResponseJson(clientResponse)
         },
         context = HttpDomain.CLIENT_CONTEXT
     )
@@ -522,12 +522,12 @@ def raiseExceptionIfNeeded(clientResponse):
             url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
             status = status,
             logHeaders = {
-                'requestHeaders': FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
-                'responseHeaders': FlaskUtil.safellyGetResponseHeaders(clientResponse)
+                HttpClientConstant.REQUEST_HEADERS_KEY: FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
+                HttpClientConstant.RESPONSE_HEADERS_KEY: FlaskUtil.safellyGetResponseHeaders(clientResponse)
             },
             logPayload = {
-                'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
-                'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
+                HttpClientConstant.REQUEST_BODY_KEY: FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
+                HttpClientConstant.RESPONSE_BODY_KEY: FlaskUtil.safellyGetResponseJson(clientResponse)
             },
             context = HttpDomain.CLIENT_CONTEXT
         )
@@ -538,12 +538,12 @@ def raiseExceptionIfNeeded(clientResponse):
             url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
             status = status,
             logHeaders = {
-                'requestHeaders': FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
-                'responseHeaders': FlaskUtil.safellyGetResponseHeaders(clientResponse)
+                HttpClientConstant.REQUEST_HEADERS_KEY: FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
+                HttpClientConstant.RESPONSE_HEADERS_KEY: FlaskUtil.safellyGetResponseHeaders(clientResponse)
             },
             logPayload = {
-                'requestBody': FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
-                'responseBody': FlaskUtil.safellyGetResponseJson(clientResponse)
+                HttpClientConstant.REQUEST_BODY_KEY: FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
+                HttpClientConstant.RESPONSE_BODY_KEY: FlaskUtil.safellyGetResponseJson(clientResponse)
             },
             context = HttpDomain.CLIENT_CONTEXT
         )

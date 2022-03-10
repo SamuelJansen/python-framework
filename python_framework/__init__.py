@@ -35,6 +35,7 @@ from python_framework.api.src.constant import HttpClientConstant
 from python_framework.api.src.constant import WeekDayConstant
 from python_framework.api.src.constant import ControllerConstant
 from python_framework.api.src.constant import StaticConstant
+from python_framework.api.src.constant import LogConstant
 
 from python_framework.api.src.converter.static import ConverterStatic
 

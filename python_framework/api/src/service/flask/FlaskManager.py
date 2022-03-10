@@ -8,10 +8,11 @@ from python_framework.api.src.annotation.EnumAnnotation import EnumItem
 from python_framework.api.src.annotation.GlobalExceptionAnnotation import EncapsulateItWithGlobalException
 from python_framework.api.src.constant import ConfigurationKeyConstant, JwtConstant
 from python_framework.api.src.domain import HttpDomain
-from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.constant import StaticConstant
+from python_framework.api.src.constant import LogConstant
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
+from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service import WebBrowser
 from python_framework.api.src.service.ExceptionHandler import GlobalException
@@ -486,7 +487,7 @@ def handleControllerMethod(
         if resourceInstance.logRequest or  logRequest :
             log.prettyJson(
                 resourceInstanceMethod,
-                '[CONTROLLER] Request',
+                LogConstant.CONTROLLER_REQUEST,
                 {
                     'headers': headers,
                     # 'query': FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs), ###- safellyGetUrl() returns query param
@@ -655,7 +656,7 @@ def ControllerMethod(
             # r.headers['Cache-Control'] = 'public, max-age=0'
             resourceInstance = args[0]
             completeResponse = None
-            log.info(resourceInstanceMethod, f'[CONTROLLER] {FlaskUtil.safellyGetVerb()} - {FlaskUtil.safellyGetUrl()}')
+            log.info(resourceInstanceMethod, f'{LogConstant.CONTROLLER_SPACE}{FlaskUtil.safellyGetVerb()}{c.SPACE_DASH_SPACE}{FlaskUtil.safellyGetUrl()}')
             try :
                 completeResponse = handleAnyControllerMethodRequest(
                     args,
@@ -717,7 +718,7 @@ def ControllerMethod(
                 if resourceInstance.logResponse or logResponse :
                     log.prettyJson(
                         resourceInstanceMethod,
-                        '[CONTROLLER] Response',
+                        LogConstant.CONTROLLER_RESPONSE,
                         {
                             'headers': FlaskUtil.safellyGetResponseHeaders(httpResponse),
                             'body': FlaskUtil.safellyGetFlaskResponseJson(httpResponse), ###- json.loads(Serializer.jsonifyIt(responseBody))
