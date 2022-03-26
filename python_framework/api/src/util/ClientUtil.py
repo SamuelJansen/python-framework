@@ -22,21 +22,21 @@ class HttpClientEvent(Exception):
 
 
 class ManualHttpClientEvent(Exception):
-    def __init__(self, completeResponse):
+    def __init__(self, completeResponse, eventContext=HttpDomain.CLIENT_CONTEXT):
         Exception.__init__(self, f'ManualHttpClientEvent')
         self.completeResponse = completeResponse
 
 
-def getHttpClientEvent(resourceInstanceMethod, *args, **kwargs):
+def getHttpClientEvent(resourceInstanceMethod, *args, eventContext=HttpDomain.CLIENT_CONTEXT, **kwargs):
     completeResponse = None
     try:
-        completeResponse = resourceInstanceMethod(*args, **kwargs)
+        completeResponse = resourceInstanceMethod(*args, eventContext=eventContext, **kwargs)
     except HttpClientEvent as httpClientEvent:
         return httpClientEvent
     except Exception as exception:
         raise exception
     if ObjectHelper.isNotNone(completeResponse):
-        return ManualHttpClientEvent(completeResponse)
+        return ManualHttpClientEvent(completeResponse, eventContext=eventContext)
 
 
 def raiseHttpClientEventNotFoundException(*args, **kwargs):
@@ -101,20 +101,6 @@ def raiseException(
         getErrorMessage(clientResponse, exception=exception, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage),
         exception = exception
     )
-    # raise GlobalException(
-    #     logMessage = getErrorMessage(clientResponse, exception=exception),
-    #     url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
-    #     status = FlaskUtil.safellyGetResponseStatus(clientResponse),
-    #     logHeaders = {
-    #         HttpClientConstant.REQUEST_HEADERS_KEY: FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
-    #         HttpClientConstant.RESPONSE_HEADERS_KEY: FlaskUtil.safellyGetResponseHeaders(clientResponse)
-    #     },
-    #     logPayload = {
-    #         HttpClientConstant.REQUEST_BODY_KEY: FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
-    #         HttpClientConstant.RESPONSE_BODY_KEY: FlaskUtil.safellyGetResponseJson(clientResponse)
-    #     },
-    #     context = HttpDomain.CLIENT_CONTEXT
-    # )
 
 
 def raiseExceptionIfNeeded(
@@ -132,20 +118,6 @@ def raiseExceptionIfNeeded(
             exception = None,
             status = status
         )
-        # raise GlobalException(
-        #     logMessage = getErrorMessage(clientResponse),
-        #     url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
-        #     status = status,
-        #     logHeaders = {
-        #         HttpClientConstant.REQUEST_HEADERS_KEY: FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
-        #         HttpClientConstant.RESPONSE_HEADERS_KEY: FlaskUtil.safellyGetResponseHeaders(clientResponse)
-        #     },
-        #     logPayload = {
-        #         HttpClientConstant.REQUEST_BODY_KEY: FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
-        #         HttpClientConstant.RESPONSE_BODY_KEY: FlaskUtil.safellyGetResponseJson(clientResponse)
-        #     },
-        #     context = HttpDomain.CLIENT_CONTEXT
-        # )
     elif 400 <= status:
         raise ExceptionHandler.getClientGlobalException(
             clientResponse,
@@ -155,21 +127,6 @@ def raiseExceptionIfNeeded(
             status = status,
             message = getErrorMessage(clientResponse, context=context, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage)
         )
-        # raise GlobalException(
-        #     message = getErrorMessage(clientResponse),
-        #     logMessage = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE,
-        #     url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
-        #     status = status,
-        #     logHeaders = {
-        #         HttpClientConstant.REQUEST_HEADERS_KEY: FlaskUtil.safellyGetRequestHeadersFromResponse(clientResponse),
-        #         HttpClientConstant.RESPONSE_HEADERS_KEY: FlaskUtil.safellyGetResponseHeaders(clientResponse)
-        #     },
-        #     logPayload = {
-        #         HttpClientConstant.REQUEST_BODY_KEY: FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
-        #         HttpClientConstant.RESPONSE_BODY_KEY: FlaskUtil.safellyGetResponseJson(clientResponse)
-        #     },
-        #     context = HttpDomain.CLIENT_CONTEXT
-        # )
 
 
 @Function
