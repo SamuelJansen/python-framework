@@ -98,8 +98,8 @@ def raiseException(
     raise ExceptionHandler.getClientGlobalException(
         clientResponse,
         context,
-        exception,
-        getErrorMessage(clientResponse, exception=exception, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage)
+        getErrorMessage(clientResponse, exception=exception, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage),
+        exception = exception
     )
     # raise GlobalException(
     #     logMessage = getErrorMessage(clientResponse, exception=exception),
@@ -128,8 +128,8 @@ def raiseExceptionIfNeeded(
         raise ExceptionHandler.getClientGlobalException(
             clientResponse,
             context,
-            exception,
             getErrorMessage(clientResponse, context=context, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage),
+            exception = None,
             status = status
         )
         # raise GlobalException(
@@ -150,8 +150,8 @@ def raiseExceptionIfNeeded(
         raise ExceptionHandler.getClientGlobalException(
             clientResponse,
             context,
-            exception,
             businessLogMessage,
+            exception = None,
             status = status,
             message = getErrorMessage(clientResponse, context=context, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage)
         )

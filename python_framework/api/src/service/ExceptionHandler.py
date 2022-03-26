@@ -175,7 +175,7 @@ def getGeneralGlobalException(exception, resourceInstance, resourceInstanceMetho
 
 
 @Function
-def getClientGlobalException(clientResponse, context, exception, logMessage, status=None, message=None):
+def getClientGlobalException(clientResponse, context, logMessage, exception=None, status=None, message=None):
     raise GlobalException(
         message = message,
         logMessage = logMessage,
@@ -189,5 +189,6 @@ def getClientGlobalException(clientResponse, context, exception, logMessage, sta
             HttpDomain.REQUEST_BODY_KEY: FlaskUtil.safellyGetRequestJsonFromResponse(clientResponse),
             HttpDomain.RESPONSE_BODY_KEY: FlaskUtil.safellyGetResponseJson(clientResponse)
         },
-        context = context
+        context = context,
+        originalException = exception
     )
