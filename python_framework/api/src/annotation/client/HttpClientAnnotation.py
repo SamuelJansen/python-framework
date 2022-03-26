@@ -16,13 +16,21 @@ from python_framework.api.src.util.ClientUtil import HttpClientEvent, ManualHttp
 
 
 @Function
-def HttpClient(url=c.BLANK, headers=None, timeout=HttpClientConstant.DEFAULT_TIMEOUT, logRequest=False, logResponse=False) :
-    clientUrl = url
-    clientHeaders = ConverterStatic.getValueOrDefault(headers, dict())
-    clientTimeout = timeout
-    clientLogRequest = logRequest
-    clientLogResponse = logResponse
+def HttpClient(
+    url = c.BLANK,
+    headers = None,
+    timeout = HttpClientConstant.DEFAULT_TIMEOUT,
+    eventContext = HttpDomain.CLIENT_CONTEXT,
+    logRequest = False,
+    logResponse = False
+):
     def Wrapper(OuterClass, *args, **kwargs):
+        clientUrl = url
+        clientHeaders = ConverterStatic.getValueOrDefault(headers, dict())
+        clientTimeout = timeout
+        clientEventContext = eventContext
+        clientLogRequest = logRequest
+        clientLogResponse = logResponse
         log.wrapper(HttpClient,f'''wrapping {OuterClass.__name__}''')
         class InnerClass(OuterClass):
             url = clientUrl
@@ -36,17 +44,17 @@ def HttpClient(url=c.BLANK, headers=None, timeout=HttpClientConstant.DEFAULT_TIM
                 OuterClass.__init__(self,*args, **kwargs)
                 self.globals = apiInstance.globals
             def options(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.OPTIONS, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.OPTIONS, *args, eventContext=clientEventContext, **kwargs)
             def get(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.GET, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.GET, *args, eventContext=clientEventContext, **kwargs)
             def post(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.POST, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.POST, *args, eventContext=clientEventContext, **kwargs)
             def put(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.PUT, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.PUT, *args, eventContext=clientEventContext, **kwargs)
             def patch(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.PATCH, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.PATCH, *args, eventContext=clientEventContext, **kwargs)
             def delete(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.DELETE, *args, **kwargs)
+                raise HttpClientEvent(HttpDomain.Verb.DELETE, *args, eventContext=clientEventContext, **kwargs)
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -371,14 +379,6 @@ def HttpClientMethod(
                             resourceInstance,
                             *httpClientEvent.args,
                             **httpClientEvent.kwargs
-                        )
-                    except requests.exceptions.ReadTimeout as readTimeoutException:
-                        raise ExceptionHandler.getClientGlobalException(
-                            resourceMethodResponse,
-                            HttpDomain.EMITTER_CONTEXT,
-                            str(exception),
-                            exception = readTimeoutException,
-                            status = HttpStatus.REQUEST_TIMEOUT
                         )
                     except Exception as exception:
                         ClientUtil.raiseException(clientResponse, exception)

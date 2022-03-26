@@ -27,10 +27,10 @@ class ManualHttpClientEvent(Exception):
         self.completeResponse = completeResponse
 
 
-def getHttpClientEvent(resourceInstanceMethod, *args, eventContext=HttpDomain.CLIENT_CONTEXT, **kwargs):
+def getHttpClientEvent(resourceInstanceMethod, *args, **kwargs):
     completeResponse = None
     try:
-        completeResponse = resourceInstanceMethod(*args, eventContext=eventContext, **kwargs)
+        completeResponse = resourceInstanceMethod(*args, **kwargs)
     except HttpClientEvent as httpClientEvent:
         return httpClientEvent
     except Exception as exception:
