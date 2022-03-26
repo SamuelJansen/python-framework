@@ -497,7 +497,7 @@ def handleControllerMethod(
                 logLevel = log.INFO
             )
     except Exception as exception:
-        log.failure(innerResourceInstanceMethod, 'Not possible to log request properly', exception)
+        log.failure(handleControllerMethod, 'Not possible to log request properly', exception)
     return validateAndReturnResponse(handleAdditionalResponseHeadersIfNeeded(resourceInstanceMethod(resourceInstance,*args[1:],**kwargs)))
 
 @Function

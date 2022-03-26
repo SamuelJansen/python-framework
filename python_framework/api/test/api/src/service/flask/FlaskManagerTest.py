@@ -9,6 +9,8 @@ def KW_RESOURCE_LIST_isInCorrectOrder() :
         FlaskManager.KW_SCHEDULER_RESOURCE,
         FlaskManager.KW_SERVICE_RESOURCE,
         FlaskManager.KW_CLIENT_RESOURCE,
+        FlaskManager.KW_LISTENER_RESOURCE,
+        FlaskManager.KW_EMITTER_RESOURCE,
         FlaskManager.KW_REPOSITORY_RESOURCE,
         FlaskManager.KW_VALIDATOR_RESOURCE,
         FlaskManager.KW_MAPPER_RESOURCE,

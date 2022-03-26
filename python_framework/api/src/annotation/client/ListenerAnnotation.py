@@ -6,11 +6,11 @@ from python_framework.api.src.converter.static import ConverterStatic
 
 
 DEFAUTL_MUTE_LOGS = False
-DEFAUTL_DISABLE = False
+DEFAUTL_ENABLED = True
 
 
 @Function
-def Listener(*listenerArgs, manager=None, managerClient=None, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **listenerKwargs) :
+def Listener(*listenerArgs, manager=None, managerClient=None, enabled=DEFAUTL_ENABLED, muteLogs=DEFAUTL_MUTE_LOGS, **listenerKwargs) :
     listenerManager = manager
     listenerManagerClient = managerClient
     def Wrapper(OuterClass, *args, **kwargs):
@@ -24,8 +24,7 @@ def Listener(*listenerArgs, manager=None, managerClient=None, disable=DEFAUTL_DI
                 self.managerClient = listenerManagerClient if not isinstance(listenerManagerClient, str) else ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, listenerManagerClient)
                 self.globals = apiInstance.globals
                 self.service = apiInstance.resource.service
-                self.enabled = self.globals.getApiSetting(ConfigurationKeyConstant.API_LISTENER_ENABLE)
-                self.disabled = disable
+                self.enabled = enabled and self.globals.getApiSetting(ConfigurationKeyConstant.API_LISTENER_ENABLE)
                 self.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.API_LISTENER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and muteLogs)
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
@@ -37,11 +36,11 @@ def ListenerMethod(
     *methodArgs,
     requestClass = None,
     interceptor = FlaskManager.defaultResourceInterceptor,
-    disable = DEFAUTL_DISABLE,
+    enabled = DEFAUTL_ENABLED,
     muteLogs = DEFAUTL_MUTE_LOGS,
     **methodKwargs
 ):
-    resourceMethodDisable = disable
+    resourceMethodEnabled = enabled
     resourceMethodMuteLogs = muteLogs
     resourceInterceptor = interceptor
     def innerMethodWrapper(resourceMethod, *innerMethodArgs, **innerMethodKwargs) :
@@ -49,7 +48,8 @@ def ListenerMethod(
         apiInstance = FlaskManager.getApi()
         methodClassName = ReflectionHelper.getMethodClassName(resourceMethod)
         methodName = ReflectionHelper.getName(resourceMethod)
-        resourceMethod.disabled = disable
+        resourceTypeIsEnabled = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_LISTENER_ENABLE)
+        resourceMethod.enabled = resourceMethodEnabled and resourceTypeIsEnabled
         resourceMethod.id = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
         resourceMethod.muteLogs = resourceMethodMuteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_LISTENER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceMethodMuteLogs)
         listenerArgs = [*methodArgs]
@@ -62,7 +62,7 @@ def ListenerMethod(
             resourceInstance = FlaskManager.getResourceSelf(apiInstance, FlaskManager.KW_LISTENER_RESOURCE, resourceInstanceName)
             args = FlaskManager.getArgumentInFrontOfArgs(args, resourceInstance) ###- resourceInstance = args[0]
             muteLogs = resourceInstance.muteLogs or resourceMethod.muteLogs
-            if resourceInstance.enabled and not resourceInstance.disabled and not resourceMethod.disabled:
+            if resourceInstance.enabled and resourceMethod.enabled:
                 if not muteLogs:
                     log.info(resourceMethod, f'{resourceMethod.id} listener method started with args={methodArgs} and kwargs={methodKwargs}')
                 methodReturn = None
@@ -76,10 +76,11 @@ def ListenerMethod(
                 if not muteLogs:
                     log.info(resourceMethod, f'{resourceMethod.id} listener method finished')
                 return methodReturn
-            if not muteLogs:
-                log.warning(resourceMethod, f'{resourceMethod.id} listener method didn{c.SINGLE_QUOTE}t started. {"Listeners are disabled" if not resourceInstance.enabled else "This listener class is disabled" if resourceInstance.disabled else "This listener method is disabled"}')
+            else:
+                if not muteLogs:
+                    log.warning(resourceMethod, f'{resourceMethod.id} listener method didn{c.SINGLE_QUOTE}t started. {"Listeners are disabled" if resourceTypeIsEnabled else "This listener class is disabled" if not resourceInstance.enabled else "This listener method is disabled"}')
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceMethod)
-        innerResourceInstanceMethod.disable = resourceMethodDisable
+        innerResourceInstanceMethod.enabled = resourceMethodEnabled
         innerResourceInstanceMethod.muteLogs = resourceMethodMuteLogs
         innerResourceInstanceMethod.interceptor = resourceInterceptor
         return innerResourceInstanceMethod
