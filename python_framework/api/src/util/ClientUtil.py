@@ -95,6 +95,14 @@ def raiseException(
     businessLogMessage = HttpClientConstant.ERROR_AT_CLIENT_CALL_MESSAGE,
     defaultLogMessage = HttpClientConstant.CLIENT_DID_NOT_SENT_ANY_MESSAGE
 ):
+    if isinstance(exception, requests.exceptions.ReadTimeout):
+        raise ExceptionHandler.getClientGlobalException(
+            resourceMethodResponse,
+            context,
+            str(exception),
+            exception = exception,
+            status = HttpStatus.REQUEST_TIMEOUT
+        )
     raise ExceptionHandler.getClientGlobalException(
         clientResponse,
         context,
@@ -119,6 +127,15 @@ def raiseExceptionIfNeeded(
             status = status
         )
     elif 400 <= status:
+        if 404 == status:
+            raise ExceptionHandler.getClientGlobalException(
+                clientResponse,
+                context,
+                businessLogMessage,
+                exception = None,
+                status = HttpStatus.PROXY_ATHENTICATION_REQUIRED,
+                message = getErrorMessage(clientResponse, context=context, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage)
+            )
         raise ExceptionHandler.getClientGlobalException(
             clientResponse,
             context,
