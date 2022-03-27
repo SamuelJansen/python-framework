@@ -98,7 +98,7 @@ def raiseException(
 ):
     if isinstance(exception, requests.exceptions.ReadTimeout):
         raise ExceptionHandler.getClientGlobalException(
-            resourceMethodResponse,
+            clientResponse,
             context,
             str(exception),
             exception = exception,

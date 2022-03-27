@@ -21,8 +21,8 @@ class Verb:
 CONTROLLER_CONTEXT = 'Controller'
 CLIENT_CONTEXT = 'Client'
 LISTENER_CONTEXT = 'Listener'
-EMITTER_CONTEXT = 'Emmiter'
-SCHEDULER_CONTEXT = 'Emmiter'
+EMITTER_CONTEXT = 'Emitter'
+SCHEDULER_CONTEXT = 'Scheduler'
 
 
 REQUEST_HEADERS_KEY = 'requestHeaders'
