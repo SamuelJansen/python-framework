@@ -3,6 +3,7 @@ from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringH
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 
 
 DEFAUTL_MUTE_LOGS = False
@@ -38,20 +39,23 @@ def ListenerMethod(
     interceptor = FlaskManager.defaultResourceInterceptor,
     enabled = DEFAUTL_ENABLED,
     muteLogs = DEFAUTL_MUTE_LOGS,
+    muteStacktraceOnBusinessRuleException = True,
     **methodKwargs
 ):
-    resourceMethodEnabled = enabled
-    resourceMethodMuteLogs = muteLogs
+    resourceInstanceMethodRequestClass = requestClass
+    resourceInstanceMethodEnabled = enabled
+    resourceInstanceMethodMuteLogs = muteLogs
     resourceInterceptor = interceptor
-    def innerMethodWrapper(resourceMethod, *innerMethodArgs, **innerMethodKwargs) :
-        log.wrapper(ListenerMethod,f'''wrapping {resourceMethod.__name__}''')
+    resourceInstanceMethodMuteStacktraceOnBusinessRuleException = muteStacktraceOnBusinessRuleException
+    def innerMethodWrapper(resourceInstanceMethod, *innerMethodArgs, **innerMethodKwargs) :
+        log.wrapper(ListenerMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
-        methodClassName = ReflectionHelper.getMethodClassName(resourceMethod)
-        methodName = ReflectionHelper.getName(resourceMethod)
+        methodClassName = ReflectionHelper.getMethodClassName(resourceInstanceMethod)
+        methodName = ReflectionHelper.getName(resourceInstanceMethod)
         resourceTypeIsEnabled = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_LISTENER_ENABLE)
-        resourceMethod.enabled = resourceMethodEnabled and resourceTypeIsEnabled
-        resourceMethod.id = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
-        resourceMethod.muteLogs = resourceMethodMuteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_LISTENER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceMethodMuteLogs)
+        resourceInstanceMethod.enabled = resourceInstanceMethodEnabled and resourceTypeIsEnabled
+        resourceInstanceMethod.id = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
+        resourceInstanceMethod.muteLogs = resourceInstanceMethodMuteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_LISTENER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceInstanceMethodMuteLogs)
         listenerArgs = [*methodArgs]
         listenerKwargs = {**methodKwargs}
         resourceInstanceName = methodClassName[:-len(FlaskManager.KW_LISTENER_RESOURCE)]
@@ -61,27 +65,38 @@ def ListenerMethod(
         def innerResourceInstanceMethod(*args, **kwargs) :
             resourceInstance = FlaskManager.getResourceSelf(apiInstance, FlaskManager.KW_LISTENER_RESOURCE, resourceInstanceName)
             args = FlaskManager.getArgumentInFrontOfArgs(args, resourceInstance) ###- resourceInstance = args[0]
-            muteLogs = resourceInstance.muteLogs or resourceMethod.muteLogs
-            if resourceInstance.enabled and resourceMethod.enabled:
+            muteLogs = resourceInstance.muteLogs or resourceInstanceMethod.muteLogs
+            if resourceInstance.enabled and resourceInstanceMethod.enabled:
                 if not muteLogs:
-                    log.info(resourceMethod, f'{resourceMethod.id} listener method started with args={methodArgs} and kwargs={methodKwargs}')
+                    log.info(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.LISTENER_CONTEXT.lower()} method started with args={methodArgs} and kwargs={methodKwargs}')
                 methodReturn = None
-                try :
-                    FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
-                    methodReturn = resourceMethod(*args,**kwargs)
-                except Exception as exception :
-                    if not muteLogs:
-                        log.warning(resourceMethod, f'Not possible to run {resourceMethod.id} properly', exception=exception, muteStackTrace=True)
-                    FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceMethod)
+                try:
+                    try :
+                        FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
+                        methodReturn = resourceInstanceMethod(*args,**kwargs)
+                    except Exception as exception :
+                        # if not muteLogs:
+                        #     log.warning(resourceInstanceMethod, f'Not possible to run {resourceInstanceMethod.id} properly', exception=exception, muteStackTrace=True)
+                        FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
+                except Exception as exception:
+                    logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} {HttpDomain.LISTENER_CONTEXT.lower()}'
+                    if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):
+                        log.error(resourceInstance.__class__, logErrorMessage, exception)
+                    else :
+                        log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=resourceInstanceMethodMuteStacktraceOnBusinessRuleException)
+                    raise exception
                 if not muteLogs:
-                    log.info(resourceMethod, f'{resourceMethod.id} listener method finished')
+                    log.info(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.LISTENER_CONTEXT.lower()} method finished')
                 return methodReturn
             else:
                 if not muteLogs:
-                    log.warning(resourceMethod, f'{resourceMethod.id} listener method didn{c.SINGLE_QUOTE}t started. {"Listeners are disabled" if resourceTypeIsEnabled else "This listener class is disabled" if not resourceInstance.enabled else "This listener method is disabled"}')
-        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceMethod)
-        innerResourceInstanceMethod.enabled = resourceMethodEnabled
-        innerResourceInstanceMethod.muteLogs = resourceMethodMuteLogs
+                    log.warning(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.LISTENER_CONTEXT.lower()} method didn{c.SINGLE_QUOTE}t started. {"Listeners are disabled" if resourceTypeIsEnabled else f"This {HttpDomain.LISTENER_CONTEXT.lower()} class is disabled" if not resourceInstance.enabled else f"This {HttpDomain.LISTENER_CONTEXT.lower()} method is disabled"}')
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        innerResourceInstanceMethod.id = resourceInstanceMethod.id
+        innerResourceInstanceMethod.requestClass = resourceInstanceMethodRequestClass
+        innerResourceInstanceMethod.enabled = resourceInstanceMethodEnabled
+        innerResourceInstanceMethod.muteLogs = resourceInstanceMethodMuteLogs
         innerResourceInstanceMethod.interceptor = resourceInterceptor
+        innerResourceInstanceMethod.muteStacktraceOnBusinessRuleException = resourceInstanceMethodMuteStacktraceOnBusinessRuleException
         return innerResourceInstanceMethod
     return innerMethodWrapper

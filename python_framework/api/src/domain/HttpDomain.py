@@ -22,6 +22,7 @@ CONTROLLER_CONTEXT = 'Controller'
 CLIENT_CONTEXT = 'Client'
 LISTENER_CONTEXT = 'Listener'
 EMITTER_CONTEXT = 'Emmiter'
+SCHEDULER_CONTEXT = 'Emmiter'
 
 
 REQUEST_HEADERS_KEY = 'requestHeaders'

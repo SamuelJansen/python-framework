@@ -473,7 +473,8 @@ def handleControllerMethod(
     requestParamClass,
     requestClass,
     logRequest,
-    muteStacktraceOnBusinessRuleException
+    muteStacktraceOnBusinessRuleException,
+    logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
     requestBodyAsJson = {}
     if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
@@ -487,7 +488,7 @@ def handleControllerMethod(
         if resourceInstance.logRequest or  logRequest :
             log.prettyJson(
                 resourceInstanceMethod,
-                LogConstant.CONTROLLER_REQUEST,
+                logRequestMessage,
                 {
                     'headers': headers,
                     # 'query': FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs), ###- safellyGetUrl() returns query param
@@ -766,7 +767,7 @@ def getAndPersistGlobalException(
     )
 
 
-def raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=None):
+def raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.CONTROLLER_CONTEXT):
     raise getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=context)
 
 
@@ -774,24 +775,25 @@ def getCompleteResponseByException(
     exception,
     resourceInstance,
     resourceInstanceMethod,
-    muteStacktraceOnBusinessRuleException
+    muteStacktraceOnBusinessRuleException,
+    context = HttpDomain.CONTROLLER_CONTEXT
 ):
     try:
-        exception = getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
+        exception = getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=context)
         completeResponse = (ExceptionHandler.getDefaultBodyException(exception=exception), {}, exception.status)
         try :
-            logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} request'
+            logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} {context.lower()} request'
             if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):
                 log.error(resourceInstance.__class__, logErrorMessage, exception)
             else :
                 log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=muteStacktraceOnBusinessRuleException)
         except Exception as logErrorMessageException :
-            log.debug(getCompleteResponseByException, 'Error logging exception at controller', exception=logErrorMessageException)
-            log.error(getCompleteResponseByException, 'Error processing request', exception)
+            log.debug(getCompleteResponseByException, f'Error logging exception at {context.lower()}', exception=logErrorMessageException, muteStackTrace=True)
+            log.error(getCompleteResponseByException, f'Error processing {context.lower()} request', exception)
         return validateAndReturnResponse(handleAdditionalResponseHeadersIfNeeded(completeResponse))
     except Exception as unexpectedException:
-        log.error(getCompleteResponseByException, 'Error while building exception return', unexpectedException)
-        log.error(getCompleteResponseByException, 'Error processing request', exception)
+        log.debug(getCompleteResponseByException, f'Error while building exception {context.lower()} return', exception=unexpectedException, muteStackTrace=True)
+        log.error(getCompleteResponseByException, f'Error processing {context.lower()} request', exception)
         return validateAndReturnResponse((ExceptionHandler.getDefaultBodyException(), {}, ExceptionHandler.DEFAULT_STATUS))
 
 def validateAndReturnResponse(completeResponse):

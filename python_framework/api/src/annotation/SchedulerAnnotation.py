@@ -4,6 +4,8 @@ from python_framework.api.src.enumeration.SchedulerType import SchedulerType
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.domain import HttpDomain
 
 
 DEFAUTL_MUTE_LOGS = False
@@ -29,52 +31,71 @@ def Scheduler(*schedulerArgs, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOG
     return Wrapper
 
 @Function
-def SchedulerMethod(*methodArgs, requestClass=None, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOGS, **methodKwargs) :
-    resourceMethodDisable = disable
-    resourceMethodMuteLogs = muteLogs
-    def innerMethodWrapper(resourceMethod, *innerMethodArgs, **innerMethodKwargs) :
-        log.wrapper(SchedulerMethod,f'''wrapping {resourceMethod.__name__}''')
+def SchedulerMethod(
+    *methodArgs,
+    requestClass = None,
+    disable = DEFAUTL_DISABLE,
+    muteLogs = DEFAUTL_MUTE_LOGS,
+    muteStacktraceOnBusinessRuleException = True,
+    **methodKwargs
+):
+    resourceInstanceMethodRequestClass = requestClass
+    resourceInstanceMethodDisable = disable
+    resourceInstanceMethodMuteLogs = muteLogs
+    resourceInstanceMethodMuteStacktraceOnBusinessRuleException = muteStacktraceOnBusinessRuleException
+    def innerMethodWrapper(resourceInstanceMethod, *innerMethodArgs, **innerMethodKwargs) :
+        log.wrapper(SchedulerMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
-        methodClassName = ReflectionHelper.getMethodClassName(resourceMethod)
-        methodName = ReflectionHelper.getName(resourceMethod)
+        methodClassName = ReflectionHelper.getMethodClassName(resourceInstanceMethod)
+        methodName = ReflectionHelper.getName(resourceInstanceMethod)
         methodKwargs['id'] = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
         instancesUpTo = methodKwargs.pop('instancesUpTo', 1)
         weekDays = methodKwargs.pop('weekDays', None)
-        resourceMethod.disabled = disable
-        resourceMethod.id = methodKwargs['id']
-        resourceMethod.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceMethodMuteLogs)
+        resourceInstanceMethod.disabled = disable
+        resourceInstanceMethod.id = methodKwargs['id']
+        resourceInstanceMethod.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceInstanceMethodMuteLogs)
         if ObjectHelper.isNotEmpty(methodArgs) and SchedulerType.CRON == methodArgs[0] and ObjectHelper.isNotNone(weekDays) and StringHelper.isNotBlank(weekDays) :
             methodKwargs['day_of_week'] = weekDays
         if ObjectHelper.isNotNone(instancesUpTo) :
             methodKwargs['max_instances'] = instancesUpTo
-        shedulerArgs = [*methodArgs]
-        shedulerKwargs = {**methodKwargs}
-        @apiInstance.schedulerManager.task(*shedulerArgs, **shedulerKwargs)
+        schedulerArgs = [*methodArgs]
+        schedulerKwargs = {**methodKwargs}
+        @apiInstance.schedulerManager.task(*schedulerArgs, **schedulerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
             resourceInstanceName = methodClassName[:-len(FlaskManager.KW_SCHEDULER_RESOURCE)]
             resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
             args = FlaskManager.getArgumentInFrontOfArgs(args, ReflectionHelper.getAttributeOrMethod(apiInstance.resource.scheduler, resourceInstanceName))
             resourceInstance = args[0]
-            muteLogs = resourceInstance.muteLogs or resourceMethod.muteLogs
-            if resourceInstance.enabled and not resourceInstance.disabled and not resourceMethod.disabled:
+            muteLogs = resourceInstance.muteLogs or resourceInstanceMethod.muteLogs
+            if resourceInstance.enabled and not resourceInstance.disabled and not resourceInstanceMethod.disabled:
                 if not muteLogs:
-                    log.info(resourceMethod, f'{resourceMethod.id} scheduler method started with args={methodArgs} and kwargs={methodKwargs}')
+                    log.info(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.SCHEDULER_CONTEXT.lower()} method started with args={methodArgs} and kwargs={methodKwargs}')
                 methodReturn = None
-                try :
-                    FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
-                    methodReturn = resourceMethod(*args,**kwargs)
-                except Exception as exception :
-                    if not muteLogs:
-                        log.warning(resourceMethod, f'Not possible to run {resourceMethod.id} properly', exception=exception, muteStackTrace=True)
-                    FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceMethod)
+                try:
+                    try :
+                        FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
+                        methodReturn = resourceInstanceMethod(*args,**kwargs)
+                    except Exception as exception:
+                        # if not muteLogs:
+                        #     log.warning(resourceInstanceMethod, f'Not possible to run {resourceInstanceMethod.id} properly', exception=exception, muteStackTrace=True)
+                        FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.SCHEDULER_CONTEXT)
+                except Exception as exception:
+                    logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} {HttpDomain.SCHEDULER_CONTEXT.lower()}'
+                    if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):
+                        log.error(resourceInstance.__class__, logErrorMessage, exception)
+                    else :
+                        log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=resourceInstanceMethodMuteStacktraceOnBusinessRuleException)
+                    raise exception
                 if not muteLogs:
-                    log.info(resourceMethod, f'{resourceMethod.id} scheduler method finished')
+                    log.info(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.SCHEDULER_CONTEXT.lower()} method finished')
                 return methodReturn
             if not muteLogs:
-                log.warning(resourceMethod, f'{resourceMethod.id} scheduler didn{c.SINGLE_QUOTE}t started. {"Schedulers are disabled" if not resourceInstance.enabled else "This scheduler is disabled" if resourceInstance.disabled else "This scheduler method is disabled"}')
-        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceMethod)
-        resourceMethod.id = methodKwargs.get('id')
-        innerResourceInstanceMethod.disable = resourceMethodDisable
-        innerResourceInstanceMethod.muteLogs = resourceMethodMuteLogs
+                log.warning(resourceInstanceMethod, f'''{resourceInstanceMethod.id} {HttpDomain.SCHEDULER_CONTEXT.lower()} didn{c.SINGLE_QUOTE}t started. {"Schedulers are disabled" if not resourceInstance.enabled else f"This {HttpDomain.SCHEDULER_CONTEXT.lower()} is disabled" if resourceInstance.disabled else f"This {HttpDomain.SCHEDULER_CONTEXT.lower()} method is disabled"}''')
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        innerResourceInstanceMethod.id = methodKwargs.get('id')
+        innerResourceInstanceMethod.requestClass = resourceInstanceMethodRequestClass
+        innerResourceInstanceMethod.disable = resourceInstanceMethodDisable
+        innerResourceInstanceMethod.muteLogs = resourceInstanceMethodMuteLogs
+        innerResourceInstanceMethod.muteStacktraceOnBusinessRuleException = resourceInstanceMethodMuteStacktraceOnBusinessRuleException
         return innerResourceInstanceMethod
     return innerMethodWrapper

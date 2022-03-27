@@ -3,6 +3,7 @@ from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringH
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.domain import HttpDomain
 
 
 DEFAUTL_MUTE_LOGS = False
@@ -40,18 +41,19 @@ def EmitterMethod(
     muteLogs = DEFAUTL_MUTE_LOGS,
     **methodKwargs
 ):
-    resourceMethodEnabled = enabled
-    resourceMethodMuteLogs = muteLogs
+    resourceInstanceMethodRequestClass = requestClass
+    resourceInstanceMethodEnabled = enabled
+    resourceInstanceMethodMuteLogs = muteLogs
     resourceInterceptor = interceptor
-    def innerMethodWrapper(resourceMethod, *innerMethodArgs, **innerMethodKwargs) :
-        log.wrapper(EmitterMethod,f'''wrapping {resourceMethod.__name__}''')
+    def innerMethodWrapper(resourceInstanceMethod, *innerMethodArgs, **innerMethodKwargs) :
+        log.wrapper(EmitterMethod,f'''wrapping {resourceInstanceMethod.__name__}''')
         apiInstance = FlaskManager.getApi()
-        methodClassName = ReflectionHelper.getMethodClassName(resourceMethod)
-        methodName = ReflectionHelper.getName(resourceMethod)
+        methodClassName = ReflectionHelper.getMethodClassName(resourceInstanceMethod)
+        methodName = ReflectionHelper.getName(resourceInstanceMethod)
         resourceTypeIsEnabled = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_ENABLE)
-        resourceMethod.enabled = resourceMethodEnabled and resourceTypeIsEnabled
-        resourceMethod.id = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
-        resourceMethod.muteLogs = resourceMethodMuteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceMethodMuteLogs)
+        resourceInstanceMethod.enabled = resourceInstanceMethodEnabled and resourceTypeIsEnabled
+        resourceInstanceMethod.id = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
+        resourceInstanceMethod.muteLogs = resourceInstanceMethodMuteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceInstanceMethodMuteLogs)
         emitterArgs = [*methodArgs]
         emitterKwargs = {**methodKwargs}
         resourceInstanceName = methodClassName[:-len(FlaskManager.KW_EMITTER_RESOURCE)]
@@ -61,27 +63,29 @@ def EmitterMethod(
         def innerResourceInstanceMethod(*args, **kwargs) :
             resourceInstance = FlaskManager.getResourceSelf(apiInstance, FlaskManager.KW_EMITTER_RESOURCE, resourceInstanceName)
             args = FlaskManager.getArgumentInFrontOfArgs(args, resourceInstance) ###- resourceInstance = args[0]
-            muteLogs = resourceInstance.muteLogs or resourceMethod.muteLogs
-            if resourceInstance.enabled and resourceMethod.enabled:
+            muteLogs = resourceInstance.muteLogs or resourceInstanceMethod.muteLogs
+            if resourceInstance.enabled and resourceInstanceMethod.enabled:
                 if not muteLogs:
-                    log.info(resourceMethod, f'{resourceMethod.id} emitter method started with args={methodArgs} and kwargs={methodKwargs}')
+                    log.info(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.EMITTER_CONTEXT.lower()} method started with args={methodArgs} and kwargs={methodKwargs}')
                 methodReturn = None
                 try :
                     FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
-                    methodReturn = resourceMethod(*args,**kwargs)
+                    methodReturn = resourceInstanceMethod(*args,**kwargs)
                 except Exception as exception :
                     if not muteLogs:
-                        log.warning(resourceMethod, f'Not possible to run {resourceMethod.id} properly', exception=exception, muteStackTrace=True)
-                    FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceMethod)
+                        log.warning(resourceInstanceMethod, f'Not possible to run {resourceInstanceMethod.id} properly', exception=exception, muteStackTrace=True)
+                    FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.EMITTER_CONTEXT)
                 if not muteLogs:
-                    log.info(resourceMethod, f'{resourceMethod.id} emitter method finished')
+                    log.info(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.EMITTER_CONTEXT.lower()} method finished')
                 return methodReturn
             else:
                 if not muteLogs:
-                    log.warning(resourceMethod, f'{resourceMethod.id} emitter method didn{c.SINGLE_QUOTE}t started. {"Handlers are disabled" if resourceTypeIsEnabled else "This emitter class is disabled" if not resourceInstance.enabled else "This emitter method is disabled"}')
-        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceMethod)
-        innerResourceInstanceMethod.enabled = resourceMethodEnabled
-        innerResourceInstanceMethod.muteLogs = resourceMethodMuteLogs
+                    log.warning(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.EMITTER_CONTEXT.lower()} method didn{c.SINGLE_QUOTE}t started. {"Handlers are disabled" if resourceTypeIsEnabled else f"This {HttpDomain.EMITTER_CONTEXT.lower()} class is disabled" if not resourceInstance.enabled else f"This {HttpDomain.EMITTER_CONTEXT.lower()} method is disabled"}')
+        ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
+        innerResourceInstanceMethod.id = resourceInstanceMethod.id
+        innerResourceInstanceMethod.requestClass = resourceInstanceMethodRequestClass
+        innerResourceInstanceMethod.enabled = resourceInstanceMethodEnabled
+        innerResourceInstanceMethod.muteLogs = resourceInstanceMethodMuteLogs
         innerResourceInstanceMethod.interceptor = resourceInterceptor
         return innerResourceInstanceMethod
     return innerMethodWrapper
