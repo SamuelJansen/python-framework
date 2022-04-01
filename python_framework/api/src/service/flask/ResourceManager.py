@@ -112,7 +112,10 @@ def getResourceList(apiInstance, resourceType):
         else:
             resource = globals.importResource(ajustedResourceName, resourceModuleName=ajustedResourceModuleName, required=True)
         if ObjectHelper.isEmpty(resource):
-            raise Exception(f'Error while importing {ajustedResourceName} resource from {ajustedResourceModuleName} module. Resource not found.')
+            resource = globals.importResource(ajustedResourceName, resourceModuleName=ajustedResourceModuleName, required=True)
+            if ObjectHelper.isNone(resource):
+                raise Exception(f'Error while importing "{ajustedResourceName}" resource from "{ajustedResourceModuleName}" module. Resource not found')
+            resourceList.append(resource)
         elif ObjectHelper.isList(resource):
             resourceList += resource
         else:
