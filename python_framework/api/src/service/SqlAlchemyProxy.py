@@ -60,13 +60,16 @@ MEDIUM_STRING_SIZE = 128
 LITTLE_STRING_SIZE = 64
 
 
+MODEL_PATTERN_NAME = 'Model'
+
+
 @Function
 def getNewModel():
     return declarative_base()
 
 @Function
 def attributeIt(modelName):
-    return f'{modelName[0].lower()}{modelName[1:]}'
+    return f'{modelName[0].lower()}{modelName[1:]}'.replace(MODEL_PATTERN_NAME, c.BLANK)
 
 @Function
 def getManyToMany(sister, brother, refferenceModel):

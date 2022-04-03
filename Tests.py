@@ -5,14 +5,13 @@ EnvironmentHelper.update("URL_VARIANT", RandomHelper.integer(minimum=0, maximum=
 log.debug(log.debug, f'variant: {EnvironmentHelper.get("URL_VARIANT")}')
 
 from python_helper import TestHelper
-# TestHelper.run(__file__)
-TestHelper.run(
-    __file__,
-    runOnly = [
+TestHelper.run(__file__)
+# TestHelper.run(
+#     __file__,
+#     runOnly = [
         # 'SerializerTest.getClassRole',
         # 'SerializerTest.importResource',
-        'SerializerTest.convertFromObjectToObject'
-
+        # 'SerializerTest.convertFromObjectToObject',
         # 'SerializerTest.convertFromObjectToObject_whenTargetClassIsList',
         # 'SerializerTest.isModelTest',
         # 'SerializerTest.isJsonifyable',
@@ -22,8 +21,8 @@ TestHelper.run(
         # 'SerializerTest.convertFromJsonToObject_whenThereAreEnums',
         # 'SerializerTest.convertFromObjectToObject_weirdIdList',
         # 'SerializerTest.convertFromJsonToObject_nativeClassAtributeList'
-    ]
-)
+#     ]
+# )
 # TestHelper.run(
 #     __file__,
 #     runOnly = [
