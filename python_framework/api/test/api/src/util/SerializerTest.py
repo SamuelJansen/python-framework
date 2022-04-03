@@ -1006,3 +1006,123 @@ def convertFromObjectToObject():
     assert SomeExampleOfCollectionDto.SomeExampleOfCollectionResponseDto == type(seriaizedCollectionResponseDto)
     assert SomeExampleOfDto.SomeExampleOfResponseDto == type(seriaizedCollectionResponseDto.someExampleOf)
     assert SomeExampleOfChildDto.SomeExampleOfChildResponseDto == type(seriaizedCollectionResponseDto.someExampleOfChild)
+
+
+LOG_HELPER_SETTINGS = {
+    log.LOG : True,
+    log.SUCCESS : True,
+    log.SETTING : True,
+    log.STATUS : True,
+    log.INFO : True,
+    log.DEBUG : True,
+    log.WARNING : True,
+    log.WRAPPER : True,
+    log.FAILURE : True,
+    log.ERROR : True,
+    log.TEST : False,
+    log.ENABLE_LOGS_WITH_COLORS: True
+}
+ELPER_SETTINGS = {}
+
+@Test(
+    environmentVariables=LOG_HELPER_SETTINGS
+)
+def convertFromJsonToObject_listSpecialCase_whenNotFound():
+    #arrange
+    SPECIAL_CASE = 'special case'
+    MY_SPECIAL_CASE_LIST = [SPECIAL_CASE]
+    class MyClassWhitListSpecialCase:
+        def __init__(self, myAttributeClass):
+            self.myAttributeClass = myAttributeClass
+        def __repr__(self):
+            return f'{MyClassWhitListSpecialCase.__name__}(myAttributeClass={self.myAttributeClass})'
+    DICTIONARY = {
+        'myAttributeClass': MY_SPECIAL_CASE_LIST
+    }
+    expected = MyClassWhitListSpecialCase(myAttributeClass=MY_SPECIAL_CASE_LIST)
+
+    #act
+    toAssert = Serializer.convertFromJsonToObject(DICTIONARY, MyClassWhitListSpecialCase)
+
+    #assert
+    assert ObjectHelper.equals(expected, toAssert), f'{expected} == {toAssert}'
+
+
+
+@Test(
+    environmentVariables=LOG_HELPER_SETTINGS
+)
+def convertFromJsonToObject_listSpecialCase_whenFoundButInvalid():
+    #arrange
+    SPECIAL_CASE = 'special case'
+    MY_SPECIAL_CASE_LIST = [SPECIAL_CASE]
+    class MyClassWhitListSpecialCase:
+        def __init__(self, myAttributeClass):
+            self.myAttributeClass = myAttributeClass
+        def __repr__(self):
+            return f'{MyClassWhitListSpecialCase.__name__}(myAttributeClass={self.myAttributeClass})'
+    DICTIONARY = {
+        'myAttributeClass': MY_SPECIAL_CASE_LIST
+    }
+    expected = MyClassWhitListSpecialCase(myAttributeClass=MY_SPECIAL_CASE_LIST)
+
+    #act
+    toAssert = Serializer.convertFromJsonToObject(DICTIONARY, MyClassWhitListSpecialCase)
+
+    #assert
+    assert ObjectHelper.equals(expected, toAssert), f'{expected} == {toAssert}'
+
+import MyAttributeClassy
+
+@Test(
+    environmentVariables=LOG_HELPER_SETTINGS
+)
+def convertFromJsonToObject_listSpecialCase_whenFoundAndValid():
+    #arrange
+    SPECIAL_CASE = 'special case'
+    MY_VALID_VALUE = MyAttributeClassy.MyAttributeClassy(yolo=SPECIAL_CASE)
+    class MyClassWhitListSpecialCase:
+        def __init__(self, myAttributeClassy):
+            self.myAttributeClassy = myAttributeClassy
+        def __repr__(self):
+            return f'{MyClassWhitListSpecialCase.__name__}(myAttributeClassy={self.myAttributeClassy})'
+    DICTIONARY = {
+        'myAttributeClassy': {
+            'yolo': SPECIAL_CASE
+        }
+    }
+    expected = MyClassWhitListSpecialCase(myAttributeClassy=MY_VALID_VALUE)
+
+    #act
+    toAssert = Serializer.convertFromJsonToObject(DICTIONARY, MyClassWhitListSpecialCase)
+
+    #assert
+    assert ObjectHelper.equals(expected, toAssert), f'{expected} == {toAssert}'
+
+
+import MyAttributeClassyDto
+
+@Test(
+    environmentVariables=LOG_HELPER_SETTINGS
+)
+def convertFromJsonToObject_listSpecialCase_whenFoundAndValidKeepingDataType():
+    #arrange
+    SPECIAL_CASE = 'special case'
+    MY_VALID_VALUE = MyAttributeClassyDto.MyAttributeClassyResponseDto(yolo=SPECIAL_CASE)
+    class MyClassWhitListSpecialCaseResponseDto:
+        def __init__(self, myAttributeClassy):
+            self.myAttributeClassy = myAttributeClassy
+        def __repr__(self):
+            return f'{MyClassWhitListSpecialCaseResponseDto.__name__}(myAttributeClassy={self.myAttributeClassy})'
+    DICTIONARY = {
+        'myAttributeClassy': {
+            'yolo': SPECIAL_CASE
+        }
+    }
+    expected = MyClassWhitListSpecialCaseResponseDto(myAttributeClassy=MY_VALID_VALUE)
+
+    #act
+    toAssert = Serializer.convertFromJsonToObject(DICTIONARY, MyClassWhitListSpecialCaseResponseDto)
+
+    #assert
+    assert ObjectHelper.equals(expected, toAssert), f'{expected} == {toAssert}'

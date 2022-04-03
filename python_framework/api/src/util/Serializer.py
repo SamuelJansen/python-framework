@@ -384,12 +384,20 @@ def resolveValue(value, key, classRole, fatherClass=None):
             resourceName = getResourceName(key, classRole)
             resourceModuleName = getResourceModuleName(key, classRole)
             resourceClass = importResource(resourceName, resourceModuleName=resourceModuleName)
-            convertedValue = []
-            for jsonItem in value :
-                if jsonItem :
-                    convertedItem = convertFromJsonToObject(jsonItem, resourceClass, fatherClass=fatherClass)
-                    convertedValue.append(convertedItem)
-            return convertedValue
+            return [
+                convertFromJsonToObject(jsonItem, resourceClass, fatherClass=fatherClass) for jsonItem in value if jsonItem
+            ]
+        else:
+            try:
+                resourceName = getResourceName(key, classRole)
+                resourceModuleName = getResourceModuleName(key, classRole)
+                resourceClass = importResource(resourceName, resourceModuleName=resourceModuleName)
+                return [
+                    convertFromJsonToObject(jsonItem, resourceClass, fatherClass=fatherClass) for jsonItem in value if jsonItem
+                ]
+            except Exception as exception:
+                log.log(resolveValue, 'Not possible to resolve list value properly. returning received value by default', exception=exception)
+                return value
     else:
         resourceName = getResourceName(key, classRole)
         resourceModuleName = getResourceModuleName(key, classRole)
