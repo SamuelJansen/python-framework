@@ -1,4 +1,7 @@
 import json
+import datetime
+
+from python_helper import Constant as c
 from python_helper import log, Test, RandomHelper, ReflectionHelper, ObjectHelper, StringHelper
 from python_framework.api.src.util import Serializer
 from python_framework.api.src.service import SqlAlchemyProxy as sap
@@ -7,6 +10,10 @@ from MyOtherDto import MyOtherDto
 from MyThirdDto import MyThirdDto
 from TestCallDto import TestCallRequestDto
 import CallServiceName, CallType, CallStatus
+
+import SomeExampleOf, SomeExampleOfModel, SomeExampleOfDto
+import SomeExampleOfChild, SomeExampleOfChildModel, SomeExampleOfChildDto
+import SomeExampleOfCollection, SomeExampleOfCollectionModel, SomeExampleOfCollectionDto
 
 
 def generatorFunction() :
@@ -67,9 +74,6 @@ class Child(MODEL) :
     father, fatherId = sap.getManyToOne(__tablename__, SELF_REFERENCE_FATHER_NAME, MODEL)
     brother, brotherId = sap.getOneToOneChild(__tablename__, BROTHER_NAME, MODEL)
 
-import datetime
-from python_helper import Constant as c
-from python_helper import ObjectHelper
 
 DEFAULT_DATETIME_PATTERN = '%Y-%m-%d %H:%M:%S'
 DEFAULT_DATE_PATTERN = '%Y-%m-%d'
@@ -204,6 +208,7 @@ class DateTimeTestResponseDto :
         self.intervalTime = toString(intervalTime, pattern=DEFAULT_DATETIME_PATTERN)
         self.timedelta = toString(timedelta, pattern=DEFAULT_TIME_PATTERN)
 
+
 @Test()
 def fromModelToDto() :
     # arrange
@@ -290,6 +295,7 @@ def fromModelToDto() :
             'timedelta'
         ]
     )
+
 
 @Test()
 def fromDtoToModel() :
@@ -380,17 +386,20 @@ def fromDtoToModel() :
         ]
     )
 
+
 @Test()
 def isModelTest() :
     assert False == Serializer.isModel(generatorFunction())
     assert False == Serializer.isModel(MyClass())
     assert True == Serializer.isModel(MyEntityClass())
 
+
 @Test()
 def isJsonifyable() :
     assert False == Serializer.isJsonifyable(generatorFunction())
     assert True == Serializer.isJsonifyable(MyClass())
     assert True == Serializer.isJsonifyable(MyEntityClass())
+
 
 @Test()
 def convertFromObjectToObject_whenTargetClassIsList() :
@@ -438,6 +447,7 @@ def convertFromObjectToObject_whenTargetClassIsList() :
     assert False == ObjectHelper.equals(another, toAssert, muteLogs=not inspectEquals)
     assert False == ObjectHelper.equals(toAssert, another, muteLogs=not inspectEquals)
     assert str(expected) == str(toAssert), f'str({str(expected)}) == str({str(toAssert)}): {str(expected) == str(toAssert)}'
+
 
 @Test()
 def jsonifyIt() :
@@ -494,6 +504,7 @@ def jsonifyIt() :
     myClass.myAttribute = myAttributeClass
     assert '{"myAttribute": {"myClass": null, "myNeutralClassAttribute": "someOtherString"}, "myNeutralAttribute": "someString"}' == Serializer.jsonifyIt(myClass)
     assert '{"myClass": {"myAttribute": null, "myNeutralAttribute": "someString"}, "myNeutralClassAttribute": "someOtherString"}' == Serializer.jsonifyIt(myClass.myAttribute)
+
 
 @Test()
 def convertFromJsonToObject_whenThereAreEnums() :
@@ -694,6 +705,7 @@ def convertFromJsonToObject_whenThereAreEnums() :
         Serializer.getObjectAsDictionary(toAssert)
     )
 
+
 @Test()
 def convertFromObjectToObject_weirdIdList() :
     #arrange
@@ -743,3 +755,254 @@ def convertFromJsonToObject_nativeClassAtributeList():
 
     #aqssert
     assert ObjectHelper.equals(expected, toAssert), f'{expected} == {toAssert}'
+
+
+
+
+@Test()
+def getClassRole():
+    #arrange
+    DTO = 'DTO'
+    MODEL = 'MODEL'
+    EXPLICIT_MODEL = 'EXPLICITMODEL'
+    BREAK = 'BREAK'
+
+    #act & aqssert
+    assert DTO == Serializer.getClassRole(SomeExampleOfDto.SomeExampleOfDto)
+    assert DTO == Serializer.getClassRole(SomeExampleOfChildDto.SomeExampleOfChildDto)
+    assert MODEL == Serializer.getClassRole(SomeExampleOf.SomeExampleOf)
+    assert MODEL == Serializer.getClassRole(SomeExampleOfChild.SomeExampleOfChild)
+    assert EXPLICIT_MODEL == Serializer.getClassRole(SomeExampleOfModel.SomeExampleOfModel)
+    assert EXPLICIT_MODEL == Serializer.getClassRole(SomeExampleOfChildModel.SomeExampleOfChildModel)
+
+
+@Test()
+def importResource():
+    #arrange
+    someExampleOfDto = Serializer.importResource('SomeExampleOfDto')
+    someExampleOfRequestDto = Serializer.importResource('SomeExampleOfRequestDto', resourceModuleName='SomeExampleOfDto')
+    someExampleOfResponseDto = Serializer.importResource('SomeExampleOfResponseDto', resourceModuleName='SomeExampleOfDto')
+    someExampleOfChildDto = Serializer.importResource('SomeExampleOfChildDto')
+    someExampleOfChildRequestDto = Serializer.importResource('SomeExampleOfChildRequestDto', resourceModuleName='SomeExampleOfChildDto')
+    someExampleOfChildResponseDto = Serializer.importResource('SomeExampleOfChildResponseDto', resourceModuleName='SomeExampleOfChildDto')
+    someExampleOf = Serializer.importResource('SomeExampleOf')
+    someExampleOfChild = Serializer.importResource('SomeExampleOfChild')
+    someExampleOfModel = Serializer.importResource('SomeExampleOfModel')
+    someExampleOfChildModel = Serializer.importResource('SomeExampleOfChildModel')
+    def asserEquals(expected, toAssert):
+        assert ReflectionHelper.getName(expected) == ReflectionHelper.getName(toAssert), f'{ReflectionHelper.getName(expected)} == {ReflectionHelper.getName(toAssert)}'
+        assert type(expected()) == type(toAssert()), f'type({expected()}) == type({toAssert}): {type(expected()) == type(toAssert())}'
+        assert isinstance(expected(), toAssert), f'isinstance({expected()}, {toAssert}): {isinstance(expected(), toAssert)}'
+        assert isinstance(expected(), toAssert), f'isinstance({toAssert()}, {expected}): {isinstance(toAssert(), expected)}'
+
+    #act & aqssert
+    asserEquals(SomeExampleOfDto.SomeExampleOfDto, someExampleOfDto)
+    asserEquals(SomeExampleOfDto.SomeExampleOfRequestDto, someExampleOfRequestDto)
+    asserEquals(SomeExampleOfDto.SomeExampleOfResponseDto, someExampleOfResponseDto)
+    asserEquals(SomeExampleOfChildDto.SomeExampleOfChildDto, someExampleOfChildDto)
+    asserEquals(SomeExampleOfChildDto.SomeExampleOfChildRequestDto, someExampleOfChildRequestDto)
+    asserEquals(SomeExampleOfChildDto.SomeExampleOfChildResponseDto, someExampleOfChildResponseDto)
+    asserEquals(SomeExampleOf.SomeExampleOf, someExampleOf)
+    asserEquals(SomeExampleOfChild.SomeExampleOfChild, someExampleOfChild)
+    asserEquals(SomeExampleOfModel.SomeExampleOfModel, someExampleOfModel)
+    asserEquals(SomeExampleOfChildModel.SomeExampleOfChildModel, someExampleOfChildModel)
+
+
+@Test()
+def convertFromObjectToObject():
+    #arrange
+    NUMBER_VALUE = 1
+    STRING_VALUE = 'a2'
+
+    someExampleOf = SomeExampleOf.SomeExampleOf(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfChild = SomeExampleOfChild.SomeExampleOfChild(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfModel = SomeExampleOfModel.SomeExampleOfModel(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfChildModel = SomeExampleOfChildModel.SomeExampleOfChildModel(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+
+    someExampleOfDto = SomeExampleOfDto.SomeExampleOfDto(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfRequestDto = SomeExampleOfDto.SomeExampleOfRequestDto(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfResponseDto = SomeExampleOfDto.SomeExampleOfResponseDto(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfChildDto = SomeExampleOfChildDto.SomeExampleOfChildDto(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfChildRequestDto = SomeExampleOfChildDto.SomeExampleOfChildRequestDto(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfChildResponseDto = SomeExampleOfChildDto.SomeExampleOfChildResponseDto(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+
+    someExampleOfCollection = SomeExampleOfCollection.SomeExampleOfCollection(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfCollectionModel = SomeExampleOfCollectionModel.SomeExampleOfCollectionModel(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+
+    someExampleOfCollectionDto = SomeExampleOfCollectionDto.SomeExampleOfCollectionDto(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfCollectionRequestDto = SomeExampleOfCollectionDto.SomeExampleOfCollectionRequestDto(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+    someExampleOfCollectionResponseDto = SomeExampleOfCollectionDto.SomeExampleOfCollectionResponseDto(numberAttribute=NUMBER_VALUE, stringAttribute=STRING_VALUE)
+
+    def assertFatherEquals(expected, toAssert):
+        assert ObjectHelper.equals(expected, toAssert, ignoreAttributeList=['someExampleOf', 'someExampleOfChild']), StringHelper.prettyPython([
+            f'''ObjectHelper.equals({expected}, {toAssert}): {ObjectHelper.equals(expected, toAssert, ignoreAttributeList=['someExampleOfChild'])}''',
+            f'StringHelper.prettyPython(Serializer.getObjectAsDictionary({expected})): {StringHelper.prettyPython(Serializer.getObjectAsDictionary(expected), tabCount=1)}',
+            f'StringHelper.prettyPython(Serializer.getObjectAsDictionary({toAssert})): {StringHelper.prettyPython(Serializer.getObjectAsDictionary(toAssert), tabCount=1)}',
+            f'expected.someExampleOfChild: {expected.someExampleOfChild}',
+            f'expected.someExampleOfChild: {expected.someExampleOfCollectionList}',
+            f'expected.someExampleOfChild.someExampleOf: {expected.someExampleOfChild.someExampleOf}',
+            f'toAssert.someExampleOfChild: {toAssert.someExampleOfChild}',
+            f'toAssert.someExampleOfChild: {toAssert.someExampleOfCollectionList}',
+            f'toAssert.someExampleOfChild.someExampleOf: {toAssert.someExampleOfChild.someExampleOf}'
+        ])
+        ObjectHelper.equals(expected.someExampleOfChild, toAssert.someExampleOfChild, ignoreAttributeList=['someExampleOf', 'someExampleOfChild'])
+        ObjectHelper.equals(expected.someExampleOfCollectionList, toAssert.someExampleOfCollectionList, ignoreAttributeList=['someExampleOf', 'someExampleOfChild'])
+    def assertChildEquals(expected, toAssert):
+        assert ObjectHelper.equals(expected, toAssert, ignoreAttributeList=['someExampleOf', 'someExampleOfChild']), StringHelper.prettyPython([
+            f'''ObjectHelper.equals({expected}, {toAssert}): {ObjectHelper.equals(expected, toAssert, ignoreAttributeList=['someExampleOfChild'])}''',
+            f'StringHelper.prettyPython(Serializer.getObjectAsDictionary({expected})): {StringHelper.prettyPython(Serializer.getObjectAsDictionary(expected), tabCount=1)}',
+            f'StringHelper.prettyPython(Serializer.getObjectAsDictionary({toAssert})): {StringHelper.prettyPython(Serializer.getObjectAsDictionary(toAssert), tabCount=1)}',
+            f'expected.someExampleOf: {expected.someExampleOf}',
+            f'expected.someExampleOf: {expected.someExampleOfCollectionList}',
+            f'expected.someExampleOf.someExampleOfChild: {expected.someExampleOf.someExampleOfChild}',
+            f'toAssert.someExampleOf: {toAssert.someExampleOf}',
+            f'toAssert.someExampleOf: {toAssert.someExampleOfCollectionList}',
+            f'toAssert.someExampleOf.someExampleOfChild: {toAssert.someExampleOf.someExampleOfChild}'
+        ])
+        ObjectHelper.equals(expected.someExampleOf, toAssert.someExampleOf, ignoreAttributeList=['someExampleOf', 'someExampleOfChild'])
+        ObjectHelper.equals(expected.someExampleOfCollectionList, toAssert.someExampleOfCollectionList, ignoreAttributeList=['someExampleOf', 'someExampleOfChild'])
+
+    def assertCollectionEquals(expected, toAssert):
+        ObjectHelper.equals(expected, toAssert, ignoreAttributeList=['someExampleOf', 'someExampleOfChild']), StringHelper.prettyPython([
+            f'''ObjectHelper.equals({expected}, {toAssert}): {ObjectHelper.equals(expected, toAssert, ignoreAttributeList=['someExampleOfChild'])}''',
+            f'StringHelper.prettyPython(Serializer.getObjectAsDictionary({expected})): {StringHelper.prettyPython(Serializer.getObjectAsDictionary(expected), tabCount=1)}',
+            f'StringHelper.prettyPython(Serializer.getObjectAsDictionary({toAssert})): {StringHelper.prettyPython(Serializer.getObjectAsDictionary(toAssert), tabCount=1)}',
+            f'expected.someExampleOf: {expected.someExampleOf}',
+            f'expected.someExampleOfChild: {expected.someExampleOfChild}',
+            f'expected.someExampleOf.someExampleOfCollectionList: {expected.someExampleOf.someExampleOfCollectionList}',
+            f'toAssert.someExampleOf: {toAssert.someExampleOf}',
+            f'toAssert.someExampleOfChild: {toAssert.someExampleOfChild}',
+            f'toAssert.someExampleOf.someExampleOfCollectionList: {toAssert.someExampleOf.someExampleOfCollectionList}'
+        ])
+        ObjectHelper.equals(expected.someExampleOf, toAssert.someExampleOf, ignoreAttributeList=['someExampleOf', 'someExampleOfChild'])
+        ObjectHelper.equals(expected.someExampleOfChild, toAssert.someExampleOfChild, ignoreAttributeList=['someExampleOf', 'someExampleOfChild'])
+
+    someExampleOf.someExampleOfChild = someExampleOfChild
+    someExampleOfChild.someExampleOf = someExampleOf
+    someExampleOf.someExampleOfCollectionList = [someExampleOfCollection]
+    someExampleOfCollection.someExampleOf = someExampleOf
+    someExampleOfCollection.someExampleOfChild = someExampleOfChild
+    someExampleOfChild.someExampleOfCollectionList = [someExampleOfCollection]
+
+    someExampleOfModel.someExampleOfChild = someExampleOfChildModel
+    someExampleOfChildModel.someExampleOf = someExampleOfModel
+    someExampleOfModel.someExampleOfCollectionList = [someExampleOfCollectionModel]
+    someExampleOfCollectionModel.someExampleOf = someExampleOfModel
+    someExampleOfCollectionModel.someExampleOfChild = someExampleOfChildModel
+    someExampleOfChildModel.someExampleOfCollectionList = [someExampleOfCollectionModel]
+
+    someExampleOfDto.someExampleOfChild = someExampleOfChildDto
+    someExampleOfChildDto.someExampleOf = someExampleOfDto
+    someExampleOfDto.someExampleOfCollectionList = [someExampleOfCollectionDto]
+    someExampleOfCollectionDto.someExampleOf = someExampleOfDto
+    someExampleOfCollectionDto.someExampleOfChild = someExampleOfChildDto
+    someExampleOfChildDto.someExampleOfCollectionList = [someExampleOfCollectionDto]
+
+    someExampleOfRequestDto.someExampleOfChild = someExampleOfChildRequestDto
+    someExampleOfChildRequestDto.someExampleOf = someExampleOfRequestDto
+    someExampleOfRequestDto.someExampleOfCollectionList = [someExampleOfCollectionRequestDto]
+    someExampleOfCollectionRequestDto.someExampleOf = someExampleOfRequestDto
+    someExampleOfCollectionRequestDto.someExampleOfChild = someExampleOfChildRequestDto
+    someExampleOfChildRequestDto.someExampleOfCollectionList = [someExampleOfCollectionRequestDto]
+
+    someExampleOfResponseDto.someExampleOfChild = someExampleOfChildResponseDto
+    someExampleOfChildResponseDto.someExampleOf = someExampleOfResponseDto
+    someExampleOfResponseDto.someExampleOfCollectionList = [someExampleOfCollectionResponseDto]
+    someExampleOfCollectionResponseDto.someExampleOf = someExampleOfResponseDto
+    someExampleOfCollectionResponseDto.someExampleOfChild = someExampleOfChildResponseDto
+    someExampleOfChildResponseDto.someExampleOfCollectionList = [someExampleOfCollectionResponseDto]
+
+    #act
+    seriaizedFather = Serializer.convertFromObjectToObject(someExampleOfDto, SomeExampleOf.SomeExampleOf)
+    seriaizedFatherModel = Serializer.convertFromObjectToObject(someExampleOfDto, SomeExampleOfModel.SomeExampleOfModel)
+    seriaizedFatherDto = Serializer.convertFromObjectToObject(someExampleOf, SomeExampleOfDto.SomeExampleOfDto)
+    seriaizedFatherRequestDto = Serializer.convertFromObjectToObject(someExampleOf, SomeExampleOfDto.SomeExampleOfRequestDto)
+    seriaizedFatherResponseDto = Serializer.convertFromObjectToObject(someExampleOf, SomeExampleOfDto.SomeExampleOfResponseDto)
+
+    seriaizedChild = Serializer.convertFromObjectToObject(someExampleOfChildDto, SomeExampleOfChild.SomeExampleOfChild)
+    seriaizedChildModel = Serializer.convertFromObjectToObject(someExampleOfChildDto, SomeExampleOfChildModel.SomeExampleOfChildModel)
+    seriaizedChildDto = Serializer.convertFromObjectToObject(someExampleOfChild, SomeExampleOfChildDto.SomeExampleOfChildDto)
+    seriaizedChildRequestDto = Serializer.convertFromObjectToObject(someExampleOfChild, SomeExampleOfChildDto.SomeExampleOfChildRequestDto)
+    seriaizedChildResponseDto = Serializer.convertFromObjectToObject(someExampleOfChild, SomeExampleOfChildDto.SomeExampleOfChildResponseDto)
+
+    seriaizedCollection = Serializer.convertFromObjectToObject(someExampleOfCollectionDto, SomeExampleOfCollection.SomeExampleOfCollection)
+    seriaizedCollectionModel = Serializer.convertFromObjectToObject(someExampleOfCollectionDto, SomeExampleOfCollectionModel.SomeExampleOfCollectionModel)
+    seriaizedCollectionDto = Serializer.convertFromObjectToObject(someExampleOfCollection, SomeExampleOfCollectionDto.SomeExampleOfCollectionDto)
+    seriaizedCollectionRequestDto = Serializer.convertFromObjectToObject(someExampleOfCollection, SomeExampleOfCollectionDto.SomeExampleOfCollectionRequestDto)
+    seriaizedCollectionResponseDto = Serializer.convertFromObjectToObject(someExampleOfCollection, SomeExampleOfCollectionDto.SomeExampleOfCollectionResponseDto)
+
+    #aqssert
+    assertFatherEquals(someExampleOf, seriaizedFather)
+    assert SomeExampleOf.SomeExampleOf == type(seriaizedFather)
+    assert SomeExampleOfChild.SomeExampleOfChild == type(seriaizedFather.someExampleOfChild)
+    assert SomeExampleOfCollection.SomeExampleOfCollection == type(seriaizedFather.someExampleOfCollectionList[0])
+
+    assertFatherEquals(someExampleOf, seriaizedFatherModel)
+    assert SomeExampleOfModel.SomeExampleOfModel == type(seriaizedFatherModel)
+    assert SomeExampleOfChildModel.SomeExampleOfChildModel == type(seriaizedFatherModel.someExampleOfChild)
+    assert SomeExampleOfCollectionModel.SomeExampleOfCollectionModel == type(seriaizedFatherModel.someExampleOfCollectionList[0])
+
+    assertFatherEquals(someExampleOfDto, seriaizedFatherDto)
+    assert SomeExampleOfDto.SomeExampleOfDto == type(seriaizedFatherDto)
+    assert SomeExampleOfChildDto.SomeExampleOfChildDto == type(seriaizedFatherDto.someExampleOfChild)
+    assert SomeExampleOfCollectionDto.SomeExampleOfCollectionDto == type(seriaizedFatherDto.someExampleOfCollectionList[0])
+
+    assertFatherEquals(seriaizedFatherRequestDto, seriaizedFatherRequestDto)
+    assert SomeExampleOfDto.SomeExampleOfRequestDto == type(seriaizedFatherRequestDto)
+    assert SomeExampleOfChildDto.SomeExampleOfChildRequestDto == type(seriaizedFatherRequestDto.someExampleOfChild)
+    assert SomeExampleOfCollectionDto.SomeExampleOfCollectionRequestDto == type(seriaizedFatherRequestDto.someExampleOfCollectionList[0])
+
+    assertFatherEquals(seriaizedFatherResponseDto, seriaizedFatherResponseDto)
+    assert SomeExampleOfDto.SomeExampleOfResponseDto == type(seriaizedFatherResponseDto)
+    assert SomeExampleOfChildDto.SomeExampleOfChildResponseDto == type(seriaizedFatherResponseDto.someExampleOfChild)
+    assert SomeExampleOfCollectionDto.SomeExampleOfCollectionResponseDto == type(seriaizedFatherResponseDto.someExampleOfCollectionList[0])
+
+    assertChildEquals(someExampleOfChild, seriaizedChild)
+    assert SomeExampleOfChild.SomeExampleOfChild == type(seriaizedChild)
+    assert SomeExampleOf.SomeExampleOf == type(seriaizedChild.someExampleOf)
+    assert SomeExampleOfCollection.SomeExampleOfCollection == type(seriaizedChild.someExampleOfCollectionList[0])
+
+    assertChildEquals(someExampleOfChild, seriaizedChildModel)
+    assert SomeExampleOfChildModel.SomeExampleOfChildModel == type(seriaizedChildModel)
+    assert SomeExampleOfModel.SomeExampleOfModel == type(seriaizedChildModel.someExampleOf)
+    assert SomeExampleOfCollectionModel.SomeExampleOfCollectionModel == type(seriaizedChildModel.someExampleOfCollectionList[0])
+
+    assertChildEquals(someExampleOfChildDto, seriaizedChildDto)
+    assert SomeExampleOfChildDto.SomeExampleOfChildDto == type(seriaizedChildDto)
+    assert SomeExampleOfDto.SomeExampleOfDto == type(seriaizedChildDto.someExampleOf)
+    assert SomeExampleOfCollectionDto.SomeExampleOfCollectionDto == type(seriaizedChildDto.someExampleOfCollectionList[0])
+
+    assertChildEquals(seriaizedChildRequestDto, seriaizedChildRequestDto)
+    assert SomeExampleOfChildDto.SomeExampleOfChildRequestDto == type(seriaizedChildRequestDto)
+    assert SomeExampleOfDto.SomeExampleOfRequestDto == type(seriaizedChildRequestDto.someExampleOf)
+    assert SomeExampleOfCollectionDto.SomeExampleOfCollectionRequestDto == type(seriaizedChildRequestDto.someExampleOfCollectionList[0])
+
+    assertChildEquals(seriaizedChildResponseDto, seriaizedChildResponseDto)
+    assert SomeExampleOfChildDto.SomeExampleOfChildResponseDto == type(seriaizedChildResponseDto)
+    assert SomeExampleOfDto.SomeExampleOfResponseDto == type(seriaizedChildResponseDto.someExampleOf)
+    assert SomeExampleOfCollectionDto.SomeExampleOfCollectionResponseDto == type(seriaizedChildResponseDto.someExampleOfCollectionList[0])
+
+    assertCollectionEquals(someExampleOfCollection, seriaizedCollection)
+    assert SomeExampleOfCollection.SomeExampleOfCollection == type(seriaizedCollection)
+    assert SomeExampleOf.SomeExampleOf == type(seriaizedCollection.someExampleOf)
+    assert SomeExampleOfChild.SomeExampleOfChild == type(seriaizedCollection.someExampleOfChild)
+
+    assertCollectionEquals(someExampleOfCollection, seriaizedCollectionModel)
+    assert SomeExampleOfCollectionModel.SomeExampleOfCollectionModel == type(seriaizedCollectionModel)
+    assert SomeExampleOfModel.SomeExampleOfModel == type(seriaizedCollectionModel.someExampleOf)
+    assert SomeExampleOfChildModel.SomeExampleOfChildModel == type(seriaizedFatherModel.someExampleOfChild)
+
+    assertCollectionEquals(someExampleOfCollectionDto, seriaizedCollectionDto)
+    assert SomeExampleOfCollectionDto.SomeExampleOfCollectionDto == type(seriaizedCollectionDto)
+    assert SomeExampleOfDto.SomeExampleOfDto == type(seriaizedCollectionDto.someExampleOf)
+    assert SomeExampleOfChildDto.SomeExampleOfChildDto == type(seriaizedCollectionDto.someExampleOfChild)
+
+    assertCollectionEquals(seriaizedCollectionRequestDto, seriaizedCollectionRequestDto)
+    assert SomeExampleOfCollectionDto.SomeExampleOfCollectionRequestDto == type(seriaizedCollectionRequestDto)
+    assert SomeExampleOfDto.SomeExampleOfRequestDto == type(seriaizedCollectionRequestDto.someExampleOf)
+    assert SomeExampleOfChildDto.SomeExampleOfChildRequestDto == type(seriaizedCollectionRequestDto.someExampleOfChild)
+
+    assertCollectionEquals(seriaizedCollectionResponseDto, seriaizedCollectionResponseDto)
+    assert SomeExampleOfCollectionDto.SomeExampleOfCollectionResponseDto == type(seriaizedCollectionResponseDto)
+    assert SomeExampleOfDto.SomeExampleOfResponseDto == type(seriaizedCollectionResponseDto.someExampleOf)
+    assert SomeExampleOfChildDto.SomeExampleOfChildResponseDto == type(seriaizedCollectionResponseDto.someExampleOfChild)
