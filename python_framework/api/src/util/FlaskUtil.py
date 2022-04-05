@@ -60,7 +60,7 @@ def safellyGetResponseJson(response):
         CLIENT_RESPONSE: response
     }
     if ObjectHelper.isNone(response):
-        log.log(safellyGetResponseJson, f'Response is None. Returning {jsonBody} by default', exception=exception)
+        log.log(safellyGetResponseJson, f'Response is None. Returning {jsonBody} by default')
 
     try :
         jsonBody = response.json()
