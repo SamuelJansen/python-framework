@@ -1,4 +1,4 @@
-import requests
+import requests, urllib3
 from python_helper import Constant as c
 from python_helper import ObjectHelper, log, Function, StringHelper
 
@@ -104,6 +104,14 @@ def raiseException(
             exception = exception,
             status = HttpStatus.REQUEST_TIMEOUT
         )
+    elif isinstance(exception, urllib3.exceptions.NewConnectionError):
+        raise ExceptionHandler.getClientGlobalException(
+            clientResponse,
+            context,
+            str(exception),
+            exception = exception,
+            status = HttpStatus.SERVICE_UNAVAILABLE
+        )
     raise ExceptionHandler.getClientGlobalException(
         clientResponse,
         context,
@@ -128,7 +136,7 @@ def raiseExceptionIfNeeded(
             status = status
         )
     elif 400 <= status:
-        if 404 == status:
+        if 401 == status:
             raise ExceptionHandler.getClientGlobalException(
                 clientResponse,
                 context,
@@ -136,6 +144,15 @@ def raiseExceptionIfNeeded(
                 exception = None,
                 status = HttpStatus.PROXY_ATHENTICATION_REQUIRED,
                 message = getErrorMessage(clientResponse, context=context, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage)
+            )
+        elif 404 == status:
+            raise ExceptionHandler.getClientGlobalException(
+                clientResponse,
+                context,
+                businessLogMessage,
+                exception = None,
+                status = HttpStatus.INTERNAL_SERVER_ERROR,
+                logMessage = getErrorMessage(clientResponse, context=context, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage)
             )
         raise ExceptionHandler.getClientGlobalException(
             clientResponse,

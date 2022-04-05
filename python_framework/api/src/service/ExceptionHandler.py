@@ -175,7 +175,7 @@ def getGeneralGlobalException(exception, resourceInstance, resourceInstanceMetho
 
 
 @Function
-def getClientGlobalException(clientResponse, context, logMessage, exception=None, status=None, message=None):
+def getClientGlobalException(clientResponse, context, logMessage, exception=None, status=DEFAULT_STATUS, message=DEFAULT_MESSAGE):
     raise GlobalException(
         message = message,
         logMessage = logMessage,
