@@ -10,6 +10,7 @@ from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import ExceptionHandler
+from python_framework.api.src.service.ExceptionHandler import GlobalException
 from python_framework.api.src.service.openapi import OpenApiManager
 from python_framework.api.src.util import ClientUtil
 from python_framework.api.src.util.ClientUtil import HttpClientEvent, ManualHttpClientEvent

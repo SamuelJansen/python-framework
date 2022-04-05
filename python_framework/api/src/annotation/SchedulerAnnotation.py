@@ -85,7 +85,8 @@ def SchedulerMethod(
                         log.error(resourceInstance.__class__, logErrorMessage, exception)
                     else :
                         log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=resourceInstanceMethodMuteStacktraceOnBusinessRuleException)
-                    raise exception
+                    # raise exception
+                    return methodReturn
                 if not muteLogs:
                     log.info(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.SCHEDULER_CONTEXT.lower()} method finished')
                 return methodReturn

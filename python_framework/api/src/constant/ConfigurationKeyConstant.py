@@ -4,9 +4,11 @@ API_SCHEDULER_TIMEZONE = 'api.scheduler.time-zone'
 
 API_LISTENER_ENABLE = 'api.listener.enable'
 API_LISTENER_MUTE_LOGS = 'api.listener.mute-logs'
+API_LISTENER_TIMEOUT = 'api.listener.timeout'
 
 API_EMITTER_ENABLE = 'api.emitter.enable'
 API_EMITTER_MUTE_LOGS = 'api.emitter.mute-logs'
+API_EMITTER_TIMEOUT = 'api.emitter.timeout'
 
 API_SERVER_SCHEME = 'api.server.scheme'
 API_SERVER_HOST = 'api.server.host'

@@ -55,15 +55,24 @@ def safellyGetFlaskResponseJson(response: Response):
 
 @Function
 def safellyGetResponseJson(response):
-    jsonBody = None
+    jsonBody = {
+        CLIENT_RESPONSE_TEXT: c.BLANK,
+        CLIENT_RESPONSE: response
+    }
+    if ObjectHelper.isNone(response):
+        log.log(safellyGetResponseJson, f'Response is None. Returning {jsonBody} by default', exception=exception)
+
     try :
         jsonBody = response.json()
     except Exception as exception:
-        jsonBody = {
-            CLIENT_RESPONSE_TEXT: response.text,
-            CLIENT_RESPONSE: response
-        }
-        log.log(safellyGetResponseJson, f'Not possible to get response body. Returning {jsonBody} by default', exception=exception)
+        try:
+            jsonBody = {
+                CLIENT_RESPONSE_TEXT: response.text,
+                CLIENT_RESPONSE: response
+            }
+            log.log(safellyGetResponseJson, f'Not possible to get response body. Returning {jsonBody} by default', exception=exception)
+        except Exception as innerException:
+            log.log(safellyGetResponseJson, f'Not possible to get response body neither response data. Returning {jsonBody} by default', exception=innerException)
     return jsonBody
 
 @Function
