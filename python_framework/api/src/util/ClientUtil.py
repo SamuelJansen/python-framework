@@ -1,4 +1,4 @@
-import requests, urllib3
+import requests
 from python_helper import Constant as c
 from python_helper import ObjectHelper, log, Function, StringHelper
 
@@ -104,7 +104,7 @@ def raiseException(
             exception = exception,
             status = HttpStatus.REQUEST_TIMEOUT
         )
-    elif isinstance(exception, urllib3.exceptions.NewConnectionError):
+    elif isinstance(exception, requests.exceptions.ConnectionError):
         raise ExceptionHandler.getClientGlobalException(
             clientResponse,
             context,
