@@ -485,7 +485,7 @@ def handleControllerMethod(
     headers = FlaskUtil.addToKwargs(FlaskUtil.KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
     query = FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
     try:
-        if resourceInstance.logRequest or  logRequest :
+        if resourceInstance.logRequest and logRequest :
             log.prettyJson(
                 resourceInstanceMethod,
                 logRequestMessage,
@@ -629,8 +629,8 @@ def ControllerMethod(
     contextRequired = None,
     consumes = OpenApiManager.DEFAULT_CONTENT_TYPE,
     produces = OpenApiManager.DEFAULT_CONTENT_TYPE,
-    logRequest = False,
-    logResponse = False,
+    logRequest = True,
+    logResponse = True,
     muteStacktraceOnBusinessRuleException = True
 ):
     controllerMethodUrl = url
@@ -716,7 +716,7 @@ def ControllerMethod(
                 httpResponse = FlaskUtil.buildHttpResponse(completeResponse[1], completeResponse[0], completeResponse[-1].enumValue, produces)
 
             try:
-                if resourceInstance.logResponse or logResponse :
+                if resourceInstance.logResponse and logResponse :
                     log.prettyJson(
                         resourceInstanceMethod,
                         LogConstant.CONTROLLER_RESPONSE,

@@ -1,5 +1,6 @@
 from distutils.core import setup
 import os
+from python_helper import StringHelper
 
 print('''Installation on linux, run:
 sudo apt install libpq-dev python3-dev
@@ -13,35 +14,37 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.3.47'
+VERSION = '0.3.49'
 
 NAME = 'python_framework'
-URL = f'https://github.com/SamuelJansen/{NAME}/'
+PACKAGE_NAME = NAME
+REPOSITORY_NAME = StringHelper.toSnakeCase(NAME)
+URL = f'https://github.com/SamuelJansen/{REPOSITORY_NAME}/'
 
 OS_SEPARATOR = os.path.sep
 
 setup(
     name = NAME,
     packages = [
-        NAME,
-        f'{NAME}{OS_SEPARATOR}api',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}annotation',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}annotation{OS_SEPARATOR}client',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}model',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}util',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}domain',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}constant',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}controller',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}converter',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}converter{OS_SEPARATOR}static',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}repository',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}enumeration',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}dto',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}service',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}service{OS_SEPARATOR}openapi',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}service{OS_SEPARATOR}flask',
-        f'{NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource'
+        PACKAGE_NAME,
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}annotation',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}annotation{OS_SEPARATOR}client',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}model',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}util',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}domain',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}constant',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}controller',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}converter',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}converter{OS_SEPARATOR}static',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}repository',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}enumeration',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}dto',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}service',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}service{OS_SEPARATOR}openapi',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}src{OS_SEPARATOR}service{OS_SEPARATOR}flask',
+        f'{PACKAGE_NAME}{OS_SEPARATOR}api{OS_SEPARATOR}resource'
     ],
     # data_files = [
     #     (STATIC_PACKAGE_PATH, [
@@ -67,8 +70,8 @@ setup(
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary<3.0,>=2.8.6',
         'SQLAlchemy==1.4.25',
-        'globals<1.0,>=0.3.29',
-        'python_helper<1.0,>=0.3.46',
+        'globals<1.0,>=0.3.34',
+        'python-helper<1.0,>=0.3.49',
         'Flask-APScheduler==1.12.2',
         # 'psutil<6.0,>=5.8.0',
         'requests<3.0,>=2.26.0',

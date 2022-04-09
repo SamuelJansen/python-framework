@@ -234,14 +234,16 @@ def addControllerListTo(apiInstance, controllerList):
         OpenApiManager.addControllerDocumentation(controller, apiInstance)
         mainUrl = f'{apiInstance.baseUrl}{controller.url}'
         urlList = [mainUrl]
-        infoList = [f'Controller: {mainUrl}']
+        controllerInfoList = [f'Controller: {mainUrl}']
         controllerMethodList = ReflectionHelper.getAttributePointerList(controller)
         for controllerMethod in controllerMethodList:
             if ReflectionHelper.hasAttributeOrMethod(controllerMethod, FlaskManager.KW_URL) and ObjectHelper.isNotEmpty(controllerMethod.url):
                 controllerUrl = f'{mainUrl}{controllerMethod.url}'
                 if controllerUrl not in urlList:
                     urlList.append(controllerUrl)
-                    infoList.append(f'{c.TAB}{ReflectionHelper.getName(controllerMethod)}: {controllerUrl}')
+                controllerInfo = f'{c.TAB}{ReflectionHelper.getName(controllerMethod)}: {controllerUrl}'
+                if controllerInfo not in controllerInfoList:
+                    controllerInfoList.append(controllerInfo)
                 # subUrlList = controllerMethod.url.split(c.SLASH)
                 # concatenatedSubUrl = c.NOTHING
                 # for subUrl in subUrlList:
@@ -252,7 +254,7 @@ def addControllerListTo(apiInstance, controllerList):
                 #             if not newUrl in urlList:
                 #                 urlList.append(newUrl)
                 OpenApiManager.addEndPointDocumentation(controllerUrl, controllerMethod, controller, apiInstance)
-        log.debug(addControllerListTo, f'{controller.url} -> {StringHelper.prettyPython(infoList)}')
+        log.debug(addControllerListTo, f'{controller.url} -> {StringHelper.prettyPython(controllerInfoList)}')
         apiInstance.add_resource(controller, *urlList)
 
 
