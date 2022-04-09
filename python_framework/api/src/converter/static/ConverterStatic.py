@@ -17,11 +17,23 @@ def overrideData(model, loggedUser) :
     overrideDateData(model)
     overrideUserData(model, loggedUser)
 
+def to(dto, toClass) :
+    if not (ObjectHelper.isNone(dto) or ObjectHelper.isNone(toClass))  :
+        return Serializer.convertFromObjectToObject(dto, toClass)
+    return dto
+
+def toList(dtoList, toClass) :
+    if not (ObjectHelper.isNone(dtoList) or ObjectHelper.isNone(toClass)) :
+        return Serializer.convertFromObjectToObject(dtoList, toClass)
+    return dtoList
+
+###- deprecation
 def toResponseDtoList(dtoList, toClass) :
     if not (ObjectHelper.isNone(dtoList) or ObjectHelper.isNone(toClass)) :
         return Serializer.convertFromObjectToObject(dtoList, toClass)
     return dtoList
 
+###- deprecation
 def toResponseDto(dto, toClass) :
     if not (ObjectHelper.isNone(dto) or ObjectHelper.isNone(toClass))  :
         return Serializer.convertFromObjectToObject(dto, toClass)
