@@ -25,9 +25,9 @@ environment:
     #     info:
     #         key: LOG
     #         value: True
-    # shema:
-    #     key: DATABASE_SCHEMA
-    #     value: ${database.schema}
+    shema:
+        key: DATABASE_SCHEMA
+        value: ${database.schema}
     # database:
     #     key: DATABASE_URL
     #     value: ${database.dialect}://${database.username}:${database.password}@${database.host}:${database.port}/${database.database}

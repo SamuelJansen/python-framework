@@ -116,7 +116,7 @@ def jsonifyIt(instance, fieldsToExpand=[EXPAND_ALL_FIELDS]):
 
 
 @Function
-def pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDictionary):
+def pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDictionary, muteLogs=False):
     args = []
     kwargs = fromJsonToDictionary.copy()
     objectInstance = None
@@ -125,6 +125,7 @@ def pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDict
     if SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE in kwargs:
         kwargs.pop(SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE) ###- this particular job from SqlAlchemy was a big shity one...
     objectInstance = None
+    possibleErrorSet = set()
     for key,value in fromJsonToDictionary.items():
         try :
             objectInstance = toClass(*args,**kwargs)
@@ -132,6 +133,9 @@ def pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDict
         except Exception as exception :
             args.append(value)
             kwargs.pop(key)
+            possibleErrorSet.add(str(exception))
+    if not muteLogs:
+        log.log(pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy, f'Not possible to instantiate toClass. Possible causes: {possibleErrorSet}')
     return objectInstance
 
 
@@ -190,12 +194,13 @@ def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
             #     ReflectionHelper.setAttributeOrMethod(fromObject, attributeName, jsonAttributeValue)
 
         if isModelClass(toClass):
-            objectInstance = pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDictionary)
+            objectInstance = pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDictionary, muteLogs=muteLogs)
         else:
             args = []
             kwargs = fromJsonToDictionary.copy()
             # print(f'fromJsonToDictionary = {fromJsonToDictionary}')
             objectInstance = None
+            possibleErrorSet = set()
             for key,value in fromJsonToDictionary.items():
                 # print(f'*args{args},**kwargs{kwargs}')
                 try :
@@ -206,9 +211,12 @@ def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
                     args.append(value)
                     # del kwargs[key]
                     kwargs.pop(key)
+                    possibleErrorSet.add(str(exception))
+            if not muteLogs:
+                log.log(serializeIt, f'Not possible to instantiate toClass. Possible causes: {possibleErrorSet}')
 
         if ObjectHelper.isNone(objectInstance):
-            raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class')
+            raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class. Check LOG logs level for mor information')
         # print(objectInstance)
         # if objectInstance is [] :
         #     print(fromJson, toClass, fatherClass)
@@ -216,7 +224,7 @@ def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
 
 
 @Function
-def convertFromJsonToObject(fromJson, toClass, fatherClass=None):
+def convertFromJsonToObject(fromJson, toClass, fatherClass=None, muteLogs=False):
     if ObjectHelper.isNone(fromJson) or ObjectHelper.isNone(toClass):
         return fromJson
     # validateToClassIsNotNone(fromJson, toClass)
@@ -229,13 +237,13 @@ def convertFromJsonToObject(fromJson, toClass, fatherClass=None):
             if isSerializerList(innerToObjectClass) and ObjectHelper.isList(fromJson):
                 objectList = []
                 for fromJsonElement in fromJson :
-                    objectList.append(convertFromJsonToObject(fromJsonElement, innerToObjectClass[0], fatherClass=fatherClass))
+                    objectList.append(convertFromJsonToObject(fromJsonElement, innerToObjectClass[0], fatherClass=fatherClass, muteLogs=muteLogs))
                 # print(f'convertFromJsonToObject: {objectList}')
                 return objectList
             elif not isSerializerList(innerToObjectClass) and not ObjectHelper.isList(fromJson):
-                return convertFromJsonToObject(fromJson, innerToObjectClass, fatherClass=fatherClass)
+                return convertFromJsonToObject(fromJson, innerToObjectClass, fatherClass=fatherClass, muteLogs=muteLogs)
     else:
-        return serializeIt(fromJson, toClass, fatherClass=fatherClass)
+        return serializeIt(fromJson, toClass, fatherClass=fatherClass, muteLogs=muteLogs)
     raiseUnhandledConversion(fromJson, toClass)
 
 

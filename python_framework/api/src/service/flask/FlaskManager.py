@@ -269,7 +269,7 @@ def handleAnyControllerMethodRequest(
             muteStacktraceOnBusinessRuleException
         )
     elif ObjectHelper.isNotEmptyCollection(apiKeyRequired):
-        return handleLockedByApiKeyControllerMethod(
+        return handleByApiKeyControllerMethod(
             args,
             kwargs,
             contentType,
@@ -335,7 +335,7 @@ def handleSecuredControllerMethod(
             status = HttpStatus.FORBIDDEN
         )
     elif ObjectHelper.isNotEmptyCollection(apiKeyRequired):
-        return handleLockedByApiKeyControllerMethod(
+        return handleByApiKeyControllerMethod(
             args,
             kwargs,
             contentType,
@@ -378,7 +378,7 @@ def handleSecuredControllerMethod(
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 @ApiKeyManager.jwtAccessRequired
-def handleLockedByApiKeyControllerMethod(
+def handleByApiKeyControllerMethod(
     args,
     kwargs,
     contentType,
@@ -474,11 +474,15 @@ def handleControllerMethod(
     requestClass,
     logRequest,
     muteStacktraceOnBusinessRuleException,
+    requestBody = None,
     logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
     requestBodyAsJson = {}
-    if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass :
-        requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
+    if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass:
+        if ObjectHelper.isNotNone(requestBody):
+            requestBodyAsJson = requestBody
+        else:
+            requestBodyAsJson = getRequestBodyAsJson(contentType, requestClass)
         if Serializer.requestBodyIsPresent(requestBodyAsJson):
             requestBodyAsJsonSerialized = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(args, requestBodyAsJsonSerialized)
