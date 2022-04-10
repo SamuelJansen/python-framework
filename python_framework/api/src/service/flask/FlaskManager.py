@@ -464,7 +464,7 @@ def handleSessionedControllerMethod(
 
 
 def isAbleToHaveRequestBody(resourceInstanceMethod, requestClass, verb):
-    return ObjectHelper.isNotNone(equestClass) and (
+    return ObjectHelper.isNotNone(requestClass) and (
         resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST or
         str(verb).lower() in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST
     )
