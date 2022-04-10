@@ -138,7 +138,7 @@ def pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy(toClass, fromJsonToDict
             args.append(value)
             kwargs.pop(key)
             possibleErrorSet.add(str(exception))
-    if not muteLogs:
+    if not muteLogs and ObjectHelper.isNotEmpty(possibleErrorSet):
         log.log(pleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy, f'Not possible to instantiate toClass. Possible causes: {possibleErrorSet}')
     return objectInstance
 
@@ -216,7 +216,7 @@ def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
                     # del kwargs[key]
                     kwargs.pop(key)
                     possibleErrorSet.add(str(exception))
-            if not muteLogs:
+            if not muteLogs and ObjectHelper.isNotEmpty(possibleErrorSet):
                 log.log(serializeIt, f'Not possible to instantiate toClass. Possible causes: {possibleErrorSet}')
 
         if ObjectHelper.isNone(objectInstance):
