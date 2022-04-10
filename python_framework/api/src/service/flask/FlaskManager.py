@@ -462,6 +462,14 @@ def handleSessionedControllerMethod(
             muteStacktraceOnBusinessRuleException
         )
 
+
+def isAbleToHaveRequestBody(resourceInstanceMethod, requestClass, verb):
+    return ObjectHelper.isNotNone(equestClass) and (
+        resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST or
+        str(verb).lower() in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST
+    )
+
+
 @EncapsulateItWithGlobalException()
 def handleControllerMethod(
     args,
@@ -475,10 +483,11 @@ def handleControllerMethod(
     logRequest,
     muteStacktraceOnBusinessRuleException,
     requestBody = None,
+    verb = None,
     logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
     requestBodyAsJson = {}
-    if resourceInstanceMethod.__name__ in OpenApiManager.ABLE_TO_RECIEVE_BODY_LIST and requestClass:
+    if isAbleToHaveRequestBody(resourceInstanceMethod, requestClass, verb):
         if ObjectHelper.isNotNone(requestBody):
             requestBodyAsJson = requestBody
         else:
