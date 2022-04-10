@@ -149,10 +149,9 @@ def raiseExceptionIfNeeded(
             raise ExceptionHandler.getClientGlobalException(
                 clientResponse,
                 context,
-                businessLogMessage,
+                getErrorMessage(clientResponse, context=context, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage),
                 exception = None,
-                status = HttpStatus.INTERNAL_SERVER_ERROR,
-                logMessage = getErrorMessage(clientResponse, context=context, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage)
+                status = HttpStatus.INTERNAL_SERVER_ERROR
             )
         raise ExceptionHandler.getClientGlobalException(
             clientResponse,
