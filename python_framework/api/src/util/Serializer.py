@@ -88,6 +88,14 @@ def newUuidAsString():
     return str(newUuid())
 
 
+def isUuid(thing):
+    return isinstance(thing, UUID)
+
+
+def isDatetimeRelated(thing):
+    return ReflectionHelper.getName(type(thing)) in DATE_TIME_RELATED
+
+
 def isSerializerList(instance):
     return ObjectHelper.isList(instance) or type(instance) == InstrumentedList
 
@@ -98,10 +106,6 @@ def isSerializerCollection(instance):
 
 def requestBodyIsPresent(requestBody):
     return ObjectHelper.isNotNone(requestBody) and (ObjectHelper.isDictionary(requestBody) or ObjectHelper.isList(requestBody))
-
-
-def isDatetimeRelated(thing):
-    return ReflectionHelper.getName(type(thing)) in DATE_TIME_RELATED
 
 
 @Function
@@ -297,7 +301,7 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
         return instance
     if EnumAnnotation.isEnumItem(instance):
         return instance.enumValue
-    if isDatetimeRelated(instance):
+    if isDatetimeRelated(instance) or isUuid(instance):
         return str(instance)
     # print(f'{instance} not in {visitedIdInstances}: {instance not in visitedIdInstances}')
     isVisitedInstance = id(instance) in visitedIdInstances
