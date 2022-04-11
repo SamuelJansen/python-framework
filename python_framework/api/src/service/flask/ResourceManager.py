@@ -201,7 +201,7 @@ def initialize(
     api.baseStaticUrl = baseStaticUrl
     api.internalUrl = FlaskManager.getInternalUrl(api)
 
-    api.cors = CORS(app, resources={f"{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}})
+    api.cors = CORS(app, resources={f"{c.ASTERISK}{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}})
     api.cors.api = api
 
     OpenApiManager.newDocumentation(api, app)
@@ -239,6 +239,10 @@ def addControllerListTo(apiInstance, controllerList):
         for controllerMethod in controllerMethodList:
             if ReflectionHelper.hasAttributeOrMethod(controllerMethod, FlaskManager.KW_URL) and ObjectHelper.isNotEmpty(controllerMethod.url):
                 controllerUrl = f'{mainUrl}{controllerMethod.url}'
+                if controllerUrl.endswith(c.SLASH):
+                    controllerUrl = controllerUrl[:-1]
+                if f'{apiInstance.baseUrl}' == controllerUrl or f'{apiInstance.baseUrl}{c.SLASH}' == controllerUrl:
+                    raise Exception(f'Invalid controller url: {controllerUrl}')
                 if controllerUrl not in urlList:
                     urlList.append(controllerUrl)
                 controllerInfo = f'{c.TAB}{ReflectionHelper.getName(controllerMethod)}: {controllerUrl}'
