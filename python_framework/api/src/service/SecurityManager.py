@@ -177,6 +177,7 @@ def getCurrentUser(userClass=None, apiInstance=None):
 def getContextData(dataClass=None, apiInstance=None):
     return getCurrentUser(userClass=dataClass, apiInstance=apiInstance)
 
+
 def addResource(apiInstance, appInstance):
     apiInstance.securityManager = None
     try:
@@ -194,18 +195,23 @@ def addResource(apiInstance, appInstance):
         log.success(initialize, 'SecurityManager created')
     return apiInstance.securityManager
 
+
 @Function
 def initialize(apiInstance, appInstance):
-    @apiInstance.securityManager.token_in_blacklist_loader
-    def verifyAuthorizaionAccess(decriptedToken):
-        return decriptedToken[JwtConstant.KW_JTI] in BLACK_LIST
+    try:
+        @apiInstance.securityManager.token_in_blacklist_loader
+        def verifyAuthorizaionAccess(decriptedToken):
+            return decriptedToken[JwtConstant.KW_JTI] in BLACK_LIST
 
-    @apiInstance.securityManager.revoked_token_loader
-    def invalidAccess():
-        log.log(initialize, 'Access revoked', exception=None)
-        return {'message': 'Unauthorized'}, HttpStatus.UNAUTHORIZED
-    if ObjectHelper.isNotNone(apiInstance.securityManager):
-        log.success(initialize, 'SecurityManager is running')
+        @apiInstance.securityManager.revoked_token_loader
+        def invalidAccess():
+            log.log(initialize, 'Access revoked', exception=None)
+            return {'message': 'Unauthorized'}, HttpStatus.UNAUTHORIZED
+        if ObjectHelper.isNotNone(apiInstance.securityManager):
+            log.success(initialize, 'SecurityManager is running')
+    except Exception as exception:
+        log.failure(initialize, 'Not possible to load security utilities properly', exception=exception, muteStackTrace=True)
+
 
 def onHttpRequestCompletion(apiInstance, appInstance):
     # @appInstance.teardown_appcontext
