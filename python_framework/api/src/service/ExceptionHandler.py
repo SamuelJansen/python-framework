@@ -109,17 +109,20 @@ def validateArgs(self, method, objectRequest, expecteObjectClass):
 def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, context, apiInstance = None) :
     try :
         exception = getGeneralGlobalException(exception, resourceInstance, resourceInstanceMethod, context, apiInstance = None)
-        httpErrorLog = ErrorLog.ErrorLog()
-        httpErrorLog.override(exception)
         if ObjectHelper.isNone(apiInstance):
             from python_framework import FlaskManager
             apiInstance = FlaskManager.getApi()
-        else:
-            apiInstance = apiInstance
+        try:
+            apiInstance.repository.commit()
+        except Exception as firstPreCommitException:
+            log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}. Going for a second attempt', exception=firstPreCommitException)
             try:
+                apiInstance.repository.flush()
                 apiInstance.repository.commit()
-            except Exception as preCommitException:
-                log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}', exception=preCommitException)
+            except Exception as secondPreCommitException:
+                log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}', exception=secondPreCommitException)
+        httpErrorLog = ErrorLog.ErrorLog()
+        httpErrorLog.override(exception)
         apiInstance.repository.saveAndCommit(httpErrorLog)
     except Exception as errorLogException :
         log.warning(handleLogErrorException, f'Failed to persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
