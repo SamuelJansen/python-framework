@@ -115,12 +115,18 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
         try:
             apiInstance.repository.commit()
         except Exception as firstPreCommitException:
-            log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}. Going for a second attempt', exception=firstPreCommitException)
+            log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}. Going for a second attempt', exception=firstPreCommitException, muteStackTrace=True)
             try:
                 apiInstance.repository.flush()
                 apiInstance.repository.commit()
             except Exception as secondPreCommitException:
-                log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}', exception=secondPreCommitException)
+                log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}. Going for a third attempt', exception=secondPreCommitException, muteStackTrace=True)
+                try:
+                    apiInstance.repository.rollback()
+                    apiInstance.repository.flush()
+                    apiInstance.repository.commit()
+                except Exception as thirdPreCommitException:
+                    log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}', exception=thirdPreCommitException)
         httpErrorLog = ErrorLog.ErrorLog()
         httpErrorLog.override(exception)
         apiInstance.repository.saveAndCommit(httpErrorLog)

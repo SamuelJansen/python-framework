@@ -283,6 +283,14 @@ class SqlAlchemyProxy:
         log.debug(self.run, 'Database tables created')
 
     @Method
+    def flush(self):
+        self.session.flush()
+
+    @Method
+    def rollback(self):
+        self.session.rollback()
+
+    @Method
     def commit(self):
         self.session.commit()
 
