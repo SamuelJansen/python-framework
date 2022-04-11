@@ -233,7 +233,7 @@ def addControllerListTo(apiInstance, controllerList):
     for controller in controllerList:
         OpenApiManager.addControllerDocumentation(controller, apiInstance)
         mainUrl = f'{apiInstance.baseUrl}{controller.url}'
-        urlList = [mainUrl]
+        urlList = []
         controllerInfoList = [f'Controller: {mainUrl}']
         controllerMethodList = ReflectionHelper.getAttributePointerList(controller)
         for controllerMethod in controllerMethodList:
