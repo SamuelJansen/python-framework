@@ -201,7 +201,7 @@ def initialize(
     api.baseStaticUrl = baseStaticUrl
     api.internalUrl = FlaskManager.getInternalUrl(api)
 
-    api.cors = CORS(app, resources={f"{c.ASTERISK}{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}})
+    api.cors = CORS(app, resources={f"{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}}, supports_credentials=True)
     api.cors.api = api
 
     OpenApiManager.newDocumentation(api, app)
