@@ -23,7 +23,7 @@ class HttpClientEvent(Exception):
 
 
 class ManualHttpClientEvent(Exception):
-    def __init__(self, completeResponse, eventContext=HttpDomain.CLIENT_CONTEXT):
+    def __init__(self, completeResponse, *args, eventContext=HttpDomain.CLIENT_CONTEXT, **kwargs):
         Exception.__init__(self, f'ManualHttpClientEvent')
         self.completeResponse = completeResponse
 
@@ -37,7 +37,7 @@ def getHttpClientEvent(resourceInstanceMethod, *args, **kwargs):
     except Exception as exception:
         raise exception
     if ObjectHelper.isNotNone(completeResponse):
-        return ManualHttpClientEvent(completeResponse, eventContext=eventContext)
+        return ManualHttpClientEvent(completeResponse, *args, **kwargs)
 
 
 def raiseHttpClientEventNotFoundException(*args, **kwargs):
