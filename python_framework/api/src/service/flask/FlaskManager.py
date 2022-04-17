@@ -171,7 +171,7 @@ def runApi(*args, api=None, debug=False, **kwargs):
     if 'port' not in kwargs and api.port :
         kwargs['port'] = api.port
     log.success(runApi, f'Api will run at {api.internalUrl}')
-    log.success(runApi, f'Api will be exposed at {api.exposedUrl}')
+    log.success(runApi, f'Api will be available at {api.exposedUrl}')
     log.success(runApi, f'Health check will be available at {api.healthCheckUrl}')
     log.success(runApi, f'Documentation will be available at {api.documentationUrl}')
     log.success(runApi, f'Api static content will be available at {api.exposedStaticUrl}')

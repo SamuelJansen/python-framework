@@ -157,6 +157,16 @@ def addGlobalsTo(apiInstance, globalsInstance=None):
 
 
 @Function
+def getApiUrl(app=None, api=None):
+    if ObjectHelper.isNone(api):
+        api = app.api
+    exposedHost = ConverterStatic.getValueOrDefault(api.exposedHost, api.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_HOST))
+    if ObjectHelper.isNotNone(exposedHost):
+        return f'{exposedHost}{api.baseUrl}'
+    return f'{api.documentationUrl[:-(len(api.baseUrl)+len(OpenApiManager.DOCUMENTATION_ENDPOINT))]}{api.baseUrl}'
+
+
+@Function
 def getApiStaticUrl(app=None, api=None, staticUrl=None):
     if ObjectHelper.isNotNone(staticUrl):
         return staticUrl
@@ -231,6 +241,7 @@ def initialize(
 
     api.documentationUrl = OpenApiManager.getDocumentationUrl(api)
     api.healthCheckUrl = f'{api.documentationUrl[:-len(OpenApiManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
+    api.exposedUrl = getApiUrl(api=api)
     api.exposedStaticUrl = getApiStaticUrl(api=api, staticUrl=staticUrl)
 
     return app
