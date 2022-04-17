@@ -394,7 +394,7 @@ def HttpClientMethod(
             clientResponseStatus = completeResponse[-1]
             clientResponseHeaders = completeResponse[1]
             clientResponseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : HttpStatus.map(clientResponseStatus).enumName}
-            if resourceInstance.logResponse or logResponse :
+            if resourceInstance.logResponse and logResponse :
                 log.prettyJson(
                     resourceInstanceMethod,
                     LogConstant.CLIENT_RESPONSE,
