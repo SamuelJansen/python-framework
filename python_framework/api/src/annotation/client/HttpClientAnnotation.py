@@ -111,8 +111,8 @@ def HttpClientMethod(
     propagateSession = False,
     consumes = OpenApiManager.DEFAULT_CONTENT_TYPE,
     produces = OpenApiManager.DEFAULT_CONTENT_TYPE,
-    logRequest = False,
-    logResponse = False,
+    logRequest = True,
+    logResponse = True,
     debugIt = False
 ):
     clientMethodConfig = ClientMethodConfig(
@@ -141,7 +141,7 @@ def HttpClientMethod(
             params = None,
             headers = None,
             timeout = None,
-            logRequest = False,
+            logRequest = True,
             **kwargs
         ):
             verb = HttpDomain.Verb.OPTIONS
@@ -173,7 +173,7 @@ def HttpClientMethod(
             params = None,
             headers = None,
             timeout = None,
-            logRequest = False,
+            logRequest = True,
             **kwargs
         ):
             verb = HttpDomain.Verb.GET
@@ -205,7 +205,7 @@ def HttpClientMethod(
             headers = None,
             params = None,
             timeout = None,
-            logRequest = False,
+            logRequest = True,
             **kwargs
         ):
             verb = HttpDomain.Verb.POST
@@ -237,7 +237,7 @@ def HttpClientMethod(
             headers = None,
             params = None,
             timeout = None,
-            logRequest = False,
+            logRequest = True,
             **kwargs
         ):
             verb = HttpDomain.Verb.PUT
@@ -269,7 +269,7 @@ def HttpClientMethod(
             headers = None,
             params = None,
             timeout = None,
-            logRequest = False,
+            logRequest = True,
             **kwargs
         ):
             verb = HttpDomain.Verb.PATCH
@@ -301,7 +301,7 @@ def HttpClientMethod(
             headers = None,
             params = None,
             timeout = None,
-            logRequest = False,
+            logRequest = True,
             **kwargs
         ):
             verb = HttpDomain.Verb.DELETE

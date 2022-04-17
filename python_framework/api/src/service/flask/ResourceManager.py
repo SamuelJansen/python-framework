@@ -156,9 +156,14 @@ def addGlobalsTo(apiInstance, globalsInstance=None):
 
 
 @Function
-def getApiStaticUrl(app=None, api=None):
+def getApiStaticUrl(app=None, api=None, staticUrl=None):
+    if ObjectHelper.isNotNone(staticUrl):
+        return staticUrl
     if ObjectHelper.isNone(api):
         api = app.api
+    exposedStaticHost = ConverterStatic.getValueOrDefault(api.exposedStaticHost, api.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_STATIC_HOST))
+    if ObjectHelper.isNotNone(staticHost):
+        return f'{exposedStaticHost}{api.baseStaticUrl}'
     return f'{api.documentationUrl[:-(len(api.baseUrl)+len(OpenApiManager.DOCUMENTATION_ENDPOINT))]}{api.baseStaticUrl}'
 
 
@@ -200,6 +205,8 @@ def initialize(
     api.baseUrl = getBaseUrl(globalsInstance)
     api.baseStaticUrl = baseStaticUrl
     api.internalUrl = FlaskManager.getInternalUrl(api)
+    api.exposedHost = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_HOST)
+    api.exposedStaticHost = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_STATIC_HOST)
 
     api.cors = CORS(app, resources={f"{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}}, supports_credentials=True)
     api.cors.api = api
@@ -223,7 +230,7 @@ def initialize(
 
     api.documentationUrl = OpenApiManager.getDocumentationUrl(api)
     api.healthCheckUrl = f'{api.documentationUrl[:-len(OpenApiManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
-    api.staticUrl = getApiStaticUrl(api=api)
+    api.exposedStaticUrl = getApiStaticUrl(api=api, staticUrl=staticUrl)
 
     return app
 

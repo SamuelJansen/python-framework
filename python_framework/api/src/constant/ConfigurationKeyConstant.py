@@ -14,6 +14,8 @@ API_SERVER_SCHEME = 'api.server.scheme'
 API_SERVER_HOST = 'api.server.host'
 API_SERVER_PORT = 'api.server.port'
 API_SERVER_BASE_URL = 'api.server.base-url'
+API_SERVER_EXPOSED_HOST = 'api.server.exposed.host'
+API_SERVER_EXPOSED_STATIC_HOST = 'api.server.exposed.static-host'
 
 API_SESSION_SECRET = 'api.session.secret'
 API_SESSION_ALGORITHM = 'api.session.algorithm'

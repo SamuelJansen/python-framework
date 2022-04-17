@@ -75,7 +75,7 @@ def getTimeout(client, clientMethodConfig, timeout):
 
 @Function
 def getLogRequest(client, clientMethodConfig, logRequest):
-    return client.logRequest or clientMethodConfig.logRequest or logRequest
+    return client.logRequest and clientMethodConfig.logRequest and logRequest
 
 
 @Function
