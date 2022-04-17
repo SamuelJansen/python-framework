@@ -9,6 +9,7 @@ from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.constant import StaticConstant
 from python_framework.api.src.constant import HealthCheckConstant
 from python_framework.api.src.util import FlaskUtil
+from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import SqlAlchemyProxy
 from python_framework.api.src.service import SessionManager
@@ -162,7 +163,7 @@ def getApiStaticUrl(app=None, api=None, staticUrl=None):
     if ObjectHelper.isNone(api):
         api = app.api
     exposedStaticHost = ConverterStatic.getValueOrDefault(api.exposedStaticHost, api.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_STATIC_HOST))
-    if ObjectHelper.isNotNone(staticHost):
+    if ObjectHelper.isNotNone(exposedStaticHost):
         return f'{exposedStaticHost}{api.baseStaticUrl}'
     return f'{api.documentationUrl[:-(len(api.baseUrl)+len(OpenApiManager.DOCUMENTATION_ENDPOINT))]}{api.baseStaticUrl}'
 
