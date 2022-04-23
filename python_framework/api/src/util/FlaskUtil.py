@@ -270,9 +270,14 @@ def validateResourceInstance(resourceInstance):
         raise Exception(f'Resource cannot be None')
 
 @Function
-def retrieveApiInstance(apiInstance=None, arguments=None):
+def retrieveApiInstance(apiInstance=None, arguments=None, service=None):
     if isApiInstance(apiInstance):
         return apiInstance
+    if ObjectHelper.isNotNone(service):
+        try:
+            api = service.globals.api
+        except:
+            log.log(retrieveApiInstance, f'''Not possible to retrieve api instance by {service} service. Going for another approach''', exception=exception, muteStackTrace=True)
     if isApiInstance(API_INSTANCE_HOLDER.get(KEY_API_INSTANCE)):
         return API_INSTANCE_HOLDER.get(KEY_API_INSTANCE)
     if ObjectHelper.isNone(apiInstance) and ObjectHelper.isNotNone(arguments):

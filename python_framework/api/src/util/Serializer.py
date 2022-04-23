@@ -228,6 +228,13 @@ def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
 
 
 @Function
+def convertFromJsonToDictionary(string):
+    if isinstance(string, str):
+        return json.loads(string)
+    return string
+
+
+@Function
 def convertFromJsonToObject(fromJson, toClass, fatherClass=None, muteLogs=False):
     if ObjectHelper.isNone(fromJson) or ObjectHelper.isNone(toClass):
         return fromJson
