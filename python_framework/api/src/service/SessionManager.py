@@ -36,7 +36,7 @@ class JwtManager:
         return jwt.decode(encodedPayload, self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def validateAccessSession(self, rawJwt=None, options=None, requestHeaders=None, requestHeaders=None):
+    def validateAccessSession(self, rawJwt=None, options=None, requestHeaders=None):
         decodedSessionToken = rawJwt
         try:
             decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=decodedSessionToken, options=options, requestHeaders=requestHeaders)
