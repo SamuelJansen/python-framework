@@ -254,7 +254,7 @@ def handleAnyControllerMethodRequest(
     muteStacktraceOnBusinessRuleException,
     verb = None,
     requestHeaders = None,
-    requestParam = None,
+    requestParams = None,
     requestBody = None,
     logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
@@ -275,7 +275,7 @@ def handleAnyControllerMethodRequest(
             muteStacktraceOnBusinessRuleException,
             verb = verb,
             requestHeaders = requestHeaders,
-            requestParam = requestParam,
+            requestParams = requestParams,
             requestBody = requestBody,
             logRequestMessage = logRequestMessage
         )
@@ -295,7 +295,7 @@ def handleAnyControllerMethodRequest(
             muteStacktraceOnBusinessRuleException,
             verb = verb,
             requestHeaders = requestHeaders,
-            requestParam = requestParam,
+            requestParams = requestParams,
             requestBody = requestBody,
             logRequestMessage = logRequestMessage
         )
@@ -314,7 +314,7 @@ def handleAnyControllerMethodRequest(
             muteStacktraceOnBusinessRuleException,
             verb = verb,
             requestHeaders = requestHeaders,
-            requestParam = requestParam,
+            requestParams = requestParams,
             requestBody = requestBody,
             logRequestMessage = logRequestMessage
         )
@@ -331,7 +331,7 @@ def handleAnyControllerMethodRequest(
         muteStacktraceOnBusinessRuleException,
         verb = verb,
         requestHeaders = requestHeaders,
-        requestParam = requestParam,
+        requestParams = requestParams,
         requestBody = requestBody,
         logRequestMessage = logRequestMessage
     )
@@ -354,7 +354,7 @@ def handleSecuredControllerMethod(
     muteStacktraceOnBusinessRuleException,
     verb = None,
     requestHeaders = None,
-    requestParam = None,
+    requestParams = None,
     requestBody = None,
     logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
@@ -381,7 +381,7 @@ def handleSecuredControllerMethod(
             muteStacktraceOnBusinessRuleException,
             verb = verb,
             requestHeaders = requestHeaders,
-            requestParam = requestParam,
+            requestParams = requestParams,
             requestBody = requestBody,
             logRequestMessage = logRequestMessage
         )
@@ -400,7 +400,7 @@ def handleSecuredControllerMethod(
             muteStacktraceOnBusinessRuleException,
             verb = verb,
             requestHeaders = requestHeaders,
-            requestParam = requestParam,
+            requestParams = requestParams,
             requestBody = requestBody,
             logRequestMessage = logRequestMessage
         )
@@ -417,7 +417,7 @@ def handleSecuredControllerMethod(
         muteStacktraceOnBusinessRuleException,
         verb = verb,
         requestHeaders = requestHeaders,
-        requestParam = requestParam,
+        requestParams = requestParams,
         requestBody = requestBody,
         logRequestMessage = logRequestMessage
     )
@@ -439,7 +439,7 @@ def handleByApiKeyControllerMethod(
     muteStacktraceOnBusinessRuleException,
     verb = None,
     requestHeaders = None,
-    requestParam = None,
+    requestParams = None,
     requestBody = None,
     logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
@@ -465,7 +465,7 @@ def handleByApiKeyControllerMethod(
             muteStacktraceOnBusinessRuleException,
             verb = verb,
             requestHeaders = requestHeaders,
-            requestParam = requestParam,
+            requestParams = requestParams,
             requestBody = requestBody,
             logRequestMessage = logRequestMessage
         )
@@ -482,7 +482,7 @@ def handleByApiKeyControllerMethod(
         muteStacktraceOnBusinessRuleException,
         verb = verb,
         requestHeaders = requestHeaders,
-        requestParam = requestParam,
+        requestParams = requestParams,
         requestBody = requestBody,
         logRequestMessage = logRequestMessage
     )
@@ -503,7 +503,7 @@ def handleSessionedControllerMethod(
     muteStacktraceOnBusinessRuleException,
     verb = None,
     requestHeaders = None,
-    requestParam = None,
+    requestParams = None,
     requestBody = None,
     logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
@@ -528,7 +528,7 @@ def handleSessionedControllerMethod(
             muteStacktraceOnBusinessRuleException,
             verb = verb,
             requestHeaders = requestHeaders,
-            requestParam = requestParam,
+            requestParams = requestParams,
             requestBody = requestBody,
             logRequestMessage = logRequestMessage
         )
@@ -555,7 +555,7 @@ def handleControllerMethod(
     muteStacktraceOnBusinessRuleException,
     verb = None,
     requestHeaders = None,
-    requestParam = None,
+    requestParams = None,
     requestBody = None,
     logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
@@ -573,7 +573,7 @@ def handleControllerMethod(
     else:
         requestHeadersAsJson = FlaskUtil.safellyGetHeaders()
     if ObjectHelper.isNotNone(requestBody):
-        requestParamAsJson = requestParam
+        requestParamAsJson = requestParams
     else:
         requestParamAsJson = FlaskUtil.safellyGetArgs()
     headers = FlaskUtil.addToKwargs(FlaskUtil.KW_HEADERS, requestHeaderClass, requestHeadersAsJson, kwargs)
