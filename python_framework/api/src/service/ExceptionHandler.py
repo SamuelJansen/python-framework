@@ -185,7 +185,7 @@ def getGeneralGlobalException(exception, resourceInstance, resourceInstanceMetho
 
 @Function
 def getClientGlobalException(clientResponse, context, logMessage, exception=None, status=DEFAULT_STATUS, message=DEFAULT_MESSAGE):
-    raise GlobalException(
+    return GlobalException(
         message = message,
         logMessage = logMessage,
         url = FlaskUtil.safellyGetRequestUrlFromResponse(clientResponse),
