@@ -136,8 +136,8 @@ def getJwtBody(rawJwt=None, apiInstance=None, requestHeaders=None):
     return rawJwt
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtHeaders(apiInstance=None):
-    headers = retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getUnverifiedHeaders()
+def getJwtHeaders(apiInstance=None, requestHeaders=None):
+    headers = retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getUnverifiedHeaders(requestHeaders=requestHeaders)
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)

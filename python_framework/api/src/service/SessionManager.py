@@ -130,14 +130,14 @@ def jwtRefreshRequired(function, *args, **kwargs):
     return innerFunction
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtBody(rawJwt=None, apiInstance=None):
+def getJwtBody(rawJwt=None, apiInstance=None, requestHeaders=None):
     if ObjectHelper.isNone(rawJwt):
-        return retrieveApiInstance(apiInstance=apiInstance).sessionManager.getBody(rawJwt=rawJwt)
+        return retrieveApiInstance(apiInstance=apiInstance).sessionManager.getBody(rawJwt=rawJwt, requestHeaders=requestHeaders)
     return rawJwt
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtHeaders(apiInstance=None):
-    headers = retrieveApiInstance(apiInstance=apiInstance).sessionManager.getUnverifiedHeaders()
+def getJwtHeaders(apiInstance=None, requestHeaders=None):
+    headers = retrieveApiInstance(apiInstance=apiInstance).sessionManager.getUnverifiedHeaders(requestHeaders=requestHeaders)
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
