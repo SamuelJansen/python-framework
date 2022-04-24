@@ -36,10 +36,10 @@ class JwtManager:
         return jwt.decode(encodedPayload, self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def validateAccessSession(self, rawJwt=None, options=None):
+    def validateAccessSession(self, rawJwt=None, options=None, requestHeaders=None, requestHeaders=None):
         decodedSessionToken = rawJwt
         try:
-            decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=decodedSessionToken, options=options)
+            decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=decodedSessionToken, options=options, requestHeaders=requestHeaders)
             jwtType = getType(rawJwt=decodedSessionToken)
             assert jwtType == JwtConstant.ACCESS_VALUE_TYPE, f'Access session should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
@@ -48,10 +48,10 @@ class JwtManager:
             raise exception
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def validateRefreshSession(self, rawJwt=None, options=None):
+    def validateRefreshSession(self, rawJwt=None, options=None, requestHeaders=None):
         decodedSessionToken = rawJwt
         try:
-            decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=decodedSessionToken, options=options)
+            decodedSessionToken = self.validateGeneralSessionAndReturnItDecoded(rawJwt=decodedSessionToken, options=options, requestHeaders=requestHeaders)
             jwtType = getType(rawJwt=decodedSessionToken)
             assert jwtType == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh session should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
@@ -60,10 +60,10 @@ class JwtManager:
             raise exception
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def validateGeneralSessionAndReturnItDecoded(self, rawJwt=None, options=None):
+    def validateGeneralSessionAndReturnItDecoded(self, rawJwt=None, options=None, requestHeaders=None):
         decodedSessionToken = rawJwt
         try:
-            decodedSessionToken = self.getDecodedToken(rawJwt=decodedSessionToken, options=options)
+            decodedSessionToken = self.getDecodedToken(rawJwt=decodedSessionToken, options=options, requestHeaders=requestHeaders)
             assert ObjectHelper.isDictionary(decodedSessionToken), f'Invalid session payload type. It should be a dictionary, bu it is {type(decodedSessionToken)}'
             assert ObjectHelper.isNotEmpty(decodedSessionToken), 'Session cannot be empty'
             jti = getJti(rawJwt=decodedSessionToken)
@@ -80,35 +80,40 @@ class JwtManager:
             raise exception
         return decodedSessionToken
 
-    def getBody(self, rawJwt=None, options=None):
-        decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt, options=options)
+    def getBody(self, rawJwt=None, options=None, requestHeaders=None):
+        decodedSessionToken = self.getDecodedToken(rawJwt=rawJwt, options=options, requestHeaders=requestHeaders)
         return decodedSessionToken
 
-    def getUnverifiedBody(self, rawJwt=None):
-        return self.getDecodedToken(rawJwt=rawJwt, options={OPTION_VERIFY_SIGNATURE: False})
+    def getUnverifiedBody(self, rawJwt=None, requestHeaders=None):
+        return self.getDecodedToken(rawJwt=rawJwt, options={OPTION_VERIFY_SIGNATURE: False}, requestHeaders=requestHeaders)
 
-    def getUnverifiedHeaders(self):
-        return jwt.get_unverified_header(self.getEncodedTokenWithoutType())
+    def getUnverifiedHeaders(self, requestHeaders=None):
+        return jwt.get_unverified_header(self.getEncodedTokenWithoutType(requestHeaders=requestHeaders))
 
-    def getDecodedToken(self, rawJwt=None, options=None):
+    def getDecodedToken(self, rawJwt=None, options=None, requestHeaders=None):
         if ObjectHelper.isNotNone(rawJwt):
             return rawJwt
-        return self.decode(self.getEncodedTokenWithoutType(), options=options)
+        return self.decode(self.getEncodedTokenWithoutType(requestHeaders=requestHeaders), options=options)
 
-    def getEncodedTokenWithoutType(self):
-        encodedPayload = self.captureTokenFromRequestHeader()
+    def getEncodedTokenWithoutType(self, requestHeaders=None):
+        encodedPayload = self.captureTokenFromRequestHeader(requestHeaders=requestHeaders)
         assert ObjectHelper.isNotNone(encodedPayload), f'JWT session token cannot be None. Header: {self.headerName}'
         assert encodedPayload.startswith(f'{self.headerType} '), f'JWT session token must starts with {self.headerType}'
         return encodedPayload[len(f'{self.headerType} '):].encode()
 
-    def captureTokenFromRequestHeader(self):
+    def captureTokenFromRequestHeader(self, requestHeaders=None):
+        if ObjectHelper.isNotEmpty(requestHeaders):
+            return requestHeaders.get(self.headerName)
         return FlaskUtil.safellyGetHeaders().get(self.headerName)
+
+def getRequestHeaders(kwargs):
+    return kwargs.get('requestHeaders')
 
 @Function
 def jwtAccessRequired(function, *args, **kwargs):
     def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).sessionManager.validateAccessSession()
+        retrieveApiInstance(arguments=args[0]).sessionManager.validateAccessSession(requestHeaders=getRequestHeaders(kwargs))
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -118,7 +123,7 @@ def jwtAccessRequired(function, *args, **kwargs):
 def jwtRefreshRequired(function, *args, **kwargs):
     def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).sessionManager.validateRefreshSession()
+        retrieveApiInstance(arguments=args[0]).sessionManager.validateRefreshSession(requestHeaders=getRequestHeaders(kwargs))
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -136,8 +141,8 @@ def getJwtHeaders(apiInstance=None):
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getContext(rawJwt=None, apiInstance=None):
-    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
+def getContext(rawJwt=None, apiInstance=None, requestHeaders=None):
+    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance, requestHeaders=requestHeaders)
     return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)

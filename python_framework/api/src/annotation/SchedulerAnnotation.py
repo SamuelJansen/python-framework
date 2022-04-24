@@ -51,6 +51,7 @@ def SchedulerMethod(
         methodKwargs['id'] = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
         instancesUpTo = methodKwargs.pop('instancesUpTo', 1)
         weekDays = methodKwargs.pop('weekDays', None)
+        toleranceTime = methodKwargs.pop('toleranceTime', None)
         resourceInstanceMethod.disabled = disable
         resourceInstanceMethod.id = methodKwargs['id']
         resourceInstanceMethod.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceInstanceMethodMuteLogs)
@@ -58,6 +59,8 @@ def SchedulerMethod(
             methodKwargs['day_of_week'] = weekDays
         if ObjectHelper.isNotNone(instancesUpTo) :
             methodKwargs['max_instances'] = instancesUpTo
+        if ObjectHelper.isNotNone(toleranceTime):
+            methodKwargs['misfire_grace_time'] = toleranceTime
         schedulerArgs = [*methodArgs]
         schedulerKwargs = {**methodKwargs}
         @apiInstance.schedulerManager.task(*schedulerArgs, **schedulerKwargs)
@@ -76,8 +79,6 @@ def SchedulerMethod(
                         FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
                         methodReturn = resourceInstanceMethod(*args,**kwargs)
                     except Exception as exception:
-                        # if not muteLogs:
-                        #     log.warning(resourceInstanceMethod, f'Not possible to run {resourceInstanceMethod.id} properly', exception=exception, muteStackTrace=True)
                         FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.SCHEDULER_CONTEXT)
                 except Exception as exception:
                     logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} {HttpDomain.SCHEDULER_CONTEXT.lower()}'
@@ -85,8 +86,6 @@ def SchedulerMethod(
                         log.error(resourceInstance.__class__, logErrorMessage, exception)
                     else :
                         log.failure(resourceInstance.__class__, logErrorMessage, exception=exception, muteStackTrace=resourceInstanceMethodMuteStacktraceOnBusinessRuleException)
-                    # raise exception
-                    return methodReturn
                 if not muteLogs:
                     log.info(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.SCHEDULER_CONTEXT.lower()} method finished')
                 return methodReturn

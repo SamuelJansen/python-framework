@@ -251,7 +251,12 @@ def handleAnyControllerMethodRequest(
     requestParamClass,
     requestClass,
     logRequest,
-    muteStacktraceOnBusinessRuleException
+    muteStacktraceOnBusinessRuleException,
+    verb = None,
+    requestHeaders = None,
+    requestParam = None,
+    requestBody = None,
+    logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
     if ObjectHelper.isNotEmptyCollection(roleRequired):
         return handleSecuredControllerMethod(
@@ -267,7 +272,12 @@ def handleAnyControllerMethodRequest(
             requestParamClass,
             requestClass,
             logRequest,
-            muteStacktraceOnBusinessRuleException
+            muteStacktraceOnBusinessRuleException,
+            verb = verb,
+            requestHeaders = requestHeaders,
+            requestParam = requestParam,
+            requestBody = requestBody,
+            logRequestMessage = logRequestMessage
         )
     elif ObjectHelper.isNotEmptyCollection(apiKeyRequired):
         return handleByApiKeyControllerMethod(
@@ -282,7 +292,12 @@ def handleAnyControllerMethodRequest(
             requestParamClass,
             requestClass,
             logRequest,
-            muteStacktraceOnBusinessRuleException
+            muteStacktraceOnBusinessRuleException,
+            verb = verb,
+            requestHeaders = requestHeaders,
+            requestParam = requestParam,
+            requestBody = requestBody,
+            logRequestMessage = logRequestMessage
         )
     elif ObjectHelper.isNotEmptyCollection(contextRequired):
         return handleSessionedControllerMethod(
@@ -296,7 +311,12 @@ def handleAnyControllerMethodRequest(
             requestParamClass,
             requestClass,
             logRequest,
-            muteStacktraceOnBusinessRuleException
+            muteStacktraceOnBusinessRuleException,
+            verb = verb,
+            requestHeaders = requestHeaders,
+            requestParam = requestParam,
+            requestBody = requestBody,
+            logRequestMessage = logRequestMessage
         )
     return handleControllerMethod(
         args,
@@ -308,7 +328,12 @@ def handleAnyControllerMethodRequest(
         requestParamClass,
         requestClass,
         logRequest,
-        muteStacktraceOnBusinessRuleException
+        muteStacktraceOnBusinessRuleException,
+        verb = verb,
+        requestHeaders = requestHeaders,
+        requestParam = requestParam,
+        requestBody = requestBody,
+        logRequestMessage = logRequestMessage
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -326,7 +351,12 @@ def handleSecuredControllerMethod(
     requestParamClass,
     requestClass,
     logRequest,
-    muteStacktraceOnBusinessRuleException
+    muteStacktraceOnBusinessRuleException,
+    verb = None,
+    requestHeaders = None,
+    requestParam = None,
+    requestBody = None,
+    logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
     contextList = SecurityManager.getContext()
     if not any(role in set(contextList) for role in roleRequired):
@@ -348,7 +378,12 @@ def handleSecuredControllerMethod(
             requestParamClass,
             requestClass,
             logRequest,
-            muteStacktraceOnBusinessRuleException
+            muteStacktraceOnBusinessRuleException,
+            verb = verb,
+            requestHeaders = requestHeaders,
+            requestParam = requestParam,
+            requestBody = requestBody,
+            logRequestMessage = logRequestMessage
         )
     elif ObjectHelper.isNotEmptyCollection(contextRequired):
         return handleSessionedControllerMethod(
@@ -362,7 +397,12 @@ def handleSecuredControllerMethod(
             requestParamClass,
             requestClass,
             logRequest,
-            muteStacktraceOnBusinessRuleException
+            muteStacktraceOnBusinessRuleException,
+            verb = verb,
+            requestHeaders = requestHeaders,
+            requestParam = requestParam,
+            requestBody = requestBody,
+            logRequestMessage = logRequestMessage
         )
     return handleControllerMethod(
         args,
@@ -374,7 +414,12 @@ def handleSecuredControllerMethod(
         requestParamClass,
         requestClass,
         logRequest,
-        muteStacktraceOnBusinessRuleException
+        muteStacktraceOnBusinessRuleException,
+        verb = verb,
+        requestHeaders = requestHeaders,
+        requestParam = requestParam,
+        requestBody = requestBody,
+        logRequestMessage = logRequestMessage
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -391,9 +436,14 @@ def handleByApiKeyControllerMethod(
     requestParamClass,
     requestClass,
     logRequest,
-    muteStacktraceOnBusinessRuleException
+    muteStacktraceOnBusinessRuleException,
+    verb = None,
+    requestHeaders = None,
+    requestParam = None,
+    requestBody = None,
+    logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
-    contextList = ApiKeyManager.getContext()
+    contextList = ApiKeyManager.getContext(requestHeaders=requestHeaders)
     if not any(apiKey in set(contextList) for apiKey in apiKeyRequired):
         raise GlobalException(
             message = 'ApiKey not allowed',
@@ -412,7 +462,12 @@ def handleByApiKeyControllerMethod(
             requestParamClass,
             requestClass,
             logRequest,
-            muteStacktraceOnBusinessRuleException
+            muteStacktraceOnBusinessRuleException,
+            verb = verb,
+            requestHeaders = requestHeaders,
+            requestParam = requestParam,
+            requestBody = requestBody,
+            logRequestMessage = logRequestMessage
         )
     return handleControllerMethod(
         args,
@@ -424,7 +479,12 @@ def handleByApiKeyControllerMethod(
         requestParamClass,
         requestClass,
         logRequest,
-        muteStacktraceOnBusinessRuleException
+        muteStacktraceOnBusinessRuleException,
+        verb = verb,
+        requestHeaders = requestHeaders,
+        requestParam = requestParam,
+        requestBody = requestBody,
+        logRequestMessage = logRequestMessage
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -440,9 +500,14 @@ def handleSessionedControllerMethod(
     requestParamClass,
     requestClass,
     logRequest,
-    muteStacktraceOnBusinessRuleException
+    muteStacktraceOnBusinessRuleException,
+    verb = None,
+    requestHeaders = None,
+    requestParam = None,
+    requestBody = None,
+    logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
-    contextList = SessionManager.getContext()
+    contextList = SessionManager.getContext(requestHeaders=requestHeaders)
     if not any(context in set(contextList) for context in contextRequired):
         raise GlobalException(
             message = 'Session not allowed',
@@ -460,7 +525,12 @@ def handleSessionedControllerMethod(
             requestParamClass,
             requestClass,
             logRequest,
-            muteStacktraceOnBusinessRuleException
+            muteStacktraceOnBusinessRuleException,
+            verb = verb,
+            requestHeaders = requestHeaders,
+            requestParam = requestParam,
+            requestBody = requestBody,
+            logRequestMessage = logRequestMessage
         )
 
 
@@ -483,8 +553,10 @@ def handleControllerMethod(
     requestClass,
     logRequest,
     muteStacktraceOnBusinessRuleException,
-    requestBody = None,
     verb = None,
+    requestHeaders = None,
+    requestParam = None,
+    requestBody = None,
     logRequestMessage = LogConstant.CONTROLLER_REQUEST
 ):
     requestBodyAsJson = {}
@@ -496,8 +568,16 @@ def handleControllerMethod(
         if Serializer.requestBodyIsPresent(requestBodyAsJson):
             requestBodyAsJsonSerialized = Serializer.convertFromJsonToObject(requestBodyAsJson, requestClass)
             args = getArgsWithSerializerReturnAppended(args, requestBodyAsJsonSerialized)
-    headers = FlaskUtil.addToKwargs(FlaskUtil.KW_HEADERS, requestHeaderClass, FlaskUtil.safellyGetHeaders(), kwargs)
-    query = FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs)
+    if ObjectHelper.isNotNone(requestBody):
+        requestHeadersAsJson = requestHeaders
+    else:
+        requestHeadersAsJson = FlaskUtil.safellyGetHeaders()
+    if ObjectHelper.isNotNone(requestBody):
+        requestParamAsJson = requestParam
+    else:
+        requestParamAsJson = FlaskUtil.safellyGetArgs()
+    headers = FlaskUtil.addToKwargs(FlaskUtil.KW_HEADERS, requestHeaderClass, requestHeadersAsJson, kwargs)
+    query = FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, requestParamAsJson, kwargs)
     try:
         if resourceInstance.logRequest and logRequest :
             log.prettyJson(

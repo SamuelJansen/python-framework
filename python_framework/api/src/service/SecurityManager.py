@@ -9,6 +9,7 @@ from flask_jwt_extended import (
     create_refresh_token,
     jwt_refresh_token_required
 )
+import jwt
 
 from python_helper import Constant as c
 from python_helper import log, Function, ObjectHelper, ReflectionHelper, SettingHelper, DateTimeHelper
@@ -27,10 +28,18 @@ BLACK_LIST = set()
 
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtBody(rawJwt=None, apiInstance=None):
-    if ObjectHelper.isNone(rawJwt):
-        return get_raw_jwt()
-    return rawJwt
+def getJwtBody(rawJwt=None, apiInstance=None, options=None, requestHeaders=None):
+    if ObjectHelper.isNotNone(rawJwt):
+        return rawJwt
+    if ObjectHelper.isNotNone(requestHeaders):
+        headerName = apiInstance.app.config.get(ConfigurationKeyConstant.API_SECURITY_HEADER)
+        jwtSecret = apiInstance.app.config.get(JwtConstant.KW_JWT_SECRET_KEY)
+        algorithm = apiInstance.app.config.get(JwtConstant.KW_JWT_ALGORITHM)
+        headerType = apiInstance.app.config.get(JwtConstant.KW_JWT_HEADER_TYPE)
+        bearerJwt = requestHeaders.get(headerName)
+        encodedPayload = bearerJwt[len(f'{headerType} '):]
+        return jwt.decode(encodedPayload, jwtSecret, algorithms=algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
+    return get_raw_jwt()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtHeaders():
@@ -38,8 +47,8 @@ def getJwtHeaders():
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getContext(rawJwt=None, apiInstance=None):
-    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
+def getContext(rawJwt=None, apiInstance=None, requestHeaders=None):
+    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance, requestHeaders=requestHeaders)
     return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)

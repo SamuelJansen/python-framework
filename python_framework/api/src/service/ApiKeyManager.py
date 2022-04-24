@@ -36,10 +36,10 @@ class JwtManager:
         return jwt.decode(encodedPayload, self.secret, algorithms=self.algorithm, options=options if ObjectHelper.isNotNone(options) else dict())
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def validateAccessApiKey(self, rawJwt=None, options=None):
+    def validateAccessApiKey(self, rawJwt=None, options=None, requestHeaders=None):
         decodedApiKeyToken = rawJwt
         try:
-            decodedApiKeyToken = self.validateGeneralApiKeyAndReturnItDecoded(rawJwt=decodedApiKeyToken, options=options)
+            decodedApiKeyToken = self.validateGeneralApiKeyAndReturnItDecoded(rawJwt=decodedApiKeyToken, options=options, requestHeaders=requestHeaders)
             jwtType = getType(rawJwt=decodedApiKeyToken)
             assert jwtType == JwtConstant.ACCESS_VALUE_TYPE, f'Access apiKey should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
@@ -48,10 +48,10 @@ class JwtManager:
             raise exception
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def validateRefreshApiKey(self, rawJwt=None, options=None):
+    def validateRefreshApiKey(self, rawJwt=None, options=None, requestHeaders=None):
         decodedApiKeyToken = rawJwt
         try:
-            decodedApiKeyToken = self.validateGeneralApiKeyAndReturnItDecoded(rawJwt=decodedApiKeyToken, options=options)
+            decodedApiKeyToken = self.validateGeneralApiKeyAndReturnItDecoded(rawJwt=decodedApiKeyToken, options=options, requestHeaders=requestHeaders)
             jwtType = getType(rawJwt=decodedApiKeyToken)
             assert jwtType == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh apiKey should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
@@ -60,10 +60,10 @@ class JwtManager:
             raise exception
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-    def validateGeneralApiKeyAndReturnItDecoded(self, rawJwt=None, options=None):
+    def validateGeneralApiKeyAndReturnItDecoded(self, rawJwt=None, options=None, requestHeaders=None):
         decodedApiKeyToken = rawJwt
         try:
-            decodedApiKeyToken = self.getDecodedToken(rawJwt=decodedApiKeyToken, options=options)
+            decodedApiKeyToken = self.getDecodedToken(rawJwt=decodedApiKeyToken, options=options, requestHeaders=requestHeaders)
             assert ObjectHelper.isDictionary(decodedApiKeyToken), f'Invalid apiKey payload type. It should be a dictionary, bu it is {type(decodedApiKeyToken)}'
             assert ObjectHelper.isNotEmpty(decodedApiKeyToken), 'ApiKey cannot be empty'
             jti = getJti(rawJwt=decodedApiKeyToken)
@@ -80,35 +80,40 @@ class JwtManager:
             raise exception
         return decodedApiKeyToken
 
-    def getBody(self, rawJwt=None, options=None):
-        decodedApiKeyToken = self.getDecodedToken(rawJwt=rawJwt, options=options)
+    def getBody(self, rawJwt=None, options=None, requestHeaders=None):
+        decodedApiKeyToken = self.getDecodedToken(rawJwt=rawJwt, options=options, requestHeaders=requestHeaders)
         return decodedApiKeyToken
 
-    def getUnverifiedBody(self, rawJwt=None):
-        return self.getDecodedToken(rawJwt=rawJwt, options={OPTION_VERIFY_SIGNATURE: False})
+    def getUnverifiedBody(self, rawJwt=None, requestHeaders=None):
+        return self.getDecodedToken(rawJwt=rawJwt, options={OPTION_VERIFY_SIGNATURE: False}, requestHeaders=requestHeaders)
 
-    def getUnverifiedHeaders(self):
-        return jwt.get_unverified_header(self.getEncodedTokenWithoutType())
+    def getUnverifiedHeaders(self, requestHeaders=None):
+        return jwt.get_unverified_header(self.getEncodedTokenWithoutType(requestHeaders=requestHeaders))
 
-    def getDecodedToken(self, rawJwt=None, options=None):
+    def getDecodedToken(self, rawJwt=None, options=None, requestHeaders=None):
         if ObjectHelper.isNotNone(rawJwt):
             return rawJwt
-        return self.decode(self.getEncodedTokenWithoutType(), options=options)
+        return self.decode(self.getEncodedTokenWithoutType(requestHeaders=requestHeaders), options=options)
 
-    def getEncodedTokenWithoutType(self):
-        encodedPayload = self.captureTokenFromRequestHeader()
+    def getEncodedTokenWithoutType(self, requestHeaders=None):
+        encodedPayload = self.captureTokenFromRequestHeader(requestHeaders=requestHeaders)
         assert ObjectHelper.isNotNone(encodedPayload), f'JWT apiKey token cannot be None. Header: {self.headerName}'
         assert encodedPayload.startswith(f'{self.headerType} '), f'JWT apiKey token must starts with {self.headerType}'
         return encodedPayload[len(f'{self.headerType} '):].encode()
 
-    def captureTokenFromRequestHeader(self):
+    def captureTokenFromRequestHeader(self, requestHeaders=None):
+        if ObjectHelper.isNotEmpty(requestHeaders):
+            return requestHeaders.get(self.headerName)
         return FlaskUtil.safellyGetHeaders().get(self.headerName)
+
+def getRequestHeaders(kwargs):
+    return kwargs.get('requestHeaders')
 
 @Function
 def jwtAccessRequired(function, *args, **kwargs):
     def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).apiKeyManager.validateAccessApiKey()
+        retrieveApiInstance(arguments=args[0]).apiKeyManager.validateAccessApiKey(requestHeaders=getRequestHeaders(kwargs))
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -118,16 +123,16 @@ def jwtAccessRequired(function, *args, **kwargs):
 def jwtRefreshRequired(function, *args, **kwargs):
     def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).apiKeyManager.validateRefreshApiKey()
+        retrieveApiInstance(arguments=args[0]).apiKeyManager.validateRefreshApiKey(requestHeaders=getRequestHeaders(kwargs))
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
     return innerFunction
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getJwtBody(rawJwt=None, apiInstance=None):
+def getJwtBody(rawJwt=None, apiInstance=None, requestHeaders=None):
     if ObjectHelper.isNone(rawJwt):
-        return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getBody(rawJwt=rawJwt)
+        return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getBody(rawJwt=rawJwt, requestHeaders=requestHeaders)
     return rawJwt
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -136,9 +141,9 @@ def getJwtHeaders(apiInstance=None):
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getContext(rawJwt=None, apiInstance=None):
-    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
-    return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT)
+def getContext(rawJwt=None, apiInstance=None, requestHeaders=None):
+    rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance, requestHeaders=requestHeaders)
+    return list() if ObjectHelper.isNone(rawJwt) else rawJwt.get(JwtConstant.KW_CLAIMS, {}).get(JwtConstant.KW_CONTEXT, [])
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getData(rawJwt=None, apiInstance=None):
@@ -340,7 +345,7 @@ def raiseSessionContextCannotBeNone():
     raise Exception('Api key context cannot be None')
 
 def safellyGetContext(contextList):
-    return Serializer.getObjectAsDictionary(contextList) if ObjectHelper.isList(contextList) else [] if ObjectHelper.isNone(contextList) else raiseSessionContextCannotBeNone()
+    return [] if ObjectHelper.isNone(contextList) else Serializer.getObjectAsDictionary(contextList) if ObjectHelper.isList(contextList) else raiseSessionContextCannotBeNone()
 
 def safellyGetData(data):
     return dict() if ObjectHelper.isNone(data) else Serializer.getObjectAsDictionary(data)
