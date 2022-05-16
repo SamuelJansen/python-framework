@@ -7,6 +7,8 @@ class HeaderValue:
     TEXT_HTML = 'text/html; charset=UTF-8'
     TEXT_PLAIN = 'text/plain'
     FROM_DATA = 'multipart/form-data; boundary=value'
+    AUDIO_WAV = 'audio/wav'
+    AUDIO_MP3 = 'audio/mp3'
     DEFAULT_CONTENT_TYPE = APPLICATION_JSON
 
 

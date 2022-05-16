@@ -19,13 +19,14 @@ def getBrowserPath(browserName) :
 
 def openUrlInChrome(url, anonymous=False) :
     parsedUrl = getParsedUrl(url)
-    # webbrowser.open_new(parsedUrl)
     if anonymous :
         try :
             webbrowser.get(f'{getBrowserPath("chrome")}{" --incognito"}').open_new_tab(parsedUrl)
-        except :
-            webbrowser.get(getBrowserPath('chrome')).open_new_tab(parsedUrl)
-    return webbrowser.get(getBrowserPath('chrome')).open_new_tab(parsedUrl)
+        except Exception as exception:
+            log.warning(openUrlInChrome, 'Failed to open browser in incognition mode', exception=exception)
+            return webbrowser.get(getBrowserPath('chrome')).open_new_tab(parsedUrl)
+    else:
+        return webbrowser.get(getBrowserPath('chrome')).open_new_tab(parsedUrl)
 
 def openUrl(url) :
     parsedUrl = getParsedUrl(url)

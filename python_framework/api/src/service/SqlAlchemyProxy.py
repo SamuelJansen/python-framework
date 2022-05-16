@@ -399,6 +399,24 @@ class SqlAlchemyProxy:
         self.session.delete(object)
         self.session.commit()
 
+    @Method
+    def deleteAllByIdIn(self, modelClass, objectIdList):
+        self.session.query(modelClass).filter(modelClass.id.in_(objectIdList)).delete(synchronize_session=False)
+
+    @Method
+    def deleteAllByKeyIn(self, modelClass, objectKeyList):
+        self.session.query(modelClass).filter(modelClass.key.in_(objectKeyList)).delete(synchronize_session=False)
+
+    @Method
+    def deleteAllByIdInAndCommit(self, modelClass, objectIdList):
+        self.deleteAllByIdIn(modelClass, objectIdList)
+        self.session.commit()
+
+    @Method
+    def deleteAllByKeyInAndCommit(self, modelClass, objectKeyList):
+        self.deleteAllByKeyIn(modelClass, objectKeyList)
+        self.session.commit()
+
 
 def addResource(apiInstance, appInstance, baseModel=None, echo=False):
     apiInstance.repository = SqlAlchemyProxy(baseModel, apiInstance.globals, echo=echo)

@@ -154,7 +154,7 @@ def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
     if ObjectHelper.isNotDictionary(fromJson):
         if ObjectHelper.isNativeClassInstance(fromJson) and toClass == fromJson.__class__ :
             return fromJson
-        if isinstance(fromJson, UUID):
+        if isUuid(fromJson):
             return str(fromJson)
         raiseUnhandledConversion(fromJson, toClass)
     # print(f'fromJson: {fromJson}, toClass: {toClass}, fatherClass: {fatherClass}')
@@ -220,7 +220,7 @@ def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
                 log.log(serializeIt, f'Not possible to instantiate toClass. Possible causes: {possibleErrorSet}')
 
         if ObjectHelper.isNone(objectInstance):
-            raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class. Check LOG logs level for mor information')
+            raise Exception(f'Not possible to instanciate {ReflectionHelper.getName(toClass, muteLogs=True)} class. Check LOG logs level for more information')
         # print(objectInstance)
         # if objectInstance is [] :
         #     print(fromJson, toClass, fatherClass)
