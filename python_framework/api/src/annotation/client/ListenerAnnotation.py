@@ -4,6 +4,7 @@ from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.converter.static import ConverterStatic
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
+from python_framework.api.src.domain import HttpDomain
 
 
 DEFAUTL_MUTE_LOGS = False
