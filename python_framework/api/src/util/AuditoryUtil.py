@@ -21,7 +21,7 @@ def overrideSessionData(model):
 def safellyGetCurrentSession(apiInstance=None, service=None):
     currentSession = None
     try:
-        currentSession = SessionManager.getCurrentSession(apiInstance=apiInstance if ObjectHelper.isNone(service) else service.globals.api.resource.service)
+        currentSession = SessionManager.getCurrentSession(apiInstance=apiInstance if ObjectHelper.isNone(service) else service.globals.api)
     except Exception as exception:
         log.debug(safellyGetCurrentSession, f'Not possible to get current session. Returning "{currentSession}" by default', exception=exception, muteStackTrace=True)
     return ConverterStatic.getValueOrDefault(currentSession, {})
@@ -44,7 +44,7 @@ def overrideApiKeyData(model):
 def safellyGetCurrentApiKey(apiInstance=None, service=None):
     currentApiKey = None
     try:
-        currentApiKey = ApiKeyManager.getCurrentApiKey(apiInstance=apiInstance if ObjectHelper.isNone(service) else service.globals.api.resource.service)
+        currentApiKey = ApiKeyManager.getCurrentApiKey(apiInstance=apiInstance if ObjectHelper.isNone(service) else service.globals.api)
     except Exception as exception:
         log.debug(safellyGetCurrentApiKey, f'Not possible to get current api key. Returning "{currentApiKey}" by default', exception=exception, muteStackTrace=True)
     return ConverterStatic.getValueOrDefault(currentApiKey, {})
@@ -67,7 +67,7 @@ def overrideAthenticationData(model):
 def safellyGetCurrentAthentication(apiInstance=None, service=None):
     currentAthentication = None
     try:
-        currentAthentication = SecurityManager.getCurrentUser(apiInstance=apiInstance if ObjectHelper.isNone(service) else service.globals.api.resource.service)
+        currentAthentication = SecurityManager.getCurrentUser(apiInstance=apiInstance if ObjectHelper.isNone(service) else service.globals.api)
     except Exception as exception:
         log.debug(safellyGetCurrentAthentication, f'Not possible to get current user. Returning "{currentAthentication}" by default', exception=exception, muteStackTrace=True)
     return ConverterStatic.getValueOrDefault(currentAthentication, {})
