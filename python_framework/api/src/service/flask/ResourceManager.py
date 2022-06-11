@@ -228,12 +228,16 @@ def initialize(
     api.cors = CORS(app, resources={f"{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}}, supports_credentials=True)
     api.cors.api = api
 
+    addResourceList(apiInstance)
+
     OpenApiManager.newDocumentation(api, app)
     SqlAlchemyProxy.addResource(api, app, baseModel=refferenceModel, echo=False)
     # SchedulerManager.addResource(api, app)
     # SessionManager.addResource(api, app)
     # ApiKeyManager.addResource(api, app)
     # SecurityManager.addResource(api, app)
+    addManagerListTo(apiInstance, apiInstance.managerList)
+
     addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
     for manager in api.managerList[::-1]:
         manager.onHttpRequestCompletion(api, app)
@@ -364,8 +368,7 @@ def addResource(instance, resourceName, resourceInstance):
 @Function
 def addResourceList(apiInstance):
     ReflectionHelper.setAttributeOrMethod(apiInstance, FlaskManager.KW_RESOURCE, FlaskResource())
-    addResource(apiInstance.resource, FlaskManager.KW_MANAGER, FlaskResource())
-    for resourceName in FlaskManager.KW_RESOURCE_LIST:
+    for resourceName in [FlaskManager.KW_MANAGER, *FlaskManager.KW_RESOURCE_LIST]:
         addResource(apiInstance.resource, resourceName, FlaskResource())
 
 
@@ -386,8 +389,6 @@ def addFlaskApiResources(
         converterList,
         *args
     ):
-    addResourceList(apiInstance)
-    addManagerListTo(apiInstance, apiInstance.managerList)
     addRepositoryTo(apiInstance, repositoryList)
     addSchedulerListTo(apiInstance, schedulerList)
     addClientListTo(apiInstance, clientList)

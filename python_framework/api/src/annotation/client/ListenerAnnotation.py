@@ -61,7 +61,7 @@ def ListenerMethod(
         listenerKwargs = {**methodKwargs}
         resourceInstanceName = methodClassName[:-len(FlaskManager.KW_LISTENER_RESOURCE)]
         resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'
-        interceptor = resourceInterceptor if not isinstance(resourceInterceptor, str) else  ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, resourceInterceptor)
+        interceptor = resourceInterceptor if not isinstance(resourceInterceptor, str) else ReflectionHelper.getAttributeOrMethodByNamePath(apiInstance, resourceInterceptor)
         @interceptor(*listenerArgs, **listenerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
             resourceInstance = FlaskManager.getResourceSelf(apiInstance, FlaskManager.KW_LISTENER_RESOURCE, resourceInstanceName)
