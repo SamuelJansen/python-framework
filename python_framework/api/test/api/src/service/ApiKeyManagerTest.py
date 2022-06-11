@@ -77,5 +77,5 @@ def apiKeyManager_worksProperly() :
     assert ObjectHelper.isNotNone(refreshException), refreshException
     assert ObjectHelper.equals(GlobalException.__name__, type(refreshException).__name__), (GlobalException.__name__, type(refreshException).__name__, refreshException)
     assert ObjectHelper.equals(401, refreshException.status)
-    assert ObjectHelper.equals('Invalid apiKey', refreshException.message)
-    assert ObjectHelper.equals('Refresh apiKey should have type refresh, but it is access', refreshException.logMessage)
+    assert ObjectHelper.equals('Invalid api key', refreshException.message), f'Invalid api key == {refreshException.message}'
+    assert ObjectHelper.equals('Refresh api key should have type refresh, but it is access', refreshException.logMessage), f'Refresh api key should have type refresh, but it is access == {refreshException.logMessage}'

@@ -185,12 +185,12 @@ class SqlAlchemyProxy:
             close_all_sessions()
             self.engine.dispose() # NOTE: close required before dispose!
         except Exception as firstException:
-            log.warning(self.close, 'not possible to close connections. Going for a second attempt', exception=firstException)
+            log.warning(self.close, 'Not possible to close connections. Going for a second attempt', exception=firstException)
             try:
                 close_all_sessions()
                 self.engine.dispose() # NOTE: close required before dispose!
             except Exception as secondException:
-                log.error(self.close, 'not possible to close connections at the second attempt either', secondException)
+                log.error(self.close, 'Not possible to close connections at the second attempt either', secondException)
                 raise secondException
         log.debug(self.close, 'Connections closed')
 

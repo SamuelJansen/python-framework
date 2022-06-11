@@ -7,7 +7,7 @@ from python_framework.api.src.service.openapi.OpenApiKey import Key as k
 from python_framework.api.src.service.openapi.OpenApiValue import Value as v
 from python_framework.api.src.service.openapi import OpenApiDocumentationFile
 from python_framework.api.src.service.openapi.OpenApiDocumentationFile import KW_OPEN_API, KW_UI
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.constant import JwtConstant, ConfigurationKeyConstant
 
 
@@ -113,8 +113,8 @@ def newDocumentation(apiInstance, appInstance):
 def addInfo(apiInstance):
     globalsInstance = apiInstance.globals
     apiInstance.documentation[k.INFO] = {
-        k.TITLE : ConverterStatic.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TITLE}'), StringHelper.toTitle(globalsInstance.apiName)),
-        k.DESCRIPTION : ConverterStatic.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_DESCRIPTION}'), f'This is a {StringHelper.toTitle(globalsInstance.apiName)} service'),
+        k.TITLE : StaticConverter.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TITLE}'), StringHelper.toTitle(globalsInstance.apiName)),
+        k.DESCRIPTION : StaticConverter.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_DESCRIPTION}'), f'This is a {StringHelper.toTitle(globalsInstance.apiName)} service'),
         k.VERSION : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_VERSION}'),
         k.TERMS_OF_SERVICE : globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_INFO}.{KW_TERMS_OF_SERVICE}')
     }
@@ -303,9 +303,9 @@ def getApiUrl(apiInstance):
 
 def getDocumentationUrl(apiInstance):
     globalsInstance = apiInstance.globals
-    sheme = ConverterStatic.getValueOrDefault(ConverterStatic.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}'), [apiInstance.scheme]), [apiInstance.scheme])[0]
-    host = ConverterStatic.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_HOST}'), apiInstance.host).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
-    colonPortIfAny = ConverterStatic.getValueOrDefault(f"{c.COLON}{globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_PORT}')}", c.BLANK).replace(f'{c.COLON}None', c.BLANK)
+    sheme = StaticConverter.getValueOrDefault(StaticConverter.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}'), [apiInstance.scheme]), [apiInstance.scheme])[0]
+    host = StaticConverter.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_HOST}'), apiInstance.host).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
+    colonPortIfAny = StaticConverter.getValueOrDefault(f"{c.COLON}{globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_PORT}')}", c.BLANK).replace(f'{c.COLON}None', c.BLANK)
     documentationUrl = f'{sheme}{SCHEME_HOST_SEPARATOR}{host}{colonPortIfAny}{apiInstance.baseUrl}{DOCUMENTATION_ENDPOINT}'
     if documentationUrl.endswith(URL_ENDS_WITH_PORT_80):
         documentationUrl = documentationUrl[:-len(URL_ENDS_WITH_PORT_80)]
@@ -427,8 +427,8 @@ def getDtoSchema(attributeName, attributeType, dtoClass):
 def addSession(verb, url, contextRequired, documentation, globalsInstance):
     if contextRequired :
         documentation[k.PATHS][url][verb][k.PARAMETERS].append({
-            k.NAME : ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SESSION_HEADER), JwtConstant.DEFAULT_JWT_SESSION_HEADER_NAME),
-            k.DESCRIPTION : f'{ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SESSION_TYPE), JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
+            k.NAME : StaticConverter.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SESSION_HEADER), JwtConstant.DEFAULT_JWT_SESSION_HEADER_NAME),
+            k.DESCRIPTION : f'{StaticConverter.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SESSION_TYPE), JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
             k.IN : v.HEADER,
             k.REQUIRED: True,
             k.TYPE : v.STRING
@@ -437,8 +437,8 @@ def addSession(verb, url, contextRequired, documentation, globalsInstance):
 def addApiKey(verb, url, apiKeyRequired, documentation, globalsInstance):
     if apiKeyRequired :
         documentation[k.PATHS][url][verb][k.PARAMETERS].append({
-            k.NAME : ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_API_KEY_HEADER), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_NAME),
-            k.DESCRIPTION : f'{ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_API_KEY_TYPE), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
+            k.NAME : StaticConverter.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_API_KEY_HEADER), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_NAME),
+            k.DESCRIPTION : f'{StaticConverter.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_API_KEY_TYPE), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
             k.IN : v.HEADER,
             k.REQUIRED: True,
             k.TYPE : v.STRING
@@ -447,8 +447,8 @@ def addApiKey(verb, url, apiKeyRequired, documentation, globalsInstance):
 def addSecurity(verb, url, roleRequired, documentation, globalsInstance):
     if roleRequired :
         documentation[k.PATHS][url][verb][k.PARAMETERS].append({
-            k.NAME : ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SECURITY_HEADER), JwtConstant.DEFAULT_JWT_SECURITY_HEADER_NAME),
-            k.DESCRIPTION : f'{ConverterStatic.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SECURITY_TYPE), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
+            k.NAME : StaticConverter.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SECURITY_HEADER), JwtConstant.DEFAULT_JWT_SECURITY_HEADER_NAME),
+            k.DESCRIPTION : f'{StaticConverter.getValueOrDefault(globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SECURITY_TYPE), JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)}{c.SPACE}{v.TOKEN_DESCRIPTION}',
             k.IN : v.HEADER,
             k.REQUIRED: True,
             k.TYPE : v.STRING

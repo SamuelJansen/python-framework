@@ -6,7 +6,7 @@ from python_helper import log, Function, ObjectHelper, ReflectionHelper, Setting
 
 from python_framework.api.src.util import UtcDateTimeUtil
 from python_framework.api.src.util import Serializer
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.constant import JwtConstant
@@ -29,7 +29,7 @@ class JwtManager:
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def encode(self, payload, headers=None):
-        return jwt.encode(payload, self.secret, algorithm=self.algorithm, headers=ConverterStatic.getValueOrDefault(headers, dict())).decode()
+        return jwt.encode(payload, self.secret, algorithm=self.algorithm, headers=StaticConverter.getValueOrDefault(headers, dict())).decode()
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def decode(self, encodedPayload, options=None):
@@ -193,9 +193,9 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
     else:
         jwtManager = JwtManager(
             jwtSecret,
-            ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SESSION_ALGORITHM),
-            ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_SESSION_HEADER_NAME),
-            ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE)
+            StaticConverter.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SESSION_ALGORITHM),
+            StaticConverter.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_SESSION_HEADER_NAME),
+            StaticConverter.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_SESSION_HEADER_TYPE)
         )
         if SettingHelper.activeEnvironmentIsLocal():
             info = {
@@ -223,7 +223,7 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
                 JwtConstant.KW_DATA: safellyGetData(data)
             }
         },
-        headers = ConverterStatic.getValueOrDefault(headers, dict())
+        headers = StaticConverter.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -242,12 +242,12 @@ def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data
                 JwtConstant.KW_DATA: safellyGetData(data)
             }
         },
-        headers = ConverterStatic.getValueOrDefault(headers, dict())
+        headers = StaticConverter.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, apiInstance=None):
-    headers = headers if ObjectHelper.isNone(rawJwt) else {**getJwtHeaders(), **ConverterStatic.getValueOrDefault(headers, dict())}
+    headers = headers if ObjectHelper.isNone(rawJwt) else {**getJwtHeaders(), **StaticConverter.getValueOrDefault(headers, dict())}
     rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
@@ -271,7 +271,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
             JwtConstant.KW_TYPE: JwtConstant.ACCESS_VALUE_TYPE,
             JwtConstant.KW_CLAIMS: userClaims
         },
-        headers = ConverterStatic.getValueOrDefault(headers, dict())
+        headers = StaticConverter.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)

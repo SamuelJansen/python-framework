@@ -9,7 +9,7 @@ from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.constant import StaticConstant
 from python_framework.api.src.constant import HealthCheckConstant
 from python_framework.api.src.util import FlaskUtil
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import SqlAlchemyProxy
 from python_framework.api.src.service import SessionManager
@@ -52,9 +52,9 @@ def getResourceName(resourceFileName):
 
 
 @Function
-def isResourceType(resourceFileName,resourceType):
+def isResourceType(resourceFileName, resourceType):
     splitedResourceFileName = resourceFileName.split(resourceType)
-    return len(splitedResourceFileName)>1 and splitedResourceFileName[1] == DOT_PY
+    return len(splitedResourceFileName) > 1 and not splitedResourceFileName[0].endswith(FlaskManager.KW_STATIC_RESOURCE_PREFIX) and splitedResourceFileName[1] == DOT_PY
 
 
 @Function
@@ -160,7 +160,7 @@ def addGlobalsTo(apiInstance, globalsInstance=None):
 def getApiUrl(app=None, api=None):
     if ObjectHelper.isNone(api):
         api = app.api
-    exposedHost = ConverterStatic.getValueOrDefault(api.exposedHost, api.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_HOST))
+    exposedHost = StaticConverter.getValueOrDefault(api.exposedHost, api.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_HOST))
     if ObjectHelper.isNotNone(exposedHost):
         return f'{exposedHost}{api.baseUrl}'
     return f'{api.documentationUrl[:-(len(api.baseUrl)+len(OpenApiManager.DOCUMENTATION_ENDPOINT))]}{api.baseUrl}'
@@ -172,7 +172,7 @@ def getApiStaticUrl(app=None, api=None, staticUrl=None):
         return staticUrl
     if ObjectHelper.isNone(api):
         api = app.api
-    exposedStaticHost = ConverterStatic.getValueOrDefault(api.exposedStaticHost, api.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_STATIC_HOST))
+    exposedStaticHost = StaticConverter.getValueOrDefault(api.exposedStaticHost, api.globals.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_STATIC_HOST))
     if ObjectHelper.isNotNone(exposedStaticHost):
         return f'{exposedStaticHost}{api.baseStaticUrl}'
     return f'{api.documentationUrl[:-(len(api.baseUrl)+len(OpenApiManager.DOCUMENTATION_ENDPOINT))]}{api.baseStaticUrl}'

@@ -12,7 +12,7 @@ from python_framework.api.src.constant import StaticConstant
 from python_framework.api.src.constant import LogConstant
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service import WebBrowser
 from python_framework.api.src.service.ExceptionHandler import GlobalException
@@ -34,6 +34,7 @@ KW_APP = 'app'
 KW_METHOD = 'method'
 
 KW_RESOURCE = 'resource'
+KW_STATIC_RESOURCE_PREFIX = 'Static'
 
 PYTHON_FRAMEWORK_MODULE_NAME = 'python_framework'
 PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST = [
@@ -120,7 +121,7 @@ def newApp(
     try:
         app = globals.importResource(
             KW_APP,
-            resourceModuleName = ConverterStatic.getValueOrDefault(
+            resourceModuleName = StaticConverter.getValueOrDefault(
                 globalsInstance.apiName,
                 StringHelper.join(EnvironmentHelper.listDirectoryContent(f'{globalsInstance.BASE_API_PATH}')[0].split(c.DOT)[:-1],character = c.DOT)
             ),

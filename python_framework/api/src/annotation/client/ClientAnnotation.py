@@ -2,7 +2,7 @@ import requests
 from python_helper import Constant as c
 from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringHelper
 
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.constant import HttpClientConstant
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service.openapi import OpenApiManager
@@ -11,7 +11,7 @@ from python_framework.api.src.service.openapi import OpenApiManager
 @Function
 def Client(url=c.BLANK, headers=None, timeout=HttpClientConstant.DEFAULT_TIMEOUT, logRequest=False, logResponse=False) :
     clientUrl = url
-    clientHeaders = ConverterStatic.getValueOrDefault(headers, dict())
+    clientHeaders = StaticConverter.getValueOrDefault(headers, dict())
     clientTimeout = timeout
     clientLogRequest = logRequest
     clientLogResponse = logResponse

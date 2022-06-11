@@ -3,7 +3,7 @@ from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringH
 from python_framework.api.src.enumeration.SchedulerType import SchedulerType
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.constant import ConfigurationKeyConstant
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.domain import HttpDomain
 
@@ -25,7 +25,7 @@ def Scheduler(*schedulerArgs, disable=DEFAUTL_DISABLE, muteLogs=DEFAUTL_MUTE_LOG
                 self.service = apiInstance.resource.service
                 self.enabled = self.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_ENABLE)
                 self.disabled = disable
-                self.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and muteLogs)
+                self.muteLogs = muteLogs or StaticConverter.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and muteLogs)
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -54,7 +54,7 @@ def SchedulerMethod(
         toleranceTime = methodKwargs.pop('toleranceTime', None)
         resourceInstanceMethod.disabled = disable
         resourceInstanceMethod.id = methodKwargs['id']
-        resourceInstanceMethod.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceInstanceMethodMuteLogs)
+        resourceInstanceMethod.muteLogs = muteLogs or StaticConverter.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SCHEDULER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceInstanceMethodMuteLogs)
         if ObjectHelper.isNotEmpty(methodArgs) and SchedulerType.CRON == methodArgs[0] and ObjectHelper.isNotNone(weekDays) and StringHelper.isNotBlank(weekDays) :
             methodKwargs['day_of_week'] = weekDays
         if ObjectHelper.isNotNone(instancesUpTo) :

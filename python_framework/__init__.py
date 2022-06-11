@@ -41,6 +41,7 @@ from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service.flask import ResourceManager
 
 from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 
 from python_framework.api.src.model import FrameworkModel
 from python_framework.api.src.model import ErrorLog

@@ -1,40 +1,25 @@
-from python_helper import DateTimeHelper, ObjectHelper
-from python_framework.api.src.util import Serializer
+from python_framework.api.src.converter.static import StaticConverter
 
-def getValueOrDefault(value, default) :
-    return value if ObjectHelper.isNotNone(value) else default
+###- deprecated
+getValueOrDefault = StaticConverter.getValueOrDefault
 
-def overrideDateData(model) :
-    now = DateTimeHelper.dateTimeNow()
-    model.createdAt = getValueOrDefault(model.createdAt, now)
-    model.updatedAt = now
+###- deprecated
+overrideDateData = StaticConverter.overrideDateData
 
-def overrideUserData(model, loggedUser) :
-    model.createdBy = getValueOrDefault(model.createdBy, loggedUser)
-    model.updatedBy = loggedUser
+###- deprecated
+overrideUserData = StaticConverter.overrideUserData
 
-def overrideData(model, loggedUser) :
-    overrideDateData(model)
-    overrideUserData(model, loggedUser)
+###- deprecated
+overrideData = StaticConverter.overrideData
 
-def to(dto, toClass) :
-    if not (ObjectHelper.isNone(dto) or ObjectHelper.isNone(toClass))  :
-        return Serializer.convertFromObjectToObject(dto, toClass)
-    return dto
+###- deprecated
+to = StaticConverter.to
 
-def toList(dtoList, toClass) :
-    if not (ObjectHelper.isNone(dtoList) or ObjectHelper.isNone(toClass)) :
-        return Serializer.convertFromObjectToObject(dtoList, toClass)
-    return dtoList
+###- deprecated
+toList = StaticConverter.toList
 
-###- deprecation
-def toResponseDtoList(dtoList, toClass) :
-    if not (ObjectHelper.isNone(dtoList) or ObjectHelper.isNone(toClass)) :
-        return Serializer.convertFromObjectToObject(dtoList, toClass)
-    return dtoList
+###- deprecated
+toResponseDto = StaticConverter.to
 
-###- deprecation
-def toResponseDto(dto, toClass) :
-    if not (ObjectHelper.isNone(dto) or ObjectHelper.isNone(toClass))  :
-        return Serializer.convertFromObjectToObject(dto, toClass)
-    return dto
+###- deprecated
+toResponseDtoList = StaticConverter.toList

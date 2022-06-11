@@ -16,7 +16,7 @@ from python_helper import log, Function, ObjectHelper, ReflectionHelper, Setting
 
 from python_framework.api.src.util import UtcDateTimeUtil
 from python_framework.api.src.util import Serializer
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.constant import JwtConstant
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
@@ -92,9 +92,9 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
         jwtMannager = JWTManager(appInstance)
         appInstance.config[JwtConstant.KW_JWT_SECRET_KEY] = jwtSecret
         appInstance.config[JwtConstant.KW_JWT_BLACKLIST_ENABLED] = True
-        appInstance.config[JwtConstant.KW_JWT_ALGORITHM] = ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SECURITY_ALGORITHM)
-        appInstance.config[JwtConstant.KW_JWT_HEADER_NAME] = ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_SECURITY_HEADER_NAME)
-        appInstance.config[JwtConstant.KW_JWT_HEADER_TYPE] = ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_SECURITY_HEADER_TYPE)
+        appInstance.config[JwtConstant.KW_JWT_ALGORITHM] = StaticConverter.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_SECURITY_ALGORITHM)
+        appInstance.config[JwtConstant.KW_JWT_HEADER_NAME] = StaticConverter.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_SECURITY_HEADER_NAME)
+        appInstance.config[JwtConstant.KW_JWT_HEADER_TYPE] = StaticConverter.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_SECURITY_HEADER_TYPE)
         if SettingHelper.activeEnvironmentIsLocal():
             info = {
                 'secret': jwtSecret,
@@ -116,7 +116,7 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
         },
         fresh = False,
         expires_delta = DateTimeHelper.timeDelta(minutes=deltaMinutes),
-        headers = ConverterStatic.getValueOrDefault(headers, dict())
+        headers = StaticConverter.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -129,12 +129,12 @@ def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data
             JwtConstant.KW_DATA: safellyGetData(data)
         },
         expires_delta = DateTimeHelper.timeDelta(minutes=deltaMinutes),
-        headers = ConverterStatic.getValueOrDefault(headers, dict())
+        headers = StaticConverter.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, apiInstance=None):
-    headers = headers if ObjectHelper.isNone(rawJwt) else {**getJwtHeaders(), **ConverterStatic.getValueOrDefault(headers, dict())}
+    headers = headers if ObjectHelper.isNone(rawJwt) else {**getJwtHeaders(), **StaticConverter.getValueOrDefault(headers, dict())}
     rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
     deltaMinutes = UtcDateTimeUtil.ofTimestamp(getExpiration(rawJwt=rawJwt)) - UtcDateTimeUtil.now()
     userClaims = {
@@ -153,7 +153,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
         user_claims = userClaims,
         fresh = False,
         expires_delta = deltaMinutes,
-        headers = ConverterStatic.getValueOrDefault(headers, dict())
+        headers = StaticConverter.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)

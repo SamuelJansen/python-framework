@@ -6,7 +6,7 @@ from python_framework.api.src.constant import HttpClientConstant
 from python_framework.api.src.domain import HttpDomain
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service import ExceptionHandler
 from python_framework.api.src.service.ExceptionHandler import GlobalException
@@ -48,7 +48,7 @@ def raiseHttpClientEventNotFoundException(*args, **kwargs):
 def getUrl(client, clientMethodConfig, additionalUrl):
     return StringHelper.join(
         [
-            ConverterStatic.getValueOrDefault(u, c.BLANK) for u in [
+            StaticConverter.getValueOrDefault(u, c.BLANK) for u in [
                 client.url,
                 clientMethodConfig.url,
                 additionalUrl
@@ -61,16 +61,16 @@ def getUrl(client, clientMethodConfig, additionalUrl):
 @Function
 def getHeaders(client, clientMethodConfig, headers):
     return {
-        **ConverterStatic.getValueOrDefault(client.headers, dict()),
+        **StaticConverter.getValueOrDefault(client.headers, dict()),
         **{HttpDomain.HeaderKey.CONTENT_TYPE: clientMethodConfig.consumes},
-        **ConverterStatic.getValueOrDefault(clientMethodConfig.headers, dict()),
-        **ConverterStatic.getValueOrDefault(headers, dict())
+        **StaticConverter.getValueOrDefault(clientMethodConfig.headers, dict()),
+        **StaticConverter.getValueOrDefault(headers, dict())
     }
 
 
 @Function
 def getTimeout(client, clientMethodConfig, timeout):
-    return ConverterStatic.getValueOrDefault(timeout, ConverterStatic.getValueOrDefault(clientMethodConfig.timeout, client.timeout))
+    return StaticConverter.getValueOrDefault(timeout, StaticConverter.getValueOrDefault(clientMethodConfig.timeout, client.timeout))
 
 
 @Function
@@ -81,9 +81,9 @@ def getLogRequest(client, clientMethodConfig, logRequest):
 @Function
 def parseParameters(client, clientMethodConfig, additionalUrl, params, headers, body, timeout, logRequest):
     url = getUrl(client, clientMethodConfig, additionalUrl)
-    params = ConverterStatic.getValueOrDefault(params, dict())
+    params = StaticConverter.getValueOrDefault(params, dict())
     headers = getHeaders(client, clientMethodConfig, headers)
-    body = ConverterStatic.getValueOrDefault(body, dict())
+    body = StaticConverter.getValueOrDefault(body, dict())
     timeout = getTimeout(client, clientMethodConfig, timeout)
     logRequest = getLogRequest(client, clientMethodConfig, logRequest)
     return url, params, headers, body, timeout, logRequest
@@ -177,7 +177,7 @@ def getCompleteResponse(clientResponse, responseClass, produces, fallbackStatus=
         **{HttpDomain.HeaderKey.CONTENT_TYPE: produces},
         **responseHeaders
     }
-    responseStatus = ConverterStatic.getValueOrDefault(responseStatus, HttpStatus.map(fallbackStatus))
+    responseStatus = StaticConverter.getValueOrDefault(responseStatus, HttpStatus.map(fallbackStatus))
     if ObjectHelper.isNotNone(responseClass):
         responseBody = Serializer.convertFromJsonToObject(responseBody, responseClass)
     return responseBody, responseHeaders, responseStatus

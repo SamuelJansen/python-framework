@@ -34,6 +34,13 @@ def safellyGetRequestBody():
     return requestBody if ObjectHelper.isNotNone(requestBody) else dict()
 
 @Function
+def safellyGetRequestBodyOrRequestData():
+    requestBody = safellyGetJson()
+    if ObjectHelper.isEmpty(requestBody):
+        requestData = safellyGetData()
+    return requestBody if ObjectHelper.isNotNone(requestBody) else requestData if ObjectHelper.isNotNone(requestData) else dict()
+
+@Function
 def safellyGetJson():
     jsonBody = None
     try :
@@ -79,7 +86,8 @@ def safellyGetResponseJson(response):
 def safellyGetData():
     dataBody = None
     try :
-        dataBody = request.get_json(force=True)
+        # dataBody = request.get_json(force=True)
+        dataBody = request.data
     except Exception as exception:
         dataBody = {}
         log.log(safellyGetData, f'Not possible to get data. Returning {dataBody} by default', exception=exception)

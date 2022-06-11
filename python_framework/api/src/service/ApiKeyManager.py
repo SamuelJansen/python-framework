@@ -6,7 +6,7 @@ from python_helper import log, Function, ObjectHelper, ReflectionHelper, Setting
 
 from python_framework.api.src.util import UtcDateTimeUtil
 from python_framework.api.src.util import Serializer
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.constant import ConfigurationKeyConstant
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.constant import JwtConstant
@@ -29,7 +29,7 @@ class JwtManager:
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def encode(self, payload, headers=None):
-        return jwt.encode(payload, self.secret, algorithm=self.algorithm, headers=ConverterStatic.getValueOrDefault(headers, dict())).decode()
+        return jwt.encode(payload, self.secret, algorithm=self.algorithm, headers=StaticConverter.getValueOrDefault(headers, dict())).decode()
 
     @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
     def decode(self, encodedPayload, options=None):
@@ -41,7 +41,7 @@ class JwtManager:
         try:
             decodedApiKeyToken = self.validateGeneralApiKeyAndReturnItDecoded(rawJwt=decodedApiKeyToken, options=options, requestHeaders=requestHeaders)
             jwtType = getType(rawJwt=decodedApiKeyToken)
-            assert jwtType == JwtConstant.ACCESS_VALUE_TYPE, f'Access apiKey should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {jwtType}'
+            assert jwtType == JwtConstant.ACCESS_VALUE_TYPE, f'Access api key should have type {JwtConstant.ACCESS_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
             addAccessTokenToBlackList(rawJwt=decodedApiKeyToken)
             log.log(self.validateAccessApiKey, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
@@ -53,7 +53,7 @@ class JwtManager:
         try:
             decodedApiKeyToken = self.validateGeneralApiKeyAndReturnItDecoded(rawJwt=decodedApiKeyToken, options=options, requestHeaders=requestHeaders)
             jwtType = getType(rawJwt=decodedApiKeyToken)
-            assert jwtType == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh apiKey should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {jwtType}'
+            assert jwtType == JwtConstant.REFRESH_VALUE_TYPE, f'Refresh api key should have type {JwtConstant.REFRESH_VALUE_TYPE}, but it is {jwtType}'
         except Exception as exception:
             addAccessTokenToBlackList(rawJwt=decodedApiKeyToken)
             log.log(self.validateRefreshApiKey, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
@@ -64,16 +64,16 @@ class JwtManager:
         decodedApiKeyToken = rawJwt
         try:
             decodedApiKeyToken = self.getDecodedToken(rawJwt=decodedApiKeyToken, options=options, requestHeaders=requestHeaders)
-            assert ObjectHelper.isDictionary(decodedApiKeyToken), f'Invalid apiKey payload type. It should be a dictionary, bu it is {type(decodedApiKeyToken)}'
+            assert ObjectHelper.isDictionary(decodedApiKeyToken), f'Invalid api key payload type. It should be a dictionary, bu it is {type(decodedApiKeyToken)}'
             assert ObjectHelper.isNotEmpty(decodedApiKeyToken), 'ApiKey cannot be empty'
             jti = getJti(rawJwt=decodedApiKeyToken)
             assert ObjectHelper.isNotNone(jti), f'JWT jti cannot be None'
             assert jti not in BLACK_LIST, f'ApiKey {jti} already revoked'
             nbf = getNfb(rawJwt=decodedApiKeyToken)
             assert ObjectHelper.isNotNone(nbf), f'JWT nbf cannot be None'
-            assert UtcDateTimeUtil.now() >= UtcDateTimeUtil.ofTimestamp(nbf), f'JWT apiKey token not valid before {UtcDateTimeUtil.ofTimestamp(nbf)}'
+            assert UtcDateTimeUtil.now() >= UtcDateTimeUtil.ofTimestamp(nbf), f'JWT api key token not valid before {UtcDateTimeUtil.ofTimestamp(nbf)}'
             expiration = getExpiration(rawJwt=decodedApiKeyToken)
-            assert UtcDateTimeUtil.now() <= UtcDateTimeUtil.ofTimestamp(expiration), f'JWT apiKey token expired at {UtcDateTimeUtil.ofTimestamp(expiration)}'
+            assert UtcDateTimeUtil.now() <= UtcDateTimeUtil.ofTimestamp(expiration), f'JWT api key token expired at {UtcDateTimeUtil.ofTimestamp(expiration)}'
         except Exception as exception:
             addAccessTokenToBlackList(rawJwt=decodedApiKeyToken)
             log.log(self.validateGeneralApiKeyAndReturnItDecoded, f'Adding {rawJwt} (or current accces) to blackList', exception=exception, muteStackTrace=True)
@@ -97,8 +97,8 @@ class JwtManager:
 
     def getEncodedTokenWithoutType(self, requestHeaders=None):
         encodedPayload = self.captureTokenFromRequestHeader(requestHeaders=requestHeaders)
-        assert ObjectHelper.isNotNone(encodedPayload), f'JWT apiKey token cannot be None. Header: {self.headerName}'
-        assert encodedPayload.startswith(f'{self.headerType} '), f'JWT apiKey token must starts with {self.headerType}'
+        assert ObjectHelper.isNotNone(encodedPayload), f'JWT api key token cannot be None. Header: {self.headerName}'
+        assert encodedPayload.startswith(f'{self.headerType} '), f'JWT api key token must starts with {self.headerType}'
         return encodedPayload[len(f'{self.headerType} '):].encode()
 
     def captureTokenFromRequestHeader(self, requestHeaders=None):
@@ -193,9 +193,9 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
     else:
         jwtManager = JwtManager(
             jwtSecret,
-            ConverterStatic.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_API_KEY_ALGORITHM),
-            ConverterStatic.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_API_KEY_HEADER_NAME),
-            ConverterStatic.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)
+            StaticConverter.getValueOrDefault(algorithm, JwtConstant.DEFAULT_JWT_API_KEY_ALGORITHM),
+            StaticConverter.getValueOrDefault(headerName, JwtConstant.DEFAULT_JWT_API_KEY_HEADER_NAME),
+            StaticConverter.getValueOrDefault(headerType, JwtConstant.DEFAULT_JWT_API_KEY_HEADER_TYPE)
         )
         if SettingHelper.activeEnvironmentIsLocal():
             info = {
@@ -204,7 +204,7 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
                 'headerName': jwtManager.headerName,
                 'headerType': jwtManager.headerType
             }
-            log.prettyJson(getJwtMannager, f'JWT apiKey', info, logLevel=log.SETTING)
+            log.prettyJson(getJwtMannager, f'JWT api key', info, logLevel=log.SETTING)
         return jwtManager
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -223,7 +223,7 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
                 JwtConstant.KW_DATA: safellyGetData(data)
             }
         },
-        headers = ConverterStatic.getValueOrDefault(headers, dict())
+        headers = StaticConverter.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -242,12 +242,12 @@ def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data
                 JwtConstant.KW_DATA: safellyGetData(data)
             }
         },
-        headers = ConverterStatic.getValueOrDefault(headers, dict())
+        headers = StaticConverter.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, apiInstance=None):
-    headers = headers if ObjectHelper.isNone(rawJwt) else {**getJwtHeaders(), **ConverterStatic.getValueOrDefault(headers, dict())}
+    headers = headers if ObjectHelper.isNone(rawJwt) else {**getJwtHeaders(), **StaticConverter.getValueOrDefault(headers, dict())}
     rawJwt = getJwtBody(rawJwt=rawJwt, apiInstance=apiInstance)
     userClaims = {
         JwtConstant.KW_CONTEXT: list(set([
@@ -271,7 +271,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
             JwtConstant.KW_TYPE: JwtConstant.ACCESS_VALUE_TYPE,
             JwtConstant.KW_CLAIMS: userClaims
         },
-        headers = ConverterStatic.getValueOrDefault(headers, dict())
+        headers = StaticConverter.getValueOrDefault(headers, dict())
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)

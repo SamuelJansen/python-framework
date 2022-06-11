@@ -1,6 +1,5 @@
 from distutils.core import setup
 import os
-from python_helper import StringHelper
 
 print('''Installation on linux, run:
 sudo apt install libpq-dev python3-dev
@@ -14,11 +13,11 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.3.76'
+VERSION = '0.3.77'
 
 NAME = 'python_framework'
 PACKAGE_NAME = NAME
-REPOSITORY_NAME = StringHelper.toSnakeCase(NAME)
+REPOSITORY_NAME = NAME.replace("_", "-")
 URL = f'https://github.com/SamuelJansen/{REPOSITORY_NAME}/'
 
 OS_SEPARATOR = os.path.sep

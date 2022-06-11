@@ -2,7 +2,7 @@ from python_helper import Constant as c
 from python_helper import ReflectionHelper, ObjectHelper, log, Function, StringHelper
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.constant import ConfigurationKeyConstant
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.domain import HttpDomain
 
 
@@ -26,7 +26,7 @@ def Emitter(*emitterArgs, manager=None, managerClient=None, enabled=DEFAUTL_ENAB
                 self.globals = apiInstance.globals
                 self.service = apiInstance.resource.service
                 self.enabled = enabled and self.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_ENABLE)
-                self.muteLogs = muteLogs or ConverterStatic.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and muteLogs)
+                self.muteLogs = muteLogs or StaticConverter.getValueOrDefault(self.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and muteLogs)
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -53,7 +53,7 @@ def EmitterMethod(
         resourceTypeIsEnabled = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_ENABLE)
         resourceInstanceMethod.enabled = resourceInstanceMethodEnabled and resourceTypeIsEnabled
         resourceInstanceMethod.id = methodKwargs.get('id', f'{methodClassName}{c.DOT}{methodName}')
-        resourceInstanceMethod.muteLogs = resourceInstanceMethodMuteLogs or ConverterStatic.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceInstanceMethodMuteLogs)
+        resourceInstanceMethod.muteLogs = resourceInstanceMethodMuteLogs or StaticConverter.getValueOrDefault(apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_EMITTER_MUTE_LOGS), DEFAUTL_MUTE_LOGS and resourceInstanceMethodMuteLogs)
         emitterArgs = [*methodArgs]
         emitterKwargs = {**methodKwargs}
         resourceInstanceName = methodClassName[:-len(FlaskManager.KW_EMITTER_RESOURCE)]

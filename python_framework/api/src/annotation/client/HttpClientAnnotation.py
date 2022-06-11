@@ -6,7 +6,7 @@ from python_framework.api.src.constant import HttpClientConstant, LogConstant
 from python_framework.api.src.domain import HttpDomain
 from python_framework.api.src.util import FlaskUtil
 from python_framework.api.src.util import Serializer
-from python_framework.api.src.converter.static import ConverterStatic
+from python_framework.api.src.converter.static import StaticConverter
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.flask import FlaskManager
 from python_framework.api.src.service import ExceptionHandler
@@ -27,7 +27,7 @@ def HttpClient(
 ):
     def Wrapper(OuterClass, *args, **kwargs):
         clientUrl = url
-        clientHeaders = ConverterStatic.getValueOrDefault(headers, dict())
+        clientHeaders = StaticConverter.getValueOrDefault(headers, dict())
         clientTimeout = timeout
         clientEventContext = eventContext
         clientLogRequest = logRequest
@@ -334,9 +334,9 @@ def HttpClientMethod(
                     resourceInstanceMethod,
                     LogConstant.CLIENT_REQUEST,
                     {
-                        'headers': ConverterStatic.getValueOrDefault(headers, dict()),
-                        'query': ConverterStatic.getValueOrDefault(params, dict()),
-                        'body': ConverterStatic.getValueOrDefault(body, dict()),
+                        'headers': StaticConverter.getValueOrDefault(headers, dict()),
+                        'query': StaticConverter.getValueOrDefault(params, dict()),
+                        'body': StaticConverter.getValueOrDefault(body, dict()),
                         **parsetRequestKwargs
                     },
                     condition = True,

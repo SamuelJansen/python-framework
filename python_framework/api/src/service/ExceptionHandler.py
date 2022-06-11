@@ -78,7 +78,7 @@ class GlobalException(Exception):
         return f'''{GlobalException.__name__} thrown at {self.timeStamp}. Status: {self.status}, message: {self.message}, verb: {self.verb}, url: {self.url}{', logMessage: ' if self.logMessage else c.NOTHING}{self.logMessage}'''
 
     def getRequestBody(self) :
-        return FlaskUtil.safellyGetRequestBody()
+        return FlaskUtil.safellyGetRequestBodyOrRequestData()
 
     def getRequestVerb(self) :
         return FlaskUtil.safellyGetVerb()
