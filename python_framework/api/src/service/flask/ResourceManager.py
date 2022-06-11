@@ -234,8 +234,6 @@ def initialize(
     # SessionManager.addResource(api, app)
     # ApiKeyManager.addResource(api, app)
     # SecurityManager.addResource(api, app)
-    for manager in api.managerList:
-        manager.addResource(api, app)
     addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
     for manager in api.managerList[::-1]:
         manager.onHttpRequestCompletion(api, app)
@@ -251,6 +249,12 @@ def initialize(
     api.exposedStaticUrl = getApiStaticUrl(api=api, staticUrl=staticUrl)
 
     return app
+
+
+@Function
+def addManagerListTo(apiInstance, managerList):
+    for manager in managerList:
+        manager.addResource(apiInstance, apiInstance.app)
 
 
 @Function
@@ -383,6 +387,7 @@ def addFlaskApiResources(
         *args
     ):
     addResourceList(apiInstance)
+    addManagerListTo(apiInstance, apiInstance.managerList)
     addRepositoryTo(apiInstance, repositoryList)
     addSchedulerListTo(apiInstance, schedulerList)
     addClientListTo(apiInstance, clientList)
