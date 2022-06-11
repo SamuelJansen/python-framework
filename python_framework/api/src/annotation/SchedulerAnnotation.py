@@ -63,7 +63,7 @@ def SchedulerMethod(
             methodKwargs['misfire_grace_time'] = toleranceTime
         schedulerArgs = [*methodArgs]
         schedulerKwargs = {**methodKwargs}
-        @apiInstance.manager.scheduler.task(*schedulerArgs, **schedulerKwargs)
+        @apiInstance.resource.manager.scheduler.task(*schedulerArgs, **schedulerKwargs)
         def innerResourceInstanceMethod(*args, **kwargs) :
             resourceInstanceName = methodClassName[:-len(FlaskManager.KW_SCHEDULER_RESOURCE)]
             resourceInstanceName = f'{resourceInstanceName[0].lower()}{resourceInstanceName[1:]}'

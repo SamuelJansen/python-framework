@@ -261,7 +261,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
     }
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
     addAccessTokenToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
-    return apiInstance.manager.apiKey.encode({
+    return apiInstance.resource.manager.apiKey.encode({
             JwtConstant.KW_IAT: getIat(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_NFB: UtcDateTimeUtil.now(),
             JwtConstant.KW_JTI: getNewJti(),
@@ -302,24 +302,24 @@ def getContextData(dataClass=None, apiInstance=None):
     return getCurrentApiKey(apiKeyClass=dataClass, apiInstance=apiInstance)
 
 def addResource(apiInstance, appInstance):
-    apiInstance.manager.apiKey = None
+    apiInstance.resource.manager.apiKey = None
     try:
-        apiInstance.manager.apiKey = getJwtMannager(
+        apiInstance.resource.manager.apiKey = getJwtMannager(
             appInstance,
             apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_SECRET),
             algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_ALGORITHM),
             headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_HEADER),
             headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_TYPE)
         )
-        apiInstance.manager.apiKey.api = apiInstance
+        apiInstance.resource.manager.apiKey.api = apiInstance
     except Exception as exception:
         log.warning(addResource, 'Not possible to add ApiKeyManager', exception=exception)
-    if ObjectHelper.isNotNone(apiInstance.manager.apiKey):
+    if ObjectHelper.isNotNone(apiInstance.resource.manager.apiKey):
         log.success(initialize, 'ApiKeyManager created')
-    return apiInstance.manager.apiKey
+    return apiInstance.resource.manager.apiKey
 
 def initialize(apiInstance, appInstance):
-    if ObjectHelper.isNotNone(apiInstance.manager.apiKey):
+    if ObjectHelper.isNotNone(apiInstance.resource.manager.apiKey):
         log.success(initialize, 'ApiKeyManager is running')
 
 def onHttpRequestCompletion(apiInstance, appInstance):
@@ -340,7 +340,7 @@ def onShutdown(apiInstance, appInstance):
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)
-    if not ReflectionHelper.hasAttributeOrMethod(apiInstance.manager, 'apiKey') or ObjectHelper.isNone(apiInstance.manager.apiKey):
+    if not ReflectionHelper.hasAttributeOrMethod(apiInstance.resource.manager, 'apiKey') or ObjectHelper.isNone(apiInstance.resource.manager.apiKey):
         raise Exception('There is no api key manager')
     return apiInstance
 

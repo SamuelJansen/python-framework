@@ -188,35 +188,35 @@ def getContextData(dataClass=None, apiInstance=None):
 
 
 def addResource(apiInstance, appInstance):
-    apiInstance.manager.security = None
+    apiInstance.resource.manager.security = None
     try:
-        apiInstance.manager.security = getJwtMannager(
+        apiInstance.resource.manager.security = getJwtMannager(
             appInstance,
             apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_SECRET),
             algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_ALGORITHM),
             headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_HEADER),
             headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_TYPE)
         )
-        apiInstance.manager.security.api = apiInstance
+        apiInstance.resource.manager.security.api = apiInstance
     except Exception as exception:
         log.warning(addResource, 'Not possible to add SecurityManager', exception=exception)
-    if ObjectHelper.isNotNone(apiInstance.manager.security):
+    if ObjectHelper.isNotNone(apiInstance.resource.manager.security):
         log.success(initialize, 'SecurityManager created')
-    return apiInstance.manager.security
+    return apiInstance.resource.manager.security
 
 
 @Function
 def initialize(apiInstance, appInstance):
     try:
-        @apiInstance.manager.security.token_in_blacklist_loader
+        @apiInstance.resource.manager.security.token_in_blacklist_loader
         def verifyAuthorizaionAccess(decriptedToken):
             return decriptedToken[JwtConstant.KW_JTI] in BLACK_LIST
 
-        @apiInstance.manager.security.revoked_token_loader
+        @apiInstance.resource.manager.security.revoked_token_loader
         def invalidAccess():
             log.log(initialize, 'Access revoked', exception=None)
             return {'message': 'Unauthorized'}, HttpStatus.UNAUTHORIZED
-        if ObjectHelper.isNotNone(apiInstance.manager.security):
+        if ObjectHelper.isNotNone(apiInstance.resource.manager.security):
             log.success(initialize, 'SecurityManager is running')
     except Exception as exception:
         log.failure(initialize, 'Not possible to load security utilities properly', exception=exception, muteStackTrace=True)

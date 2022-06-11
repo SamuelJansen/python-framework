@@ -261,7 +261,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
     }
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
     addAccessTokenToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
-    return apiInstance.manager.session.encode({
+    return apiInstance.resource.manager.session.encode({
             JwtConstant.KW_IAT: getIat(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_NFB: UtcDateTimeUtil.now(),
             JwtConstant.KW_JTI: getNewJti(),
@@ -302,24 +302,24 @@ def getContextData(dataClass=None, apiInstance=None):
     return getCurrentSession(sessionClass=dataClass, apiInstance=apiInstance)
 
 def addResource(apiInstance, appInstance):
-    apiInstance.manager.session = None
+    apiInstance.resource.manager.session = None
     try:
-        apiInstance.manager.session = getJwtMannager(
+        apiInstance.resource.manager.session = getJwtMannager(
             appInstance,
             apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_SECRET),
             algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_ALGORITHM),
             headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_HEADER),
             headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_TYPE)
         )
-        apiInstance.manager.session.api = apiInstance
+        apiInstance.resource.manager.session.api = apiInstance
     except Exception as exception:
         log.warning(addResource, 'Not possible to add SessionManager', exception=exception)
-    if ObjectHelper.isNotNone(apiInstance.manager.session):
+    if ObjectHelper.isNotNone(apiInstance.resource.manager.session):
         log.success(initialize, 'SessionManager created')
-    return apiInstance.manager.session
+    return apiInstance.resource.manager.session
 
 def initialize(apiInstance, appInstance):
-    if ObjectHelper.isNotNone(apiInstance.manager.session):
+    if ObjectHelper.isNotNone(apiInstance.resource.manager.session):
         log.success(initialize, 'SessionManager is running')
 
 def onHttpRequestCompletion(apiInstance, appInstance):
@@ -340,7 +340,7 @@ def onShutdown(apiInstance, appInstance):
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)
-    if ObjectHelper.isNone(apiInstance.manager.session):
+    if ObjectHelper.isNone(apiInstance.resource.manager.session):
         raise Exception('There is no session manager')
     return apiInstance
 
