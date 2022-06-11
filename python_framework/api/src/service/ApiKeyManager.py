@@ -331,7 +331,7 @@ def onHttpRequestCompletion(apiInstance, appInstance):
 def shutdown(apiInstance, appInstance):
     log.success(shutdown, 'ApiKeyManager successfully closed')
 
-def onRun(self, apiInstance, appInstance):
+def onRun(apiInstance, appInstance):
     ...
 
 def onShutdown(apiInstance, appInstance):

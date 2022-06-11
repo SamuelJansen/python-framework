@@ -30,7 +30,7 @@ def initialize(apiInstance, appInstance) :
 def onHttpRequestCompletion(apiInstance, appInstance) :
     ...
 
-def onRun(self, apiInstance, appInstance):
+def onRun(apiInstance, appInstance):
     ...
 
 def shutdown(apiInstance, appInstance):
