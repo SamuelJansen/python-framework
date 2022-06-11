@@ -228,7 +228,7 @@ def initialize(
     api.cors = CORS(app, resources={f"{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}}, supports_credentials=True)
     api.cors.api = api
 
-    addResourceList(apiInstance)
+    addResourceList(api)
 
     OpenApiManager.newDocumentation(api, app)
     SqlAlchemyProxy.addResource(api, app, baseModel=refferenceModel, echo=False)
@@ -236,7 +236,7 @@ def initialize(
     # SessionManager.addResource(api, app)
     # ApiKeyManager.addResource(api, app)
     # SecurityManager.addResource(api, app)
-    addManagerListTo(apiInstance, apiInstance.managerList)
+    addManagerListTo(api, api.managerList)
 
     addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
     for manager in api.managerList[::-1]:
