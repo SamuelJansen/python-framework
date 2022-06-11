@@ -132,12 +132,12 @@ def jwtRefreshRequired(function, *args, **kwargs):
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtBody(rawJwt=None, apiInstance=None, requestHeaders=None):
     if ObjectHelper.isNone(rawJwt):
-        return retrieveApiInstance(apiInstance=apiInstance).manager.apiKey.getBody(rawJwt=rawJwt, requestHeaders=requestHeaders)
+        return retrieveApiInstance(apiInstance=apiInstance).resource.managerapiKey.getBody(rawJwt=rawJwt, requestHeaders=requestHeaders)
     return rawJwt
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtHeaders(apiInstance=None, requestHeaders=None):
-    headers = retrieveApiInstance(apiInstance=apiInstance).manager.apiKey.getUnverifiedHeaders(requestHeaders=requestHeaders)
+    headers = retrieveApiInstance(apiInstance=apiInstance).resource.managerapiKey.getUnverifiedHeaders(requestHeaders=requestHeaders)
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -210,7 +210,7 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
-    return retrieveApiInstance(apiInstance=apiInstance).manager.apiKey.encode({
+    return retrieveApiInstance(apiInstance=apiInstance).resource.managerapiKey.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: getNewJti(),
@@ -229,7 +229,7 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
-    return retrieveApiInstance(apiInstance=apiInstance).manager.apiKey.encode({
+    return retrieveApiInstance(apiInstance=apiInstance).resource.managerapiKey.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: getNewJti(),
