@@ -113,7 +113,7 @@ def getRequestHeaders(kwargs):
 def jwtAccessRequired(function, *args, **kwargs):
     def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).manager.apiKey.validateAccessApiKey(requestHeaders=getRequestHeaders(kwargs))
+        retrieveApiInstance(arguments=args[0]).resource.manager.apiKey.validateAccessApiKey(requestHeaders=getRequestHeaders(kwargs))
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -123,7 +123,7 @@ def jwtAccessRequired(function, *args, **kwargs):
 def jwtRefreshRequired(function, *args, **kwargs):
     def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).manager.apiKey.validateRefreshApiKey(requestHeaders=getRequestHeaders(kwargs))
+        retrieveApiInstance(arguments=args[0]).resource.manager.apiKey.validateRefreshApiKey(requestHeaders=getRequestHeaders(kwargs))
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
