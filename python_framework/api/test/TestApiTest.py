@@ -1066,7 +1066,7 @@ def pythonRun_apiKeyManager() :
 
         responseGetConsumeBeforeLogin = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
         expectedResponseGetConsumeBeforeLogin = {
-            "message": "Invalid apiKey",
+            "message": "Invalid api key",
             "timestamp": "2021-11-02 21:47:32.444629",
             "uri": f"/api-key-manager-api/test/{TEST_VARIANT}/api-key-manager/consume"
         }
@@ -1158,7 +1158,7 @@ def pythonRun_apiKeyManager() :
         responseGetConsumeAfterLogout = requests.get(BASE_URI + GET_CONSUME_URI, headers=headers)
         assert ObjectHelper.isNotNone(responseGetConsumeAfterLogout.json())
         expectedResponseGetConsumeAfterLogout = {
-            'message': 'Invalid apiKey',
+            'message': 'Invalid api key',
             'timestamp': '2021-11-03 01:10:10.876113',
             "uri": f"/api-key-manager-api/test/{TEST_VARIANT}/api-key-manager/consume"
         }

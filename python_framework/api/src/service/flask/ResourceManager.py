@@ -206,7 +206,13 @@ def initialize(
     api = Api(app)
     api.app = app
     api.app.api = api
-    api.managerList = managerList
+    api.managerList = [
+        SecurityManager,
+        ApiKeyManager,
+        SessionManager,
+        SchedulerManager,
+        *managerList
+    ]
 
     addGlobalsTo(api, globalsInstance=globalsInstance)
 
@@ -224,19 +230,19 @@ def initialize(
 
     OpenApiManager.newDocumentation(api, app)
     SqlAlchemyProxy.addResource(api, app, baseModel=refferenceModel, echo=False)
-    SchedulerManager.addResource(api, app)
-    SessionManager.addResource(api, app)
-    ApiKeyManager.addResource(api, app)
-    SecurityManager.addResource(api, app)
+    # SchedulerManager.addResource(api, app)
+    # SessionManager.addResource(api, app)
+    # ApiKeyManager.addResource(api, app)
+    # SecurityManager.addResource(api, app)
     for manager in api.managerList:
         manager.addResource(api, app)
     addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
-    for manager in api.managerList:
+    for manager in api.managerList[::-1]:
         manager.onHttpRequestCompletion(api, app)
-    SessionManager.onHttpRequestCompletion(api, app)
-    ApiKeyManager.onHttpRequestCompletion(api, app)
-    SecurityManager.onHttpRequestCompletion(api, app)
-    SchedulerManager.onHttpRequestCompletion(api, app)
+    # SessionManager.onHttpRequestCompletion(api, app)
+    # ApiKeyManager.onHttpRequestCompletion(api, app)
+    # SecurityManager.onHttpRequestCompletion(api, app)
+    # SchedulerManager.onHttpRequestCompletion(api, app)
     SqlAlchemyProxy.onHttpRequestCompletion(api, app)
 
     api.documentationUrl = OpenApiManager.getDocumentationUrl(api)
@@ -345,10 +351,18 @@ class FlaskResource:
 
 
 @Function
-def addResourceAttibutes(apiInstance):
+def addResource(instance, resourceName, resourceInstance):
+    camelCaseResourceName = StringHelper.toCamelCase(resourceName) ###- f'{resourceName[0].lower()}{resourceName[1:]}'
+    if not ReflectionHelper.hasAttributeOrMethod(instance, camelCaseResourceName):
+        ReflectionHelper.setAttributeOrMethod(instance, camelCaseResourceName, resourceInstance)
+
+
+@Function
+def addResourceList(apiInstance):
     ReflectionHelper.setAttributeOrMethod(apiInstance, FlaskManager.KW_RESOURCE, FlaskResource())
+    addResource(apiInstance.resource, FlaskManager.KW_MANAGER, FlaskResource())
     for resourceName in FlaskManager.KW_RESOURCE_LIST:
-        ReflectionHelper.setAttributeOrMethod(apiInstance.resource, f'{resourceName[0].lower()}{resourceName[1:]}', FlaskResource())
+        addResource(apiInstance.resource, resourceName, FlaskResource())
 
 
 @Function
@@ -368,7 +382,7 @@ def addFlaskApiResources(
         converterList,
         *args
     ):
-    addResourceAttibutes(apiInstance)
+    addResourceList(apiInstance)
     addRepositoryTo(apiInstance, repositoryList)
     addSchedulerListTo(apiInstance, schedulerList)
     addClientListTo(apiInstance, clientList)
@@ -381,10 +395,10 @@ def addFlaskApiResources(
     addHelperListTo(apiInstance, helperList)
     addConverterListTo(apiInstance, converterList)
     SqlAlchemyProxy.initialize(apiInstance, appInstance)
-    SchedulerManager.initialize(apiInstance, appInstance)
-    SecurityManager.initialize(apiInstance, appInstance)
-    ApiKeyManager.initialize(apiInstance, appInstance)
-    SessionManager.initialize(apiInstance, appInstance)
+    # SchedulerManager.initialize(apiInstance, appInstance)
+    # SecurityManager.initialize(apiInstance, appInstance)
+    # ApiKeyManager.initialize(apiInstance, appInstance)
+    # SessionManager.initialize(apiInstance, appInstance)
     for manager in apiInstance.managerList:
         manager.initialize(apiInstance, appInstance)
     OpenApiManager.addSwagger(apiInstance, appInstance)

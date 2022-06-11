@@ -87,7 +87,7 @@ def addAccessTokenToBlackList(rawJwt=None, apiInstance=None):
 @Function
 def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, headerType=None):
     if ObjectHelper.isNone(jwtSecret):
-        log.warning(getJwtMannager, f'Not possible to instanciate securityManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SECURITY_SECRET}')
+        log.warning(getJwtMannager, f'Not possible to instanciate manager.security{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SECURITY_SECRET}')
     else:
         jwtMannager = JWTManager(appInstance)
         appInstance.config[JwtConstant.KW_JWT_SECRET_KEY] = jwtSecret
@@ -188,35 +188,35 @@ def getContextData(dataClass=None, apiInstance=None):
 
 
 def addResource(apiInstance, appInstance):
-    apiInstance.securityManager = None
+    apiInstance.manager.security = None
     try:
-        apiInstance.securityManager = getJwtMannager(
+        apiInstance.manager.security = getJwtMannager(
             appInstance,
             apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_SECRET),
             algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_ALGORITHM),
             headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_HEADER),
             headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SECURITY_TYPE)
         )
-        apiInstance.securityManager.api = apiInstance
+        apiInstance.manager.security.api = apiInstance
     except Exception as exception:
         log.warning(addResource, 'Not possible to add SecurityManager', exception=exception)
-    if ObjectHelper.isNotNone(apiInstance.securityManager):
+    if ObjectHelper.isNotNone(apiInstance.manager.security):
         log.success(initialize, 'SecurityManager created')
-    return apiInstance.securityManager
+    return apiInstance.manager.security
 
 
 @Function
 def initialize(apiInstance, appInstance):
     try:
-        @apiInstance.securityManager.token_in_blacklist_loader
+        @apiInstance.manager.security.token_in_blacklist_loader
         def verifyAuthorizaionAccess(decriptedToken):
             return decriptedToken[JwtConstant.KW_JTI] in BLACK_LIST
 
-        @apiInstance.securityManager.revoked_token_loader
+        @apiInstance.manager.security.revoked_token_loader
         def invalidAccess():
             log.log(initialize, 'Access revoked', exception=None)
             return {'message': 'Unauthorized'}, HttpStatus.UNAUTHORIZED
-        if ObjectHelper.isNotNone(apiInstance.securityManager):
+        if ObjectHelper.isNotNone(apiInstance.manager.security):
             log.success(initialize, 'SecurityManager is running')
     except Exception as exception:
         log.failure(initialize, 'Not possible to load security utilities properly', exception=exception, muteStackTrace=True)
@@ -230,6 +230,9 @@ def onHttpRequestCompletion(apiInstance, appInstance):
 
 def shutdown(apiInstance, appInstance):
     log.success(shutdown, 'SecurityManager successfully closed')
+
+def onRun(self, apiInstance, appInstance):
+    ...
 
 def onShutdown(apiInstance, appInstance):
     import atexit

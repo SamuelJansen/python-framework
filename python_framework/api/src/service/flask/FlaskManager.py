@@ -37,6 +37,8 @@ KW_RESOURCE = 'resource'
 KW_STATIC_RESOURCE_PREFIX = 'Static'
 
 PYTHON_FRAMEWORK_MODULE_NAME = 'python_framework'
+KW_MANAGER = 'Manager'
+
 PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST = [
     PYTHON_FRAMEWORK_MODULE_NAME,
     'TestApi',
@@ -171,7 +173,7 @@ def runApi(*args, api=None, debug=False, **kwargs):
         kwargs['host'] = api.host if not 'localhost' == api.host else '0.0.0.0'
     if 'port' not in kwargs and api.port :
         kwargs['port'] = api.port
-    log.success(runApi, f'Api will run at {api.internalUrl}')
+    log.success(runApi, f'{api.globals.apiName} api will run at {api.internalUrl}')
     log.success(runApi, f'Api will be available at {api.exposedUrl}')
     log.success(runApi, f'Health check will be available at {api.healthCheckUrl}')
     log.success(runApi, f'Documentation will be available at {api.documentationUrl}')
@@ -179,14 +181,14 @@ def runApi(*args, api=None, debug=False, **kwargs):
     for manager in api.managerList:
         manager.onRun(api, api.app)
     api.app.run(*args, debug=debug, **kwargs)
-    for manager in api.managerList:
+    for manager in api.managerList[::-1]:
         manager.onShutdown(api, api.app)
-    SessionManager.onShutdown(api, api.app)
-    ApiKeyManager.onShutdown(api, api.app)
-    SecurityManager.onShutdown(api, api.app)
-    SchedulerManager.onShutdown(api, api.app)
+    # SessionManager.onShutdown(api, api.app)
+    # ApiKeyManager.onShutdown(api, api.app)
+    # SecurityManager.onShutdown(api, api.app)
+    # SchedulerManager.onShutdown(api, api.app)
     SqlAlchemyProxy.onShutdown(api, api.app)
-    log.success(runApi, f'{api.globals.apiName} is successfully shuting down')
+    log.success(runApi, f'{api.globals.apiName} api is successfully shuting down')
 
 
 @Function

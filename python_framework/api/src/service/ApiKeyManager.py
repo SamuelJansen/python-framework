@@ -113,7 +113,7 @@ def getRequestHeaders(kwargs):
 def jwtAccessRequired(function, *args, **kwargs):
     def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).apiKeyManager.validateAccessApiKey(requestHeaders=getRequestHeaders(kwargs))
+        retrieveApiInstance(arguments=args[0]).manager.apiKey.validateAccessApiKey(requestHeaders=getRequestHeaders(kwargs))
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -123,7 +123,7 @@ def jwtAccessRequired(function, *args, **kwargs):
 def jwtRefreshRequired(function, *args, **kwargs):
     def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).apiKeyManager.validateRefreshApiKey(requestHeaders=getRequestHeaders(kwargs))
+        retrieveApiInstance(arguments=args[0]).manager.apiKey.validateRefreshApiKey(requestHeaders=getRequestHeaders(kwargs))
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -132,12 +132,12 @@ def jwtRefreshRequired(function, *args, **kwargs):
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtBody(rawJwt=None, apiInstance=None, requestHeaders=None):
     if ObjectHelper.isNone(rawJwt):
-        return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getBody(rawJwt=rawJwt, requestHeaders=requestHeaders)
+        return retrieveApiInstance(apiInstance=apiInstance).manager.apiKey.getBody(rawJwt=rawJwt, requestHeaders=requestHeaders)
     return rawJwt
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtHeaders(apiInstance=None, requestHeaders=None):
-    headers = retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.getUnverifiedHeaders(requestHeaders=requestHeaders)
+    headers = retrieveApiInstance(apiInstance=apiInstance).manager.apiKey.getUnverifiedHeaders(requestHeaders=requestHeaders)
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -189,7 +189,7 @@ def addAccessTokenToBlackList(rawJwt=None, apiInstance=None):
 @Function
 def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, headerType=None):
     if not jwtSecret:
-        log.warning(getJwtMannager, f'Not possible to instanciate apiKeyManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_API_KEY_SECRET}')
+        log.warning(getJwtMannager, f'Not possible to instanciate manager.apiKey{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_API_KEY_SECRET}')
     else:
         jwtManager = JwtManager(
             jwtSecret,
@@ -210,7 +210,7 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
-    return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.encode({
+    return retrieveApiInstance(apiInstance=apiInstance).manager.apiKey.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: getNewJti(),
@@ -229,7 +229,7 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_API_KEY_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
-    return retrieveApiInstance(apiInstance=apiInstance).apiKeyManager.encode({
+    return retrieveApiInstance(apiInstance=apiInstance).manager.apiKey.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: getNewJti(),
@@ -261,7 +261,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
     }
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
     addAccessTokenToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
-    return apiInstance.apiKeyManager.encode({
+    return apiInstance.manager.apiKey.encode({
             JwtConstant.KW_IAT: getIat(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_NFB: UtcDateTimeUtil.now(),
             JwtConstant.KW_JTI: getNewJti(),
@@ -302,24 +302,24 @@ def getContextData(dataClass=None, apiInstance=None):
     return getCurrentApiKey(apiKeyClass=dataClass, apiInstance=apiInstance)
 
 def addResource(apiInstance, appInstance):
-    apiInstance.apiKeyManager = None
+    apiInstance.manager.apiKey = None
     try:
-        apiInstance.apiKeyManager = getJwtMannager(
+        apiInstance.manager.apiKey = getJwtMannager(
             appInstance,
             apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_SECRET),
             algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_ALGORITHM),
             headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_HEADER),
             headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_API_KEY_TYPE)
         )
-        apiInstance.apiKeyManager.api = apiInstance
+        apiInstance.manager.apiKey.api = apiInstance
     except Exception as exception:
         log.warning(addResource, 'Not possible to add ApiKeyManager', exception=exception)
-    if ObjectHelper.isNotNone(apiInstance.apiKeyManager):
+    if ObjectHelper.isNotNone(apiInstance.manager.apiKey):
         log.success(initialize, 'ApiKeyManager created')
-    return apiInstance.apiKeyManager
+    return apiInstance.manager.apiKey
 
 def initialize(apiInstance, appInstance):
-    if ObjectHelper.isNotNone(apiInstance.apiKeyManager):
+    if ObjectHelper.isNotNone(apiInstance.manager.apiKey):
         log.success(initialize, 'ApiKeyManager is running')
 
 def onHttpRequestCompletion(apiInstance, appInstance):
@@ -331,13 +331,16 @@ def onHttpRequestCompletion(apiInstance, appInstance):
 def shutdown(apiInstance, appInstance):
     log.success(shutdown, 'ApiKeyManager successfully closed')
 
+def onRun(self, apiInstance, appInstance):
+    ...
+
 def onShutdown(apiInstance, appInstance):
     import atexit
     atexit.register(lambda: shutdown(apiInstance, appInstance))
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)
-    if ObjectHelper.isNone(apiInstance.apiKeyManager):
+    if not ReflectionHelper.hasAttributeOrMethod(apiInstance.manager, 'apiKey') or ObjectHelper.isNone(apiInstance.manager.apiKey):
         raise Exception('There is no api key manager')
     return apiInstance
 

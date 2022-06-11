@@ -17,22 +17,25 @@ def addResource(apiInstance, appInstance) :
     appInstance.config[SchedulerConstant.KW_SCHEDULER_API_ENABLED] = scheduler.api_enabled
     appInstance.config[SchedulerConstant.KW_SCHEDULER_TIMEZONE] = scheduler.timezone
 
-    apiInstance.schedulerManager = scheduler
-    if ObjectHelper.isNotNone(apiInstance.schedulerManager):
-        log.success(addResource, f'APScheduler schedulers created{"" if apiInstance.schedulerManager.api_enabled else ". But are disabled"}')
+    apiInstance.manager.scheduler = scheduler
+    if ObjectHelper.isNotNone(apiInstance.manager.scheduler):
+        log.success(addResource, f'APScheduler schedulers created{"" if apiInstance.manager.scheduler.api_enabled else ". But are disabled"}')
     return scheduler
 
 def initialize(apiInstance, appInstance) :
-    apiInstance.schedulerManager.init_app(appInstance)
-    apiInstance.schedulerManager.start()
-    log.success(initialize, f'APScheduler schedulers initialized{"" if apiInstance.schedulerManager.api_enabled else ". But are disabled"}')
+    apiInstance.manager.scheduler.init_app(appInstance)
+    apiInstance.manager.scheduler.start()
+    log.success(initialize, f'APScheduler schedulers initialized{"" if apiInstance.manager.scheduler.api_enabled else ". But are disabled"}')
 
 def onHttpRequestCompletion(apiInstance, appInstance) :
     ...
 
+def onRun(self, apiInstance, appInstance):
+    ...
+
 def shutdown(apiInstance, appInstance):
     try:
-        apiInstance.schedulerManager.shutdown(wait=False)
+        apiInstance.manager.scheduler.shutdown(wait=False)
     except Exception as exception:
         log.failure(shutdown, 'Not possible to close APScheduler schedulers', exception)
     log.success(shutdown, 'APScheduler schedulers successfully closed')

@@ -113,7 +113,7 @@ def getRequestHeaders(kwargs):
 def jwtAccessRequired(function, *args, **kwargs):
     def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).sessionManager.validateAccessSession(requestHeaders=getRequestHeaders(kwargs))
+        retrieveApiInstance(arguments=args[0]).manager.session.validateAccessSession(requestHeaders=getRequestHeaders(kwargs))
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -123,7 +123,7 @@ def jwtAccessRequired(function, *args, **kwargs):
 def jwtRefreshRequired(function, *args, **kwargs):
     def innerFunction(*args, **kwargs):
         ###- arguments=args[0] --> python weardnes in it's full glory
-        retrieveApiInstance(arguments=args[0]).sessionManager.validateRefreshSession(requestHeaders=getRequestHeaders(kwargs))
+        retrieveApiInstance(arguments=args[0]).manager.session.validateRefreshSession(requestHeaders=getRequestHeaders(kwargs))
         functionReturn = function(*args, **kwargs)
         return functionReturn
     ReflectionHelper.overrideSignatures(innerFunction, function)
@@ -132,12 +132,12 @@ def jwtRefreshRequired(function, *args, **kwargs):
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtBody(rawJwt=None, apiInstance=None, requestHeaders=None):
     if ObjectHelper.isNone(rawJwt):
-        return retrieveApiInstance(apiInstance=apiInstance).sessionManager.getBody(rawJwt=rawJwt, requestHeaders=requestHeaders)
+        return retrieveApiInstance(apiInstance=apiInstance).manager.session.getBody(rawJwt=rawJwt, requestHeaders=requestHeaders)
     return rawJwt
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def getJwtHeaders(apiInstance=None, requestHeaders=None):
-    headers = retrieveApiInstance(apiInstance=apiInstance).sessionManager.getUnverifiedHeaders(requestHeaders=requestHeaders)
+    headers = retrieveApiInstance(apiInstance=apiInstance).manager.session.getUnverifiedHeaders(requestHeaders=requestHeaders)
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
@@ -189,7 +189,7 @@ def addAccessTokenToBlackList(rawJwt=None, apiInstance=None):
 @Function
 def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, headerType=None):
     if not jwtSecret:
-        log.warning(getJwtMannager, f'Not possible to instanciate sessionManager{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SESSION_SECRET}')
+        log.warning(getJwtMannager, f'Not possible to instanciate manager.session{c.DOT_SPACE_CAUSE}Missing jwt secret at {ConfigurationKeyConstant.API_SESSION_SECRET}')
     else:
         jwtManager = JwtManager(
             jwtSecret,
@@ -210,7 +210,7 @@ def getJwtMannager(appInstance, jwtSecret, algorithm=None, headerName=None, head
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
-    return retrieveApiInstance(apiInstance=apiInstance).sessionManager.encode({
+    return retrieveApiInstance(apiInstance=apiInstance).manager.session.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: getNewJti(),
@@ -229,7 +229,7 @@ def createAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=
 @EncapsulateItWithGlobalException(message=JwtConstant.INVALID_SESSION_MESSAGE, status=HttpStatus.UNAUTHORIZED)
 def refreshAccessToken(identity, contextList, deltaMinutes=0, headers=None, data=None, apiInstance=None):
     timeNow = UtcDateTimeUtil.now()
-    return retrieveApiInstance(apiInstance=apiInstance).sessionManager.encode({
+    return retrieveApiInstance(apiInstance=apiInstance).manager.session.encode({
             JwtConstant.KW_IAT: timeNow,
             JwtConstant.KW_NFB: timeNow,
             JwtConstant.KW_JTI: getNewJti(),
@@ -261,7 +261,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
     }
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
     addAccessTokenToBlackList(rawJwt=rawJwt, apiInstance=apiInstance)
-    return apiInstance.sessionManager.encode({
+    return apiInstance.manager.session.encode({
             JwtConstant.KW_IAT: getIat(rawJwt=rawJwt, apiInstance=apiInstance),
             JwtConstant.KW_NFB: UtcDateTimeUtil.now(),
             JwtConstant.KW_JTI: getNewJti(),
@@ -302,24 +302,24 @@ def getContextData(dataClass=None, apiInstance=None):
     return getCurrentSession(sessionClass=dataClass, apiInstance=apiInstance)
 
 def addResource(apiInstance, appInstance):
-    apiInstance.sessionManager = None
+    apiInstance.manager.session = None
     try:
-        apiInstance.sessionManager = getJwtMannager(
+        apiInstance.manager.session = getJwtMannager(
             appInstance,
             apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_SECRET),
             algorithm = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_ALGORITHM),
             headerName = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_HEADER),
             headerType = apiInstance.globals.getApiSetting(ConfigurationKeyConstant.API_SESSION_TYPE)
         )
-        apiInstance.sessionManager.api = apiInstance
+        apiInstance.manager.session.api = apiInstance
     except Exception as exception:
         log.warning(addResource, 'Not possible to add SessionManager', exception=exception)
-    if ObjectHelper.isNotNone(apiInstance.sessionManager):
+    if ObjectHelper.isNotNone(apiInstance.manager.session):
         log.success(initialize, 'SessionManager created')
-    return apiInstance.sessionManager
+    return apiInstance.manager.session
 
 def initialize(apiInstance, appInstance):
-    if ObjectHelper.isNotNone(apiInstance.sessionManager):
+    if ObjectHelper.isNotNone(apiInstance.manager.session):
         log.success(initialize, 'SessionManager is running')
 
 def onHttpRequestCompletion(apiInstance, appInstance):
@@ -331,13 +331,16 @@ def onHttpRequestCompletion(apiInstance, appInstance):
 def shutdown(apiInstance, appInstance):
     log.success(shutdown, 'SessionManager successfully closed')
 
+def onRun(self, apiInstance, appInstance):
+    ...
+
 def onShutdown(apiInstance, appInstance):
     import atexit
     atexit.register(lambda: shutdown(apiInstance, appInstance))
 
 def retrieveApiInstance(apiInstance=None, arguments=None):
     apiInstance = FlaskUtil.retrieveApiInstance(apiInstance=apiInstance, arguments=arguments)
-    if ObjectHelper.isNone(apiInstance.sessionManager):
+    if ObjectHelper.isNone(apiInstance.manager.session):
         raise Exception('There is no session manager')
     return apiInstance
 
