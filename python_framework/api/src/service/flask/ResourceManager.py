@@ -259,7 +259,7 @@ def initialize(
                 manager.onShutdown(api, api.app)
             except Exception as onShutdownException:
                 log.log(initialize, f'Error while handling onShutdown call', exception=onShutdownException)
-
+        raise exception
     return app
 
 
