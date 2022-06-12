@@ -180,7 +180,10 @@ def runApi(*args, api=None, debug=False, **kwargs):
     for manager in api.managerList:
         manager.onRun(api, api.app)
     log.success(runApi, f'{api.globals.apiName} api will be available at {api.exposedUrl}')
-    api.app.run(*args, debug=debug, **kwargs)
+    try:
+        api.app.run(*args, debug=debug, **kwargs)
+    except Exception as exception:
+        log.debug(runApi, 'Error while running api. Initiating shutdown', exception=exception, muteStackTrace=True)
     for manager in api.managerList[::-1]:
         manager.onShutdown(api, api.app)
     # SessionManager.onShutdown(api, api.app)
