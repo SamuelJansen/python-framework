@@ -214,43 +214,51 @@ def initialize(
         *managerList
     ]
 
-    addGlobalsTo(api, globalsInstance=globalsInstance)
+    try:
+        addGlobalsTo(api, globalsInstance=globalsInstance)
 
-    api.scheme = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_SCHEME)
-    api.host = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_HOST)
-    api.port = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_PORT)
-    api.baseUrl = getBaseUrl(globalsInstance)
-    api.baseStaticUrl = baseStaticUrl
-    api.internalUrl = FlaskManager.getInternalUrl(api)
-    api.exposedHost = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_HOST)
-    api.exposedStaticHost = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_STATIC_HOST)
+        api.scheme = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_SCHEME)
+        api.host = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_HOST)
+        api.port = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_PORT)
+        api.baseUrl = getBaseUrl(globalsInstance)
+        api.baseStaticUrl = baseStaticUrl
+        api.internalUrl = FlaskManager.getInternalUrl(api)
+        api.exposedHost = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_HOST)
+        api.exposedStaticHost = globalsInstance.getApiSetting(ConfigurationKeyConstant.API_SERVER_EXPOSED_STATIC_HOST)
 
-    api.cors = CORS(app, resources={f"{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}}, supports_credentials=True)
-    api.cors.api = api
+        api.cors = CORS(app, resources={f"{api.baseUrl}/{c.ASTERISK}": {'origins': c.ASTERISK}}, supports_credentials=True)
+        api.cors.api = api
 
-    addResourceList(api)
+        addResourceList(api)
 
-    OpenApiManager.newDocumentation(api, app)
-    SqlAlchemyProxy.addResource(api, app, baseModel=refferenceModel, echo=False)
-    # SchedulerManager.addResource(api, app)
-    # SessionManager.addResource(api, app)
-    # ApiKeyManager.addResource(api, app)
-    # SecurityManager.addResource(api, app)
-    addManagerListTo(api, api.managerList)
+        OpenApiManager.newDocumentation(api, app)
+        SqlAlchemyProxy.addResource(api, app, baseModel=refferenceModel, echo=False)
+        # SchedulerManager.addResource(api, app)
+        # SessionManager.addResource(api, app)
+        # ApiKeyManager.addResource(api, app)
+        # SecurityManager.addResource(api, app)
+        addManagerListTo(api, api.managerList)
 
-    addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
-    for manager in api.managerList[::-1]:
-        manager.onHttpRequestCompletion(api, app)
-    # SessionManager.onHttpRequestCompletion(api, app)
-    # ApiKeyManager.onHttpRequestCompletion(api, app)
-    # SecurityManager.onHttpRequestCompletion(api, app)
-    # SchedulerManager.onHttpRequestCompletion(api, app)
-    SqlAlchemyProxy.onHttpRequestCompletion(api, app)
+        addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
+        for manager in api.managerList[::-1]:
+            manager.onHttpRequestCompletion(api, app)
+        # SessionManager.onHttpRequestCompletion(api, app)
+        # ApiKeyManager.onHttpRequestCompletion(api, app)
+        # SecurityManager.onHttpRequestCompletion(api, app)
+        # SchedulerManager.onHttpRequestCompletion(api, app)
+        SqlAlchemyProxy.onHttpRequestCompletion(api, app)
 
-    api.documentationUrl = OpenApiManager.getDocumentationUrl(api)
-    api.healthCheckUrl = f'{api.documentationUrl[:-len(OpenApiManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
-    api.exposedUrl = getApiUrl(api=api)
-    api.exposedStaticUrl = getApiStaticUrl(api=api, staticUrl=staticUrl)
+        api.documentationUrl = OpenApiManager.getDocumentationUrl(api)
+        api.healthCheckUrl = f'{api.documentationUrl[:-len(OpenApiManager.DOCUMENTATION_ENDPOINT)]}{HealthCheckConstant.URI}'
+        api.exposedUrl = getApiUrl(api=api)
+        api.exposedStaticUrl = getApiStaticUrl(api=api, staticUrl=staticUrl)
+    except Exception as exception:
+        log.debug(initialize, 'Error while adding api resources. Initiating shutdown', exception=exception, muteStackTrace=True)
+        for manager in api.managerList[::-1]:
+            try:
+                manager.onShutdown(api, api.app)
+            except Exception as onShutdownException:
+                log.log(, f'Error while handling onShutdown rotine {onShutdown}', exception=onShutdownException)
 
     return app
 
