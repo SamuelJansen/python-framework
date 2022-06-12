@@ -315,7 +315,7 @@ def addResource(apiInstance, appInstance):
     except Exception as exception:
         log.warning(addResource, 'Not possible to add ApiKeyManager', exception=exception)
     if ObjectHelper.isNotNone(apiInstance.resource.manager.apiKey):
-        log.success(initialize, 'ApiKeyManager created')
+        log.status(initialize, 'ApiKeyManager created')
     return apiInstance.resource.manager.apiKey
 
 def initialize(apiInstance, appInstance):
@@ -329,7 +329,8 @@ def onHttpRequestCompletion(apiInstance, appInstance):
     ...
 
 def shutdown(apiInstance, appInstance):
-    log.success(shutdown, 'ApiKeyManager successfully closed')
+    if ObjectHelper.isNotNone(apiInstance.resource.manager.apiKey):
+        log.success(shutdown, 'ApiKeyManager successfully closed')
 
 def onRun(apiInstance, appInstance):
     ...

@@ -201,7 +201,7 @@ def addResource(apiInstance, appInstance):
     except Exception as exception:
         log.warning(addResource, 'Not possible to add SecurityManager', exception=exception)
     if ObjectHelper.isNotNone(apiInstance.resource.manager.security):
-        log.success(initialize, 'SecurityManager created')
+        log.status(initialize, 'SecurityManager created')
     return apiInstance.resource.manager.security
 
 
@@ -229,7 +229,8 @@ def onHttpRequestCompletion(apiInstance, appInstance):
     ...
 
 def shutdown(apiInstance, appInstance):
-    log.success(shutdown, 'SecurityManager successfully closed')
+    if ObjectHelper.isNotNone(apiInstance.resource.manager.security):
+        log.success(shutdown, 'SecurityManager successfully closed')
 
 def onRun(apiInstance, appInstance):
     ...

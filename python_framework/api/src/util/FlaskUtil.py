@@ -139,6 +139,12 @@ def safellyGetHeaders():
         log.log(safellyGetHeaders, f'Not possible to get request headers. Returning {headers} by default', exception=exception)
     return headers if ObjectHelper.isNotNone(headers) else dict()
 
+
+@Function
+def safellyGetHeader(headerName):
+    return safellyGetHeaders().get(headerName)
+
+
 @Function
 def safellyGetResponseHeaders(response):
     headers = None

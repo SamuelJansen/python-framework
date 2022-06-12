@@ -296,62 +296,62 @@ def addControllerListTo(apiInstance, controllerList):
 
 
 @Function
-def addServiceListTo(apiInstance,serviceList):
+def addServiceListTo(apiInstance, serviceList):
     for service in serviceList:
-        apiInstance.bindResource(apiInstance,service())
+        apiInstance.bindResource(apiInstance, service())
 
 
 @Function
-def addSchedulerListTo(apiInstance,schedulerList):
+def addSchedulerListTo(apiInstance, schedulerList):
     for scheduler in schedulerList:
         apiInstance.bindResource(apiInstance,scheduler())
 
 
 @Function
-def addClientListTo(apiInstance,clientList):
+def addClientListTo(apiInstance, clientList):
     for client in clientList:
-        apiInstance.bindResource(apiInstance,client())
+        apiInstance.bindResource(apiInstance, client())
 
 
 @Function
-def addListenerTo(apiInstance,listenerList):
+def addListenerTo(apiInstance, listenerList):
     for listener in listenerList:
-        apiInstance.bindResource(apiInstance,listener())
+        apiInstance.bindResource(apiInstance, listener())
 
 
 @Function
 def addEmitterTo(apiInstance, emitterList):
     for emitter in emitterList:
-        apiInstance.bindResource(apiInstance,emitter())
+        apiInstance.bindResource(apiInstance, emitter())
 
 
 @Function
 def addRepositoryTo(apiInstance, repositoryList):
     for repository in repositoryList:
-        apiInstance.bindResource(apiInstance,repository())
+        apiInstance.bindResource(apiInstance, repository())
 
 
 @Function
-def addValidatorListTo(apiInstance,validatorList):
+def addValidatorListTo(apiInstance, validatorList):
     for validator in validatorList:
-        apiInstance.bindResource(apiInstance,validator())
+        apiInstance.bindResource(apiInstance, validator())
 
 
-def addMapperListTo(apiInstance,mapperList):
+def addMapperListTo(apiInstance, mapperList):
     for mapper in mapperList:
-        apiInstance.bindResource(apiInstance,mapper())
+        apiInstance.bindResource(apiInstance, mapper())
 
 
 @Function
-def addHelperListTo(apiInstance,helperList):
+def addHelperListTo(apiInstance, helperList):
     for helper in helperList:
-        apiInstance.bindResource(apiInstance,helper())
+        apiInstance.bindResource(apiInstance, helper())
 
 
 @Function
-def addConverterListTo(apiInstance,converterList):
+def addConverterListTo(apiInstance, converterList):
     for converter in converterList:
-        apiInstance.bindResource(apiInstance,converter())
+        apiInstance.bindResource(apiInstance, converter())
 
 
 class FlaskResource:

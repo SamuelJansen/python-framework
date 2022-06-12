@@ -421,7 +421,7 @@ class SqlAlchemyProxy:
 def addResource(apiInstance, appInstance, baseModel=None, echo=False):
     apiInstance.repository = SqlAlchemyProxy(baseModel, apiInstance.globals, echo=echo)
     if ObjectHelper.isNotNone(apiInstance.repository):
-        log.success(addResource, 'SqlAlchemyProxy database connection created')
+        log.status(addResource, 'SqlAlchemyProxy database connection created')
     return apiInstance.repository
 
 def initialize(apiInstance, appInstance):
@@ -444,7 +444,8 @@ def shutdown(apiInstance, appInstance):
     try:
         apiInstance.repository.close()
     except Exception as exception:
-        log.failure(shutdown, 'Not possible to close SqlAlchemyProxy database connection', exception)
+        log.failure(shutdown, 'Not possible to close SqlAlchemyProxy database connection properly', exception)
+        return
     log.success(shutdown, 'SqlAlchemyProxy database connection successfully closed')
 
 def onShutdown(apiInstance, appInstance):

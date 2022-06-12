@@ -315,7 +315,7 @@ def addResource(apiInstance, appInstance):
     except Exception as exception:
         log.warning(addResource, 'Not possible to add SessionManager', exception=exception)
     if ObjectHelper.isNotNone(apiInstance.resource.manager.session):
-        log.success(initialize, 'SessionManager created')
+        log.status(initialize, 'SessionManager created')
     return apiInstance.resource.manager.session
 
 def initialize(apiInstance, appInstance):
@@ -329,7 +329,8 @@ def onHttpRequestCompletion(apiInstance, appInstance):
     ...
 
 def shutdown(apiInstance, appInstance):
-    log.success(shutdown, 'SessionManager successfully closed')
+    if ObjectHelper.isNotNone(apiInstance.resource.manager.session):
+        log.success(shutdown, 'SessionManager successfully closed')
 
 def onRun(apiInstance, appInstance):
     ...

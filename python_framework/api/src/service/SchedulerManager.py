@@ -19,13 +19,16 @@ def addResource(apiInstance, appInstance) :
 
     apiInstance.resource.manager.scheduler = scheduler
     if ObjectHelper.isNotNone(apiInstance.resource.manager.scheduler):
-        log.success(addResource, f'APScheduler schedulers created{"" if apiInstance.resource.manager.scheduler.api_enabled else ". But are disabled"}')
+        log.status(addResource, f'APScheduler schedulers created{"" if apiInstance.resource.manager.scheduler.api_enabled else ". But are disabled"}')
     return scheduler
 
 def initialize(apiInstance, appInstance) :
     apiInstance.resource.manager.scheduler.init_app(appInstance)
     apiInstance.resource.manager.scheduler.start()
-    log.success(initialize, f'APScheduler schedulers initialized{"" if apiInstance.resource.manager.scheduler.api_enabled else ". But are disabled"}')
+    if apiInstance.resource.manager.scheduler.api_enabled:
+        log.success(initialize, f'APScheduler scheduler is running')
+    else:
+        log.status(initialize, f'APScheduler scheduler successfull initialized, but is disabled to run')
 
 def onHttpRequestCompletion(apiInstance, appInstance) :
     ...
@@ -37,7 +40,8 @@ def shutdown(apiInstance, appInstance):
     try:
         apiInstance.resource.manager.scheduler.shutdown(wait=False)
     except Exception as exception:
-        log.failure(shutdown, 'Not possible to close APScheduler schedulers', exception)
+        log.failure(shutdown, 'Not possible to close APScheduler schedulers properly', exception)
+        return
     log.success(shutdown, 'APScheduler schedulers successfully closed')
 
 def onShutdown(apiInstance, appInstance) :

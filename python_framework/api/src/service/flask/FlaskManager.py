@@ -173,13 +173,13 @@ def runApi(*args, api=None, debug=False, **kwargs):
         kwargs['host'] = api.host if not 'localhost' == api.host else '0.0.0.0'
     if 'port' not in kwargs and api.port :
         kwargs['port'] = api.port
-    log.success(runApi, f'{api.globals.apiName} api will run at {api.internalUrl}')
-    log.success(runApi, f'Api will be available at {api.exposedUrl}')
-    log.success(runApi, f'Health check will be available at {api.healthCheckUrl}')
-    log.success(runApi, f'Documentation will be available at {api.documentationUrl}')
-    log.success(runApi, f'Api static content will be available at {api.exposedStaticUrl}')
+    log.status(runApi, f'{api.globals.apiName} api will run at {api.internalUrl}')
+    log.status(runApi, f'Health check will be available at {api.healthCheckUrl}')
+    log.status(runApi, f'Documentation will be available at {api.documentationUrl}')
+    log.status(runApi, f'Api static content will be available at {api.exposedStaticUrl}')
     for manager in api.managerList:
         manager.onRun(api, api.app)
+    log.success(runApi, f'{api.globals.apiName} api will be available at {api.exposedUrl}')
     api.app.run(*args, debug=debug, **kwargs)
     for manager in api.managerList[::-1]:
         manager.onShutdown(api, api.app)
