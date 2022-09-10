@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.3.92'
+VERSION = '0.3.93'
 
 NAME = 'python_framework'
 PACKAGE_NAME = NAME
@@ -73,7 +73,7 @@ setup(
         'Flask-APScheduler==1.12.2',
         # 'psutil<6.0,>=5.8.0',
         'requests<3.0,>=2.26.0',
-        'werkzeug<2.0,>=0.15.0',
+        'werkzeug<3.0,>=2.2.2',
         'markupsafe==1.1.1' #https://github.com/pallets/markupsafe/releases
     ],
     classifiers = [
