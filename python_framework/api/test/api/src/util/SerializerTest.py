@@ -73,6 +73,19 @@ class Child(MODEL) :
     id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
     father, fatherId = sap.getManyToOne(__tablename__, SELF_REFERENCE_FATHER_NAME, MODEL)
     brother, brotherId = sap.getOneToOneChild(__tablename__, BROTHER_NAME, MODEL)
+    
+class TestContact(MODEL):
+    __tablename__ = 'TestContact'
+    id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
+    key = sap.Column(sap.String(128), nullable=False)
+    def __init__(self,
+        id = None,
+        key = None
+    ):
+        self.id = id
+        self.key = key
+    def __repr__(self):
+        return f'{self.__tablename__}(id: {self.id}, key: {self.key})'
 
 
 DEFAULT_DATETIME_PATTERN = '%Y-%m-%d %H:%M:%S'
@@ -709,18 +722,6 @@ def convertFromJsonToObject_whenThereAreEnums() :
 @Test()
 def convertFromObjectToObject_weirdIdList() :
     #arrange
-    class TestContact(MODEL):
-        __tablename__ = 'TestContact'
-        id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
-        key = sap.Column(sap.String(128), nullable=False)
-        def __init__(self,
-            id = None,
-            key = None
-        ):
-            self.id = id
-            self.key = key
-        def __repr__(self):
-            return f'{self.__tablename__}(id: {self.id}, key: {self.key})'
     class TestContactRequestDto :
         def __init__(self,
             key = None

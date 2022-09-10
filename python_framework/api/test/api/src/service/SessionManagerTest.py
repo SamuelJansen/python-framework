@@ -46,10 +46,10 @@ def sessionManager_worksProperly() :
     )
     timeNow = DateTimeHelper.dateTimeNow()
     payload = {
-        JwtConstant.KW_IAT: timeNow,
-        JwtConstant.KW_NFB: timeNow,
+        JwtConstant.KW_IAT: DateTimeHelper.timestampOf(dateTime=timeNow),
+        JwtConstant.KW_NFB: DateTimeHelper.timestampOf(dateTime=timeNow),
         JwtConstant.KW_JTI: f"{int(f'{time.time()}'.replace('.', ''))+int(f'{time.time()}'.replace('.', ''))}",
-        JwtConstant.KW_EXPIRATION: timeNow + deltaMinutes,
+        JwtConstant.KW_EXPIRATION: DateTimeHelper.timestampOf(dateTime=timeNow + deltaMinutes),
         JwtConstant.KW_IDENTITY: IDENTITY,
         JwtConstant.KW_FRESH: False,
         JwtConstant.KW_TYPE: JwtConstant.ACCESS_VALUE_TYPE,
@@ -72,7 +72,16 @@ def sessionManager_worksProperly() :
 
     # assert
     assert lines * .0001 > endTime/totalRuns, (lines * .0001, endTime/totalRuns)
-    assert ObjectHelper.equals(payload, decodedPayload), (payload, decodedPayload)
+    assert ObjectHelper.equals(payload, decodedPayload), f'{payload} --x-- {decodedPayload}'
+
+
+    '''
+    {'iat': datetime.datetime(2022, 9, 9, 20, 55, 51, 225782), 'nbf': datetime.datetime(2022, 9, 9, 20, 55, 51, 225782), 'jti': '33255355024515644', 'exp': datetime.datetime(2022, 9, 10, 3, 5, 51, 225782), 'identity': 'BV1C9CB0B12SZUVQCOLI5RBQQDO3B5W5RX8LGWK1EDXMQ3OJ94NY8258LZJ9OQF3CJMNZX46JWZBA65Q9YCRJOFU612ZZ8BUDZH2FPJRFEYTOV2RE3S7E4GJHFN52MKYAJO2JZ4SM435CO', 'fresh': False, 'type': 'access', 'user_claims': {'context': ['ABCD'], 'data': {'personal': 'data'}}}
+    --x--
+    {'iat': 1662756951, 'nbf': 1662756951, 'jti': '33255355024515644', 'exp': 1662779151, 'identity': 'BV1C9CB0B12SZUVQCOLI5RBQQDO3B5W5RX8LGWK1EDXMQ3OJ94NY8258LZJ9OQF3CJMNZX46JWZBA65Q9YCRJOFU612ZZ8BUDZH2FPJRFEYTOV2RE3S7E4GJHFN52MKYAJO2JZ4SM435CO', 'fresh': False, 'type': 'access', 'user_claims': {'context': ['ABCD'], 'data': {'personal': 'data'}}}
+    '''
+
+
     assert ObjectHelper.isNone(accessException), accessException
     assert ObjectHelper.isNotNone(refreshException), refreshException
     assert ObjectHelper.equals(GlobalException.__name__, type(refreshException).__name__), (GlobalException.__name__, type(refreshException).__name__, refreshException)

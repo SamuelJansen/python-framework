@@ -257,6 +257,7 @@ def appRun_whenEnvironmentIsLocalFromDevConfig_withSuccess() :
         }
 
         # act
+        requests.get(BASE_URL + '/health')
         responseGetHealth = requests.post(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER_TEST, json={'status': 'UP'})
 
         # assert
@@ -1080,7 +1081,7 @@ def pythonRun_apiKeyManager() :
         responseLogin = requests.post(BASE_URI + POST_LOGIN_URI, json=payload, headers=headers)
         firstAuthorization = responseLogin.json().get('accessToken')
         firstAuthorizationHeaders = responseLogin.headers
-        assert ObjectHelper.isNotNone(firstAuthorization)
+        assert ObjectHelper.isNotNone(firstAuthorization), firstAuthorization
         headers['Api-Key'] = 'Bearer ' + firstAuthorization
         assert ObjectHelper.isNotNone(firstAuthorization)
         assert ObjectHelper.isNotNone(id)

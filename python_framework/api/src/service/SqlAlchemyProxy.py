@@ -277,9 +277,9 @@ class SqlAlchemyProxy:
                 time.sleep(waittingTime)
                 try :
                     self.model.metadata.create_all(self.engine)
-                except Exception as secondException :
-                    log.error(self.run, 'Not possible to run', exception)
-                    raise exception
+                except Exception as thirdException :
+                    log.error(self.run, 'Not possible to run', thirdException)
+                    raise thirdException
         log.debug(self.run, 'Database tables created')
 
     @Method

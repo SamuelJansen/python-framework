@@ -127,7 +127,7 @@ def raiseExceptionIfNeeded(
     defaultLogMessage = HttpClientConstant.CLIENT_DID_NOT_SENT_ANY_MESSAGE
 ):
     status = FlaskUtil.safellyGetResponseStatus(clientResponse) ###- clientResponse.status_code
-    if ObjectHelper.isNone(status) or 500 <= status:
+    if ObjectHelper.isNone(status) or HttpStatus.INTERNAL_SERVER_ERROR <= status:
         raise ExceptionHandler.getClientGlobalException(
             clientResponse,
             context,
@@ -135,8 +135,8 @@ def raiseExceptionIfNeeded(
             exception = None,
             status = status
         )
-    elif 400 <= status:
-        if 401 == status:
+    elif HttpStatus.BAD_REQUEST <= status:
+        if HttpStatus.UNAUTHORIZED == status or HttpStatus.FORBIDDEN == status:
             raise ExceptionHandler.getClientGlobalException(
                 clientResponse,
                 context,
@@ -145,7 +145,15 @@ def raiseExceptionIfNeeded(
                 status = HttpStatus.PROXY_ATHENTICATION_REQUIRED,
                 message = getErrorMessage(clientResponse, context=context, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage)
             )
-        elif 404 == status:
+        elif HttpStatus.REQUEST_TIMEOUT == status:
+            raise ExceptionHandler.getClientGlobalException(
+                clientResponse,
+                context,
+                getErrorMessage(clientResponse, context=context, businessLogMessage=businessLogMessage, defaultLogMessage=defaultLogMessage),
+                exception = None,
+                status = HttpStatus.INTERNAL_SERVER_ERROR
+            )
+        elif HttpStatus.NOT_FOUND == status:
             raise ExceptionHandler.getClientGlobalException(
                 clientResponse,
                 context,

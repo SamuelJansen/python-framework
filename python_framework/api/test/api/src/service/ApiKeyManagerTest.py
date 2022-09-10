@@ -46,10 +46,10 @@ def apiKeyManager_worksProperly() :
     )
     timeNow = DateTimeHelper.dateTimeNow()
     payload = {
-        JwtConstant.KW_IAT: timeNow,
-        JwtConstant.KW_NFB: timeNow,
+        JwtConstant.KW_IAT: DateTimeHelper.timestampOf(dateTime=timeNow),
+        JwtConstant.KW_NFB: DateTimeHelper.timestampOf(dateTime=timeNow),
         JwtConstant.KW_JTI: f"{int(f'{time.time()}'.replace('.', ''))+int(f'{time.time()}'.replace('.', ''))}",
-        JwtConstant.KW_EXPIRATION: timeNow + deltaMinutes,
+        JwtConstant.KW_EXPIRATION: DateTimeHelper.timestampOf(dateTime=timeNow + deltaMinutes),
         JwtConstant.KW_IDENTITY: IDENTITY,
         JwtConstant.KW_FRESH: False,
         JwtConstant.KW_TYPE: JwtConstant.ACCESS_VALUE_TYPE,

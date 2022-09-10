@@ -204,6 +204,9 @@ def initialize(
         **kwargs
     )
     api = Api(app)
+
+    ###- app.config['TEMPLATES_AUTO_RELOAD'] = True
+
     api.app = app
     api.app.api = api
     api.managerList = [
@@ -259,7 +262,9 @@ def initialize(
                 manager.onShutdown(api, api.app)
             except Exception as onShutdownException:
                 log.log(initialize, f'Error while handling onShutdown call', exception=onShutdownException)
+        SqlAlchemyProxy.onShutdown(api, api.app)
         raise exception
+
     return app
 
 

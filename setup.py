@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.3.91'
+VERSION = '0.3.92'
 
 NAME = 'python_framework'
 PACKAGE_NAME = NAME
@@ -61,16 +61,15 @@ setup(
     keywords = ['flask', 'sqlalchemy', 'open api', 'jwt', 'serializer', 'scheduler'],
     install_requires = [
         'gunicorn==20.0.4',
-        'Flask==1.1.4',
-        'Flask-RESTful==0.3.8',
-        'Flask-JWT-Extended==3.25.0',
-        'PyJWT==1.7.1',
+        'Flask==2.2.2',
+        'Flask-RESTful==0.3.9',
+        'PyJWT==2.4.0',
         'Flask-Cors==3.0.9',
         'Flask-Swagger-Ui==3.36.0',
         'psycopg2-binary<3.0,>=2.8.6',
         'SQLAlchemy==1.4.25',
         'globals<1.0,>=0.3.34',
-        'python-helper<1.0,>=0.3.51',
+        'python-helper<1.0,>=0.3.52',
         'Flask-APScheduler==1.12.2',
         # 'psutil<6.0,>=5.8.0',
         'requests<3.0,>=2.26.0',

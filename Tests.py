@@ -38,13 +38,13 @@ TestHelper.run(__file__)
 #     __file__,
 #     # times=10,
 #     runOnly = [
-#         # 'TestApiTest.appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess',
-#         # 'TestApiTest.pythonRun_securityManager',
+#         'TestApiTest.appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess',
+#         'TestApiTest.pythonRun_securityManager',
 #         # 'TestApiTest.pythonRun_apiKeyManager',
 #         # 'TestApiTest.pythonRun_sessionManager',
 #         'TestApiTest.testing_headersAndParams'
 #         # ,
-#         # 'TestApiTest.testing_Client'
+#         'TestApiTest.testing_Client'
 #     ]
 # )
 # TestHelper.run(

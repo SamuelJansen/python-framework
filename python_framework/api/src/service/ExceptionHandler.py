@@ -1,4 +1,3 @@
-from flask_jwt_extended.exceptions import NoAuthorizationError, RevokedTokenError
 from jwt import ExpiredSignatureError, InvalidSignatureError
 
 from python_helper import Constant as c
@@ -143,9 +142,7 @@ def getGeneralGlobalException(exception, resourceInstance, resourceInstanceMetho
         message = None
         status = None
         logMessage = None
-        if (isinstance(exception, NoAuthorizationError) or NoAuthorizationError.__name__ == exception.__class__.__name__ or
-            isinstance(exception, RevokedTokenError) or RevokedTokenError.__name__ == exception.__class__.__name__ or
-            isinstance(exception, InvalidSignatureError) or InvalidSignatureError.__name__ == exception.__class__.__name__ or
+        if (isinstance(exception, InvalidSignatureError) or InvalidSignatureError.__name__ == exception.__class__.__name__ or
             isinstance(exception, ExpiredSignatureError) or ExpiredSignatureError.__name__ == exception.__class__.__name__):
             message = 'Unauthorized' if ObjectHelper.isNone(exception) or StringHelper.isBlank(str(exception)) else str(exception)
             status = HttpStatus.UNAUTHORIZED

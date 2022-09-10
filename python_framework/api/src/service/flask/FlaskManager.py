@@ -184,6 +184,7 @@ def runApi(*args, api=None, debug=False, **kwargs):
         api.app.run(*args, debug=debug, **kwargs)
     except Exception as exception:
         log.debug(runApi, 'Error while running api. Initiating shutdown', exception=exception, muteStackTrace=True)
+    log.success(runApi, f'{api.globals.apiName} api is successfully shuting down')
     for manager in api.managerList[::-1]:
         manager.onShutdown(api, api.app)
     # SessionManager.onShutdown(api, api.app)
@@ -191,7 +192,6 @@ def runApi(*args, api=None, debug=False, **kwargs):
     # SecurityManager.onShutdown(api, api.app)
     # SchedulerManager.onShutdown(api, api.app)
     SqlAlchemyProxy.onShutdown(api, api.app)
-    log.success(runApi, f'{api.globals.apiName} api is successfully shuting down')
 
 
 @Function
