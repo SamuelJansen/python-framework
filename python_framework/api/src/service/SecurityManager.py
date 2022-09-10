@@ -275,7 +275,7 @@ def patchAccessToken(newContextList=None, headers=None, data=None, rawJwt=None, 
     )
 
 @EncapsulateItWithGlobalException(message=JwtConstant.UNAUTHORIZED_MESSAGE, status=HttpStatus.UNAUTHORIZED)
-def getCurrentAuthorization(sessionClass=None, apiInstance=None):
+def getCurrentUser(sessionClass=None, apiInstance=None):
     apiInstance = retrieveApiInstance(apiInstance=apiInstance)
     rawJwt = getJwtBody(apiInstance=apiInstance)
     identity = getIdentity(rawJwt=rawJwt, apiInstance=apiInstance)
@@ -299,7 +299,7 @@ def getCurrentAuthorization(sessionClass=None, apiInstance=None):
         return currentAuthorization
 
 def getContextData(dataClass=None, apiInstance=None):
-    return getCurrentAuthorization(sessionClass=dataClass, apiInstance=apiInstance)
+    return getCurrentUser(sessionClass=dataClass, apiInstance=apiInstance)
 
 def addResource(apiInstance, appInstance):
     apiInstance.resource.manager.security = None

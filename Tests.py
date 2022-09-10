@@ -31,7 +31,8 @@ TestHelper.run(__file__)
 #     __file__,
 #     runOnly = [
 #         'SessionManagerTest.sessionManager_worksProperly',
-#         'ApiKeyManagerTest.apiKeyManager_worksProperly'
+#         'ApiKeyManagerTest.apiKeyManager_worksProperly',
+#         'SecurityManagerTest.securityManager_worksProperly'
 #     ]
 # )
 # TestHelper.run(
