@@ -6,7 +6,7 @@ api:
         base-url: /prd-test-api
         scheme: http
         host: localhost
-        port: 5003
+        port: 5009
     security:
         secret: ${SECURITY_SECRET:prd-secret-key}
     database:

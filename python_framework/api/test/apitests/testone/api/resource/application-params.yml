@@ -1,0 +1,5 @@
+print-status: True
+
+api:
+    server:
+        port: 5010

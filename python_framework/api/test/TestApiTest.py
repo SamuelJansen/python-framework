@@ -7,7 +7,7 @@ from python_helper import Test, ObjectHelper, SettingHelper, EnvironmentHelper, 
 import subprocess, psutil
 
 CURRENT_PATH = str(Path(__file__).parent.absolute())
-ESTIMATED_BUILD_TIME_IN_SECONDS = 6
+ESTIMATED_BUILD_TIME_IN_SECONDS = 8
 
 def killProcesses(givenProcess) :
     try :
@@ -120,7 +120,8 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
     muteLogs = False
     serverPort = 5001
     process = getProcess(
-        f'flask run --host=localhost --port={serverPort}',
+        'python app.py',
+        # f'flask run --host=localhost --port={serverPort}',
         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
         muteLogs = muteLogs
     )
@@ -242,9 +243,10 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
 def appRun_whenEnvironmentIsPrd_withSuccess() :
     # arrange
     muteLogs = False
-    serverPort = 5002
+    serverPort = 5009
     process = getProcess(
-        f'flask run --host=localhost --port={serverPort}',
+        'python app.py',
+        # f'flask run --host=localhost --port={serverPort}',
         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
         muteLogs = muteLogs
     )
@@ -310,7 +312,8 @@ def appRun_whenEnvironmentIsLocalFromDevConfig_withSuccess() :
     muteLogs = False
     serverPort = 5002
     process = getProcess(
-        f'flask run --host=localhost --port={serverPort}',
+        'python app.py',
+        # f'flask run --host=localhost --port={serverPort}',
         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
         muteLogs = muteLogs
     )
@@ -355,13 +358,16 @@ def appRun_whenEnvironmentIsLocalFromDevConfig_withSuccess() :
         killProcesses(process)
         raise exception
 
-@Test()
+@Test(environmentVariables={
+    SettingHelper.ACTIVE_ENVIRONMENT : 'params'
+})
 def testing_headersAndParams() :
     #arrange
     muteLogs = False
     serverPort = 5010
     process = getProcess(
-        f'flask run --host=localhost --port={serverPort}',
+        'python app.py',
+        # f'flask run --host=localhost --port={serverPort}',
         f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
         muteLogs = muteLogs
     )

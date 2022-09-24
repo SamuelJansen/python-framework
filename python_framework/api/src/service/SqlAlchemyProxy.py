@@ -72,7 +72,7 @@ def onLoadListener(target, context):
     target.onLoad(context)
 
 def onRefreshListener(target, context, attributes):
-    target.onRefresh(context)
+    target.onRefresh(context, attributes)
 
 def getNewOriginalModel():
     return declarative_base()
@@ -81,10 +81,10 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
     __abstract__ = True
     def onChange(self, eventType, *args, **kwargs):
         ...
-    def onLoad(self, target, context):
-        self.onChange(OnORMChangeEventType.LOAD, target, context)
-    def onRefresh(self, target, context, attributes):
-        self.onChange(OnORMChangeEventType.REFRESH, target, context, attributes)
+    def onLoad(self, context):
+        self.onChange(OnORMChangeEventType.LOAD, context)
+    def onRefresh(self, context, attributes):
+        self.onChange(OnORMChangeEventType.REFRESH, context, attributes)
 
 @Function
 def getNewModel():
