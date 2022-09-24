@@ -66,6 +66,7 @@ from sqlalchemy import event
 class OnORMChangeEventType:
     SELF = 'SELF'
     INIT = 'INIT'
+    ATTACH = 'ATTACH'
     LOAD = 'LOAD'
     REFRESH = 'REFRESH'
     EXPIRE = 'EXPIRE'
@@ -77,6 +78,9 @@ class OnORMChangeEventType:
 
 def onInitListener(target, args, kwargs):
     target.onInit(args, kwargs)
+
+def onAttachListener(session, target):
+    target.onAttach(session)
 
 def onLoadListener(target, context):
     target.onLoad(context)
@@ -108,6 +112,8 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
         ...
     def onInit(self, args, kwargs):
         self.onChange(args, kwargs, eventType=OnORMChangeEventType.INIT)
+    def onAttach(session):
+        self.onChange(session, eventType=OnORMChangeEventType.ATTACH)
     def onLoad(self, context):
         self.onChange(context, eventType=OnORMChangeEventType.LOAD)
     def onRefresh(self, context, attributes):
@@ -230,6 +236,9 @@ class SqlAlchemyProxy:
         # self.run()
         event.listen(PythonFramworkBaseClass, 'load', onLoadListener, propagate=True, restore_load_context=True)
         event.listen(PythonFramworkBaseClass, 'refresh', onRefreshListener, restore_load_context=True)
+        event.listen(PythonFramworkBaseClass, 'init', onInitListener)
+        event.listen(PythonFramworkBaseClass, 'expire', onExpireListener)
+        event.listen(self.session, 'before_attach', onAttachListener)
         event.listen(self.session, "detached_to_persistent", onDeteachedToPersistentListener)
         event.listen(self.session, "transient_to_pending", onTransientToPendingListener)
         event.listen(self.session, "pending_to_transient", onPendingToTransientListener)

@@ -1,8 +1,10 @@
 from python_helper import EnvironmentHelper, ReflectionHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.flask.FlaskManager import Controller, ControllerMethod, getCompleteResponseByException
-from python_framework.api.src.annotation.EnumAnnotation import EnumItem
+from python_framework.api.src.annotation.EnumAnnotation import EnumItem, EnumItemStr
 from python_framework.api.src.dto import ActuatorHealthDto
+from python_framework.api.src.enumeration.ActuatorHealthStatus import ActuatorHealthStatus
+from python_framework.api.src.model import ActuatorHealth
 
 from dto import EnumAsQueryDto
 
@@ -25,13 +27,20 @@ class ActuatorHealthTestController:
         logResponse = True
     )
     def patch(self, dto):
-        model = self.service.status.globals.api.resource.repository.actuatorHealthTest.findAllByStatus(EnumAsQueryDto.EnumAsQueryRequestDto(status='UP').status)
+        someModel = ActuatorHealth.ActuatorHealth(status='UP')
+        assert EnumItemStr == type(someModel.status), f'{EnumItemStr} == {type(someModel.status)}'
+        model = ActuatorHealth.ActuatorHealth(status=ActuatorHealthStatus.UP)
+        assert EnumItemStr == type(model.status), f'{EnumItemStr} == {type(model.status)}'
+        modelList = self.service.status.globals.api.resource.repository.actuatorHealthTest.findAllByStatus(EnumAsQueryDto.EnumAsQueryRequestDto(status=model.status).status)
+        assert EnumItemStr == type(modelList[0].status), f'{EnumItemStr} == {type(modelList[0].status)}'
         try:
             myReturn = self.service.status.findAllByStatus(dto), HttpStatus.OK
         except Exception as exception:
             ignoredResponse = getCompleteResponseByException(exception, self, self.patch, False)
-        assert EnumItem == type(model[0].status), f'{EnumItem} == {type(model[0].status)}'
-        return self.service.status.globals.api.resource.converter.actuatorHealthTest.fromModelListToResponseDtoList(model)
+        assert EnumItemStr == type(modelList[0].status), f'{EnumItemStr} == {type(modelList[0].status)}'
+        assert EnumItemStr == type(someModel.status), f'{EnumItemStr} == {type(someModel.status)}'
+        assert EnumItemStr == type(model.status), f'{EnumItemStr} == {type(model.status)}'
+        return self.service.status.globals.api.resource.converter.actuatorHealthTest.fromModelListToResponseDtoList(modelList)
 
     @ControllerMethod(
         url=f'/{EnvironmentHelper.get("URL_VARIANT")}',
