@@ -110,7 +110,7 @@ def getNewOriginalModel():
 class PythonFramworkBaseClass(getNewOriginalModel()):
     __abstract__ = True
     def onChange(self, *args, eventType=OnORMChangeEventType.UNKNOWN, **kwargs):
-        ...
+        return self
     def onInit(self, args, kwargs):
         self.onChange(args, kwargs, eventType=OnORMChangeEventType.INIT)
     def onAttach(self, session):
