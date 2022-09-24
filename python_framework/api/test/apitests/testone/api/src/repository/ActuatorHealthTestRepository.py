@@ -6,8 +6,4 @@ from python_framework.api.src.model import ActuatorHealth
 class ActuatorHealthTestRepository:
 
     def findAllByStatus(self, status) :
-        modelList = []
-        if ObjectHelper.isNotNone(status) :
-            modelList = self.repository.session.query(self.model).filter(self.model.status == status).all()
-        self.repository.session.commit()
-        return modelList
+        return self.repository.findByStatusAndCommit(status)

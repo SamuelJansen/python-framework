@@ -130,7 +130,6 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
     def onPersistentToTransient(self, session):
         self.onChange(session, eventType=OnORMChangeEventType.PERSISTENT_TO_TRANSIENT)
 
-
 @Function
 def getNewModel():
     return declarative_base(cls=PythonFramworkBaseClass, name='PythonFramworkBaseClass')
@@ -435,6 +434,12 @@ class SqlAlchemyProxy:
         return self.onChange(instance)
 
     @Method
+    def findAllByIdInAndCommit(self, idList):
+        instanceList = self.repository.session.query(self.model).filter(self.model.id.in_(idList)).all()
+        self.repository.session.commit()
+        return self.onChange(instanceList)
+
+    @Method
     def existsByIdAndCommit(self, id, modelClass):
         # ret = Session.query(exists().where(and_(Someobject.field1 == value1, Someobject.field2 == value2)))
         objectExists = self.session.query(exists().where(modelClass.id == id)).one()[0]
@@ -448,6 +453,12 @@ class SqlAlchemyProxy:
         return self.onChange(instance)
 
     @Method
+    def findAllByKeyInAndCommit(self, keyList):
+        instanceList = self.repository.session.query(self.model).filter(self.model.key.in_(keyList)).all()
+        self.repository.session.commit()
+        return self.onChange(instanceList)
+
+    @Method
     def existsByKeyAndCommit(self, key, modelClass):
         objectExists = self.session.query(exists().where(modelClass.key == key)).one()[0]
         self.session.commit()
@@ -458,6 +469,12 @@ class SqlAlchemyProxy:
         instance = self.session.query(modelClass).filter(modelClass.status == status).first()
         self.session.commit()
         return self.onChange(instance)
+
+    @Method
+    def findAllByStatusInAndCommit(self, statusList):
+        instanceList = self.repository.session.query(self.model).filter(self.model.status.in_(statusList)).all()
+        self.repository.session.commit()
+        return self.onChange(instanceList)
 
     @Method
     def existsByQueryAndCommit(self, query, modelClass):
