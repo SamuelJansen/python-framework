@@ -267,8 +267,8 @@ def appRun_whenEnvironmentIsPrd_withSuccess() :
         smallErrorTest = requests.post(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER_TEST, json={'status': 'should-raise-exception'})
         log.status(appRun_whenEnvironmentIsPrd_withSuccess, f'Its an expected error: {StringHelper.prettyPython(smallErrorTest.json())}')
 
-        requests.patch(BASE_URL + '/health')
-        onLoadTest = requests.post(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER_TEST, json={'status': 'should-raise-exception'})
+        requests.post(BASE_URL + '/health')
+        onLoadTest = requests.patch(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER_TEST, json={'status': None})
 
         # assert
         assert ObjectHelper.equals(

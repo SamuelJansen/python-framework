@@ -6,7 +6,7 @@ from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 
 
 @Function
-def EncapsulateItWithGlobalException(message=DEFAULT_MESSAGE, status=HttpStatus.INTERNAL_SERVER_ERROR) :
+def EncapsulateItWithGlobalException(message=DEFAULT_MESSAGE, logMessage=DEFAULT_LOG_MESSAGE, status=HttpStatus.INTERNAL_SERVER_ERROR) :
     encapsulateItWithGlobalExceptionStatus = status
     def wrapper(givenFunction,*args,**kwargs) :
         log.wrapper(wrapper, f'Wrapping {givenFunction} function with (*{args} args and **{kwargs} kwargs)')
@@ -16,7 +16,7 @@ def EncapsulateItWithGlobalException(message=DEFAULT_MESSAGE, status=HttpStatus.
             except Exception as exception :
                 if isinstance(exception, GlobalException):
                     raise exception
-                logMessage = str(exception) if StringHelper.isNotBlank(str(exception)) else LOG_MESSAGE_NOT_PRESENT
+                logMessage = str(exception) if StringHelper.isNotBlank(str(exception)) else logMessage
                 givenFunctionName = ReflectionHelper.getName(givenFunction, typeName=c.TYPE_FUNCTION)
                 log.wrapper(EncapsulateItWithGlobalException, f'''Failed to execute "{givenFunctionName}(args={args}, kwargs={kwargs})" {c.TYPE_FUNCTION} call''', exception)
                 raise GlobalException(

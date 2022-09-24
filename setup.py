@@ -13,7 +13,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.3.98'
+VERSION = '0.3.99'
 
 NAME = 'python_framework'
 PACKAGE_NAME = NAME

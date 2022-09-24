@@ -1,6 +1,7 @@
 from python_helper import EnvironmentHelper, ReflectionHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
-from python_framework.api.src.service.flask.FlaskManager import Controller, ControllerMethod
+from python_framework.api.src.service.flask.FlaskManager import Controller, ControllerMethod, getCompleteResponseByException
+from python_framework.api.src.annotation.EnumAnnotation import EnumItem
 from python_framework.api.src.dto import ActuatorHealthDto
 
 from dto import EnumAsQueryDto
@@ -24,10 +25,13 @@ class ActuatorHealthTestController:
         logResponse = True
     )
     def patch(self, dto):
-        model = self.service.globals.api.resource.repository.actuatorHealthTest.findAllByStatus(EnumAsQueryDto.EnumAsQueryRequestDto(status='UP'))
-        myReturn = self.service.status.findAllByStatus(dto), HttpStatus.OK
-        assert EnumItem == type(model.status)
-        return self.service.globals.api.resource.converter.actuatorHealthTest.fromModelListToResponseDtoList(myReturn)
+        model = self.service.status.globals.api.resource.repository.actuatorHealthTest.findAllByStatus(EnumAsQueryDto.EnumAsQueryRequestDto(status='UP').status)
+        try:
+            myReturn = self.service.status.findAllByStatus(dto), HttpStatus.OK
+        except Exception as exception:
+            ignoredResponse = getCompleteResponseByException(exception, self, self.patch, False)
+        assert EnumItem == type(model[0].status)
+        return self.service.status.globals.api.resource.converter.actuatorHealthTest.fromModelListToResponseDtoList(model)
 
     @ControllerMethod(
         url=f'/{EnvironmentHelper.get("URL_VARIANT")}',
