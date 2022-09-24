@@ -67,6 +67,7 @@ class OnORMChangeEventType:
     SELF = 'SELF'
     LOAD = 'LOAD'
     REFRESH = 'REFRESH'
+    DETEACHED_TO_PERSISTENT = 'DETEACHED_TO_PERSISTENT'
     UNKNOWN = 'UNKNOWN'
 
 def onLoadListener(target, context):
@@ -74,6 +75,9 @@ def onLoadListener(target, context):
 
 def onRefreshListener(target, context, attributes):
     target.onRefresh(context, attributes)
+
+def onDeteachedToPersistentListener(session, target):
+    target.onDeteachedToPersistent(session)
 
 def getNewOriginalModel():
     return declarative_base()
@@ -86,6 +90,8 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
         self.onChange(context, eventType=OnORMChangeEventType.LOAD)
     def onRefresh(self, context, attributes):
         self.onChange(context, attributes, eventType=OnORMChangeEventType.REFRESH)
+    def onDeteachedToPersistent(self, session):
+        self.onChange(session, eventType=OnORMChangeEventType.DETEACHED_TO_PERSISTENT)
 
 @Function
 def getNewModel():
@@ -203,6 +209,7 @@ class SqlAlchemyProxy:
         # self.run()
         event.listen(PythonFramworkBaseClass, 'load', onLoadListener, propagate=True, restore_load_context=True)
         event.listen(PythonFramworkBaseClass, 'refresh', onRefreshListener, restore_load_context=True)
+        event.listen(self.session, "detached_to_persistent", onDeteachedToPersistentListener)
         log.debug(self.__init__, 'Database initialized')
 
     def getNewEngine(self, dialect, echo, connectArgs):
