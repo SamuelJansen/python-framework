@@ -65,19 +65,27 @@ from sqlalchemy import event
 
 class OnORMChangeEventType:
     SELF = 'SELF'
+    INIT = 'INIT'
     LOAD = 'LOAD'
     REFRESH = 'REFRESH'
+    EXPIRE = 'EXPIRE'
     DETEACHED_TO_PERSISTENT = 'DETEACHED_TO_PERSISTENT'
     TRANSIENT_TO_PENDING = 'TRANSIENT_TO_PENDING'
     PENDING_TO_TRANSIENT = 'PENDING_TO_TRANSIENT'
     PERSISTENT_TO_TRANSIENT = 'PERSISTENT_TO_TRANSIENT'
     UNKNOWN = 'UNKNOWN'
 
+def onInitListener(target, args, kwargs):
+    target.onInit(args, kwargs)
+
 def onLoadListener(target, context):
     target.onLoad(context)
 
 def onRefreshListener(target, context, attributes):
     target.onRefresh(context, attributes)
+
+def onExpireListener(target, attrs):
+    target.onExpire(attributes)
 
 def onDeteachedToPersistentListener(session, target):
     target.onDeteachedToPersistent(session)
@@ -98,10 +106,14 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
     __abstract__ = True
     def onChange(self, *args, eventType=OnORMChangeEventType.UNKNOWN, **kwargs):
         ...
+    def onInit(self, args, kwargs):
+        self.onChange(args, kwargs, eventType=OnORMChangeEventType.INIT)
     def onLoad(self, context):
         self.onChange(context, eventType=OnORMChangeEventType.LOAD)
     def onRefresh(self, context, attributes):
         self.onChange(context, attributes, eventType=OnORMChangeEventType.REFRESH)
+    def onExpire(self, attrs):
+        self.onChange(attrs, eventType=OnORMChangeEventType.EXPIRE)
     def onDeteachedToPersistent(self, session):
         self.onChange(session, eventType=OnORMChangeEventType.DETEACHED_TO_PERSISTENT)
     def onTransientToPending(self, session):
@@ -111,18 +123,9 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
     def onPersistentToTransient(self, session):
         self.onChange(session, eventType=OnORMChangeEventType.PERSISTENT_TO_TRANSIENT)
 
+
 @Function
 def getNewModel():
-    # ORIGINAL_BASE_MODEL = getNewOriginalModel()
-    # class PythonFramworkBaseClass(ORIGINAL_BASE_MODEL):
-    #     def onChange(self, eventType, *args, **kwargs):
-    #         ...
-    #     def onLoad(self, target, context):
-    #         self.onChange(OnORMChangeEventType.LOAD, target, context)
-    #     def onRefresh(self, target, context, attributes):
-    #         self.onChange(OnORMChangeEventType.REFRESH, target, context, attributes)
-
-    # return declarative_base()
     return declarative_base(cls=PythonFramworkBaseClass, name='PythonFramworkBaseClass')
 
 @Function
