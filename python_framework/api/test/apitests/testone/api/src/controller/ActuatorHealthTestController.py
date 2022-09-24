@@ -37,9 +37,9 @@ class ActuatorHealthTestController:
             myReturn = self.service.status.findAllByStatus(dto), HttpStatus.OK
         except Exception as exception:
             ignoredResponse = getCompleteResponseByException(exception, self, self.patch, False)
-        assert EnumItemStr == type(modelList[0].status), f'{EnumItemStr} == {type(modelList[0].status)}'
         assert EnumItemStr == type(someModel.status), f'{EnumItemStr} == {type(someModel.status)}'
         assert EnumItemStr == type(model.status), f'{EnumItemStr} == {type(model.status)}'
+        assert EnumItemStr == type(modelList[0].status), f'{EnumItemStr} == {type(modelList[0].status)}'
         return self.service.status.globals.api.resource.converter.actuatorHealthTest.fromModelListToResponseDtoList(modelList)
 
     @ControllerMethod(

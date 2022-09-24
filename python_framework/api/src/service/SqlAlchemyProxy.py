@@ -74,6 +74,7 @@ class OnORMChangeEventType:
     TRANSIENT_TO_PENDING = 'TRANSIENT_TO_PENDING'
     PENDING_TO_TRANSIENT = 'PENDING_TO_TRANSIENT'
     PERSISTENT_TO_TRANSIENT = 'PERSISTENT_TO_TRANSIENT'
+    IMPLEMENTED_QUERY = 'IMPLEMENTED_QUERY'
     UNKNOWN = 'UNKNOWN'
 
 def onInitListener(target, args, kwargs):
@@ -112,7 +113,7 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
         ...
     def onInit(self, args, kwargs):
         self.onChange(args, kwargs, eventType=OnORMChangeEventType.INIT)
-    def onAttach(session):
+    def onAttach(self, session):
         self.onChange(session, eventType=OnORMChangeEventType.ATTACH)
     def onLoad(self, context):
         self.onChange(context, eventType=OnORMChangeEventType.LOAD)
@@ -370,18 +371,23 @@ class SqlAlchemyProxy:
     def commit(self):
         self.session.commit()
 
-    def onChange(self, modelLoad):
-        if ObjectHelper.isNone(modelLoad):
-            return modelLoad
-        if ObjectHelper.isCollection(modelLoad) or type(modelLoad) == InstrumentedList:
-            for model in modelLoad:
-                model.onChange()
-            return modelLoad
-        return modelLoad.onChange()
+    def onChange(self, model):
+        if ObjectHelper.isNone(model):
+            return model
+        elif ObjectHelper.isCollection(model) or type(model) == InstrumentedList:
+            for m in model:
+                self.onChange(m)
+            return model
+        elif isinstance(model, PythonFramworkBaseClass):
+            model.onChange(eventType=OnORMChangeEventType.IMPLEMENTED_QUERY)
+            return model
+        return model
 
     @Method
     def save(self, instance):
+        self.onChange(instance)
         self.session.add(instance)
+        return self.onChange(instance)
 
     @Method
     def saveNew(self, *args):
@@ -392,7 +398,7 @@ class SqlAlchemyProxy:
     def saveAndCommit(self, instance):
         self.save(instance)
         self.session.commit()
-        return instance
+        return self.onChange(instance)
 
     @Method
     def saveNewAndCommit(self, *args):
@@ -401,31 +407,32 @@ class SqlAlchemyProxy:
 
     @Method
     def saveAll(self, instanceList):
+        self.onChange(instanceList)
         self.session.add_all(instanceList)
-        return instanceList
+        return self.onChange(instanceList)
 
     @Method
     def saveAllAndCommit(self, instanceList):
         self.saveAll(instanceList)
         self.session.commit()
-        return instanceList
+        return self.onChange(instanceList)
 
     @Method
     def findAll(self, modelClass):
-        objectList = self.session.query(modelClass).all()
-        return objectList
+        instanceList = self.session.query(modelClass).all()
+        return self.onChange(instanceList)
 
     @Method
     def findAllAndCommit(self, modelClass):
-        objectList = self.findAll(modelClass)
+        instanceList = self.findAll(modelClass)
         self.session.commit()
-        return objectList
+        return self.onChange(instanceList)
 
     @Method
     def findByIdAndCommit(self, id, modelClass):
-        object = self.session.query(modelClass).filter(modelClass.id == id).first()
+        instance = self.session.query(modelClass).filter(modelClass.id == id).first()
         self.session.commit()
-        return object
+        return self.onChange(instance)
 
     @Method
     def existsByIdAndCommit(self, id, modelClass):
@@ -436,9 +443,9 @@ class SqlAlchemyProxy:
 
     @Method
     def findByKeyAndCommit(self, key, modelClass):
-        object = self.session.query(modelClass).filter(modelClass.key == key).first()
+        instance = self.session.query(modelClass).filter(modelClass.key == key).first()
         self.session.commit()
-        return object
+        return self.onChange(instance)
 
     @Method
     def existsByKeyAndCommit(self, key, modelClass):
@@ -448,9 +455,9 @@ class SqlAlchemyProxy:
 
     @Method
     def findByStatusAndCommit(self,status,modelClass):
-        object = self.session.query(modelClass).filter(modelClass.status == status).first()
+        instance = self.session.query(modelClass).filter(modelClass.status == status).first()
         self.session.commit()
-        return object
+        return self.onChange(instance)
 
     @Method
     def existsByQueryAndCommit(self, query, modelClass):
@@ -461,27 +468,27 @@ class SqlAlchemyProxy:
     @Method
     def findAllByQueryAndCommit(self, query, modelClass):
         if ObjectHelper.isNotNone(query):
-            objectList = self.session.query(modelClass).filter_by(**{k: v for k, v in query.items() if ObjectHelper.isNotNone(v)}).all()
+            instanceList = self.session.query(modelClass).filter_by(**{k: v for k, v in query.items() if ObjectHelper.isNotNone(v)}).all()
         self.session.commit()
-        return objectList
+        return self.onChange(instanceList)
 
     @Method
     def deleteByIdAndCommit(self, id, modelClass):
         if self.session.query(exists().where(modelClass.id == id)).one()[0] :
-            object = self.session.query(modelClass).filter(modelClass.id == id).first()
-            self.session.delete(object)
+            instance = self.session.query(modelClass).filter(modelClass.id == id).first()
+            self.session.delete(instance)
         self.session.commit()
 
     @Method
     def deleteByKeyAndCommit(self, key, modelClass):
         if self.session.query(exists().where(modelClass.key == key)).one()[0] :
-            object = self.session.query(modelClass).filter(modelClass.key == key).first()
-            self.session.delete(object)
+            instance = self.session.query(modelClass).filter(modelClass.key == key).first()
+            self.session.delete(instance)
         self.session.commit()
 
     @Method
-    def deleteAndCommit(self, object):
-        self.session.delete(object)
+    def deleteAndCommit(self, instance):
+        self.session.delete(instance)
         self.session.commit()
 
     @Method
