@@ -434,8 +434,8 @@ class SqlAlchemyProxy:
         return self.onChange(instance)
 
     @Method
-    def findAllByIdInAndCommit(self, idList):
-        instanceList = self.repository.session.query(self.model).filter(self.model.id.in_(idList)).all()
+    def findAllByIdInAndCommit(self, idList, modelClass):
+        instanceList = self.session.query(modelClass).filter(modelClass.id.in_(idList)).all()
         self.repository.session.commit()
         return self.onChange(instanceList)
 
@@ -453,8 +453,8 @@ class SqlAlchemyProxy:
         return self.onChange(instance)
 
     @Method
-    def findAllByKeyInAndCommit(self, keyList):
-        instanceList = self.repository.session.query(self.model).filter(self.model.key.in_(keyList)).all()
+    def findAllByKeyInAndCommit(self, keyList, modelClass):
+        instanceList = self.session.query(modelClass).filter(modelClass.key.in_(keyList)).all()
         self.repository.session.commit()
         return self.onChange(instanceList)
 
@@ -471,8 +471,8 @@ class SqlAlchemyProxy:
         return self.onChange(instance)
 
     @Method
-    def findAllByStatusInAndCommit(self, statusList):
-        instanceList = self.repository.session.query(self.model).filter(self.model.status.in_(statusList)).all()
+    def findAllByStatusInAndCommit(self, statusList, modelClass):
+        instanceList = self.session.query(modelClass).filter(modelClass.status.in_(statusList)).all()
         self.repository.session.commit()
         return self.onChange(instanceList)
 
