@@ -6,4 +6,4 @@ from python_framework.api.src.model import ActuatorHealth
 class ActuatorHealthTestRepository:
 
     def findAllByStatus(self, status) :
-        return self.repository.findByStatusAndCommit(status, self.model)
+        return self.repository.findAllByStatusAndCommit(status, self.model)

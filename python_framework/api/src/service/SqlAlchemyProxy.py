@@ -373,13 +373,11 @@ class SqlAlchemyProxy:
     def onChange(self, model):
         if ObjectHelper.isNone(model):
             return model
+        elif isinstance(model, PythonFramworkBaseClass):
+            model.onChange(eventType=OnORMChangeEventType.IMPLEMENTED_QUERY)
         elif ObjectHelper.isCollection(model) or type(model) == InstrumentedList:
             for m in model:
                 self.onChange(m)
-            return model
-        elif isinstance(model, PythonFramworkBaseClass):
-            model.onChange(eventType=OnORMChangeEventType.IMPLEMENTED_QUERY)
-            return model
         return model
 
     @Method
@@ -434,6 +432,12 @@ class SqlAlchemyProxy:
         return self.onChange(instance)
 
     @Method
+    def findAllByIdAndCommit(self, id, modelClass):
+        instanceList = self.session.query(modelClass).filter(modelClass.id == id).all()
+        self.session.commit()
+        return self.onChange(instanceList)
+
+    @Method
     def findAllByIdInAndCommit(self, idList, modelClass):
         instanceList = self.session.query(modelClass).filter(modelClass.id.in_(idList)).all()
         self.repository.session.commit()
@@ -453,6 +457,12 @@ class SqlAlchemyProxy:
         return self.onChange(instance)
 
     @Method
+    def findAllByKeyAndCommit(self, key, modelClass):
+        instanceList = self.session.query(modelClass).filter(modelClass.key == key).all()
+        self.session.commit()
+        return self.onChange(instanceList)
+
+    @Method
     def findAllByKeyInAndCommit(self, keyList, modelClass):
         instanceList = self.session.query(modelClass).filter(modelClass.key.in_(keyList)).all()
         self.repository.session.commit()
@@ -469,6 +479,12 @@ class SqlAlchemyProxy:
         instance = self.session.query(modelClass).filter(modelClass.status == status).first()
         self.session.commit()
         return self.onChange(instance)
+
+    @Method
+    def findAllByStatusAndCommit(self,status,modelClass):
+        instanceList = self.session.query(modelClass).filter(modelClass.status == status).all()
+        self.session.commit()
+        return self.onChange(instanceList)
 
     @Method
     def findAllByStatusInAndCommit(self, statusList, modelClass):
