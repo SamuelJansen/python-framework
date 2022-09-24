@@ -7,6 +7,8 @@ class StatusService :
 
     @ServiceMethod(requestClass=[EnumAsQueryDto.EnumAsQueryRequestDto])
     def findAllByStatus(self, dto):
+        if dto.status is None:
+            raise Exception('do Enum still remains as enum?')
         modelList = self.repository.actuatorHealthTest.findAllByStatus(dto.status)
         return self.converter.actuatorHealthTest.fromModelListToResponseDtoList(modelList), {
             'added': 'header',

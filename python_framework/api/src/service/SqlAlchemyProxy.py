@@ -64,9 +64,10 @@ MODEL_PATTERN_NAME = 'Model'
 from sqlalchemy import event
 
 class OnORMChangeEventType:
-    UNKNOWN = 'UNKNOWN'
+    SELF = 'SELF'
     LOAD = 'LOAD'
     REFRESH = 'REFRESH'
+    UNKNOWN = 'UNKNOWN'
 
 def onLoadListener(target, context):
     target.onLoad(context)
@@ -79,12 +80,12 @@ def getNewOriginalModel():
 
 class PythonFramworkBaseClass(getNewOriginalModel()):
     __abstract__ = True
-    def onChange(self, eventType, *args, **kwargs):
+    def onChange(self, *args, eventType=OnORMChangeEventType.UNKNOWN, **kwargs):
         ...
     def onLoad(self, context):
-        self.onChange(OnORMChangeEventType.LOAD, context)
+        self.onChange(context, eventType=OnORMChangeEventType.LOAD)
     def onRefresh(self, context, attributes):
-        self.onChange(OnORMChangeEventType.REFRESH, context, attributes)
+        self.onChange(context, attributes, eventType=OnORMChangeEventType.REFRESH)
 
 @Function
 def getNewModel():

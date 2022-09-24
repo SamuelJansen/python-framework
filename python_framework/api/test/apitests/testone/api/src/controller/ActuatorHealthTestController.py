@@ -16,8 +16,18 @@ class ActuatorHealthTestController:
         logResponse = True
     )
     def post(self, dto):
-        print(ReflectionHelper.getItNaked(dto))
         return self.service.status.findAllByStatus(dto), HttpStatus.OK
+
+    @ControllerMethod(
+        requestClass = EnumAsQueryDto.EnumAsQueryRequestDto,
+        responseClass = [[ActuatorHealthDto.ActuatorHealthResponseDto]],
+        logResponse = True
+    )
+    def patch(self, dto):
+        model = self.service.globals.api.resource.repository.actuatorHealthTest.findAllByStatus(EnumAsQueryDto.EnumAsQueryRequestDto(status='UP'))
+        myReturn = self.service.status.findAllByStatus(dto), HttpStatus.OK
+        assert EnumItem == type(model.status)
+        return self.service.globals.api.resource.converter.actuatorHealthTest.fromModelListToResponseDtoList(myReturn)
 
     @ControllerMethod(
         url=f'/{EnvironmentHelper.get("URL_VARIANT")}',

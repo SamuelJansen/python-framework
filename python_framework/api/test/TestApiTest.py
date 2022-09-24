@@ -7,7 +7,7 @@ from python_helper import Test, ObjectHelper, SettingHelper, EnvironmentHelper, 
 import subprocess, psutil
 
 CURRENT_PATH = str(Path(__file__).parent.absolute())
-ESTIMATED_BUILD_TIME_IN_SECONDS = 8
+ESTIMATED_BUILD_TIME_IN_SECONDS = 6
 
 def killProcesses(givenProcess) :
     try :
@@ -267,13 +267,8 @@ def appRun_whenEnvironmentIsPrd_withSuccess() :
         smallErrorTest = requests.post(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER_TEST, json={'status': 'should-raise-exception'})
         log.status(appRun_whenEnvironmentIsPrd_withSuccess, f'Its an expected error: {StringHelper.prettyPython(smallErrorTest.json())}')
 
-        # assert
-        assert ObjectHelper.equals(
-            {'message': 'Something bad happened. Please, try again later','timestamp': '2022-09-24 02:01:49.957929','uri': '/prd-test-api/test/actuator/health'},
-            smallErrorTest.json(),
-            ignoreKeyList=['timestamp']
-        ), "{'message': 'Something bad happened. Please, try again later','timestamp': '2022-09-24 02:01:49.957929','uri': '/prd-test-api/test/actuator/health'} == " + f"{smallErrorTest.json()}"
-        assert 500 == smallErrorTest.status_code
+        requests.patch(BASE_URL + '/health')
+        onLoadTest = requests.post(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER_TEST, json={'status': 'should-raise-exception'})
 
         # assert
         assert ObjectHelper.equals(
@@ -281,6 +276,19 @@ def appRun_whenEnvironmentIsPrd_withSuccess() :
             responseGetHealth.json()
         ), f"{[{'status':'UP'}]} == {responseGetHealth.json()}"
         assert 200 == responseGetHealth.status_code
+
+        assert ObjectHelper.equals(
+            {'message': 'Something bad happened. Please, try again later','timestamp': '2022-09-24 02:01:49.957929','uri': '/prd-test-api/test/actuator/health'},
+            smallErrorTest.json(),
+            ignoreKeyList=['timestamp']
+        ), "{'message': 'Something bad happened. Please, try again later','timestamp': '2022-09-24 02:01:49.957929','uri': '/prd-test-api/test/actuator/health'} == " + f"{smallErrorTest.json()}"
+        assert 500 == smallErrorTest.status_code
+
+        assert ObjectHelper.equals(
+            [{'status':'UP'}],
+            onLoadTest.json()
+        ), f"{[{'status':'UP'}]} == {onLoadTest.json()}"
+        assert 200 == onLoadTest.status_code
 
         expectedResponseHeaders = {
             'added': 'header',

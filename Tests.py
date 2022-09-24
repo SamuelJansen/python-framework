@@ -39,7 +39,7 @@ TestHelper.run(__file__)
 #     __file__,
 #     # times=10,
 #     runOnly = [
-#         'TestApiTest.appRun_whenEnvironmentIsPrd_withSuccess',
+#         # 'TestApiTest.appRun_whenEnvironmentIsPrd_withSuccess',
 #         # 'TestApiTest.appRun_whenEnvironmentIsLocalFromDevConfig_withSuccess',
 #         # 'TestApiTest.appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess',
 #         # 'TestApiTest.pythonRun_securityManager',
