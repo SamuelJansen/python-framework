@@ -2,12 +2,12 @@ print-status: False
 
 database:
     dialect: ${DATABASE_DIALECT:postgresql}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:HT65MGzihe1AbsF5XdTJ}
-    host: ${DATABASE_HOST:containers-us-west-22.railway.app}
-    port: ${DATABASE_PORT:6147}
+    username: ${DATABASE_USERNAME:test}
+    password: ${DATABASE_PASSWORD:test}
+    host: ${DATABASE_HOST:test}
+    port: ${DATABASE_PORT:test}
     schema: ${DATABASE_SCHEMA:python_framework_test_schema}
-    database: ${DATABASE_NAME:railway}
+    database: ${DATABASE_NAME:test}
     driver: ${DATABASE_DRIVER:psycopg2}
 
 environment:
@@ -27,14 +27,10 @@ environment:
         info:
             key: LOG
             value: True
-    # shema:
-    #     key: DATABASE_SCHEMA
-    #     value: key: database.schema}
     database:
         # url:
         #     key: DATABASE_URL
         #     value: ${database.dialect}://${database.username}:${database.password}@${database.host}:${database.port}/${database.database}
-        # value: postgres://postgres:HT65MGzihe1AbsF5XdTJ@containers-us-west-22.railway.app:6147/railway
         dialect:
             key: DATABASE_DIALECT
             value: ${database.dialect}
@@ -64,10 +60,10 @@ environment:
         value: local
     session:
         key: SESSION_SECRET
-        value: default-session-key
+        value: test-key
     api-key:
         key: API_KEY_SECRET
-        value: default-api-key-key
+        value: test-key
     security:
         key: SECURITY_SECRET
-        value: default-security-key
+        value: test-key

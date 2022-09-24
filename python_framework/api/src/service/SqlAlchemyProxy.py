@@ -12,8 +12,6 @@ from sqlalchemy import Table, Column, Integer, String, Float, ForeignKey, Unicod
 from sqlalchemy import and_, or_
 from sqlalchemy.sql.expression import literal
 
-
-
 and_ = and_
 or_ = or_
 
@@ -62,10 +60,45 @@ LITTLE_STRING_SIZE = 64
 
 MODEL_PATTERN_NAME = 'Model'
 
+###- https://docs.sqlalchemy.org/en/14/orm/events.html#instance-events
+from sqlalchemy import event
+
+class OnORMChangeEventType:
+    UNKNOWN = 'UNKNOWN'
+    LOAD = 'LOAD'
+    REFRESH = 'REFRESH'
+
+def onLoadListener(target, context):
+    target.onLoad(context)
+
+def onRefreshListener(target, context, attributes):
+    target.onRefresh(context)
+
+def getNewOriginalModel():
+    return declarative_base()
+
+class PythonFramworkBaseClass(getNewOriginalModel()):
+    __abstract__ = True
+    def onChange(self, eventType, *args, **kwargs):
+        ...
+    def onLoad(self, target, context):
+        self.onChange(OnORMChangeEventType.LOAD, target, context)
+    def onRefresh(self, target, context, attributes):
+        self.onChange(OnORMChangeEventType.REFRESH, target, context, attributes)
 
 @Function
 def getNewModel():
-    return declarative_base()
+    # ORIGINAL_BASE_MODEL = getNewOriginalModel()
+    # class PythonFramworkBaseClass(ORIGINAL_BASE_MODEL):
+    #     def onChange(self, eventType, *args, **kwargs):
+    #         ...
+    #     def onLoad(self, target, context):
+    #         self.onChange(OnORMChangeEventType.LOAD, target, context)
+    #     def onRefresh(self, target, context, attributes):
+    #         self.onChange(OnORMChangeEventType.REFRESH, target, context, attributes)
+
+    # return declarative_base()
+    return declarative_base(cls=PythonFramworkBaseClass, name='PythonFramworkBaseClass')
 
 @Function
 def attributeIt(modelName):
@@ -167,6 +200,8 @@ class SqlAlchemyProxy:
         self.model.metadata.bind = self.engine
         # self.model.metadata.reflect()
         # self.run()
+        event.listen(PythonFramworkBaseClass, 'load', onLoadListener, propagate=True, restore_load_context=True)
+        event.listen(PythonFramworkBaseClass, 'refresh', onRefreshListener, restore_load_context=True)
         log.debug(self.__init__, 'Database initialized')
 
     def getNewEngine(self, dialect, echo, connectArgs):
@@ -293,6 +328,15 @@ class SqlAlchemyProxy:
     @Method
     def commit(self):
         self.session.commit()
+
+    def onChange(self, modelLoad):
+        if ObjectHelper.isNone(modelLoad):
+            return modelLoad
+        if ObjectHelper.isCollection(modelLoad) or type(modelLoad) == InstrumentedList:
+            for model in modelLoad:
+                model.onChange()
+            return modelLoad
+        return modelLoad.onChange()
 
     @Method
     def save(self, instance):

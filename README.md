@@ -1,4 +1,4 @@
-# python_framework - current on v0.1.8-2 - stable for python3.8 
+# python_framework - current on v0.1.8-2 - stable for python3.8
 Basically, its a Flask wrapper
 
 It alters Flask behaviours in order to make APIs better organized.
@@ -7,7 +7,7 @@ I did it because it's cool and makes Flask better :D
 
 ## Features
 - NOT A SINGLE SERIALIZER IS NEEDED!
-- OpenApiDocumentation 
+- OpenApiDocumentation
 - JwtSecutiry
 - Suport for services, validators, helpers, converters, mappers, and repository
 - SqlAlchemyProxy without the need to "open connection" due to circular import issues. You call them and it works like a horse
@@ -25,13 +25,13 @@ etc==7.0.3
 so_on_so_forth==1.0.2
 ```
 
-### Package pattern 
+### Package pattern
 - [This package pattern](https://github.com/SamuelJansen/FeatureManager "package_pattern") makes possible automatic controller registration, controller-service-repository-etc interconnections and so on. Just follow it and/or make improvement suggestions ("could be this way", "could be that way", etc)
 
 ![Package pattern](https://i.pinimg.com/originals/f6/b0/6a/f6b06aac4c675655a8ad8763f2afcbe4.jpg?raw=true "package_pattern")
 
 ### Globals.yml configuration file
-- [Globals.yml](https://github.com/SamuelJansen/FeatureManager/blob/master/api/resource/Globals.yml "Globals.yml") configures the application 
+- [Globals.yml](https://github.com/SamuelJansen/FeatureManager/blob/master/api/resource/Globals.yml "Globals.yml") configures the application
 
 [globals](https://github.com/SamuelJansen/globals "globals_module") module still requires some implementation in order to make OS variables income here. For while, it does not
 
@@ -45,7 +45,7 @@ so_on_so_forth==1.0.2
 ![app.py and MyApi.py](https://i.pinimg.com/originals/e8/99/ff/e899ff77f1ecde64bf22175422691e63.jpg?raw=true "app_and_MyApi")
 
 ### Documentation example
-https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to load as heroku sleeps sometimes...
+https://api.data-explore.com/feature-dataset-manager-api/swagger
 
 - No configurations needed. Just code you controllers and it will be there at `GET: whathever-your-host-is/basic-deploy-url/swagger` endpoint
 
@@ -103,13 +103,13 @@ https://feature-dataset-manager.herokuapp.com/swagger/ - it may take a while to 
 - [WebkookBoot API](https://github.com/SamuelJansen/WebkookBoot "WebkookBoot API")
 
 ## Notes - stable for python3.8
-### - v0.1.0-05 
+### - v0.1.0-05
 ### - v0.1.8-2
 - Of course it's open source
 - If you don't follow package pattern, it wont happen
 - I just hate OS environments lose all over the project. That's why I made Globals.py, so we can centralize it in there. Unfortunately, `globals` module isn't perfect yet. That's my next goal
 - Repository connections are much alike SqlAlchemy native syntax. So, any specific implementation can be written in SqlAlchemy native syntax. Any issue, contact me, so I can fix it.
-- Same for migrations. Use any SqlAlchemy migrations engine you like. For `python_framework`, a liquibase migration like is being implemented, but won't be release before 2021, july 
+- Same for migrations. Use any SqlAlchemy migrations engine you like. For `python_framework`, a liquibase migration like is being implemented, but won't be release before 2021, july
 - The auto-serialization stuff is just magic. But it comes with a price: Models and Dtos must have all their attributes initialized with None value. I'll fix it by 2021, february
 - Yes, api code/file imports are simplified. You can move a service from one package to another without impact on API behaviour. Just make sure it's somewhere inside the `service` package.
 - Unit tests require instance injection in runtime. I'm implementing a module to handle it, so as its Mocks. It will be released by 2021, february

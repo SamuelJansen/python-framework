@@ -1,4 +1,4 @@
-from python_helper import EnvironmentHelper
+from python_helper import EnvironmentHelper, ReflectionHelper
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.service.flask.FlaskManager import Controller, ControllerMethod
 from python_framework.api.src.dto import ActuatorHealthDto
@@ -16,6 +16,7 @@ class ActuatorHealthTestController:
         logResponse = True
     )
     def post(self, dto):
+        print(ReflectionHelper.getItNaked(dto))
         return self.service.status.findAllByStatus(dto), HttpStatus.OK
 
     @ControllerMethod(

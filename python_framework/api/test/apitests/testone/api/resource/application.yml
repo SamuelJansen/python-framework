@@ -28,7 +28,7 @@ api:
 swagger:
     info:
         # title: ${api.name}
-        # description: 'description' ###- commented in order to test auto title auto description 
+        # description: 'description' ###- commented in order to test auto title auto description
         version: 0.0.1
         terms-of-service: http://swagger.io/terms/
         contact:

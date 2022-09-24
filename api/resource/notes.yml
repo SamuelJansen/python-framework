@@ -1,5 +1,4 @@
 import: Werkzeug==0.16.1
-host: "https://{application-git-name}.herokuapp.com"
 flask-specific-port: flask run --host=0.0.0.0 --port=5001
 procfil: [
     web: gunicorn -w 1 -k eventlet -b 127.0.0.1:5000,
@@ -12,11 +11,5 @@ procfil: [
 
 ]
 flask-specific-port: flask run --host=${api.server.host} --port=${api.server.port}
-
-
-heroku addons:attach heroku-postgresql -a <app-name> --as HEROKU_DATABASE
-heroku addons:detach DATABASE -a <app-name>
-heroku config:add DATABASE_URL=<database-url>
-
 
 git push --delete origin tagname

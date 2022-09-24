@@ -43,6 +43,7 @@ PYTHON_FRAMEWORK_INTERNAL_MODULE_NAME_LIST = [
     PYTHON_FRAMEWORK_MODULE_NAME,
     'TestApi',
     'DevTestApi',
+    'PrdTestApi',
     'LocalTestApi',
     'SecurityManagerTestApi',
     'ApiKeyManagerTestApi',
@@ -591,7 +592,7 @@ def handleControllerMethod(
                 logRequestMessage,
                 {
                     'headers': headers,
-                    # 'query': FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs), ###- safellyGetUrl() returns query param
+                    'query': query, ###- FlaskUtil.addToKwargs(FlaskUtil.KW_PARAMETERS, requestParamClass, FlaskUtil.safellyGetArgs(), kwargs), ###- safellyGetUrl() returns query param
                     'body': requestBodyAsJson
                 },
                 condition = True,

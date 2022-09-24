@@ -1,7 +1,7 @@
 import time, requests
 from pathlib import Path
 from python_helper import Constant as c
-from python_helper import Test, ObjectHelper, SettingHelper, EnvironmentHelper, log
+from python_helper import Test, ObjectHelper, SettingHelper, EnvironmentHelper, log, StringHelper
 
 ### - most likelly to be moved to python_framework library
 import subprocess, psutil
@@ -234,6 +234,73 @@ def appRun_whenEnvironmentIsLocalFromLocalConfig_withSuccess() :
     except Exception as exception:
         killProcesses(process)
         raise exception
+
+@Test(environmentVariables={
+    SettingHelper.ACTIVE_ENVIRONMENT : 'prd',
+    'ENABLE_LOGS_WITH_COLORS': True
+})
+def appRun_whenEnvironmentIsPrd_withSuccess() :
+    # arrange
+    muteLogs = False
+    serverPort = 5002
+    process = getProcess(
+        f'flask run --host=localhost --port={serverPort}',
+        f'{CURRENT_PATH}{EnvironmentHelper.OS_SEPARATOR}apitests{EnvironmentHelper.OS_SEPARATOR}testone',
+        muteLogs = muteLogs
+    )
+    try:
+        BASE_URL = f'http://localhost:{serverPort}/prd-test-api'
+        time.sleep(ESTIMATED_BUILD_TIME_IN_SECONDS)
+
+        headers = {
+            "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
+            'Cache-Control': 'no-cache'
+        }
+
+        # act
+        requests.get(BASE_URL + '/health')
+        responseGetHealth = requests.post(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER_TEST, json={'status': 'UP'})
+
+        requests.post(BASE_URL + '/health')
+        smallErrorTest = requests.post(BASE_URL + GET_ACTUATOR_HEALTH_CONTROLLER_TEST, json={'status': 'should-raise-exception'})
+        log.status(appRun_whenEnvironmentIsPrd_withSuccess, f'Its an expected error: {StringHelper.prettyPython(smallErrorTest.json())}')
+
+        # assert
+        assert ObjectHelper.equals(
+            {'message': 'Something bad happened. Please, try again later','timestamp': '2022-09-24 02:01:49.957929','uri': '/prd-test-api/test/actuator/health'},
+            smallErrorTest.json(),
+            ignoreKeyList=['timestamp']
+        ), "{'message': 'Something bad happened. Please, try again later','timestamp': '2022-09-24 02:01:49.957929','uri': '/prd-test-api/test/actuator/health'} == " + f"{smallErrorTest.json()}"
+        assert 500 == smallErrorTest.status_code
+
+        # assert
+        assert ObjectHelper.equals(
+            [{'status':'UP'}],
+            responseGetHealth.json()
+        ), f"{[{'status':'UP'}]} == {responseGetHealth.json()}"
+        assert 200 == responseGetHealth.status_code
+
+        expectedResponseHeaders = {
+            'added': 'header',
+            'booleanFalse': False,
+            'booleanTrue': True,
+            'int': 1,
+            'otherInt': -34,
+            'float': 1.0,
+            'otherFloat': 2.3334
+        }
+        for k, v in expectedResponseHeaders.items():
+            assert k in dict(responseGetHealth.headers), k
+            assert ObjectHelper.equals(
+                str(v),
+                dict(responseGetHealth.headers)[k]
+            ), (k, str(v), dict(responseGetHealth.headers)[k])
+
+        killProcesses(process)
+    except Exception as exception:
+        killProcesses(process)
+        raise exception
+
 
 @Test(environmentVariables={
     SettingHelper.ACTIVE_ENVIRONMENT : 'dev'
