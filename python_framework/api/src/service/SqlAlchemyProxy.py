@@ -68,6 +68,9 @@ class OnORMChangeEventType:
     LOAD = 'LOAD'
     REFRESH = 'REFRESH'
     DETEACHED_TO_PERSISTENT = 'DETEACHED_TO_PERSISTENT'
+    TRANSIENT_TO_PENDING = 'TRANSIENT_TO_PENDING'
+    PENDING_TO_TRANSIENT = 'PENDING_TO_TRANSIENT'
+    PERSISTENT_TO_TRANSIENT = 'PERSISTENT_TO_TRANSIENT'
     UNKNOWN = 'UNKNOWN'
 
 def onLoadListener(target, context):
@@ -78,6 +81,15 @@ def onRefreshListener(target, context, attributes):
 
 def onDeteachedToPersistentListener(session, target):
     target.onDeteachedToPersistent(session)
+
+def onTransientToPendingListener(session, target):
+    target.onTransientToPending(session)
+
+def onPendingToTransientListener(session, target):
+    target.onPendingToTransient(session)
+
+def onPersistentToTransientListener(session, target):
+    target.onPersistentToTransient(session)
 
 def getNewOriginalModel():
     return declarative_base()
@@ -92,6 +104,12 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
         self.onChange(context, attributes, eventType=OnORMChangeEventType.REFRESH)
     def onDeteachedToPersistent(self, session):
         self.onChange(session, eventType=OnORMChangeEventType.DETEACHED_TO_PERSISTENT)
+    def onTransientToPending(self, session):
+        self.onChange(session, eventType=OnORMChangeEventType.TRANSIENT_TO_PENDING)
+    def onPendingToTransien(self, session):
+        self.onChange(session, eventType=OnORMChangeEventType.PENDING_TO_TRANSIENT)
+    def onPersistentToTransient(self, session):
+        self.onChange(session, eventType=OnORMChangeEventType.PERSISTENT_TO_TRANSIENT)
 
 @Function
 def getNewModel():
@@ -210,6 +228,9 @@ class SqlAlchemyProxy:
         event.listen(PythonFramworkBaseClass, 'load', onLoadListener, propagate=True, restore_load_context=True)
         event.listen(PythonFramworkBaseClass, 'refresh', onRefreshListener, restore_load_context=True)
         event.listen(self.session, "detached_to_persistent", onDeteachedToPersistentListener)
+        event.listen(self.session, "transient_to_pending", onTransientToPendingListener)
+        event.listen(self.session, "pending_to_transient", onPendingToTransientListener)
+        event.listen(self.session, "persistent_to_transient", onPersistentToTransientListener)
         log.debug(self.__init__, 'Database initialized')
 
     def getNewEngine(self, dialect, echo, connectArgs):
