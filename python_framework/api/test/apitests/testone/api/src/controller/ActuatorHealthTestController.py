@@ -33,10 +33,12 @@ class ActuatorHealthTestController:
         assert EnumItemStr == type(model.status), f'{EnumItemStr} == {type(model.status)}'
         modelList = self.service.status.globals.api.resource.repository.actuatorHealthTest.findAllByStatus(EnumAsQueryDto.EnumAsQueryRequestDto(status=model.status).status)
         assert EnumItemStr == type(modelList[0].status), f'{EnumItemStr} == {type(modelList[0].status)}'
+        ReflectionHelper.getItNaked(self.service.status.globals.api.resource.repository.actuatorHealthTest.repository.session)
         try:
             myReturn = self.service.status.findAllByStatus(dto), HttpStatus.OK
         except Exception as exception:
             ignoredResponse = getCompleteResponseByException(exception, self, self.patch, False)
+        ReflectionHelper.getItNaked(self.service.status.globals.api.resource.repository.actuatorHealthTest.repository.session)
         assert EnumItemStr == type(someModel.status), f'{EnumItemStr} == {type(someModel.status)}'
         assert EnumItemStr == type(model.status), f'{EnumItemStr} == {type(model.status)}'
         assert EnumItemStr == type(modelList[0].status), f'{EnumItemStr} == {type(modelList[0].status)}'

@@ -104,6 +104,14 @@ def onPendingToTransientListener(session, target):
 def onPersistentToTransientListener(session, target):
     target.onPersistentToTransient(session)
 
+# def onAppendWoMutationListener(target, targetList, initiator):
+#     onAppendWoMutation(target)
+#     onAppendWoMutation(targetList)
+#
+# def onBulkReplaceListener(target, targetList, initiator):
+#     onAppendWoMutation(target)
+#     onAppendWoMutation(targetList)
+
 def getNewOriginalModel():
     return declarative_base()
 
@@ -129,6 +137,18 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
         self.onChange(session, eventType=OnORMChangeEventType.PENDING_TO_TRANSIENT)
     def onPersistentToTransient(self, session):
         self.onChange(session, eventType=OnORMChangeEventType.PERSISTENT_TO_TRANSIENT)
+
+
+@Function
+def handleOnChange(instance):
+    if ObjectHelper.isNone(instance):
+        return instance
+    elif isinstance(instance, PythonFramworkBaseClass):
+        instance.onChange(eventType=OnORMChangeEventType.IMPLEMENTED_QUERY)
+    elif ObjectHelper.isCollection(instance) or type(instance) == InstrumentedList:
+        for i in instance:
+            handleOnChange(i)
+    return instance
 
 @Function
 def getNewModel():
@@ -225,6 +245,7 @@ class SqlAlchemyProxy:
             connectArgs = None
         ):
         self.globals = globals
+        self.context = []
         self.sqlalchemy = sqlalchemy
         dialect = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_DIALECT}')
         self.engine = self.getNewEngine(dialect, echo, connectArgs)
@@ -243,7 +264,8 @@ class SqlAlchemyProxy:
         event.listen(self.session, "transient_to_pending", onTransientToPendingListener)
         event.listen(self.session, "pending_to_transient", onPendingToTransientListener)
         event.listen(self.session, "persistent_to_transient", onPersistentToTransientListener)
-        log.debug(self.__init__, 'Database initialized')
+        # event.listen(someAttribute, "append_wo_mutation", onAppendWoMutationListener)
+        # event.listen(someAttribute, "bulk_replace", onBulkReplaceListener)
 
     def getNewEngine(self, dialect, echo, connectArgs):
         url = self.getUrl(dialect)
@@ -370,15 +392,20 @@ class SqlAlchemyProxy:
     def commit(self):
         self.session.commit()
 
+    @Method
     def onChange(self, model):
-        if ObjectHelper.isNone(model):
-            return model
-        elif isinstance(model, PythonFramworkBaseClass):
-            model.onChange(eventType=OnORMChangeEventType.IMPLEMENTED_QUERY)
-        elif ObjectHelper.isCollection(model) or type(model) == InstrumentedList:
-            for m in model:
-                self.onChange(m)
-        return model
+        return handleOnChange(model)
+
+    @Method
+    def backupContext(self):
+        for instance in self.session.dirty:
+            self.context.append(instance)
+
+    @Method
+    def reloadContextBackup(self):
+        for instance in self.onChange(self.context):
+            if instance not in self.session.dirty:
+                self.session.dirty.add(self.context.pop(instance))
 
     @Method
     def save(self, instance):
