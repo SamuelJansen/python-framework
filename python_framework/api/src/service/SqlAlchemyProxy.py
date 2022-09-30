@@ -78,31 +78,31 @@ class OnORMChangeEventType:
     UNKNOWN = 'UNKNOWN'
 
 def onInitListener(target, args, kwargs):
-    target.onInit(args, kwargs)
+    target.__onInit__(args, kwargs)
 
 def onAttachListener(session, target):
-    target.onAttach(session)
+    target.__onAttach__(session)
 
 def onLoadListener(target, context):
-    target.onLoad(context)
+    target.__onLoad__(context)
 
 def onRefreshListener(target, context, attributes):
-    target.onRefresh(context, attributes)
+    target.__onRefresh__(context, attributes)
 
 def onExpireListener(target, attrs):
-    target.onExpire(attributes)
+    target.__onExpire__(attributes)
 
 def onDeteachedToPersistentListener(session, target):
-    target.onDeteachedToPersistent(session)
+    target.__onDeteachedToPersistent__(session)
 
 def onTransientToPendingListener(session, target):
-    target.onTransientToPending(session)
+    target.__onTransientToPending__(session)
 
 def onPendingToTransientListener(session, target):
-    target.onPendingToTransient(session)
+    target.__onPendingToTransient__(session)
 
 def onPersistentToTransientListener(session, target):
-    target.onPersistentToTransient(session)
+    target.__onPersistentToTransient__(session)
 
 # def onAppendWoMutationListener(target, targetList, initiator):
 #     onAppendWoMutation(target)
@@ -117,26 +117,29 @@ def getNewOriginalModel():
 
 class PythonFramworkBaseClass(getNewOriginalModel()):
     __abstract__ = True
-    def onChange(self, *args, eventType=OnORMChangeEventType.UNKNOWN, **kwargs):
+    def __onChange__(self, *args, eventType=OnORMChangeEventType.UNKNOWN, **kwargs):
         return self
-    def onInit(self, args, kwargs):
-        self.onChange(args, kwargs, eventType=OnORMChangeEventType.INIT)
-    def onAttach(self, session):
-        self.onChange(session, eventType=OnORMChangeEventType.ATTACH)
-    def onLoad(self, context):
-        self.onChange(context, eventType=OnORMChangeEventType.LOAD)
-    def onRefresh(self, context, attributes):
-        self.onChange(context, attributes, eventType=OnORMChangeEventType.REFRESH)
-    def onExpire(self, attrs):
-        self.onChange(attrs, eventType=OnORMChangeEventType.EXPIRE)
-    def onDeteachedToPersistent(self, session):
-        self.onChange(session, eventType=OnORMChangeEventType.DETEACHED_TO_PERSISTENT)
-    def onTransientToPending(self, session):
-        self.onChange(session, eventType=OnORMChangeEventType.TRANSIENT_TO_PENDING)
-    def onPendingToTransien(self, session):
-        self.onChange(session, eventType=OnORMChangeEventType.PENDING_TO_TRANSIENT)
-    def onPersistentToTransient(self, session):
-        self.onChange(session, eventType=OnORMChangeEventType.PERSISTENT_TO_TRANSIENT)
+    def __onInit__(self, args, kwargs):
+        self.__onChange__(args, kwargs, eventType=OnORMChangeEventType.INIT)
+    def __onAttach__(self, session):
+        self.__onChange__(session, eventType=OnORMChangeEventType.ATTACH)
+    def __onLoad__(self, context):
+        self.__onChange__(context, eventType=OnORMChangeEventType.LOAD)
+    def __onRefresh__(self, context, attributes):
+        self.__onChange__(context, attributes, eventType=OnORMChangeEventType.REFRESH)
+    def __onExpire__(self, attrs):
+        self.__onChange__(attrs, eventType=OnORMChangeEventType.EXPIRE)
+    def __onDeteachedToPersistent__(self, session):
+        self.__onChange__(session, eventType=OnORMChangeEventType.DETEACHED_TO_PERSISTENT)
+    def __onTransientToPending__(self, session):
+        self.__onChange__(session, eventType=OnORMChangeEventType.TRANSIENT_TO_PENDING)
+    def __onPendingToTransient__(self, session):
+        self.__onChange__(session, eventType=OnORMChangeEventType.PENDING_TO_TRANSIENT)
+    def __onPersistentToTransient__(self, session):
+        self.__onChange__(session, eventType=OnORMChangeEventType.PERSISTENT_TO_TRANSIENT)
+
+    def reload(self, eventType=OnORMChangeEventType.SELF):
+        return self.__onChange__(eventType=eventType)
 
 
 @Function
@@ -144,7 +147,7 @@ def handleOnChange(instance):
     if ObjectHelper.isNone(instance):
         return instance
     elif isinstance(instance, PythonFramworkBaseClass):
-        instance.onChange(eventType=OnORMChangeEventType.IMPLEMENTED_QUERY)
+        instance.reload(eventType=OnORMChangeEventType.IMPLEMENTED_QUERY)
     elif ObjectHelper.isCollection(instance) or type(instance) == InstrumentedList:
         for i in instance:
             handleOnChange(i)
@@ -393,7 +396,7 @@ class SqlAlchemyProxy:
         self.session.commit()
 
     @Method
-    def onChange(self, model):
+    def load(self, model):
         return handleOnChange(model)
 
     @Method
@@ -403,15 +406,15 @@ class SqlAlchemyProxy:
 
     @Method
     def reloadContextBackup(self):
-        for instance in self.onChange(self.context):
+        for instance in self.load(self.context):
             if instance not in self.session.dirty:
                 self.session.dirty.add(self.context.pop(instance))
 
     @Method
     def save(self, instance):
-        self.onChange(instance)
+        self.load(instance)
         self.session.add(instance)
-        return self.onChange(instance)
+        return self.load(instance)
 
     @Method
     def saveNew(self, *args):
@@ -422,7 +425,7 @@ class SqlAlchemyProxy:
     def saveAndCommit(self, instance):
         self.save(instance)
         self.session.commit()
-        return self.onChange(instance)
+        return self.load(instance)
 
     @Method
     def saveNewAndCommit(self, *args):
@@ -431,44 +434,44 @@ class SqlAlchemyProxy:
 
     @Method
     def saveAll(self, instanceList):
-        self.onChange(instanceList)
+        self.load(instanceList)
         self.session.add_all(instanceList)
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def saveAllAndCommit(self, instanceList):
         self.saveAll(instanceList)
         self.session.commit()
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def findAll(self, modelClass):
         instanceList = self.session.query(modelClass).all()
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def findAllAndCommit(self, modelClass):
         instanceList = self.findAll(modelClass)
         self.session.commit()
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def findByIdAndCommit(self, id, modelClass):
         instance = self.session.query(modelClass).filter(modelClass.id == id).first()
         self.session.commit()
-        return self.onChange(instance)
+        return self.load(instance)
 
     @Method
     def findAllByIdAndCommit(self, id, modelClass):
         instanceList = self.session.query(modelClass).filter(modelClass.id == id).all()
         self.session.commit()
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def findAllByIdInAndCommit(self, idList, modelClass):
         instanceList = self.session.query(modelClass).filter(modelClass.id.in_(idList)).all()
         self.repository.session.commit()
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def existsByIdAndCommit(self, id, modelClass):
@@ -481,19 +484,19 @@ class SqlAlchemyProxy:
     def findByKeyAndCommit(self, key, modelClass):
         instance = self.session.query(modelClass).filter(modelClass.key == key).first()
         self.session.commit()
-        return self.onChange(instance)
+        return self.load(instance)
 
     @Method
     def findAllByKeyAndCommit(self, key, modelClass):
         instanceList = self.session.query(modelClass).filter(modelClass.key == key).all()
         self.session.commit()
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def findAllByKeyInAndCommit(self, keyList, modelClass):
         instanceList = self.session.query(modelClass).filter(modelClass.key.in_(keyList)).all()
         self.repository.session.commit()
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def existsByKeyAndCommit(self, key, modelClass):
@@ -505,19 +508,19 @@ class SqlAlchemyProxy:
     def findByStatusAndCommit(self,status,modelClass):
         instance = self.session.query(modelClass).filter(modelClass.status == status).first()
         self.session.commit()
-        return self.onChange(instance)
+        return self.load(instance)
 
     @Method
     def findAllByStatusAndCommit(self,status,modelClass):
         instanceList = self.session.query(modelClass).filter(modelClass.status == status).all()
         self.session.commit()
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def findAllByStatusInAndCommit(self, statusList, modelClass):
         instanceList = self.session.query(modelClass).filter(modelClass.status.in_(statusList)).all()
         self.repository.session.commit()
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def existsByQueryAndCommit(self, query, modelClass):
@@ -530,7 +533,7 @@ class SqlAlchemyProxy:
         if ObjectHelper.isNotNone(query):
             instanceList = self.session.query(modelClass).filter_by(**{k: v for k, v in query.items() if ObjectHelper.isNotNone(v)}).all()
         self.session.commit()
-        return self.onChange(instanceList)
+        return self.load(instanceList)
 
     @Method
     def deleteByIdAndCommit(self, id, modelClass):

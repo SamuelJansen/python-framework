@@ -22,13 +22,13 @@ class ActuatorHealth(MODEL):
         self.id = id
         self.status = status
         self.laskCheck = laskCheck
-        self.onChange(eventType=sap.OnORMChangeEventType.SELF)
+        self.__onChange__(eventType=sap.OnORMChangeEventType.SELF)
 
-    def onChange(self, *args, **kwagrs):
-        if str(sap.OnORMChangeEventType.UNKNOWN) is not str(kwagrs.get('eventType')):
+    def __onChange__(self, *args, **kwagrs):
+        if not str(sap.OnORMChangeEventType.UNKNOWN) == str(kwagrs.get('eventType')):
             self.status = ActuatorHealthStatus.map(self.status)
         else:
-            log.warning(self.onChange, f'{str(sap.OnORMChangeEventType.UNKNOWN)} change event received. Ignoring it by default')
+            log.warning(self.__onChange__, f'{str(sap.OnORMChangeEventType.UNKNOWN)} change event received. Ignoring it by default')
         return self
 
     def __repr__(self):
