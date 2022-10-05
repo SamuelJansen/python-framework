@@ -1,0 +1,13 @@
+print-status: False
+
+api:
+    name: SessionManagerTestApi
+    server:
+        base-url: /session-manager-api
+        scheme: http
+        port: 5012
+        host: 0.0.0.0
+
+swagger:
+    schemes: [${api.server.scheme}]
+    host: localhost:${api.server.port}

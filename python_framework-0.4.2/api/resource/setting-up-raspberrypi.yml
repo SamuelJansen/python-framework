@@ -1,0 +1,241 @@
+python-related: '''
+    sudo apt-get install python-dev libatlas-base-dev
+    sudo rm /usr/bin/python
+    sudo ln -s /usr/bin/python3 /usr/bin/python
+    sudo mv /usr/bin/pip /usr/bin/pip2 # rename
+    sudo ln -s /usr/bin/pip3 /usr/bin/pip
+
+    '''
+first-boot: '''
+    https://www.raspberrypi.org/software/ -> download and build Rasbian OS image
+    boot raspberrypi
+
+    ###- configs
+    sudo raspi-config
+
+    ###- installing .deb files, but often it doesn't works on rasbian
+    sudo dpkg -i /path/to/deb/file
+    sudo apt-get install -f
+    ###- or
+    sudo apt install ./name.deb
+    '''
+getting-ip: '''
+    #!/usr/bin/python3
+
+    from urllib.request import urlopen
+    ip = urlopen('http://ipaddr.me/').read()
+    ip = ip.decode('utf-8')
+    print (ip)
+
+    import socket
+    name, alias, addresslist = socket.gethostbyaddr(ip)
+    print (name)'''
+check-if-a-service-is-running-on-port: sudo netstat -tlnp | grep port
+check-all-services-running: sudo netstat -plnt
+show-ip-address: ip address show
+env-configs: '''
+    export FLASK_APP = hello.py
+    export FLASK_ENV = development
+    flask run
+    '''
+port-fowarding: '''
+    Verify that port 7575 is unused on server
+    Ports over 1024 can be used by non-root users. Try first without "-N -f".
+    On pi
+    ssh -R 7575:localhost:7575 usbuser@100.111.111.111 (localhost is on pi)
+    On PC
+    ssh -L 7575:localhost:7575 usbuser@100.111.111.111 (localhost is on server)
+
+    springyulei wrote:
+    or PC: ssh -L -N -f 7575:100.111.111.111:7575 root@100.111.111.111 (or I should do this??)
+    "-N -f" can not be between "-L" and "7575...."
+    '''
+delete-iptables: '''
+    sudo iptables -L
+    sudo iptables -L --line-numbers
+    sudo iptables -D OUTPUT 1
+    '''
+server-configurations: '''
+    ###- https://www.digitalocean.com/community/tutorials/iptables-essentials-common-firewall-rules-and-commands
+    ###- Setup to save
+    try:
+        sudo iptables-save
+    except:
+        sudo apt-get install iptables-persistent
+        sudo netfilter-persistent save
+        sudo service iptables save
+
+    ###- Configs:
+
+    ###- Allow Loopback Connections
+    sudo iptables -A INPUT -i lo -j ACCEPT
+    sudo iptables -A OUTPUT -o lo -j ACCEPT
+
+    ###- Allow Established and Related Incoming Connections
+    sudo iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+    ###- Allow Established Outgoing Connections
+    sudo iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+    ###- Internal to External
+    sudo iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
+
+    ###- Allow All Incoming HTTP
+    sudo iptables -A INPUT -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    sudo iptables -A OUTPUT -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+    ###- Allow All Incoming HTTPS
+    sudo iptables -A INPUT -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    sudo iptables -A OUTPUT -p tcp --sport 443 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+    ###- Allow All Incoming HTTP and HTTPS
+    sudo iptables -A INPUT -p tcp -m multiport --dports 80,9999 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    sudo iptables -A OUTPUT -p tcp -m multiport --dports 80,9999 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+    ###- Configuring inbound
+    sudo iptables -I INPUT -i eth0 -p tcp --dport 59 -m comment --comment "# Server-001 #" -j ACCEPT
+    sudo iptables -I INPUT -i eth0 -p tcp --dport 5933 -m comment --comment "# Server-001 #" -j ACCEPT
+    sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 59 -m comment --comment "# Server-001 #" -j REDIRECT --to-port 5933
+    '''
+host-name: '''
+    ###- see hostname
+    sudo hostname
+
+    ###- change hostname
+    sudo nano /etc/hostname
+    newname - like raspberrypi4-environment-lead
+    ###- hit crtl + x
+    ###- hit y
+    ###- hit enter
+
+    ###- persist operation
+    sudo nano /etc/hosts
+    '''
+telnet: '''
+    on windows. hit WIN + R
+    optionalfeatures
+    telnet client
+    reboot
+    '''
+docker-on-rasbian: '''
+    sudo apt-get update && sudo apt-get upgrade
+    https://docs.docker.com/engine/install/debian/
+    '''
+    '''
+    wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.12.0-amd64.deb
+    wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.12.0-amd64.deb.sha512
+    shasum -a 512 -c elasticsearch-7.12.0-amd64.deb.sha512
+    sudo dpkg -i elasticsearch-7.12.0-amd64.deb
+    '''
+elastic-search-on-rasbian: '''
+    https://gist.github.com/chapinb/e5ab89bc9fe7e827743688d242d2b14c
+    https://stackoverflow.com/questions/53669151/java-11-application-as-lightweight-docker-image
+    '''
+
+    '''
+    FROM azul/zulu-openjdk-alpine:11 as packager
+
+    RUN { \
+            java --version ; \
+            echo "jlink version:" && \
+            jlink --version ; \
+        }
+
+    ENV JAVA_MINIMAL=/opt/jre
+
+    # build modules distribution
+    RUN jlink \
+        --verbose \
+        --add-modules \
+            java.base,java.sql,java.naming,java.desktop,java.management,java.security.jgss,java.instrument \
+            # java.naming - javax/naming/NamingException
+            # java.desktop - java/beans/PropertyEditorSupport
+            # java.management - javax/management/MBeanServer
+            # java.security.jgss - org/ietf/jgss/GSSException
+            # java.instrument - java/lang/instrument/IllegalClassFormatException
+        --compress 2 \
+        --strip-debug \
+        --no-header-files \
+        --no-man-pages \
+        --output "$JAVA_MINIMAL"
+
+    # Second stage, add only our minimal "JRE" distr and our app
+    FROM alpine
+
+    ENV JAVA_MINIMAL=/opt/jre
+    ENV PATH="$PATH:$JAVA_MINIMAL/bin"
+
+    COPY --from=packager "$JAVA_MINIMAL" "$JAVA_MINIMAL"
+    COPY "build/libs/spring-boot-demo.jar" "/app.jar"
+
+    EXPOSE 8080
+    CMD [ "-jar", "/app.jar" ]
+    ENTRYPOINT [ "java" ]
+    '''
+
+
+
+    '''
+    #FROM adoptopenjdk/openjdk11:slim
+    # First stage: JDK 11 with modules required for Spring Boot
+    FROM debian:stretch-slim as packager
+
+    # source JDK distribution names
+    # update from https://jdk.java.net/java-se-ri/11
+    ENV JDK_VERSION="11.0.1"
+    ENV JDK_URL="https://download.java.net/java/GA/jdk11/13/GPL/openjdk-${JDK_VERSION}_linux-x64_bin.tar.gz"
+    ENV JDK_HASH="7a6bb980b9c91c478421f865087ad2d69086a0583aeeb9e69204785e8e97dcfd"
+    ENV JDK_HASH_FILE="${JDK_ARJ_FILE}.sha2"
+    ENV JDK_ARJ_FILE="openjdk-${JDK_VERSION}.tar.gz"
+    # target JDK installation names
+    ENV OPT="/opt"
+    ENV JKD_DIR_NAME="jdk-${JDK_VERSION}"
+    ENV JAVA_HOME="${OPT}/${JKD_DIR_NAME}"
+    ENV JAVA_MINIMAL="${OPT}/java-minimal"
+
+    # downlodad JDK to the local file
+    ADD "$JDK_URL" "$JDK_ARJ_FILE"
+
+    # verify downloaded file hashsum
+    RUN { \
+            echo "Verify downloaded JDK file $JDK_ARJ_FILE:" && \
+            echo "$JDK_HASH $JDK_ARJ_FILE" > "$JDK_HASH_FILE" && \
+            sha256sum -c "$JDK_HASH_FILE" ; \
+        }
+
+    # extract JDK and add to PATH
+    RUN { \
+            echo "Unpack downloaded JDK to ${JAVA_HOME}/:" && \
+            mkdir -p "$OPT" && \
+            tar xf "$JDK_ARJ_FILE" -C "$OPT" ; \
+        }
+    ENV PATH="$PATH:$JAVA_HOME/bin"
+
+    RUN { \
+            java --version ; \
+            echo "jlink version:" && \
+            jlink --version ; \
+        }
+
+    # build modules distribution
+    RUN jlink \
+        --verbose \
+        --add-modules \
+            java.base,java.sql,java.naming,java.desktop,java.management,java.security.jgss,java.instrument \
+            # java.naming - javax/naming/NamingException
+            # java.desktop - java/beans/PropertyEditorSupport
+            # java.management - javax/management/MBeanServer
+            # java.security.jgss - org/ietf/jgss/GSSException
+            # java.instrument - java/lang/instrument/IllegalClassFormatException
+        --compress 2 \
+        --strip-debug \
+        --no-header-files \
+        --no-man-pages \
+        --output "$JAVA_MINIMAL"
+
+    # Second stage, add only our minimal "JRE" distr and our app
+    FROM debian:stretch-slim
+
+    ENV JAVA_HOME=/opt/java-minimal
+    ENV PATH="$PATH:$JAVA_HOME/bin"
+    '''

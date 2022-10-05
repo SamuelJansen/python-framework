@@ -1,0 +1,27 @@
+print-status: False
+
+api:
+    name: PrdTestApi
+    server:
+        base-url: /prd-test-api
+        scheme: http
+        host: localhost
+        port: 5009
+    security:
+        secret: ${SECURITY_SECRET:prd-secret-key}
+    database:
+        dialect: ${DATABASE_DIALECT:postgresql}
+        username: ${DATABASE_USERNAME:test}
+        password: ${DATABASE_PASSWORD:test}
+        host: ${DATABASE_HOST:test}
+        port: ${DATABASE_PORT:test}
+        database: ${DATABASE_NAME:test}
+        # driver: ${DATABASE_DRIVER:psycopg2}
+        # url: ${DATABASE_URL:${api.database.dialect}://${api.database.username}:${api.database.password}@${api.database.host}:${api.database.port}/${api.database.database}}
+        schema: ${DATABASE_SCHEMA:python_framework_test_schema}
+        settings:
+            options: -csearch_path=${api.database.schema}
+
+swagger:
+    schemes: [${api.server.scheme}]
+    host: ${api.server.host}:${api.server.port}

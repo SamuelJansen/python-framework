@@ -1,0 +1,16 @@
+print-status: False
+
+api:
+    name: TestApi
+    extension: yml
+    dependency:
+        update: False
+        list:
+            web: [globals,python_helper,Popen,Path,numpy,pywin32,sqlalchemy]
+    git:
+        force-upgrade-command: pip install --upgrade --force python_framework
+    static-package: AppData\Local\Programs\Python\Python38-32\statics
+    list: []
+
+python:
+    version: 3.9

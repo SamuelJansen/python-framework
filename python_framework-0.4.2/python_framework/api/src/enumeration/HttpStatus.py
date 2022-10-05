@@ -1,0 +1,80 @@
+from python_framework.api.src.annotation.EnumAnnotation import Enum, EnumItem
+
+@Enum(associateReturnsTo='value')
+class HttpStatusEnumeration() :
+    ###- HttpStatus.enumName returns the enum name
+
+    ###- 1×× Informational
+    CONTINUE = EnumItem(value = 100)
+    SWITCHING_PROTOCOLS = EnumItem(value = 101)
+    PROCESSING = EnumItem(value = 102)
+
+    ###- 2×× Success
+    OK = EnumItem(value = 200)
+    CREATED = EnumItem(value = 201)
+    ACCEPTED = EnumItem(value = 202)
+    NON_AUTHORATIVE_INFORMATION = EnumItem(value = 203)
+    NO_CONTENT = EnumItem(value = 204)
+    RESET_CONTENT = EnumItem(value = 205)
+    PARTIAL_CONTENT = EnumItem(value = 206)
+    MULTI_STATUS = EnumItem(value = 207)
+    ALREADY_REPORTED = EnumItem(value = 208)
+    IM_USED = EnumItem(value = 226)
+
+    ###- 3×× Redirection
+    MULTIPLE_CHOICES = EnumItem(value = 300)
+    MOVED_PERMANENTLY = EnumItem(value = 301)
+    FOUND = EnumItem(value = 302)
+    SEE_OTHER = EnumItem(value = 303)
+    NOT_MODIFIED = EnumItem(value = 304)
+    USE_PROXY = EnumItem(value = 305)
+    TEMPORARY_REDIRECT = EnumItem(value = 306)
+    PERMANENT_REDIRECT = EnumItem(value = 307)
+
+    ###- 4×× Client Error
+    BAD_REQUEST = EnumItem(value = 400)
+    UNAUTHORIZED = EnumItem(value = 401)
+    REQUIRED = EnumItem(value = 402)
+    FORBIDDEN = EnumItem(value = 403)
+    NOT_FOUND = EnumItem(value = 404)
+    METHOD_NOT_ALLOWED = EnumItem(value = 405)
+    NOT_ACCEPTABLE = EnumItem(value = 406)
+    PROXY_ATHENTICATION_REQUIRED = EnumItem(value = 407)
+    REQUEST_TIMEOUT = EnumItem(value = 408)
+    CONFLICT = EnumItem(value = 409)
+    GONE = EnumItem(value = 410)
+    LENGTH_REQUIRED = EnumItem(value = 411)
+    PRECONDITION_FAILED = EnumItem(value = 412)
+    PAYLOAD_TOO_LARGE = EnumItem(value = 413)
+    REQUEST_URI_TOO_LONG = EnumItem(value = 414)
+    UNSUPORTED_MEDIA_TYPE = EnumItem(value = 415)
+    REQUEST_RANGE_NOT_SATISFIABLE = EnumItem(value = 416)
+    EXPECTATION_FAILED = EnumItem(value = 417)
+    I_M_A_TEAPOT = EnumItem(value = 418)
+    MISDIRECTED_REQUEST = EnumItem(value = 421)
+    UNPROCESSABLE_ENTITY = EnumItem(value = 422)
+    LOCKED = EnumItem(value = 423)
+    FILED_DEPENDENCY = EnumItem(value = 424)
+    UPGRADE_REQUIRED = EnumItem(value = 426)
+    PRECONDITION_REQUIRED = EnumItem(value = 428)
+    TOO_MANY_REQUESTS = EnumItem(value = 429)
+    REQUEST_HEADER_FIELDS_TOO_LARGE = EnumItem(value = 431)
+    CONNECTION_CLOSED_WITHOUT_RESPONSE = EnumItem(value = 444)
+    UNAVAILABLE_FOR_LEGAL_REASONS = EnumItem(value = 451)
+    CLIENT_CLOSE_REQUEST = EnumItem(value = 499)
+
+    ###- 5×× Server Error
+    INTERNAL_SERVER_ERROR = EnumItem(value = 500)
+    NOT_IMPLEMENTED = EnumItem(value = 501)
+    BAD_GATWAY = EnumItem(value = 502)
+    SERVICE_UNAVAILABLE = EnumItem(value = 503)
+    GATEWAY_TIMEOUT = EnumItem(value = 504)
+    HTTP_VERSION_NOT_SUPORTED = EnumItem(value = 505)
+    VARIANT_ALSO_NEGOTIATES = EnumItem(value = 506)
+    INSUFICIENT_STORAGE = EnumItem(value = 507)
+    LOOP_DETECTED = EnumItem(value = 508)
+    NOT_EXTENDED = EnumItem(value = 510)
+    NETWORK_AUTHENTICATION_REQUIRED = EnumItem(value = 511)
+    NETWORK_CONNECT_TIMEOUT_ERROR = EnumItem(value = 599)
+
+HttpStatus = HttpStatusEnumeration()

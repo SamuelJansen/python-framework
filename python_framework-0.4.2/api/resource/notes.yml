@@ -1,0 +1,15 @@
+import: Werkzeug==0.16.1
+flask-specific-port: flask run --host=0.0.0.0 --port=5001
+procfil: [
+    web: gunicorn -w 1 -k eventlet -b 127.0.0.1:5000,
+    web: gunicorn -w 1 -k eventlet app:app,
+    web: gunicorn -w 1 -k eventlet app:app,
+    web: gunicorn -k eventlet -w 1 app:app,
+    web: gunicorn -k eventlet -w 2 app:app,
+    web: gunicorn -k eventlet -w 4 app:app,
+    web: bundle exec puma -p $PORT -C ./config/puma.rb
+
+]
+flask-specific-port: flask run --host=${api.server.host} --port=${api.server.port}
+
+git push --delete origin tagname

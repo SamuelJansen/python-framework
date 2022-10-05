@@ -1,0 +1,12 @@
+print-status: False
+
+api:
+    server:
+        base-url: /python-build
+        scheme: http
+        port: 5010
+        host: 0.0.0.0
+
+swagger:
+    schemes: [${api.server.scheme}]
+    host: localhost:${api.server.port}

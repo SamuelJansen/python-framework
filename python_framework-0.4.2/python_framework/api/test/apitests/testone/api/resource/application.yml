@@ -1,0 +1,42 @@
+print-status: True
+
+api:
+    name: TestApi
+    extension: yml
+    dependency:
+        update: False
+        list:
+            web: [globals,python_helper,Popen,Path,numpy,pywin32,sqlalchemy]
+    git:
+        force-upgrade-command: pip install --upgrade --force python_framework
+    static-package: AppData\Local\Programs\Python\Python38-32\statics
+    list: []
+
+    session:
+        secret: ${SESSION_SECRET:default-session-key}
+    api-key:
+        secret: ${API_KEY_SECRET:default-api-key-key}
+    security:
+        secret: ${SECURITY_SECRET:default-security-key}
+    server:
+        scheme: http
+        base-url: /test-api
+    database:
+        schema: ${DATABASE_SCHEMA:}
+        url: ${DATABASE_URL:}
+
+swagger:
+    info:
+        # title: ${api.name}
+        # description: 'description' ###- commented in order to test auto title auto description
+        version: 0.0.1
+        terms-of-service: http://swagger.io/terms/
+        contact:
+            name: Samuel Jansen
+            email: samuel.jansenn@gmail.com
+        license:
+            name: Apache 2.0 / MIT License
+            url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+python:
+    version: 3.9
