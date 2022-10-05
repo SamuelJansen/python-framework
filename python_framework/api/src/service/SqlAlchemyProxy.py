@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, exists, select
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship, close_all_sessions
 from sqlalchemy.orm.collections import InstrumentedList
 from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
-from sqlalchemy import Table, Column, Integer, String, Float, ForeignKey, UnicodeText, MetaData, Sequence, DateTime, Date, Time, Interval, Boolean
+from sqlalchemy import Table, Column, Numeric, Integer, String, Float, ForeignKey, UnicodeText, MetaData, Sequence, DateTime, Date, Time, Interval, Boolean
 from sqlalchemy import and_, or_
 from sqlalchemy.sql.expression import literal
 
@@ -28,6 +28,7 @@ Integer = Integer
 String = String
 Float = Float
 Boolean = Boolean
+Numeric = Numeric
 
 exists = exists
 select = select
@@ -143,15 +144,15 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
 
 
 @Function
-def handleOnChange(instance):
-    if ObjectHelper.isNone(instance):
-        return instance
-    elif isinstance(instance, PythonFramworkBaseClass):
-        instance.reload(eventType=OnORMChangeEventType.IMPLEMENTED_QUERY)
-    elif ObjectHelper.isCollection(instance) or type(instance) == InstrumentedList:
-        for i in instance:
+def handleOnChange(instanceOrInstanceList):
+    if ObjectHelper.isNone(instanceOrInstanceList):
+        return instanceOrInstanceList
+    elif isinstance(instanceOrInstanceList, PythonFramworkBaseClass) or isinstance(instanceOrInstanceList, DeclarativeMeta):
+        instanceOrInstanceList.reload(eventType=OnORMChangeEventType.IMPLEMENTED_QUERY)
+    elif (ObjectHelper.isCollection(instanceOrInstanceList) and ObjectHelper.isNotDictionary(instanceOrInstanceList)) or type(instanceOrInstanceList) == InstrumentedList:
+        for i in instanceOrInstanceList:
             handleOnChange(i)
-    return instance
+    return instanceOrInstanceList
 
 @Function
 def getNewModel():
@@ -396,8 +397,8 @@ class SqlAlchemyProxy:
         self.session.commit()
 
     @Method
-    def load(self, model):
-        return handleOnChange(model)
+    def load(self, modelOrModelList):
+        return handleOnChange(modelOrModelList)
 
     @Method
     def backupContext(self):
@@ -405,10 +406,11 @@ class SqlAlchemyProxy:
             self.context.append(instance)
 
     @Method
-    def reloadContextBackup(self):
-        for instance in self.load(self.context):
+    def reloadContextFromBackup(self):
+        for index, instance in enumerate(self.load(self.context)):
+            self.context.pop(index)
             if instance not in self.session.dirty:
-                self.session.dirty.add(self.context.pop(instance))
+                self.session.dirty.add(instance)
 
     @Method
     def save(self, instance):

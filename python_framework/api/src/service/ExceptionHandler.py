@@ -132,7 +132,7 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
         apiInstance.repository.saveAndCommit(httpErrorLog)
     except Exception as errorLogException :
         log.warning(handleLogErrorException, f'Failed to persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
-    apiInstance.repository.reloadContextBackup()
+    apiInstance.repository.reloadContextFromBackup()
     return exception
 
 

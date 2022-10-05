@@ -62,6 +62,30 @@ DATE_TIME_RELATED = [
     'timedelta'
 ]
 
+SAP_NATIVE_CLASSES_NAMES_AS_STRING_LIST = [
+    'Decimal',
+    'Float',
+    'Integer',
+    'Numeric',
+    'Interval'
+    'String',
+    'Bolean',
+    'Date',
+    'Time',
+    'DateTime'
+]
+
+def isSerializerNativeClassInstance(instance):
+    return (
+        (
+            ObjectHelper.isNativeClassInstance(instance)
+        ) or (
+            ReflectionHelper.getClassName(instance) in SAP_NATIVE_CLASSES_NAMES_AS_STRING_LIST
+        ) or (
+            str(type(instance)).split(c.DOT)[-1] in SAP_NATIVE_CLASSES_NAMES_AS_STRING_LIST
+        )
+    )
+
 
 def validateJsonIsNotNone(fromJson, toClass):
     if ObjectHelper.isNone(fromJson):
@@ -152,7 +176,7 @@ def getAttributeNameList_andPleaseSomeoneSlapTheFaceOfTheGuyWhoDidItInSqlAlchemy
 @Function
 def serializeIt(fromJson, toClass, fatherClass=None, muteLogs=False):
     if ObjectHelper.isNotDictionary(fromJson):
-        if ObjectHelper.isNativeClassInstance(fromJson) and toClass == fromJson.__class__ :
+        if isSerializerNativeClassInstance(fromJson) and toClass == fromJson.__class__ :
             return fromJson
         if isUuid(fromJson):
             return str(fromJson)
@@ -269,7 +293,7 @@ def convertFromObjectToObject(fromObject, toClass):
 
 @Function
 def prettify(objectAsDict):
-    if ObjectHelper.isNativeClassInstance(objectAsDict):
+    if isSerializerNativeClassInstance(objectAsDict):
         return objectAsDict
     ###- someone please give a hint on SqlAlchemy developers on this fucking "registry" thing...
     return StringHelper.prettyJson(objectAsDict, ignoreKeyList=[SQL_ALCHEMY_RESGITRY_PUBLIC_REFLECTED_ATTRIBUTE_PRETTY_MUCH_THE_WORST_CODE_I_SAW_IN_MY_LIFE] if isModel(objectAsDict) else [])
@@ -304,7 +328,7 @@ def getObjectAsDictionary(instance, fieldsToExpand=[EXPAND_ALL_FIELDS], visitedI
     # print(instance)
     if ObjectHelper.isNone(visitedIdInstances):
         visitedIdInstances = []
-    if ObjectHelper.isNativeClassInstance(instance) or ObjectHelper.isNone(instance):
+    if isSerializerNativeClassInstance(instance) or ObjectHelper.isNone(instance):
         return instance
     if EnumAnnotation.isEnumItem(instance):
         return instance.enumValue
@@ -396,7 +420,7 @@ def getResourceModuleName(key, classRole):
 
 
 def resolveValue(value, key, classRole, fatherClass=None):
-    if ObjectHelper.isNativeClassInstance(value):
+    if isSerializerNativeClassInstance(value):
         return value
     if ObjectHelper.isList(value):
         if key.endswith(LIST_SUFIX):
