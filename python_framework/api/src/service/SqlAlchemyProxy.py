@@ -139,6 +139,10 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
     def __onPersistentToTransient__(self, session):
         self.__onChange__(session, eventType=OnORMChangeEventType.PERSISTENT_TO_TRANSIENT)
 
+    def setDefaultValues(self, *args, eventType=OnORMChangeEventType.SELF, **kwargs):
+        return self
+    def loadDefaultValues(self, eventType=OnORMChangeEventType.SELF):
+        return self.__onChange__(eventType=eventType)
     def reload(self, eventType=OnORMChangeEventType.SELF):
         return self.__onChange__(eventType=eventType)
 
