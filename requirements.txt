@@ -1,1 +1,3 @@
 psutil
+globals==0.3.34
+python-helper==0.3.55
