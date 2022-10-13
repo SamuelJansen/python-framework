@@ -135,7 +135,7 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
         httpErrorLog = ErrorLog.ErrorLog()
         httpErrorLog.override(exception)
         # apiInstance.repository.saveAndCommit(httpErrorLog)
-        instance.manager.exception.handleErrorLog(httpErrorLog)
+        apiInstance.manager.exception.handleErrorLog(httpErrorLog)
     except Exception as errorLogException :
         log.warning(handleLogErrorException, f'Failed to handle {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
     apiInstance.repository.reloadContextFromBackup()
