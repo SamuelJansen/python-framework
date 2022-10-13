@@ -45,17 +45,17 @@ def HttpClient(
                 OuterClass.__init__(self,*args, **kwargs)
                 self.globals = apiInstance.globals
             def options(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.OPTIONS, *args, eventContext=clientEventContext, **kwargs)
+                return HttpClientEvent(HttpDomain.Verb.OPTIONS, *args, eventContext=clientEventContext, **kwargs)
             def get(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.GET, *args, eventContext=clientEventContext, **kwargs)
+                return HttpClientEvent(HttpDomain.Verb.GET, *args, eventContext=clientEventContext, **kwargs)
             def post(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.POST, *args, eventContext=clientEventContext, **kwargs)
+                return HttpClientEvent(HttpDomain.Verb.POST, *args, eventContext=clientEventContext, **kwargs)
             def put(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.PUT, *args, eventContext=clientEventContext, **kwargs)
+                return HttpClientEvent(HttpDomain.Verb.PUT, *args, eventContext=clientEventContext, **kwargs)
             def patch(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.PATCH, *args, eventContext=clientEventContext, **kwargs)
+                return HttpClientEvent(HttpDomain.Verb.PATCH, *args, eventContext=clientEventContext, **kwargs)
             def delete(self, *args, **kwargs):
-                raise HttpClientEvent(HttpDomain.Verb.DELETE, *args, eventContext=clientEventContext, **kwargs)
+                return HttpClientEvent(HttpDomain.Verb.DELETE, *args, eventContext=clientEventContext, **kwargs)
         ReflectionHelper.overrideSignatures(InnerClass, OuterClass)
         return InnerClass
     return Wrapper
@@ -373,8 +373,11 @@ def HttpClientMethod(
                     completeResponse = httpClientEvent.completeResponse
                 elif isinstance(httpClientEvent, HttpClientEvent):
                     try :
-                        clientResponse = HTTP_CLIENT_RESOLVERS_MAP.get(
-                            httpClientEvent.verb,
+                        clientResponse = StaticConverter.getValueOrDefault(
+                            HTTP_CLIENT_RESOLVERS_MAP.get(
+                                httpClientEvent.verb,
+                                ClientUtil.raiseHttpClientEventNotFoundException
+                            ),
                             ClientUtil.raiseHttpClientEventNotFoundException
                         )(
                             resourceInstance,
@@ -390,7 +393,7 @@ def HttpClientMethod(
                     raise Exception('Unknown http client event')
             except Exception as exception:
                 log.log(innerResourceInstanceMethod, 'Failure at client method execution', exception=exception, muteStackTrace=True)
-                FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.CLIENT_CONTEXT)
+                FlaskManager.raiseAndHandleGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.CLIENT_CONTEXT)
             clientResponseStatus = completeResponse[-1]
             clientResponseHeaders = completeResponse[1]
             clientResponseBody = completeResponse[0] if ObjectHelper.isNotNone(completeResponse[0]) else {'message' : HttpStatus.map(clientResponseStatus).enumName}

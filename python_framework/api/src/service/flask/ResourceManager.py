@@ -17,6 +17,7 @@ from python_framework.api.src.service import ApiKeyManager
 from python_framework.api.src.service import SecurityManager
 from python_framework.api.src.service import SchedulerManager
 from python_framework.api.src.service.openapi import OpenApiManager
+from python_framework.api.src.service import DefaultExceptionManager
 
 
 DOT_PY = '.py'
@@ -210,6 +211,7 @@ def initialize(
     api.app = app
     api.app.api = api
     api.managerList = [
+        DefaultExceptionManager,
         SecurityManager,
         ApiKeyManager,
         SessionManager,
@@ -236,19 +238,12 @@ def initialize(
 
         OpenApiManager.newDocumentation(api, app)
         SqlAlchemyProxy.addResource(api, app, baseModel=refferenceModel, echo=False)
-        # SchedulerManager.addResource(api, app)
-        # SessionManager.addResource(api, app)
-        # ApiKeyManager.addResource(api, app)
-        # SecurityManager.addResource(api, app)
         addManagerListTo(api, api.managerList)
 
         addFlaskApiResources(*[api, app, *[getResourceList(api, resourceType) for resourceType in FlaskManager.KW_RESOURCE_LIST]])
+
         for manager in api.managerList[::-1]:
             manager.onHttpRequestCompletion(api, app)
-        # SessionManager.onHttpRequestCompletion(api, app)
-        # ApiKeyManager.onHttpRequestCompletion(api, app)
-        # SecurityManager.onHttpRequestCompletion(api, app)
-        # SchedulerManager.onHttpRequestCompletion(api, app)
         SqlAlchemyProxy.onHttpRequestCompletion(api, app)
 
         api.documentationUrl = OpenApiManager.getDocumentationUrl(api)

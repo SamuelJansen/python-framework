@@ -78,7 +78,7 @@ def ListenerMethod(
                     except Exception as exception :
                         # if not muteLogs:
                         #     log.warning(resourceInstanceMethod, f'Not possible to run {resourceInstanceMethod.id} properly', exception=exception, muteStackTrace=True)
-                        FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
+                        FlaskManager.raiseAndHandleGlobalException(exception, resourceInstance, resourceInstanceMethod)
                 except Exception as exception:
                     logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} {HttpDomain.LISTENER_CONTEXT.lower()}'
                     if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):

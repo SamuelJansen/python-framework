@@ -34,7 +34,7 @@ def ServiceMethod(requestClass=None):
                 FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
                 methodReturn = resourceInstanceMethod(*args,**kwargs)
             except Exception as exception :
-                FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod)
+                FlaskManager.raiseAndHandleGlobalException(exception, resourceInstance, resourceInstanceMethod)
             return methodReturn
         ReflectionHelper.overrideSignatures(innerResourceInstanceMethod, resourceInstanceMethod)
         return innerResourceInstanceMethod

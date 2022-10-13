@@ -12,32 +12,29 @@ from python_framework.api.src.service import ExceptionHandler
 from python_framework.api.src.service.ExceptionHandler import GlobalException
 
 
-class HttpClientEvent(Exception):
+class HttpClientEvent:
     def __init__(self, verb, *args, eventContext=HttpDomain.CLIENT_CONTEXT, **kwargs):
         if ObjectHelper.isNone(verb):
             raise Exception(f'Http {eventContext.lower()} event verb cannot be none')
-        Exception.__init__(self, f'Http {eventContext.lower()} {verb} event')
         self.verb = verb
         self.args = args
         self.kwargs = kwargs
 
 
-class ManualHttpClientEvent(Exception):
+class ManualHttpClientEvent:
     def __init__(self, completeResponse, *args, eventContext=HttpDomain.CLIENT_CONTEXT, **kwargs):
-        Exception.__init__(self, f'ManualHttpClientEvent')
         self.completeResponse = completeResponse
 
 
 def getHttpClientEvent(resourceInstanceMethod, *args, **kwargs):
-    completeResponse = None
     try:
         completeResponse = resourceInstanceMethod(*args, **kwargs)
-    except HttpClientEvent as httpClientEvent:
-        return httpClientEvent
+        if isinstance(completeResponse, HttpClientEvent):
+            return completeResponse
+        else:
+            return ManualHttpClientEvent(completeResponse, *args, **kwargs)
     except Exception as exception:
         raise exception
-    if ObjectHelper.isNotNone(completeResponse):
-        return ManualHttpClientEvent(completeResponse, *args, **kwargs)
 
 
 def raiseHttpClientEventNotFoundException(*args, **kwargs):

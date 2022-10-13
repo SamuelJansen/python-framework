@@ -852,7 +852,7 @@ def ControllerMethod(
     return innerMethodWrapper
 
 
-def getAndPersistGlobalException(
+def getAndHandleGlobalException(
     exception,
     resourceInstance,
     resourceInstanceMethod,
@@ -868,9 +868,13 @@ def getAndPersistGlobalException(
     )
 
 
-def raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.CONTROLLER_CONTEXT):
-    raise getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=context)
+def raiseAndHandleGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.CONTROLLER_CONTEXT):
+    raise getAndHandleGlobalException(exception, resourceInstance, resourceInstanceMethod, context=context)
 
+###- reprecated
+getAndPersistGlobalException = getAndHandleGlobalException
+###- reprecated
+raiseAndPersistGlobalException = raiseAndHandleGlobalException
 
 def getCompleteResponseByException(
     exception,
@@ -880,7 +884,7 @@ def getCompleteResponseByException(
     context = HttpDomain.CONTROLLER_CONTEXT
 ):
     try:
-        exception = getAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=context)
+        exception = getAndHandleGlobalException(exception, resourceInstance, resourceInstanceMethod, context=context)
         completeResponse = (ExceptionHandler.getDefaultBodyException(exception=exception), {}, exception.status)
         try :
             logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} {context.lower()} request'

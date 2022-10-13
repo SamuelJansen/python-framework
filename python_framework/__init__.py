@@ -26,6 +26,8 @@ from python_framework.api.src.util import AuditoryUtil
 
 from python_framework.api.src.service import ExceptionHandler
 from python_framework.api.src.service.ExceptionHandler import GlobalException
+from python_framework.api.src.service import DefaultExceptionManager
+
 from python_framework.api.src.service import SessionManager
 from python_framework.api.src.service import ApiKeyManager
 from python_framework.api.src.service import SecurityManager

@@ -46,6 +46,11 @@ def getDefaultBodyException(exception=None):
         bodyErrorResponse['uri'] = uriIfAny
     return bodyErrorResponse
 
+
+class ExceptionManager:
+    ...
+
+
 class GlobalException(Exception):
     def __init__(self,
         message = None,
@@ -112,26 +117,27 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
         if ObjectHelper.isNone(apiInstance):
             from python_framework import FlaskManager
             apiInstance = FlaskManager.getApi()
-        try:
-            apiInstance.repository.commit()
-        except Exception as firstPreCommitException:
-            log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}. Going for a second attempt', exception=firstPreCommitException, muteStackTrace=True)
-            try:
-                apiInstance.repository.flush()
-                apiInstance.repository.commit()
-            except Exception as secondPreCommitException:
-                log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}. Going for a third attempt', exception=secondPreCommitException, muteStackTrace=True)
-                try:
-                    apiInstance.repository.rollback()
-                    apiInstance.repository.flush()
-                    apiInstance.repository.commit()
-                except Exception as thirdPreCommitException:
-                    log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}', exception=thirdPreCommitException)
+        # try:
+        #     apiInstance.repository.commit()
+        # except Exception as firstPreCommitException:
+        #     log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}. Going for a second attempt', exception=firstPreCommitException, muteStackTrace=True)
+        #     try:
+        #         apiInstance.repository.flush()
+        #         apiInstance.repository.commit()
+        #     except Exception as secondPreCommitException:
+        #         log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}. Going for a third attempt', exception=secondPreCommitException, muteStackTrace=True)
+        #         try:
+        #             apiInstance.repository.rollback()
+        #             apiInstance.repository.flush()
+        #             apiInstance.repository.commit()
+        #         except Exception as thirdPreCommitException:
+        #             log.warning(handleLogErrorException, f'Failed to pre commit before persist {ErrorLog.ErrorLog.__name__}', exception=thirdPreCommitException)
         httpErrorLog = ErrorLog.ErrorLog()
         httpErrorLog.override(exception)
-        apiInstance.repository.saveAndCommit(httpErrorLog)
+        # apiInstance.repository.saveAndCommit(httpErrorLog)
+        instance.manager.exception.handleErrorLog(httpErrorLog)
     except Exception as errorLogException :
-        log.warning(handleLogErrorException, f'Failed to persist {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
+        log.warning(handleLogErrorException, f'Failed to handle {ErrorLog.ErrorLog.__name__}', exception=errorLogException)
     apiInstance.repository.reloadContextFromBackup()
     return exception
 

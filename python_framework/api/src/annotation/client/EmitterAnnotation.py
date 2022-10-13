@@ -74,7 +74,7 @@ def EmitterMethod(
                 except Exception as exception :
                     if not muteLogs:
                         log.warning(resourceInstanceMethod, f'Not possible to run {resourceInstanceMethod.id} properly', exception=exception, muteStackTrace=True)
-                    FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.EMITTER_CONTEXT)
+                    FlaskManager.raiseAndHandleGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.EMITTER_CONTEXT)
                 if not muteLogs:
                     log.info(resourceInstanceMethod, f'{resourceInstanceMethod.id} {HttpDomain.EMITTER_CONTEXT.lower()} method finished')
                 return methodReturn

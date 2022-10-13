@@ -79,7 +79,7 @@ def SchedulerMethod(
                         FlaskManager.validateArgs(args,requestClass,innerResourceInstanceMethod)
                         methodReturn = resourceInstanceMethod(*args,**kwargs)
                     except Exception as exception:
-                        FlaskManager.raiseAndPersistGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.SCHEDULER_CONTEXT)
+                        FlaskManager.raiseAndHandleGlobalException(exception, resourceInstance, resourceInstanceMethod, context=HttpDomain.SCHEDULER_CONTEXT)
                 except Exception as exception:
                     logErrorMessage = f'Error processing {resourceInstance.__class__.__name__}.{resourceInstanceMethod.__name__} {HttpDomain.SCHEDULER_CONTEXT.lower()}'
                     if HttpStatus.INTERNAL_SERVER_ERROR <= HttpStatus.map(exception.status):
