@@ -34,7 +34,7 @@ def getHttpClientEvent(resourceInstanceMethod, *args, **kwargs):
         else:
             return ManualHttpClientEvent(evenOrCompleteResponse, *args, **kwargs)
     except Exception as exception:
-        log.log(getHttpClientEvent, 'Not possible o get client event' exception=exception)
+        log.log(getHttpClientEvent, 'Not possible o get client event', exception=exception)
         raise exception
 
 
