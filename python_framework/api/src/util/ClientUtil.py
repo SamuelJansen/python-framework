@@ -28,12 +28,13 @@ class ManualHttpClientEvent:
 
 def getHttpClientEvent(resourceInstanceMethod, *args, **kwargs):
     try:
-        completeResponse = resourceInstanceMethod(*args, **kwargs)
-        if isinstance(completeResponse, HttpClientEvent):
-            return completeResponse
+        evenOrCompleteResponse = resourceInstanceMethod(*args, **kwargs)
+        if isinstance(evenOrCompleteResponse, HttpClientEvent):
+            return evenOrCompleteResponse
         else:
-            return ManualHttpClientEvent(completeResponse, *args, **kwargs)
+            return ManualHttpClientEvent(evenOrCompleteResponse, *args, **kwargs)
     except Exception as exception:
+        log.log(getHttpClientEvent, 'Not possible o get client event' exception=exception)
         raise exception
 
 

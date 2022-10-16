@@ -1,6 +1,8 @@
 from distutils.core import setup
 import os
 
+###- pip install python-framework==0.4.7 --force  --upgrade
+
 print('''Installation on linux, run:
 sudo apt install libpq-dev python3-dev
 pip3.9 install --no-cache-dir python-framework --force --upgrade
@@ -13,7 +15,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.4.7' 
+VERSION = '0.4.8'
 
 NAME = 'python_framework'
 PACKAGE_NAME = NAME
