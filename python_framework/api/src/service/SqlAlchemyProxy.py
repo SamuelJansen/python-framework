@@ -405,13 +405,17 @@ class SqlAlchemyProxy:
         return handleOnChange(modelOrModelList)
 
     @Method
+    def getContext(self):
+        return self.load(self.context)
+
+    @Method
     def backupContext(self):
         for instance in self.session.dirty:
-            self.context.append(instance)
+            self.getContext().append(instance)
 
     @Method
     def reloadContextFromBackup(self):
-        for index, instance in enumerate(self.load(self.context)):
+        for index, instance in enumerate(self.getContext()):
             self.context.pop(index)
             if instance not in self.session.dirty:
                 self.session.dirty.add(instance)
