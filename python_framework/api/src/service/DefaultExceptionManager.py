@@ -3,6 +3,7 @@ from python_framework.api.src.model import ErrorLog
 
 class ExceptionManager:
     def handleErrorLog(self, httpErrorLog, *args, **kwargs):
+        # apiInstance.repository.backupContext()
         try:
             self.api.repository.commit()
         except Exception as firstPreCommitException:
@@ -20,6 +21,7 @@ class ExceptionManager:
                     log.warning(handleLogErrorException, f'Failed to pre commit before persist {ReflectionHelper.getName(httpErrorLog)}', exception=thirdPreCommitException)
         httpErrorLog.reload()
         self.api.repository.saveAndCommit(httpErrorLog)
+        # apiInstance.repository.reloadContextFromBackup()
 
 def addResource(apiInstance, appInstance) :
     apiInstance.resource.manager.exception = ExceptionManager()
