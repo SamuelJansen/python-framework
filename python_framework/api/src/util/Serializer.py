@@ -128,6 +128,10 @@ def isSerializerCollection(instance):
     return ObjectHelper.isCollection(instance) or type(instance) == InstrumentedList
 
 
+def isNotSerializerList(instance):
+    return not isSerializerList(instance)
+
+
 def requestBodyIsPresent(requestBody):
     return ObjectHelper.isNotNone(requestBody) and (ObjectHelper.isDictionary(requestBody) or ObjectHelper.isList(requestBody))
 

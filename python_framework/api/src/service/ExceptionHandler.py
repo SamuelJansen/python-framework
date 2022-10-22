@@ -1,11 +1,12 @@
 from jwt import ExpiredSignatureError, InvalidSignatureError
 
 from python_helper import Constant as c
-from python_helper import log, Function, ObjectHelper, StringHelper, DateTimeHelper
+from python_helper import log, Function, ObjectHelper, StringHelper, DateTimeHelper, ReflectionHelper
 
 from python_framework.api.src.domain import HttpDomain
 from python_framework.api.src.enumeration.HttpStatus import HttpStatus
 from python_framework.api.src.util import FlaskUtil
+from python_framework.api.src.util import Serializer
 from python_framework.api.src.model import ErrorLog
 
 
@@ -95,18 +96,29 @@ class GlobalException(Exception):
 
 
 @Function
-def validateArgs(self, method, objectRequest, expecteObjectClass):
+def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass):
     try :
         proceedValidation = True
-        if ObjectHelper.isList(expecteObjectClass) and ObjectHelper.isList(objectRequest) :
+        if ObjectHelper.isList(expecteObjectClass) and Serializer.isSerializerList(objectRequest):
             if len(objectRequest) == 0 :
                 proceedValidation = False
-        if proceedValidation and (objectRequest and not type(expecteObjectClass) == type(objectRequest.__class__) and expecteObjectClass.__name__ == objectRequest.__class__.__name__) :
-            raise GlobalException(logMessage = f'Invalid args. {self.__class__}.{method} call got an unnexpected object request: {objectRequest.__class__}. It should be {expecteObjectClass}')
-    except Exception as exception :
-        log.debug(validateArgs, f'self: {self}, method: {method}, objectRequest: {objectRequest}, expecteObjectClass: {expecteObjectClass}')
-        log.failure(expecteObjectClass.__class__, f'Failed to validate args of {method.__name__} method', exception)
-        raise GlobalException(logMessage = f'Failed to validate args of {method.__name__} method{DOT_SPACE_CAUSE}{str(exception)}')
+        if proceedValidation and ObjectHelper.isNotNone(objectRequest) and (
+            (
+                ObjectHelper.isList(expecteObjectClass) and Serializer.isNotSerializerList(objectRequest)
+            ) or (
+                ObjectHelper.isNotList(expecteObjectClass) and Serializer.isSerializerList(objectRequest)
+            ) or (
+                not expecteObjectClass == type(objectRequest)
+            ) or (
+                not type(expecteObjectClass) == type(objectRequest.__class__)
+            )
+        ):
+            raise GlobalException(logMessage = f'Invalid args{c.DOT_SPACE}{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)} call got an unnexpected object request: {objectRequest.__class__}{c.DOT_SPACE}It should be {expecteObjectClass}{c.DOT_SPACE}ObjectRequest: {objectRequest}, expecteObjectClass: {expecteObjectClass}')
+    except GlobalException as globalException:
+        raise globalException
+    except Exception as exception:
+        errorMessage = f'Failed to validate args of {ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)} method. ObjectRequest: {objectRequest}, expecteObjectClass: {expecteObjectClass}'
+        raise GlobalException(logMessage = f'{errorMessage}{c.DOT_SPACE_CAUSE}{str(exception)}')
 
 
 @Function
