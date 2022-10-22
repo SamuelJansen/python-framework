@@ -455,6 +455,17 @@ def resolveValue(value, key, classRole, fatherClass=None):
             return convertFromJsonToObject(value, resourceClass, fatherClass=fatherClass)
 
 
+def getUncheckedKeyValue(key, value):
+    if key.endswith(LIST_SUFIX) and ObjectHelper.isNotList(value):
+        return [
+            value
+        ] if not isinstance(value, str) else [
+            v.strip()
+            for v in value.split(c.COMA)
+        ]
+    return value
+
+
 def importResource(resourceName, resourceModuleName=None):
     # resourceClass = globals.importResource(resourceName, resourceModuleName=resourceModuleName)
     # if ObjectHelper.isNone(resourceClass):

@@ -235,13 +235,14 @@ def buildHttpResponse(additionalResponseHeaders, controllerResponseBody, status,
 def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
     if ObjectHelper.isNotEmpty(givenClass):
         toClass = givenClass if ObjectHelper.isNotList(givenClass) else givenClass[0]
-        kwargs[key] = Serializer.convertFromJsonToObject({k:getKeyValue(k, v) for k,v in valuesAsDictionary.items()}, toClass)
+        kwargs[key] = Serializer.convertFromJsonToObject(
+            {
+                k: Serializer.getUncheckedKeyValue(k, v)
+                for k, v in valuesAsDictionary.items()
+            },
+            toClass
+        )
     return valuesAsDictionary
-
-def getKeyValue(key, value):
-    if key.endswith(Serializer.LIST_SUFIX) and ObjectHelper.isNotList(value):
-        return [value] if not isinstance(value, str) else [*value.split(c.COMA)]
-    return value
 
 @Function
 def getGlobals():
