@@ -108,7 +108,11 @@ def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expect
             ) or (
                 ObjectHelper.isNotList(expecteObjectClass) and Serializer.isSerializerList(objectRequest)
             ) or (
-                not ReflectionHelper.getClassName(objectRequest) == ReflectionHelper.getName(expecteObjectClass)
+                (
+                    not ReflectionHelper.getClassName(objectRequest) == ReflectionHelper.getName(expecteObjectClass)
+                ) and (
+                    not isinstance(objectRequest, expecteObjectClass)
+                )
             )
         ):
             typeComparison = f'type(objectRequest: {objectRequest}): {type(objectRequest)}'
