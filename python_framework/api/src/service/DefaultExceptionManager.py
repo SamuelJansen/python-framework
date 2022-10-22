@@ -3,7 +3,7 @@ from python_framework.api.src.model import ErrorLog
 
 class ExceptionManager:
     def handleErrorLog(self, httpErrorLog, *args, **kwargs):
-        apiInstance.repository.backupContext()
+        self.api.repository.backupContext()
         try:
             try:
                 self.api.repository.commit()
@@ -24,7 +24,7 @@ class ExceptionManager:
             self.api.repository.saveAndCommit(httpErrorLog)
         except Exception as exception:
             log.warning(self.handleErrorLog, f'Failed handle error', exception=exception)
-        apiInstance.repository.reloadContextFromBackup()
+        self.api.repository.reloadContextFromBackup()
 
 def addResource(apiInstance, appInstance) :
     apiInstance.resource.manager.exception = ExceptionManager()
