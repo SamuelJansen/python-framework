@@ -99,7 +99,9 @@ class GlobalException(Exception):
 def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass):
     try :
         if ObjectHelper.isNotNone(objectRequest) and (
-            ObjectHelper.isList(expecteObjectClass) and Serializer.isSerializerList(objectRequest) and len(objectRequest) == 0
+            not (
+                ObjectHelper.isList(expecteObjectClass) and Serializer.isSerializerList(objectRequest) and len(objectRequest) == 0
+            )
         ) and (
             (
                 ObjectHelper.isList(expecteObjectClass) and Serializer.isNotSerializerList(objectRequest)
