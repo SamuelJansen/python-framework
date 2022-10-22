@@ -108,16 +108,18 @@ def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expect
             ) or (
                 ObjectHelper.isNotList(expecteObjectClass) and Serializer.isSerializerList(objectRequest)
             ) or (
-                not expecteObjectClass == type(objectRequest)
-            ) or (
-                not type(expecteObjectClass) == type(objectRequest.__class__)
+                not isinstance(objectRequest, expecteObjectClass)
             )
         ):
-            raise GlobalException(logMessage = f'Invalid args{c.DOT_SPACE}{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)} call got an unnexpected object request class: {ReflectionHelper.getClassName(objectRequest)}{c.DOT_SPACE}It should be a {ReflectionHelper.getName(expecteObjectClass)} class{c.DOT_SPACE}Object request: {objectRequest}')
+            completeName = f'{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)}'
+            expectedClassName = f'{ReflectionHelper.getClassName(expecteObjectClass) if Serializer.isSerializerList(expecteObjectClass) else ReflectionHelper.getName(expecteObjectClass)}'
+            raise GlobalException(logMessage = f'Invalid args{c.DOT_SPACE}{completeName} call got an unnexpected object request class: {ReflectionHelper.getClassName(objectRequest)}{c.DOT_SPACE}It should be a {expectedClassName} class{c.DOT_SPACE}Object request: {objectRequest}')
     except GlobalException as globalException:
         raise globalException
     except Exception as exception:
-        errorMessage = f'Failed to validate args of {ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)} method{c.DOT_SPACE}Object request: {objectRequest}'
+        completeName = f'{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)}'
+        expectedClassName = f'{ReflectionHelper.getClassName(expecteObjectClass) if Serializer.isSerializerList(expecteObjectClass) else ReflectionHelper.getName(expecteObjectClass)}'
+        errorMessage = f'Failed to validate args of {completeName} method{c.DOT_SPACE}Object request: {objectRequest}{c.DOT_SPACE}Expected request class: {expectedClassName}'
         raise GlobalException(logMessage = f'{errorMessage}{c.DOT_SPACE_CAUSE}{str(exception)}')
 
 
