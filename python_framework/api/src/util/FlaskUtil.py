@@ -133,7 +133,8 @@ def safellyGetVerb():
 def safellyGetHeaders():
     headers = None
     try:
-        headers = dict(request.headers)
+        requestHeaders = dict(request.headers)
+        headers = {k:getKeyValue(k, v) for k,v in requestHeaders.items()}
     except Exception as exception:
         headers = {}
         log.log(safellyGetHeaders, f'Not possible to get request headers. Returning {headers} by default', exception=exception)
@@ -149,7 +150,8 @@ def safellyGetHeader(headerName):
 def safellyGetResponseHeaders(response):
     headers = None
     try:
-        headers = dict(response.headers)
+        responseHeaders = dict(response.headers)
+        headers = {k:getKeyValue(k, v) for k,v in responseHeaders.items()}
     except Exception as exception:
         headers = {}
         log.log(safellyGetResponseHeaders, f'Not possible to get response headers. Returning {headers} by default', exception=exception)
@@ -159,7 +161,8 @@ def safellyGetResponseHeaders(response):
 def safellyGetRequestHeadersFromResponse(response):
     headers = None
     try:
-        headers = dict(response.request.headers)
+        requestHeaders = dict(response.request.headers)
+        headers = {k:getKeyValue(k, v) for k,v in requestHeaders.items()}
     except Exception as exception:
         headers = {}
         log.log(safellyGetRequestHeadersFromResponse, f'Not possible to get request headers from response. Returning {headers} by default', exception=exception)
@@ -169,7 +172,8 @@ def safellyGetRequestHeadersFromResponse(response):
 def safellyGetArgs():
     args = None
     try:
-        args = dict(request.args)
+        requestArgs = dict(request.args)
+        args = {k:getKeyValue(k, v) for k,v in requestArgs.items()}
     except Exception as exception:
         args = {}
         log.log(safellyGetArgs, f'Not possible to get args. Returning {args} by default', exception=exception)
@@ -231,12 +235,12 @@ def buildHttpResponse(additionalResponseHeaders, controllerResponseBody, status,
 def addToKwargs(key, givenClass, valuesAsDictionary, kwargs):
     if ObjectHelper.isNotEmpty(givenClass):
         toClass = givenClass if ObjectHelper.isNotList(givenClass) else givenClass[0]
-        kwargs[key] = Serializer.convertFromJsonToObject({k:getKwargsAttributeValue(k, v) for k,v in valuesAsDictionary.items()}, toClass)
+        kwargs[key] = Serializer.convertFromJsonToObject({k:getKeyValue(k, v) for k,v in valuesAsDictionary.items()}, toClass)
     return valuesAsDictionary
 
-def getKwargsAttributeValue(key, value):
+def getKeyValue(key, value):
     if key.endswith(Serializer.LIST_SUFIX) and ObjectHelper.isNotList(value):
-        return [value]
+        return [value] if not isinstance(value, str) else [*value.split(c.COMA)]
     return value
 
 @Function
