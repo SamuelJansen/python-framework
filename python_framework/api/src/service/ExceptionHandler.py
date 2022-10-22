@@ -98,11 +98,9 @@ class GlobalException(Exception):
 @Function
 def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass):
     try :
-        proceedValidation = True
-        if ObjectHelper.isList(expecteObjectClass) and Serializer.isSerializerList(objectRequest):
-            if len(objectRequest) == 0 :
-                proceedValidation = False
-        if proceedValidation and ObjectHelper.isNotNone(objectRequest) and (
+        if ObjectHelper.isNotNone(objectRequest) and (
+            ObjectHelper.isList(expecteObjectClass) and Serializer.isSerializerList(objectRequest) and len(objectRequest) == 0
+        ) and (
             (
                 ObjectHelper.isList(expecteObjectClass) and Serializer.isNotSerializerList(objectRequest)
             ) or (
@@ -113,11 +111,11 @@ def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expect
                 not type(expecteObjectClass) == type(objectRequest.__class__)
             )
         ):
-            raise GlobalException(logMessage = f'Invalid args{c.DOT_SPACE}{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)} call got an unnexpected object request: {objectRequest.__class__}{c.DOT_SPACE}It should be {expecteObjectClass}{c.DOT_SPACE}ObjectRequest: {objectRequest}, expecteObjectClass: {expecteObjectClass}')
+            raise GlobalException(logMessage = f'Invalid args{c.DOT_SPACE}{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)} call got an unnexpected object request class: {ReflectionHelper.getClassName(objectRequest)}{c.DOT_SPACE}It should be a {ReflectionHelper.getName(expecteObjectClass)} class{c.DOT_SPACE}Object request: {objectRequest}')
     except GlobalException as globalException:
         raise globalException
     except Exception as exception:
-        errorMessage = f'Failed to validate args of {ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)} method. ObjectRequest: {objectRequest}, expecteObjectClass: {expecteObjectClass}'
+        errorMessage = f'Failed to validate args of {ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)} method{c.DOT_SPACE}Object request: {objectRequest}'
         raise GlobalException(logMessage = f'{errorMessage}{c.DOT_SPACE_CAUSE}{str(exception)}')
 
 
