@@ -573,6 +573,7 @@ def Enum_str() :
     assert str(4) == str(MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.map(4)))
     assert str(3) == str(MY_THIRD_ENUM_TEST.map('THREE'))
     assert str(4) == str(MY_THIRD_ENUM_TEST.map(MY_THIRD_ENUM_TEST.map('FOUR')))
+    assert isinstance(SIMPLE_ENUM.ABC, EnumItem), f'isinstance({type(SIMPLE_ENUM.ABC)}, {EnumItem})'
 
 @Test(environmentVariables={
         SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,

@@ -15,7 +15,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.4.17'
+VERSION = '0.4.18'
 
 NAME = 'python_framework'
 PACKAGE_NAME = NAME

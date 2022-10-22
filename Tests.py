@@ -64,6 +64,8 @@ TestHelper.run(__file__)
 # )
 # TestHelper.run(
 #     __file__,
+#     # logStatus = True,
+#     # wrapperStatus = True,
 #     runOnly = [
 #         'EnumAnnotationTest.enum_withSuccess',
 #         'EnumAnnotationTest.otherEnum_withSuccess',

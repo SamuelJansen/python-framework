@@ -108,18 +108,20 @@ def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expect
             ) or (
                 ObjectHelper.isNotList(expecteObjectClass) and Serializer.isSerializerList(objectRequest)
             ) or (
-                not isinstance(objectRequest, expecteObjectClass)
+                not ReflectionHelper.getClassName(objectRequest) == ReflectionHelper.getName(expecteObjectClass)
             )
         ):
+            typeComparison = f'type(objectRequest: {objectRequest}): {type(objectRequest)}'
             completeName = f'{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)}'
             expectedClassName = f'{ReflectionHelper.getClassName(expecteObjectClass) if Serializer.isSerializerList(expecteObjectClass) else ReflectionHelper.getName(expecteObjectClass)}'
-            raise GlobalException(logMessage = f'Invalid args{c.DOT_SPACE}{completeName} call got an unnexpected object request class: {ReflectionHelper.getClassName(objectRequest)}{c.DOT_SPACE}It should be a {expectedClassName} class{c.DOT_SPACE}Object request: {objectRequest}')
+            raise GlobalException(logMessage = f'Invalid args{c.DOT_SPACE}{completeName} call got an unnexpected object request class: {ReflectionHelper.getClassName(objectRequest)}{c.DOT_SPACE}It should be {expectedClassName} class{c.DOT_SPACE}Object request: {typeComparison}')
     except GlobalException as globalException:
         raise globalException
     except Exception as exception:
+        typeComparison = f'type(objectRequest: {objectRequest}): {type(objectRequest)}'
         completeName = f'{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)}'
         expectedClassName = f'{ReflectionHelper.getClassName(expecteObjectClass) if Serializer.isSerializerList(expecteObjectClass) else ReflectionHelper.getName(expecteObjectClass)}'
-        errorMessage = f'Failed to validate args of {completeName} method{c.DOT_SPACE}Object request: {objectRequest}{c.DOT_SPACE}Expected request class: {expectedClassName}'
+        errorMessage = f'Failed to validate args of {completeName} method{c.DOT_SPACE}Object request: {typeComparison}{c.DOT_SPACE}Expected request class: {expectedClassName}'
         raise GlobalException(logMessage = f'{errorMessage}{c.DOT_SPACE_CAUSE}{str(exception)}')
 
 
