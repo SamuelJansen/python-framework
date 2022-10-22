@@ -134,7 +134,10 @@ def safellyGetHeaders():
     headers = None
     try:
         requestHeaders = dict(request.headers)
-        headers = {k:getKeyValue(k, v) for k,v in requestHeaders.items()}
+        headers = {
+            k: Serializer.getUncheckedKeyValue(k, v)
+            for k, v in requestHeaders.items()
+        }
     except Exception as exception:
         headers = {}
         log.log(safellyGetHeaders, f'Not possible to get request headers. Returning {headers} by default', exception=exception)
@@ -151,7 +154,10 @@ def safellyGetResponseHeaders(response):
     headers = None
     try:
         responseHeaders = dict(response.headers)
-        headers = {k:getKeyValue(k, v) for k,v in responseHeaders.items()}
+        headers = {
+            k: Serializer.getUncheckedKeyValue(k, v)
+            for k, v in responseHeaders.items()
+        }
     except Exception as exception:
         headers = {}
         log.log(safellyGetResponseHeaders, f'Not possible to get response headers. Returning {headers} by default', exception=exception)
@@ -162,7 +168,10 @@ def safellyGetRequestHeadersFromResponse(response):
     headers = None
     try:
         requestHeaders = dict(response.request.headers)
-        headers = {k:getKeyValue(k, v) for k,v in requestHeaders.items()}
+        headers = {
+            k: Serializer.getUncheckedKeyValue(k, v)
+            for k, v in requestHeaders.items()
+        }
     except Exception as exception:
         headers = {}
         log.log(safellyGetRequestHeadersFromResponse, f'Not possible to get request headers from response. Returning {headers} by default', exception=exception)
@@ -173,7 +182,9 @@ def safellyGetArgs():
     args = None
     try:
         requestArgs = dict(request.args)
-        args = {k:getKeyValue(k, v) for k,v in requestArgs.items()}
+        args = { k: Serializer.getUncheckedKeyValue(k, v)
+        for k, v in requestArgs.items()
+    }
     except Exception as exception:
         args = {}
         log.log(safellyGetArgs, f'Not possible to get args. Returning {args} by default', exception=exception)
