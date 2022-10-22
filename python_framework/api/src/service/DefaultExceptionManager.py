@@ -3,25 +3,28 @@ from python_framework.api.src.model import ErrorLog
 
 class ExceptionManager:
     def handleErrorLog(self, httpErrorLog, *args, **kwargs):
-        # apiInstance.repository.backupContext()
+        apiInstance.repository.backupContext()
         try:
-            self.api.repository.commit()
-        except Exception as firstPreCommitException:
-            log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getName(httpErrorLog)}. Going for a second attempt', exception=firstPreCommitException, muteStackTrace=True)
             try:
-                self.api.repository.flush()
                 self.api.repository.commit()
-            except Exception as secondPreCommitException:
-                log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getName(httpErrorLog)}. Going for a third attempt', exception=secondPreCommitException, muteStackTrace=True)
+            except Exception as firstPreCommitException:
+                log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getName(httpErrorLog)}. Going for a second attempt', exception=firstPreCommitException, muteStackTrace=True)
                 try:
-                    self.api.repository.rollback()
                     self.api.repository.flush()
                     self.api.repository.commit()
-                except Exception as thirdPreCommitException:
-                    log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getName(httpErrorLog)}', exception=thirdPreCommitException)
-        httpErrorLog.reload()
-        self.api.repository.saveAndCommit(httpErrorLog)
-        # apiInstance.repository.reloadContextFromBackup()
+                except Exception as secondPreCommitException:
+                    log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getName(httpErrorLog)}. Going for a third attempt', exception=secondPreCommitException, muteStackTrace=True)
+                    try:
+                        self.api.repository.rollback()
+                        self.api.repository.flush()
+                        self.api.repository.commit()
+                    except Exception as thirdPreCommitException:
+                        log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getName(httpErrorLog)}', exception=thirdPreCommitException)
+            httpErrorLog.reload()
+            self.api.repository.saveAndCommit(httpErrorLog)
+        except Exception as exception:
+            log.warning(self.handleErrorLog, f'Failed handle error', exception=exception)
+        apiInstance.repository.reloadContextFromBackup()
 
 def addResource(apiInstance, appInstance) :
     apiInstance.resource.manager.exception = ExceptionManager()

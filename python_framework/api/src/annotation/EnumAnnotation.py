@@ -46,28 +46,12 @@ class EnumItemInt(int):
 class EnumItemFloat(float):
     ...
 class EnumItemDict(dict):
-    def __instancecheck__(self, instance):
-        return type(instance) in DERIVATED_ENUM_ITEM_CLASS_SET
-    def __subclasscheck__(self, instance):
-        return type(instance) == EnumItem
     ...
 class EnumItemSet(set):
-    def __instancecheck__(self, instance):
-        return type(instance) in DERIVATED_ENUM_ITEM_CLASS_SET
-    def __subclasscheck__(self, instance):
-        return type(instance) == EnumItem
     ...
 class EnumItemTuple(tuple):
-    def __instancecheck__(self, instance):
-        return type(instance) in DERIVATED_ENUM_ITEM_CLASS_SET
-    def __subclasscheck__(self, instance):
-        return type(instance) == EnumItem
     ...
 class EnumItemList(list):
-    def __instancecheck__(self, instance):
-        return type(instance) in DERIVATED_ENUM_ITEM_CLASS_SET
-    def __subclasscheck__(self, instance):
-        return type(instance) == EnumItem
     ...
 
 class EnumClass(object):
