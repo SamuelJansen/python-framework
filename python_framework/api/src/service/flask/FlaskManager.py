@@ -658,9 +658,9 @@ def validateArgs(args, requestClass, resourceInstanceMethod):
         if Serializer.isSerializerList(requestClass):
             if 0 < len(requestClass):
                 for index in range(len(requestClass)):
-                    if Serializer.isSerializerList(args[index + 1]) and len(args[index + 1]) > 0 :
-                        expecteObjectClass = requestClass[index][0]
-                        for objectInstance in args[index + 1] :
+                    if Serializer.isSerializerList(args[index + 1]) and len(args[index + 1]) > 0:
+                        expecteObjectClass = requestClass[index] if not Serializer.isSerializerList(requestClass[index]) else requestClass[index][0]
+                        for objectInstance in args[index + 1]:
                             ExceptionHandler.validateArgs(resourceInstance, resourceInstanceMethod, objectInstance, expecteObjectClass)
                     else :
                         objectRequest = args[index + 1]
