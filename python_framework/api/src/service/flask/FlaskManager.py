@@ -658,18 +658,15 @@ def validateArgs(args, requestClass, resourceInstanceMethod):
         if Serializer.isSerializerList(requestClass):
             if 0 < len(requestClass):
                 for index in range(len(requestClass)):
+                    objectRequest = args[index + 1]
+                    expecteObjectClass = requestClass[index]
+                    ExceptionHandler.validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass)
                     if Serializer.isSerializerList(args[index + 1]) and len(args[index + 1]) > 0:
-                        expecteObjectClass = requestClass[index] if not Serializer.isSerializerList(requestClass[index]) else requestClass[index][0]
-                        for objectInstance in args[index + 1]:
-                            ExceptionHandler.validateArgs(resourceInstance, resourceInstanceMethod, objectInstance, expecteObjectClass)
-                    else :
-                        objectRequest = args[index + 1]
-                        expecteObjectClass = requestClass[index]
-                        ExceptionHandler.validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass)
-        else :
-            objectRequest = args[1]
-            expecteObjectClass = requestClass
-            ExceptionHandler.validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass)
+                        expecteObjectClass = requestClass[index][0]
+                        for objectRequest in args[index + 1]:
+                            ExceptionHandler.validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass)
+        else:
+            validateArgs(args, [requestClass], resourceInstanceMethod)
 
 def validateKwargs(kwargs, resourceInstance, resourceInstanceMethod, requestHeaderClass, requestParamClass):
     classListToValidate = []
