@@ -95,6 +95,10 @@ class GlobalException(Exception):
         return FlaskUtil.safellyGetHeaders()
 
 
+def getCompleteName(resourceInstance, resourceInstanceMethod):
+    return f'{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)}'
+
+
 @Function
 def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass):
     try :
@@ -116,18 +120,17 @@ def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expect
             )
         ):
             typeComparison = f'type(objectRequest: {objectRequest}): {type(objectRequest)}'
-            completeName = f'{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)}'
+            completeName = getCompleteName(resourceInstance, resourceInstanceMethod)
             expectedClassName = f'{ReflectionHelper.getClassName(expecteObjectClass) if Serializer.isSerializerList(expecteObjectClass) else ReflectionHelper.getName(expecteObjectClass)}'
             raise GlobalException(logMessage = f'Invalid args{c.DOT_SPACE}{completeName} call got an unnexpected object request class: {ReflectionHelper.getClassName(objectRequest)}{c.DOT_SPACE}It should be {expectedClassName} class{c.DOT_SPACE}Object request: {typeComparison}')
     except GlobalException as globalException:
         raise globalException
     except Exception as exception:
         typeComparison = f'type(objectRequest: {objectRequest}): {type(objectRequest)}'
-        completeName = f'{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)}'
+        completeName = getCompleteName(resourceInstance, resourceInstanceMethod)
         expectedClassName = f'{ReflectionHelper.getClassName(expecteObjectClass) if Serializer.isSerializerList(expecteObjectClass) else ReflectionHelper.getName(expecteObjectClass)}'
         errorMessage = f'Failed to validate args of {completeName} method{c.DOT_SPACE}Object request: {typeComparison}{c.DOT_SPACE}Expected request class: {expectedClassName}'
         raise GlobalException(logMessage = f'{errorMessage}{c.DOT_SPACE_CAUSE}{str(exception)}')
-
 
 @Function
 def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod, context, apiInstance = None) :
@@ -148,7 +151,7 @@ def handleLogErrorException(exception, resourceInstance, resourceInstanceMethod,
 def getGeneralGlobalException(exception, resourceInstance, resourceInstanceMethod, context, apiInstance = None):
     originalException = exception
     if not (isinstance(exception, GlobalException) or GlobalException.__name__ == exception.__class__.__name__):
-        log.debug(getGeneralGlobalException, f'Failed to excecute {resourceInstanceMethod.__name__} method due to {exception.__class__.__name__} exception', exception=exception)
+        log.debug(getGeneralGlobalException, f'Failed to excecute {getCompleteName(resourceInstance, resourceInstanceMethod)} method due to {exception.__class__.__name__} exception', exception=exception)
         message = None
         status = None
         logMessage = None
