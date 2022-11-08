@@ -110,10 +110,12 @@ def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expect
             ) or (
                 (
                     not ReflectionHelper.getClassName(objectRequest) == ReflectionHelper.getName(expecteObjectClass)
-                # ) and (
-                #     Serializer.isNotSerializerList(expecteObjectClass)
                 ) and (
-                    not isinstance(objectRequest, expecteObjectClass)
+                    (
+                        Serializer.isNotSerializerList(expecteObjectClass) and not isinstance(objectRequest, expecteObjectClass)
+                    ) or not (
+                        Serializer.isSerializerList(expecteObjectClass) and Serializer.isSerializerList(objectRequest) and not isinstance(objectRequest[0], expecteObjectClass[0])
+                    )
                 )
             )
         ):
