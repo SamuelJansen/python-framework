@@ -95,10 +95,6 @@ class GlobalException(Exception):
         return FlaskUtil.safellyGetHeaders()
 
 
-def getCompleteName(resourceInstance, resourceInstanceMethod):
-    return f'{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)}'
-
-
 @Function
 def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expecteObjectClass):
     try :
@@ -114,22 +110,24 @@ def validateArgs(resourceInstance, resourceInstanceMethod, objectRequest, expect
             ) or (
                 (
                     not ReflectionHelper.getClassName(objectRequest) == ReflectionHelper.getName(expecteObjectClass)
+                # ) and (
+                #     Serializer.isNotSerializerList(expecteObjectClass)
                 ) and (
                     not isinstance(objectRequest, expecteObjectClass)
                 )
             )
         ):
             typeComparison = f'type(objectRequest: {objectRequest}): {type(objectRequest)}'
-            completeName = getCompleteName(resourceInstance, resourceInstanceMethod)
+            resourceCompleteName = getCompleteName(resourceInstance, resourceInstanceMethod)
             expectedClassName = f'{ReflectionHelper.getClassName(expecteObjectClass) if Serializer.isSerializerList(expecteObjectClass) else ReflectionHelper.getName(expecteObjectClass)}'
-            raise GlobalException(logMessage = f'Invalid args{c.DOT_SPACE}{completeName} call got an unnexpected object request class: {ReflectionHelper.getClassName(objectRequest)}{c.DOT_SPACE}It should be {expectedClassName} class{c.DOT_SPACE}Object request: {typeComparison}')
+            raise GlobalException(logMessage = f'Invalid args{c.DOT_SPACE}{resourceCompleteName} call got an unnexpected object request class: {ReflectionHelper.getClassName(objectRequest)}{c.DOT_SPACE}It should be of type(requestClass{expecteObjectClass}): {expectedClassName}{c.DOT_SPACE}Object request: {typeComparison}')
     except GlobalException as globalException:
         raise globalException
     except Exception as exception:
         typeComparison = f'type(objectRequest: {objectRequest}): {type(objectRequest)}'
-        completeName = getCompleteName(resourceInstance, resourceInstanceMethod)
+        resourceCompleteName = getCompleteName(resourceInstance, resourceInstanceMethod)
         expectedClassName = f'{ReflectionHelper.getClassName(expecteObjectClass) if Serializer.isSerializerList(expecteObjectClass) else ReflectionHelper.getName(expecteObjectClass)}'
-        errorMessage = f'Failed to validate args of {completeName} method{c.DOT_SPACE}Object request: {typeComparison}{c.DOT_SPACE}Expected request class: {expectedClassName}'
+        errorMessage = f'Failed to validate args of {resourceCompleteName} method{c.DOT_SPACE}Object request: {typeComparison}{c.DOT_SPACE}Expected request type(requestClass{expecteObjectClass}): {expectedClassName}'
         raise GlobalException(logMessage = f'{errorMessage}{c.DOT_SPACE_CAUSE}{str(exception)}')
 
 @Function
@@ -211,3 +209,7 @@ def getClientGlobalException(clientResponse, context, logMessage, exception=None
         context = context,
         originalException = exception
     )
+
+
+def getCompleteName(resourceInstance, resourceInstanceMethod):
+    return f'{ReflectionHelper.getClassName(resourceInstance)}{c.DOT}{ReflectionHelper.getName(resourceInstanceMethod)}'
