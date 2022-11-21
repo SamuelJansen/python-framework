@@ -1,7 +1,7 @@
 import os, time
 
 from python_helper import Constant as c
-from python_helper import SettingHelper, EnvironmentHelper, ObjectHelper, StringHelper, log, Method, Function
+from python_helper import SettingHelper, EnvironmentHelper, ObjectHelper, StringHelper, log, Method, Function, ReflectionHelper
 
 import sqlalchemy
 from sqlalchemy import create_engine, exists, select
@@ -209,6 +209,31 @@ def isNeitherNoneNorBlank(thing):
 
 def isNoneOrBlank(thing):
     return ObjectHelper.isNone(thing) or StringHelper.isBlank(str(thing))
+
+def getUnitCondition(query: dict, modelClass):
+    return {
+        k: v
+        for k, v in query.items()
+        if (not k.endswith(LIST)) and ObjectHelper.isNotEmpty(v)
+    }
+
+def getCollectionCondition(query: dict, modelClass, additionalCondition=None):
+    condition = True
+    for key in [
+        k
+        for k, v in query.items()
+        if k.endswith(LIST) and ObjectHelper.isNotEmpty(v)
+    ]:
+        condition = and_(
+            condition,
+            ReflectionHelper.getAttributeOrMethod(modelClass, k.replace(LIST, c.BLANK)).in_(v)
+        )
+    if ObjectHelper.isNotNone(additionalCondition):
+        condition = and_(
+            additionalCondition,
+            condition
+        )
+    return condition
 
 
 class SqlAlchemyProxy:
@@ -421,6 +446,18 @@ class SqlAlchemyProxy:
                 self.session.dirty.add(instance)
 
     @Method
+    def getQueryFilter(self, query, modelClass, additionalCondition=None):
+        return self.session.query(modelClass).filter(
+            getCollectionCondition(
+                query,
+                modelClass,
+                additionalCondition = additionalCondition
+            )
+        ).filter_by(
+            **getUnitCondition(query, modelClass)
+        )
+
+    @Method
     def save(self, instance):
         self.load(instance)
         self.session.add(instance)
@@ -533,15 +570,28 @@ class SqlAlchemyProxy:
         return self.load(instanceList)
 
     @Method
-    def existsByQueryAndCommit(self, query, modelClass):
-        exists = self.session.query(literal(True)).filter(self.session.query(modelClass).filter_by(**query).exists()).scalar()
+    def existsByQueryAndCommit(self, query, modelClass, additionalCondition=None):
+        exists = self.session.query(
+            literal(True)
+        ).filter(
+            self.getQueryFilter(
+                query,
+                modelClass,
+                additionalCondition = additionalCondition
+            ).exists()
+        ).scalar()
         self.session.commit()
         return exists
 
     @Method
-    def findAllByQueryAndCommit(self, query, modelClass):
+    def findAllByQueryAndCommit(self, query, modelClass, additionalCondition=None):
+        instanceList = []
         if ObjectHelper.isNotNone(query):
-            instanceList = self.session.query(modelClass).filter_by(**{k: v for k, v in query.items() if ObjectHelper.isNotNone(v)}).all()
+            instanceList = self.getQueryFilter(
+                query,
+                modelClass,
+                additionalCondition = additionalCondition
+            ).all()
         self.session.commit()
         return self.load(instanceList)
 
