@@ -219,15 +219,12 @@ def getUnitCondition(query: dict, modelClass):
 
 def getCollectionCondition(query: dict, modelClass, additionalCondition=None):
     condition = True
-    for key in [
-        k
-        for k, v in query.items()
-        if k.endswith(LIST) and ObjectHelper.isNotEmpty(v)
-    ]:
-        condition = and_(
-            condition,
-            ReflectionHelper.getAttributeOrMethod(modelClass, k.replace(LIST, c.BLANK)).in_(v)
-        )
+    for k, v in query.items():
+        if k.endswith(LIST) and ObjectHelper.isNotEmpty(v):
+            condition = and_(
+                condition,
+                ReflectionHelper.getAttributeOrMethod(modelClass, k.replace(LIST, c.BLANK)).in_(v)
+            )
     if ObjectHelper.isNotNone(additionalCondition):
         condition = and_(
             additionalCondition,
