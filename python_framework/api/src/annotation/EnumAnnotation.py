@@ -40,19 +40,25 @@ def setInnerAttributeValue(instance, attributeName, value):
 
 
 class EnumItemStr(str):
-    ...
+    __name__ = 'EnumItemStr'
+
 class EnumItemInt(int):
-    ...
+    __name__ = 'EnumItemInt'
+
 class EnumItemFloat(float):
-    ...
+    __name__ = 'EnumItemFloat'
+
 class EnumItemDict(dict):
-    ...
+    __name__ = 'EnumItemDict'
+
 class EnumItemSet(set):
-    ...
+    __name__ = 'EnumItemSet'
+
 class EnumItemTuple(tuple):
-    ...
+    __name__ = 'EnumItemTuple'
+
 class EnumItemList(list):
-    ...
+    __name__ = 'EnumItemList'
 
 class EnumClass(object):
     ...
@@ -68,6 +74,7 @@ class EnumItem(metaclass=ABCMeta):
         ###- if type(self) not in STRICTLY_DERIVATED_ENUM_ITEM_CLASS_SET:
         self.__enumItemMap__ = {}
         self.__enumItemEqMap__ = {}
+        self.enumName = None
         for key, value in kwargs.items():
             updateEnumItem(self, key, value)
 
@@ -279,6 +286,19 @@ def Enum(instanceLog=False, associateReturnsTo=ENUM_VALUE_AS_STRING_KEY):
                     #     print(f'''ReflectionHelper.hasAttributeOrMethod({enumItemOrEnumItemValue}, 'enumName') --> {enumItemOrEnumItemValue.enumName}''')
                     mappedEnum = OuterEnum.__enumMap__.get(str(enumItemOrEnumItemValue) if not ReflectionHelper.hasAttributeOrMethod(enumItemOrEnumItemValue, 'enumName') else enumItemOrEnumItemValue.enumName)
                     return mappedEnum if ObjectHelper.isNotNone(mappedEnum) else __raiseEnumValueNotImplemented__(enumItemOrEnumItemValue, enumClass=OuterEnum, enumEqList=OuterEnum.__enumEqList__, enumMap=OuterEnum.__enumMap__)
+
+            def getItems(self):
+                return [
+                    *ReflectionHelper.getAttributeDataDictionary(self).values()
+                ]
+
+            def getItemsAsString(self):
+                return [
+                    enumItem.enumName
+                    for enumItem in ReflectionHelper.getAttributeDataDictionary(self).values()
+                    # if ReflectionHelper.isNotMethodClass(enumItem)
+                ]
+
         ReflectionHelper.overrideSignatures(InnerEnum, OuterEnum)
         return InnerEnum
     return Wrapper

@@ -33,11 +33,12 @@ FULL_LOG_HELPER_SETTINGS = {
     }
 )
 def enum_withSuccess() :
-    TEST_ITERATION = 1
+    TEST_ITERATION = 10
     ASSERT_ITERATION = 1
     discount = 0
     instanciationTime = 0
     equalTestTime = 0
+    MAX_ACCEPTABLE_INTERVAL = 0.02 * TEST_ITERATION
     start = time.time()
     for _ in range(TEST_ITERATION) :
         # arrange
@@ -217,6 +218,9 @@ def enum_withSuccess() :
         assert MyEnumTest() == MyEnumTest()
         equalTestTime += (time.time() - equalTestTimeStart)
 
+
+    end = time.time()
+    assert (end - start < MAX_ACCEPTABLE_INTERVAL), f'{end} - {start} < {MAX_ACCEPTABLE_INTERVAL}'
     # log.debug(enum_withSuccess, f'discount time: {discount}')
     # log.debug(enum_withSuccess, f'3 * equal evaluation time : {equalTestTime}')
     # log.debug(enum_withSuccess, f'instanciation time : {instanciationTime}')
@@ -645,3 +649,27 @@ def Enum_comparing() :
     assert not HttpStatus.CREATED <= 200
     assert not HttpStatus.OK >= 201
     assert HttpStatus.CREATED >= 200
+
+@Test(environmentVariables={
+        SettingHelper.ACTIVE_ENVIRONMENT : SettingHelper.LOCAL_ENVIRONMENT,
+        **FULL_LOG_HELPER_SETTINGS
+    }
+)
+def Enum_getItemsAsString() :
+    #arrange
+    MAX_ACCEPTABLE_INTERVAL = 0.06
+    timeAssertInit = time.time()
+
+    #act
+    for _ in range(100):
+        temp = HttpStatus.getItemsAsString()
+
+    timeAssertEnd = time.time()
+
+    #assert
+    assert HttpStatus.OK in HttpStatus.getItems()
+    assert HttpStatus.CREATED in HttpStatus.getItems()
+    assert 'OK' in HttpStatus.getItemsAsString()
+    assert 'CREATED' in HttpStatus.getItemsAsString()
+    assert None not in HttpStatus.getItemsAsString()
+    assert timeAssertEnd - timeAssertInit < MAX_ACCEPTABLE_INTERVAL, f'{timeAssertEnd} - {timeAssertInit} < {MAX_ACCEPTABLE_INTERVAL}'

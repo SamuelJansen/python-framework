@@ -76,7 +76,8 @@ TestHelper.run(__file__)
 #         'EnumAnnotationTest.Enum_whenHaveMoreThanOneInnerValue',
 #         'EnumAnnotationTest.Enum_dot_map',
 #         'EnumAnnotationTest.Enum_str',
-#         'EnumAnnotationTest.Enum_strInOutput'
+#         'EnumAnnotationTest.Enum_strInOutput',
+#         'EnumAnnotationTest.Enum_getItemsAsString'
 #     ]
 # )
 # TestHelper.run(
