@@ -24,7 +24,7 @@ def safellyGetCurrentSession(apiInstance=None, service=None, sessionClass=None):
         currentSession = SessionManager.getCurrentSession(sessionClass=sessionClass, apiInstance=apiInstance if ObjectHelper.isNone(service) else service.globals.api)
     except Exception as exception:
         log.debug(safellyGetCurrentSession, f'Not possible to get current session. Returning "{currentSession}" by default', exception=exception, muteStackTrace=True)
-    return StaticConverter.getValueOrDefault(currentSession, {})
+    return StaticConverter.getValueOrDefault(currentSession, {} if ObjectHelper.isNone(sessionClass) else sessionClass())
 
 
 def getSessionIdentity(apiInstance=None, service=None):
@@ -47,7 +47,7 @@ def safellyGetCurrentApiKey(apiInstance=None, service=None, apiKeyClass=None):
         currentApiKey = ApiKeyManager.getCurrentApiKey(apiKeyClass=apiKeyClass, apiInstance=apiInstance if ObjectHelper.isNone(service) else service.globals.api)
     except Exception as exception:
         log.debug(safellyGetCurrentApiKey, f'Not possible to get current api key. Returning "{currentApiKey}" by default', exception=exception, muteStackTrace=True)
-    return StaticConverter.getValueOrDefault(currentApiKey, {})
+    return StaticConverter.getValueOrDefault(currentApiKey, {} if ObjectHelper.isNone(apiKeyClass) else apiKeyClass())
 
 
 def getApiKeyIdentity(apiInstance=None, service=None):
@@ -70,7 +70,7 @@ def safellyGetCurrentAthentication(apiInstance=None, service=None, securityClass
         currentAthentication = SecurityManager.getCurrentUser(securityClass=securityClass, apiInstance=apiInstance if ObjectHelper.isNone(service) else service.globals.api)
     except Exception as exception:
         log.debug(safellyGetCurrentAthentication, f'Not possible to get current user. Returning "{currentAthentication}" by default', exception=exception, muteStackTrace=True)
-    return StaticConverter.getValueOrDefault(currentAthentication, {})
+    return StaticConverter.getValueOrDefault(currentAthentication, {} if ObjectHelper.isNone(securityClass) else securityClass())
 
 
 def getAthenticationIdentity(apiInstance=None, service=None):
