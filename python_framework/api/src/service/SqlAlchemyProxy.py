@@ -442,7 +442,7 @@ class SqlAlchemyProxy:
     def backupContext(self):
         try:
             context = self.getContext()
-            for instance in self.session.dirty and not in context:
+            for instance in self.session.dirty and instance not in context:
                 context.append(self.load(instance))
         except Exception as exception:
             log.warning(self.backupContext, 'Not possible backup context', exception=exception)
