@@ -442,7 +442,7 @@ class SqlAlchemyProxy:
     def backupContext(self):
         try:
             context = self.getContext()
-            for instance in self.session.dirty: 
+            for instance in self.session.dirty:
                 if instance not in context:
                     context.append(self.load(instance))
         except Exception as exception:
@@ -451,8 +451,8 @@ class SqlAlchemyProxy:
     @Method
     def reloadContextFromBackup(self):
         try:
-            for index, instance in enumerate(self.getContext()[::-1]):
-                self.context.pop(index)
+            for instance in self.getContext():
+                self.context.pop(self.context.index(instance))
                 if instance not in self.session.dirty:
                     self.session.dirty.add(instance)
         except Exception as exception:
