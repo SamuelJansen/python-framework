@@ -15,7 +15,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.4.41'
+VERSION = '0.4.42'
 
 NAME = 'python_framework'
 PACKAGE_NAME = NAME

@@ -440,15 +440,22 @@ class SqlAlchemyProxy:
 
     @Method
     def backupContext(self):
-        for instance in self.session.dirty:
-            self.getContext().append(instance)
+        try:
+            context = self.getContext()
+            for instance in self.session.dirty and not in context:
+                context.append(self.load(instance))
+        except Exception as exception:
+            log.warning(self.backupContext, 'Not possible backup context', exception=exception)
 
     @Method
     def reloadContextFromBackup(self):
-        for index, instance in enumerate(self.getContext()):
-            self.context.pop(self.context.index(instance))
-            if instance not in self.session.dirty:
-                self.session.dirty.add(instance)
+        try:
+            for index, instance in enumerate(self.getContext()[::-1]):
+                self.context.pop(index)
+                if instance not in self.session.dirty:
+                    self.session.dirty.add(instance)
+        except Exception as exception:
+            log.warning(self.reloadContextFromBackup, 'Not possible reload context backup', exception=exception)
 
     @Method
     def getQueryFilter(self, query, modelClass, joinList=None, additionalCondition=None):
