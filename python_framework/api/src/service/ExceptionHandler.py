@@ -68,7 +68,7 @@ class GlobalException(Exception):
     ):
         self.timeStamp = DateTimeHelper.now()
         self.status = HttpStatus.map(DEFAULT_STATUS if ObjectHelper.isNone(status) else status).enumValue
-        self.message = message if ObjectHelper.isNotEmpty(message) and StringHelper.isNotBlank(message) else DEFAULT_MESSAGE if 500 <= self.status else StringHelper.toParagraphCase(self.status.enumName)
+        self.message = message if ObjectHelper.isNotEmpty(message) and StringHelper.isNotBlank(message) else DEFAULT_MESSAGE if 500 <= self.status else StringHelper.toText(self.status.enumName)
         self.verb = verb if ObjectHelper.isNotNone(verb) else self.getRequestVerb()
         self.url = url if ObjectHelper.isNotNone(url) else self.getRequestUrl()
         self.logMessage = DEFAULT_LOG_MESSAGE if ObjectHelper.isNone(logMessage) or StringHelper.isBlank(logMessage) else logMessage

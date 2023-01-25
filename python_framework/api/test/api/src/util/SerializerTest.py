@@ -73,7 +73,7 @@ class Child(MODEL) :
     id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
     father, fatherId = sap.getManyToOne(__tablename__, SELF_REFERENCE_FATHER_NAME, MODEL)
     brother, brotherId = sap.getOneToOneChild(__tablename__, BROTHER_NAME, MODEL)
-    
+
 class TestContact(MODEL):
     __tablename__ = 'TestContact'
     id = sap.Column(sap.Integer(), sap.Sequence(f'{__tablename__}{sap.ID}{sap.SEQ}'), primary_key=True)
@@ -1072,6 +1072,7 @@ def convertFromJsonToObject_listSpecialCase_whenFoundButInvalid():
 
     #assert
     assert ObjectHelper.equals(expected, toAssert), f'{expected} == {toAssert}'
+    print(f'{expected} == {toAssert}')
 
 import MyAttributeClassy
 

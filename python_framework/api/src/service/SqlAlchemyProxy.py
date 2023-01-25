@@ -120,27 +120,33 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
     __abstract__ = True
     def __onChange__(self, *args, eventType=OnORMChangeEventType.UNKNOWN, **kwargs):
         return self
+    def __safelyOnChange__(self, *args, eventType=OnORMChangeEventType.UNKNOWN, **kwargs):
+        try:
+            self.__onChange__(*args, eventType=eventType, **kwargs)
+        except Exception exception:
+            log.warning(self, 'Not possible to handle __onChange__ properly', exception=exception)
+        return self
     def __onInit__(self, args, kwargs):
-        self.__onChange__(args, kwargs, eventType=OnORMChangeEventType.INIT)
+        self.__safelyOnChange__(args, kwargs, eventType=OnORMChangeEventType.INIT)
     def __onAttach__(self, session):
-        self.__onChange__(session, eventType=OnORMChangeEventType.ATTACH)
+        self.__safelyOnChange__(session, eventType=OnORMChangeEventType.ATTACH)
     def __onLoad__(self, context):
-        self.__onChange__(context, eventType=OnORMChangeEventType.LOAD)
+        self.__safelyOnChange__(context, eventType=OnORMChangeEventType.LOAD)
     def __onRefresh__(self, context, attributes):
-        self.__onChange__(context, attributes, eventType=OnORMChangeEventType.REFRESH)
+        self.__safelyOnChange__(context, attributes, eventType=OnORMChangeEventType.REFRESH)
     def __onExpire__(self, attrs):
-        self.__onChange__(attrs, eventType=OnORMChangeEventType.EXPIRE)
+        self.__safelyOnChange__(attrs, eventType=OnORMChangeEventType.EXPIRE)
     def __onDeteachedToPersistent__(self, session):
-        self.__onChange__(session, eventType=OnORMChangeEventType.DETEACHED_TO_PERSISTENT)
+        self.__safelyOnChange__(session, eventType=OnORMChangeEventType.DETEACHED_TO_PERSISTENT)
     def __onTransientToPending__(self, session):
-        self.__onChange__(session, eventType=OnORMChangeEventType.TRANSIENT_TO_PENDING)
+        self.__safelyOnChange__(session, eventType=OnORMChangeEventType.TRANSIENT_TO_PENDING)
     def __onPendingToTransient__(self, session):
-        self.__onChange__(session, eventType=OnORMChangeEventType.PENDING_TO_TRANSIENT)
+        self.__safelyOnChange__(session, eventType=OnORMChangeEventType.PENDING_TO_TRANSIENT)
     def __onPersistentToTransient__(self, session):
-        self.__onChange__(session, eventType=OnORMChangeEventType.PERSISTENT_TO_TRANSIENT)
+        self.__safelyOnChange__(session, eventType=OnORMChangeEventType.PERSISTENT_TO_TRANSIENT)
 
     def setDefaultValues(self, *args, eventType=OnORMChangeEventType.SELF, **kwargs):
-        return self.__onChange__(*args, eventType=eventType, **kwargs)
+        return self.__safelyOnChange__(*args, eventType=eventType, **kwargs)
     def loadDefaultValues(self, *args, eventType=OnORMChangeEventType.SELF, **kwargs):
         return self.setDefaultValues(*args, eventType=eventType, **kwargs)
     def reload(self, *args, eventType=OnORMChangeEventType.SELF, **kwargs):
@@ -204,9 +210,11 @@ def getOneToOneChild(child, parent, refferenceModel):
     parentAttribute = relationship(parent, back_populates=attributeIt(child))
     return parentAttribute, parentId
 
+###- deprecated
 def isNeitherNoneNorBlank(thing):
-    return ObjectHelper.isNotNone(thing) and StringHelper.isNotBlank(str(thing))
+    return ObjectHelper.isNeitherNoneNorBlank(thing)
 
+###- deprecated
 def isNoneOrBlank(thing):
     return ObjectHelper.isNone(thing) or StringHelper.isBlank(str(thing))
 
@@ -325,7 +333,7 @@ class SqlAlchemyProxy:
     def getUrl(self, dialect):
         log.log(self.getUrl, 'Loading repository configuration')
         url = EnvironmentHelper.get(self.ENV_DATABASE_URL)
-        if isNeitherNoneNorBlank(url):
+        if ObjectHelper.isNeitherNoneNorBlank(url):
             dialect = None
             driver = None
             database = None
@@ -337,7 +345,7 @@ class SqlAlchemyProxy:
             log.log(self.getUrl, f'Prioritising repository url in {self.ENV_DATABASE_URL} environment variable')
         else :
             url = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_URL}')
-            if isNeitherNoneNorBlank(url):
+            if ObjectHelper.isNeitherNoneNorBlank(url):
                 dialect = None
                 driver = None
                 database = None
@@ -356,15 +364,15 @@ class SqlAlchemyProxy:
                 host = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_HOST}')
                 port = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_PORT}')
                 schema = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_SCHEMA}')
-                if isNeitherNoneNorBlank(username) and isNeitherNoneNorBlank(password):
+                if ObjectHelper.isNeitherNoneNorBlank(username) and ObjectHelper.isNeitherNoneNorBlank(password):
                     url += f'{username}{c.COLON}{password}'
-                if isNeitherNoneNorBlank(host) and isNeitherNoneNorBlank(port):
+                if ObjectHelper.isNeitherNoneNorBlank(host) and ObjectHelper.isNeitherNoneNorBlank(port):
                     url += f'{c.ARROBA}{host}{c.COLON}{port}'
                 url += c.SLASH
-                database = f'{database}' if isNeitherNoneNorBlank(database) else f'{self.DEFAULT_LOCAL_STORAGE_NAME if ObjectHelper.isNone(self.globals.apiName) else self.globals.apiName}{c.DOT}{self.EXTENSION}'
-                if not isNeitherNoneNorBlank(dialect):
+                database = f'{database}' if ObjectHelper.isNeitherNoneNorBlank(database) else f'{self.DEFAULT_LOCAL_STORAGE_NAME if ObjectHelper.isNone(self.globals.apiName) else self.globals.apiName}{c.DOT}{self.EXTENSION}'
+                if not ObjectHelper.isNeitherNoneNorBlank(dialect):
                     dialect = self.DEFAULT_DIALECT
-                plusDriverOrNothing = f'{c.PLUS}{driver}' if isNeitherNoneNorBlank(driver) else c.NOTHING
+                plusDriverOrNothing = f'{c.PLUS}{driver}' if ObjectHelper.isNeitherNoneNorBlank(driver) else c.NOTHING
                 dialectAndDriver = f'''{dialect}{plusDriverOrNothing}'''
                 url = f'{dialectAndDriver}{c.COLON}{c.DOUBLE_SLASH}{url}{database}'
                 log.log(self.getUrl, 'Prioritising repository yamel configuration')
@@ -438,12 +446,16 @@ class SqlAlchemyProxy:
     @Method
     def reloadContextFromBackup(self):
         for index, instance in enumerate(self.getContext()):
-            self.context.pop(index)
+            self.context.pop(self.context.index(instance))
             if instance not in self.session.dirty:
                 self.session.dirty.add(instance)
 
     @Method
-    def getQueryFilter(self, query, modelClass, additionalCondition=None):
+    def getQueryFilter(self, query, modelClass, joinList=None, additionalCondition=None):
+        sessionQuery = self.session.query(modelClass)
+        if ObjectHelper.isNotEmpty(joinList):
+            for join in joinList:
+                sessionQuery.join(join)
         return self.session.query(modelClass).filter(
             getCollectionCondition(
                 query,
@@ -567,13 +579,14 @@ class SqlAlchemyProxy:
         return self.load(instanceList)
 
     @Method
-    def existsByQueryAndCommit(self, query, modelClass, additionalCondition=None):
+    def existsByQueryAndCommit(self, query, modelClass, joinList=None, additionalCondition=None):
         exists = self.session.query(
             literal(True)
         ).filter(
             self.getQueryFilter(
                 query,
                 modelClass,
+                joinList = joinList,
                 additionalCondition = additionalCondition
             ).exists()
         ).scalar()
@@ -581,12 +594,13 @@ class SqlAlchemyProxy:
         return exists
 
     @Method
-    def findAllByQueryAndCommit(self, query, modelClass, additionalCondition=None):
+    def findAllByQueryAndCommit(self, query, modelClass, joinList=None, additionalCondition=None):
         instanceList = []
         if ObjectHelper.isNotNone(query):
             instanceList = self.getQueryFilter(
                 query,
                 modelClass,
+                joinList = joinList,
                 additionalCondition = additionalCondition
             ).all()
         self.session.commit()

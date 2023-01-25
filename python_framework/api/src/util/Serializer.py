@@ -37,8 +37,12 @@ KW_DELETE_VERB = 'Delete'
 
 KW_CREATE_ACTION = 'Create'
 KW_UPDATE_ACTION = 'Update'
-KW_QUERY_ACTION = 'Query'
 KW_DELETE_ACTION = 'Delete'
+KW_QUERY_ACTION = 'Query'
+KW_PARAM_ACTION = 'Param'
+KW_HEADER_ACTION = 'Header'
+KW_ALL_ACTION = 'All'
+
 
 MESO_SUFIX_LIST = [
     KW_REQUEST,
@@ -51,8 +55,18 @@ MESO_SUFIX_LIST = [
 
     KW_CREATE_ACTION,
     KW_UPDATE_ACTION,
+    KW_DELETE_ACTION,
     KW_QUERY_ACTION,
-    KW_DELETE_ACTION
+    KW_PARAM_ACTION,
+    KW_HEADER_ACTION,
+    KW_ALL_ACTION
+]
+
+RESERVED_TERM_LIST = [
+    MODEL_SUFIX,
+    DTO_SUFIX,
+    LIST_SUFIX,
+    *MESO_SUFIX_LIST
 ]
 
 DATE_TIME_RELATED = [
@@ -264,6 +278,13 @@ def convertFromJsonToDictionary(string):
 
 @Function
 def convertFromJsonToObject(fromJson, toClass, fatherClass=None, muteLogs=False):
+    # if isinstance(fromJson, str):
+    #     return convertFromJsonToObject(
+    #         convertFromJsonToDictionary(fromJson),
+    #         toClass,
+    #         fatherClass=fatherClass,
+    #         muteLogs=muteLogs
+    #     )
     if ObjectHelper.isNone(fromJson) or ObjectHelper.isNone(toClass):
         return fromJson
     # validateToClassIsNotNone(fromJson, toClass)
@@ -472,3 +493,6 @@ def importResource(resourceName, resourceModuleName=None):
     #     resourceClass = globals.importResource(resourceName)
     # return resourceClass
     return globals.importResource(resourceName, resourceModuleName=resourceModuleName)
+
+
+#######################################################
