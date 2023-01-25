@@ -124,7 +124,7 @@ class PythonFramworkBaseClass(getNewOriginalModel()):
         try:
             self.__onChange__(*args, eventType=eventType, **kwargs)
         except Exception as exception:
-            log.warning(self, 'Not possible to handle __onChange__ properly', exception=exception)
+            log.warning(self.__safelyOnChange__, 'Not possible to handle __onChange__ properly', exception=exception)
         return self
     def __onInit__(self, args, kwargs):
         self.__safelyOnChange__(args, kwargs, eventType=OnORMChangeEventType.INIT)
