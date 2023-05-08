@@ -216,7 +216,7 @@ def isNeitherNoneNorBlank(thing):
 
 ###- deprecated
 def isNoneOrBlank(thing):
-    return ObjectHelper.isNone(thing) or StringHelper.isBlank(str(thing))
+    return ObjectHelper.isNoneOrBlank(thing)
 
 def getUnitCondition(query: dict, modelClass):
     return {

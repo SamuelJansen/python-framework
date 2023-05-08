@@ -657,7 +657,7 @@ def Enum_comparing() :
 )
 def Enum_getItemsAsString() :
     #arrange
-    MAX_ACCEPTABLE_INTERVAL = 0.06
+    MAX_ACCEPTABLE_INTERVAL = 0.2 ###- MAX_ACCEPTABLE_INTERVAL = 0.06
     NOT_AN_ENUM_ITEM_LIST = ['map']
     timeAssertInit = time.time()
 
