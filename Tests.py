@@ -73,17 +73,17 @@ TestHelper.run(
 #     # logStatus = True,
 #     # wrapperStatus = True,
 #     runOnly = [
-#         'EnumAnnotationTest.enum_withSuccess',
-#         'EnumAnnotationTest.otherEnum_withSuccess',
-#         'EnumAnnotationTest.python_framework_status',
-#         'EnumAnnotationTest.enumName',
-#         'EnumAnnotationTest.enumName_badImplementation',
-#         'EnumAnnotationTest.map_whenArgIsNone',
-#         'EnumAnnotationTest.Enum_whenHaveMoreThanOneInnerValue',
-#         'EnumAnnotationTest.Enum_dot_map',
-#         'EnumAnnotationTest.Enum_str',
-#         'EnumAnnotationTest.Enum_strInOutput',
-#         'EnumAnnotationTest.Enum_getItemsAsString'
+#         # 'EnumAnnotationTest.enum_withSuccess',
+#         # 'EnumAnnotationTest.otherEnum_withSuccess',
+#         # 'EnumAnnotationTest.python_framework_status',
+#         # 'EnumAnnotationTest.enumName',
+#         # 'EnumAnnotationTest.enumName_badImplementation',
+#         # 'EnumAnnotationTest.map_whenArgIsNone',
+#         # 'EnumAnnotationTest.Enum_whenHaveMoreThanOneInnerValue',
+#         # 'EnumAnnotationTest.Enum_dot_map',
+#         # 'EnumAnnotationTest.Enum_str',
+#         # 'EnumAnnotationTest.Enum_strInOutput',
+#         # 'EnumAnnotationTest.Enum_getItemsAsString'
 #     ]
 # )
 # TestHelper.run(

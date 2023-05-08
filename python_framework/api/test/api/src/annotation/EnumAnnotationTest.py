@@ -658,6 +658,7 @@ def Enum_comparing() :
 def Enum_getItemsAsString() :
     #arrange
     MAX_ACCEPTABLE_INTERVAL = 0.06
+    NOT_AN_ENUM_ITEM_LIST = ['map']
     timeAssertInit = time.time()
 
     #act
@@ -673,3 +674,7 @@ def Enum_getItemsAsString() :
     assert 'CREATED' in HttpStatus.getItemsAsString()
     assert None not in HttpStatus.getItemsAsString()
     assert timeAssertEnd - timeAssertInit < MAX_ACCEPTABLE_INTERVAL, f'{timeAssertEnd} - {timeAssertInit} < {MAX_ACCEPTABLE_INTERVAL}'
+    for notEnumItem in NOT_AN_ENUM_ITEM_LIST:
+        assert notEnumItem not in HttpStatus.getItemsAsString(), notEnumItem
+    for enumItemAsString in HttpStatus.getItemsAsString():
+        assert enumItemAsString.isupper(), enumItemAsString

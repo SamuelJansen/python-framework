@@ -1072,7 +1072,7 @@ def convertFromJsonToObject_listSpecialCase_whenFoundButInvalid():
 
     #assert
     assert ObjectHelper.equals(expected, toAssert), f'{expected} == {toAssert}'
-    print(f'{expected} == {toAssert}')
+    # print(f'{expected} == {toAssert}')
 
 import MyAttributeClassy
 
