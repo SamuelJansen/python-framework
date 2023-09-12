@@ -299,18 +299,16 @@ def getUrl(endPointUrl, baseUrl):
     return f'{c.SLASH}{c.SLASH.join(urlList)}'
 
 def getApiUrl(apiInstance):
-    return f'{apiInstance.scheme}{SCHEME_HOST_SEPARATOR}{apiInstance.host}{apiInstance.baseUrl}'.replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
-
-def getDocumentationUrl(apiInstance):
+    ###- return f'{apiInstance.scheme}{SCHEME_HOST_SEPARATOR}{apiInstance.host}{apiInstance.baseUrl}'.replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
     globalsInstance = apiInstance.globals
     sheme = StaticConverter.getValueOrDefault(StaticConverter.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_SCHEMES}'), [apiInstance.scheme]), [apiInstance.scheme])[0]
     host = StaticConverter.getValueOrDefault(globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_HOST}'), apiInstance.host).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
-    colonPortIfAny = StaticConverter.getValueOrDefault(f"{c.COLON}{globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_PORT}')}", c.BLANK).replace(f'{c.COLON}None', c.BLANK)
-    documentationUrl = f'{sheme}{SCHEME_HOST_SEPARATOR}{host}{colonPortIfAny}{apiInstance.baseUrl}{DOCUMENTATION_ENDPOINT}'
-    if documentationUrl.endswith(URL_ENDS_WITH_PORT_80):
-        documentationUrl = documentationUrl[:-len(URL_ENDS_WITH_PORT_80)]
-    documentationUrl = documentationUrl.replace(PORT_80_IN_URL, PORT_80_EXCLUDED_FROM_URL)
-    return documentationUrl.replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
+    colonPortIfAny = StaticConverter.getValueOrDefault(f"{c.COLON}{globalsInstance.getSetting(f'{KW_OPEN_API}.{KW_PORT}')}", c.BLANK).replace(PORT_80_IN_URL, PORT_80_EXCLUDED_FROM_URL).replace(f'{c.COLON}None', c.BLANK)
+    exposedHostApiUrl = f'{sheme}{SCHEME_HOST_SEPARATOR}{host}{colonPortIfAny}{apiInstance.baseUrl}'
+    return f'{exposedHostApiUrl}'.replace(PORT_80_IN_URL, PORT_80_EXCLUDED_FROM_URL).replace(ZERO_DOT_ZERO_DOT_ZERO_DOT_ZERO_HOST, LOCALHOST_HOST)
+
+def getDocumentationUrl(apiInstance):
+    return f'{getApiUrl(apiInstance)}{DOCUMENTATION_ENDPOINT}'
 
 def addDtoToUrlVerb(verb, url, dtoClass, documentation, dtoType=v.OBJECT, where=None):
     log.log(addDtoToUrlVerb, f'verb: {verb}, url: {url}, dtoClass: {dtoClass}, dtoType: {dtoType}, where: {where}')

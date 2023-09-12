@@ -90,7 +90,7 @@ def onLoadListener(target, context):
 def onRefreshListener(target, context, attributes):
     target.__onRefresh__(context, attributes)
 
-def onExpireListener(target, attrs):
+def onExpireListener(target, attributes):
     target.__onExpire__(attributes)
 
 def onDeteachedToPersistentListener(session, target):
@@ -634,21 +634,21 @@ class SqlAlchemyProxy:
         self.session.commit()
 
     @Method
-    def deleteAllByIdIn(self, modelClass, objectIdList):
+    def deleteAllByIdIn(self, objectIdList, modelClass):
         self.session.query(modelClass).filter(modelClass.id.in_(objectIdList)).delete(synchronize_session=False)
 
     @Method
-    def deleteAllByKeyIn(self, modelClass, objectKeyList):
+    def deleteAllByKeyIn(self, objectKeyList, modelClass):
         self.session.query(modelClass).filter(modelClass.key.in_(objectKeyList)).delete(synchronize_session=False)
 
     @Method
-    def deleteAllByIdInAndCommit(self, modelClass, objectIdList):
-        self.deleteAllByIdIn(modelClass, objectIdList)
+    def deleteAllByIdInAndCommit(self, objectIdList, modelClass):
+        self.deleteAllByIdIn(objectIdList, modelClass)
         self.session.commit()
 
     @Method
-    def deleteAllByKeyInAndCommit(self, modelClass, objectKeyList):
-        self.deleteAllByKeyIn(modelClass, objectKeyList)
+    def deleteAllByKeyInAndCommit(self, objectKeyList, modelClass):
+        self.deleteAllByKeyIn(objectKeyList, modelClass)
         self.session.commit()
 
 

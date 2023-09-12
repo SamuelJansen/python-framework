@@ -653,6 +653,54 @@ def bindResource(apiInstance,resourceInstance):
 
 @Function
 def validateArgs(args, requestClass, resourceInstanceMethod):
+
+    ###- import inspect
+    
+    ###- def enforce_type_annotation(fn):
+    ###-     parameters = inspect.signature(fn).parameters
+    ###-     param_keys = list(parameters.keys())
+    ###-     def wrapper(*args, **kwargs):
+    ###-         errors = list()
+    ###-         # -- iterate over positionals
+    ###-         for i in range(len(args)):
+    ###-             param = parameters[param_keys[i]]
+    ###-             value = args[i]
+    ###-             # -- if the parameter is not annotated, don't validate.
+    ###-             if not param.annotation:
+    ###-                 continue
+    ###-             if not isinstance(value, param.annotation):
+    ###-                 errors.append(
+    ###-                     f'Positional argument {param} was given type {type(value)} but expected {param.annotation}!'
+    ###-                 )
+    ###-         # -- this might throw a KeyError if an incorrect argument is provided
+    ###-         for key, value in kwargs.items():
+    ###-             param = parameters[key]
+    ###-             value = kwargs[key]
+    ###-             # -- if the parameter is not annotated, don't validate.
+    ###-             if not param.annotation:
+    ###-                 continue
+    ###-             if not isinstance(value, param.annotation):
+    ###-                 errors.append(
+    ###-                     f'Keyword argument {param} was given type {type(value)} but expected {param.annotation}!'
+    ###-                 )
+    ###-         if len(errors):
+    ###-             raise TypeError('\n'.join(errors))
+    ###-         return fn(*args, **kwargs)
+    ###-     return wrapper
+    
+    ###- @enforce_type_annotation
+    ###- def foo(bar: bool, barry: str = None):
+    ###-     return "hello world"
+    
+    ###- # -- works - keyword arguments remain optional
+    ###- print(foo(True))
+    ###- # -- works - all types were passed correctly
+    ###- print(foo(True, 'Hello'))
+    ###- # -- does not work, keyword arguments may also be passed as positional
+    ###- print(foo(True, 1))
+    ###- # -- does not work, "barry" expects a string
+    ###- print(foo(True, barry=1))
+
     if ObjectHelper.isNotNone(requestClass):
         if Serializer.isSerializerList(requestClass):
             if 0 < len(requestClass):

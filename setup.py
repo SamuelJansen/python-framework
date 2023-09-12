@@ -15,7 +15,7 @@ sudo rm /usr/bin/pip
 sudo ln -s /usr/local/bin/pipX.Y /usr/bin/pip
 ''')
 
-VERSION = '0.4.47'
+VERSION = '0.4.48'
 
 NAME = 'python_framework'
 PACKAGE_NAME = NAME
@@ -70,9 +70,9 @@ setup(
         'psycopg2-binary<3.0,>=2.8.6',
         'SQLAlchemy==1.4.25',
         'globals<1.0,>=0.3.36',
-        'python-helper<1.0,>=0.3.65',
+        'python-helper<1.0,>=0.3.74',
         'Flask-APScheduler==1.12.2',
-        'requests<3.0,>=2.26.0',
+        'requests<3.0,>=2.31.0',
         'werkzeug<3.0,>=2.2.2'
     ],
     classifiers = [

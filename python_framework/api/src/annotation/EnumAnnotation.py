@@ -78,7 +78,7 @@ class EnumItem(metaclass=ABCMeta):
         for key, value in kwargs.items():
             updateEnumItem(self, key, value)
 
-    def isInstance(self, other, givenClass):
+    def isInstance(self, other):
         return areUnsafellyEnumItemInstance(self, other)
 
     def __get__(self, obj, objtype=None):
@@ -91,22 +91,22 @@ class EnumItem(metaclass=ABCMeta):
         return self.__str__()
 
     def __eq__(self, other):
-        if self.isInstance(other, EnumItem):
+        if self.isInstance(other):
             return str(other.__enumItemEqMap__) == str(self.__enumItemEqMap__)
         return self.enumValue == other
 
     def __ne__(self, other):
-        if self.isInstance(other, EnumItem):
+        if self.isInstance(other):
             return str(other.__enumItemEqMap__) != str(self.__enumItemEqMap__)
         return self.enumValue != other
 
     def __lt__(self, other):
-        if self.isInstance(other, EnumItem) and not self.isInstance(self.enumValue, EnumItem):
+        if self.isInstance(other) and not self.isInstance(self.enumValue):
             return self.enumValue < other.enumValue
         return self < other
 
     def __gt__(self, other):
-        if self.isInstance(other, EnumItem) and not self.isInstance(self.enumValue, EnumItem):
+        if self.isInstance(other) and not self.isInstance(self.enumValue):
             return self.enumValue > other.enumValue
 
     def __le__(self, other):
@@ -164,13 +164,15 @@ DERIVATED_ENUM_ITEM_CLASS_SET = set([
     *STRICTLY_DERIVATED_ENUM_ITEM_CLASS_SET
 ])
 
+
 def isEnum(possibleEnum):
     itIs = False
     try :
-        itIs = isinstance(possibleEnum, EnumItem)
+        itIs = isinstance(possibleEnum, Enum)
     except Exception as exception :
         log.error(isEnum, f'Not possible to evaluate. Returning {itIs} by default', exception)
     return itIs
+
 
 def isEnumItem(possibleEnumItem):
     itIs = False
@@ -179,6 +181,7 @@ def isEnumItem(possibleEnumItem):
     except Exception as exception :
         log.error(isEnumItem, f'Not possible to evaluate. Returning {itIs} by default', exception)
     return itIs
+
 
 def Enum(instanceLog=False, associateReturnsTo=ENUM_VALUE_AS_STRING_KEY):
     def Wrapper(OuterEnum, *args, **kwargs):
