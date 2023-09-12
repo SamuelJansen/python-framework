@@ -287,24 +287,28 @@ class SqlAlchemyProxy:
         self.sqlalchemy = sqlalchemy
         dialect = self.globals.getSetting(f'{self.KW_API}{c.DOT}{self.KW_DATABASE}{c.DOT}{self.KW_REPOSITORY_DIALECT}')
         self.engine = self.getNewEngine(dialect, echo, connectArgs)
-        self.session = scoped_session(sessionmaker(self.engine)) ###- sessionmaker(bind=self.engine)()
-        # self.session = scoped_session(sessionmaker(autocommit=True, autoflush=True, bind=self.engine)) ###- sessionmaker(bind=self.engine)()
         self.model = model
         self.model.metadata.bind = self.engine
+        self.session = self.getNewSession()
         # self.model.metadata.reflect()
         # self.run()
+
+    def getNewSession(self):
+        session = scoped_session(sessionmaker(self.engine)) ###- sessionmaker(bind=self.engine)()
+        # session = scoped_session(sessionmaker(autocommit=True, autoflush=True, bind=self.engine)) ###- sessionmaker(bind=self.engine)()
         event.listen(PythonFramworkBaseClass, 'load', onLoadListener, propagate=True, restore_load_context=True)
         event.listen(PythonFramworkBaseClass, 'refresh', onRefreshListener, restore_load_context=True)
         event.listen(PythonFramworkBaseClass, 'init', onInitListener)
         event.listen(PythonFramworkBaseClass, 'expire', onExpireListener)
-        event.listen(self.session, 'before_attach', onAttachListener)
-        event.listen(self.session, "detached_to_persistent", onDeteachedToPersistentListener)
-        event.listen(self.session, "transient_to_pending", onTransientToPendingListener)
-        event.listen(self.session, "pending_to_transient", onPendingToTransientListener)
-        event.listen(self.session, "persistent_to_transient", onPersistentToTransientListener)
+        event.listen(session, 'before_attach', onAttachListener)
+        event.listen(session, "detached_to_persistent", onDeteachedToPersistentListener)
+        event.listen(session, "transient_to_pending", onTransientToPendingListener)
+        event.listen(session, "pending_to_transient", onPendingToTransientListener)
+        event.listen(session, "persistent_to_transient", onPersistentToTransientListener)
         # event.listen(someAttribute, "append_wo_mutation", onAppendWoMutationListener)
         # event.listen(someAttribute, "bulk_replace", onBulkReplaceListener)
-
+        return session
+        
     def getNewEngine(self, dialect, echo, connectArgs):
         url = self.getUrl(dialect)
         connectArgs = self.getConnectArgs(connectArgs)
@@ -419,16 +423,28 @@ class SqlAlchemyProxy:
         log.debug(self.run, 'Database tables created')
 
     @Method
-    def flush(self):
-        self.session.flush()
+    def flush(self, session=None):
+        if ObjectHelper.isNotNone(session):
+            session.flush()
+            return
+        if ObjectHelper.isNotNone(self.session):
+            self.session.flush()
 
     @Method
-    def rollback(self):
-        self.session.rollback()
+    def rollback(self, session=None):
+        if ObjectHelper.isNotNone(session):
+            session.rollback()
+            return
+        if ObjectHelper.isNotNone(self.session):
+            self.session.rollback()
 
     @Method
-    def commit(self):
-        self.session.commit()
+    def commit(self, session=None):
+        if ObjectHelper.isNotNone(session):
+            session.commit()
+            return
+        if ObjectHelper.isNotNone(self.session):
+            self.session.commit()
 
     @Method
     def load(self, modelOrModelList):
@@ -459,12 +475,14 @@ class SqlAlchemyProxy:
             log.warning(self.reloadContextFromBackup, 'Not possible reload context backup', exception=exception)
 
     @Method
-    def getQueryFilter(self, query, modelClass, joinList=None, additionalCondition=None):
-        sessionQuery = self.session.query(modelClass)
+    def getQueryFilter(self, query, modelClass, joinList=None, additionalCondition=None, session=None):
+        if ObjectHelper.isNone(session):
+            session = self.session
+        sessionQuery = session.query(modelClass)
         if ObjectHelper.isNotEmpty(joinList):
             for join in joinList:
                 sessionQuery.join(join)
-        return self.session.query(modelClass).filter(
+        return session.query(modelClass).filter(
             getCollectionCondition(
                 query,
                 modelClass,

@@ -5,21 +5,21 @@ class ExceptionManager:
     def handleErrorLog(self, httpErrorLog, *args, **kwargs):
         self.api.repository.backupContext()
         try:
-            # try:
-            #     self.api.repository.commit()
-            # except Exception as firstPreCommitException:
-            #     log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getClassName(httpErrorLog)}. Going for a second attempt', exception=firstPreCommitException, muteStackTrace=True)
-            #     try:
-            #         self.api.repository.flush()
-            #         self.api.repository.commit()
-            #     except Exception as secondPreCommitException:
-            #         log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getClassName(httpErrorLog)}. Going for a third attempt', exception=secondPreCommitException, muteStackTrace=True)
-            #         try:
-            #             self.api.repository.rollback()
-            #             self.api.repository.flush()
-            #             self.api.repository.commit()
-            #         except Exception as thirdPreCommitException:
-            #             log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getClassName(httpErrorLog)}', exception=thirdPreCommitException)
+            try:
+                self.api.repository.commit()
+            except Exception as firstPreCommitException:
+                log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getClassName(httpErrorLog)}. Going for a second attempt', exception=firstPreCommitException, muteStackTrace=True)
+                try:
+                    self.api.repository.flush()
+                    self.api.repository.commit()
+                except Exception as secondPreCommitException:
+                    log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getClassName(httpErrorLog)}. Going for a third attempt', exception=secondPreCommitException, muteStackTrace=True)
+                    try:
+                        self.api.repository.rollback()
+                        self.api.repository.flush()
+                        self.api.repository.commit()
+                    except Exception as thirdPreCommitException:
+                        log.warning(self.handleErrorLog, f'Failed to pre commit before persist {ReflectionHelper.getClassName(httpErrorLog)}', exception=thirdPreCommitException)
             httpErrorLog.reload()
             self.api.repository.saveAndCommit(httpErrorLog)
         except Exception as exception:
